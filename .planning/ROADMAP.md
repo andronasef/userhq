@@ -43,7 +43,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. From the Oracle VPS, the API container can open an authenticated SMTP session to Brevo on port 587 (or 2525/465 as a fallback). The working port is recorded for Phase 3.
   5. The deployed web app is served from vinext's standalone output, and the same app code also passes a `next build` canary in CI. If a blocking vinext defect appears, the phase exits by switching the build to `next build`.
 
-**Plans:** 2/11 plans executed
+**Plans:** 3/11 plans executed
 
 Plans:
 **Wave 1**
@@ -56,7 +56,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 01-03-PLAN.md — Better Auth in Nest: /api/v1/me, refresh-safe default-deny guard, origin check, session lifecycle tests
+- [x] 01-03-PLAN.md — Better Auth in Nest: /api/v1/me, refresh-safe default-deny guard, origin check, session lifecycle tests
 
 **Wave 4** *(blocked on Wave 3 completion)*
 

@@ -35,13 +35,13 @@ User (global platform account, OAuth)
             ├─ Roadmap (internal + public layers)
             ├─ Changelog
             ├─ FAQ
-            ├─ Statuses (seeded defaults, admin-editable)
-            └─ Public/private toggle
+            └─ Statuses (seeded defaults, admin-editable)
 ```
 
 - A **user account is global**: one Google/GitHub sign-in participates in any company's portal on the platform. No per-workspace or per-product re-registration.
 - A **workspace** holds the company identity and team. It owns no feedback content directly.
 - A **product** is the unit that end-users actually visit. One company with three apps runs three independent portals under one workspace and one team.
+- **Every product portal is publicly readable in v1.** Anyone can browse feedback, the public roadmap, the changelog, and the FAQ. Signing in is required only to post, vote, or comment. There is no private/login-required portal in v1 (see Out of Scope).
 - **Routing is path-based and product-rooted**: `/{workspace}/{product}` is the portal home, `/{workspace}` lists that company's products. Path-based only — chosen for development simplicity, with the tenant resolver kept behind one abstraction so subdomains and custom domains can be added later without rewriting routing.
 
 ## Requirements
@@ -57,8 +57,7 @@ User (global platform account, OAuth)
 - [ ] User can sign in with Google or GitHub (OAuth only in v1)
 - [ ] User can create a workspace with a name, slug, and uploaded logo
 - [ ] Admin can create multiple products inside one workspace, each with its own name, slug, and logo
-- [ ] Admin can invite teammates to a workspace by email
-- [ ] Admin can toggle a product's portal between public-read and login-required
+- [ ] Admin can invite teammates to a workspace via a shareable invite link, accepted by signing in with a matching verified email (no email is sent)
 - [ ] Portal resolves by path at `/{workspace}/{product}`
 
 **Feedback Board**
@@ -97,13 +96,16 @@ User (global platform account, OAuth)
 - [ ] End-user can browse FAQ categories
 - [ ] End-user can search FAQ questions
 
+Research surfaced further table-stakes features (own-vote removal, post editing, admin moderation, duplicate merge, post status timeline, "My activity", changelog drafts). These are scoped in REQUIREMENTS.md, not here.
+
 ### Out of Scope
 
 - **AI chat assistant and automated duplicate detection** — explicitly deferred in the PRD; the MVP must prove the manual loop works first.
-- **Email notifications of any kind** — MVP relies purely on in-app status; avoids taking an email-provider dependency (Resend is also out of scope).
+- **Email notifications of any kind** — MVP relies purely on in-app status; avoids taking an email-provider dependency (Resend is also out of scope). This is also why teammate invites are link-based.
 - **Third-party integrations (Jira, Slack, GitHub issues)** — deferred; none are needed to validate the core loop.
 - **External cloud storage (S3 and similar)** — local server storage on a Docker volume is sufficient at MVP scale and keeps hosting costs flat.
-- **Email+password and magic-link sign-in** — OAuth-only in v1. The auth schema must leave room for both; adding them is a v2 provider addition, not a rewrite.
+- **Email+password and magic-link sign-in** — OAuth-only in v1. Better Auth supports both natively, so adding them is a configuration change, not a rewrite.
+- **Private / login-required product portals** — dropped from v1 by user decision. With global OAuth accounts, "login-required" would not actually be private (anyone with a Google account could get in), and a real email/domain allowlist was judged not worth the v1 cost. All portals are publicly readable. A proper allowlist is a v2 candidate.
 - **Subdomain and custom-domain portals** — path-based routing only for v1, for development simplicity. The tenant resolver is abstracted so this is additive later.
 - **Role permission matrix** — the membership model carries a role enum, but v1 issues exactly one role (admin) to every invited member. Owner/admin/viewer splits come later without a migration.
 - **Billing, plans, and usage metering** — no revenue model defined for MVP.
@@ -112,24 +114,27 @@ User (global platform account, OAuth)
 
 - Greenfield project. Empty directory, fresh git repo, no existing code to integrate with.
 - The PRD arrived unusually complete: scope, stack, personas, user flows, and explicit exclusions were all specified up front. Questioning filled gaps the PRD left open rather than discovering the product.
-- The stack is pre-decided by the PRD and is not an open question for planning: Next.js, Tailwind CSS, Radix UI, NestJS, PostgreSQL via Prisma, NextAuth.js, local file storage with WebP optimization, Docker + Dokploy with volumes for persistence.
-- **The web app is built with [vinext](https://github.com/cloudflare/vinext), not Next.js's own compiler.** vinext is a Cloudflare Vite plugin that reimplements the Next.js API surface on top of Vite. The app is still written as a Next.js app — App Router, React Server Components, route handlers, middleware, `next/link`, `next/image`, `next/navigation`, Metadata API all remain available. Only the build and dev toolchain changes. This pins the project to Next.js 16.x and Vite 8+, and rules out Turbopack/webpack config.
-- vinext carries real adoption risk that planning must account for. Its README states it is "not yet a drop-in replacement for every application or production workload" and to "expect compatibility gaps, especially in newer App Router features," covering roughly 94% of the Next.js 16 API surface. Two gaps matter here: build-time image/font optimization, and native modules (notably `sharp`) in App Router development. NextAuth.js compatibility under vinext is unverified and must be proven early.
-- Because `sharp` is a known vinext gap, **all image processing and WebP conversion happens in the NestJS API, never in the web app.** The web app uploads to the API; the API optimizes and writes to the Docker volume. This sidesteps the gap entirely and is the cleaner split for a decoupled architecture regardless.
-- vinext's primary deployment target is Cloudflare Workers, but this project deliberately uses its secondary Node/Nitro path to honor the PRD's Docker + Dokploy requirement. Local-disk uploads on a Docker volume are incompatible with Workers, and moving to Workers would drag R2 and managed Postgres into scope. Verifying the standalone Node build works under Docker is an early-phase risk to retire.
-- Admin-editable statuses mean status cannot be a Postgres enum or hardcoded union — statuses are per-product rows. Every status reference is a foreign key, and deleting a status needs a defined fallback for posts and items sitting in it.
-- The dual-layer roadmap is the main privacy-correctness risk in the product. Internal fields must never be serialized into a public response. This wants enforcement at the query/DTO boundary, not a conditional in the UI.
+- The PRD's stack has been amended by user decision after research. Final stack: Next.js app built with vinext, Tailwind CSS, Radix UI, NestJS, PostgreSQL via **Drizzle ORM** (drizzle-kit migrations), **Better Auth**, local file storage with WebP optimization, Docker + Dokploy with volumes, **Bun as package manager** with Node 24 LTS as the runtime. Prisma, NextAuth.js, and pnpm from the original PRD are replaced.
+- **The web app is built with [vinext](https://github.com/cloudflare/vinext), not Next.js's own compiler.** vinext is a Cloudflare Vite plugin that reimplements the Next.js API surface on top of Vite. The app is still written as a Next.js app — App Router, React Server Components, route handlers, middleware, `next/link`, `next/image`, `next/navigation`, Metadata API all remain available. vinext reached 1.0.0 on 2026-09-28. This pins the project to Next.js 16.x and Vite 8+, and rules out Turbopack/webpack config.
+- vinext still carries adoption risk on the self-hosted Node path this project uses. Open issues at research time (2026-10-01) that hit this stack: the `radix-ui` barrel package hangs the build (use individual `@radix-ui/react-*` packages); standalone output can copy the wrong React version in a monorepo; standalone `server.js` does not default `NODE_ENV`; the Nitro preset returns 500 on every route once the server bundle splits. vinext also lists `sharp` (native modules) as a gap in App Router.
+- **Fallback to `next build` must stay cheap.** App code imports only `next/*`, `react`, and npm packages — no `import.meta.env`, `vinext/*`, `cloudflare:workers`, or Vite `?raw`/`?url` imports. A lint rule enforces this. Estimated fallback cost if vinext blocks: about half a day to a day.
+- **Auth lives in the NestJS API.** Better Auth runs inside NestJS and owns OAuth, sessions, and all database access. The web app never imports the database package and holds no database credentials; it forwards the session cookie to the API (server components call the API over the internal network). Dokploy/Traefik serves one domain: `/api/*` and `/uploads/*` go to NestJS, everything else to the web app, so cookies need no CORS configuration. This also keeps OAuth redirects off vinext, where Better Auth's OAuth flow is untested.
+- **All image processing happens in the NestJS API, never in the web app.** The web app uploads to the API; the API validates, converts to WebP with `sharp`, writes to the Docker volume, and serves files at `/uploads/*`. This sidesteps vinext's `sharp` gap and keeps uploads in one hardened place.
+- Admin-editable statuses mean status cannot be a Postgres enum or hardcoded union — statuses are per-product rows. Research found each status also needs a fixed underlying type (e.g. reviewing / planned / active / completed / canceled) so the system knows which renamed status means "shipped" or "closed". Every status reference is a foreign key, and deleting a status requires reassigning its posts and items.
+- The dual-layer roadmap is the main privacy-correctness risk in the product. Internal fields live in a separate 1:1 table, and public endpoints read through explicit column allowlists (Drizzle core `select()` with named columns) mapped to hand-written public types. Never use exclude-a-column patterns or schema-derived DTOs on public paths: they leak any internal column added later. A contract test asserts the exact key set of every public response.
 
 ## Constraints
 
-- **Tech stack**: Next.js + Tailwind + Radix UI (web), NestJS (API), PostgreSQL + Prisma, NextAuth.js — Specified in the PRD as locked for v1; decoupled frontend/backend is a deliberate scalability choice.
-- **Web build toolchain**: vinext (Vite 8+) building a Next.js 16.x app, not `next build` — User decision. Pins Next.js to 16.x; no Turbopack/webpack config; accept vinext's documented compatibility gaps.
-- **Image processing location**: WebP conversion and all `sharp` usage live in `apps/api` only — `sharp` is a known vinext gap in App Router; keeping it in NestJS avoids it.
-- **Repo shape**: pnpm monorepo, two Docker images — `apps/web`, `apps/api`, `packages/db` (Prisma schema + client), `packages/types` (shared DTOs). Shared schema and types without publishing packages; independent deploys as two Dokploy apps.
-- **File storage**: Local server storage on a Docker volume, images converted to WebP — Cost-efficiency for V1; no cloud storage dependency.
-- **Infrastructure**: Docker + Dokploy, Docker volumes for persistence — Self-hosted deployment target; uploads and Postgres data must survive container replacement.
-- **Auth**: OAuth providers only (Google, GitHub) — No password storage or email sending in v1, which is consistent with email notifications being out of scope.
+- **Web**: Next.js 16.x app + Tailwind CSS v4 + Radix UI (individual `@radix-ui/react-*` packages), built with vinext using native `output: "standalone"` — not the Nitro preset, and not `next build`. User decision; Nitro path has a blocking open bug.
+- **API**: NestJS — decoupled backend specified in the PRD.
+- **Database**: PostgreSQL via Drizzle ORM with drizzle-kit migrations, `pg` driver — User decision replacing Prisma. Migrations are generated at dev time and committed; the API container applies them at boot under an advisory lock; drizzle-kit is not shipped in the production image.
+- **Auth**: Better Auth inside NestJS, OAuth only (Google, GitHub), database sessions — User decision replacing NextAuth.js, which vinext marks unsupported.
+- **Package manager / runtime**: Bun for installs, workspaces, and scripts; Node 24 LTS runs both containers — User decision. Bun as runtime was rejected over open Bun bugs affecting NestJS decorator metadata and cheap-VPS CPUs.
+- **Repo shape**: Bun-workspace monorepo, two Docker images — `apps/web`, `apps/api`, `packages/db` (Drizzle schema, used by the API only), `packages/types` (shared DTOs and public response types).
+- **File storage**: Local server storage on a named Docker volume, images converted to WebP in the API — Cost-efficiency for v1; no cloud storage dependency.
+- **Infrastructure**: Docker + Dokploy, named Docker volumes for Postgres and uploads — Self-hosted deployment target; data must survive container replacement.
 - **Privacy**: Internal roadmap fields must be unreachable from any public endpoint — Core trust guarantee of the dual-layer roadmap; a leak here is the product's worst failure mode.
+- **Tenant isolation**: Every query is scoped by product/workspace, enforced by NestJS guards and covered by a cross-tenant test suite that grows with each feature.
 
 ## Key Decisions
 
@@ -138,13 +143,18 @@ User (global platform account, OAuth)
 | Three-level tenancy: User → Workspace → Product | One company commonly ships several apps; each needs its own portal, but they share a team and company identity | — Pending |
 | Global platform user accounts | A single OAuth sign-in participates in any company's portal; avoids re-registration friction per product | — Pending |
 | Path-based, product-rooted routing (`/{workspace}/{product}`) | No wildcard DNS or TLS work during development; resolver abstracted so subdomains are additive later | — Pending |
-| OAuth-only auth for both admins and end-users | One NextAuth config, one User table, no password or email infrastructure; credentials and magic link planned for v2 | — Pending |
+| OAuth-only auth for both admins and end-users | No password or email infrastructure in v1; Better Auth adds credentials and magic link later by configuration | — Pending |
 | Role enum present, single role issued in v1 | Invited members are all admins now; owner/admin/viewer splits need no schema migration later | — Pending |
-| Statuses as per-product editable rows, shared by posts and roadmap items | Admin-definable Kanban columns are required, and a shared set makes post↔item status sync fall out for free instead of needing a mapping table | — Pending |
-| Public/private portal toggle scoped to the product | A company may run one public portal and one private beta portal under the same workspace | — Pending |
-| pnpm monorepo, two Docker images | Shared Prisma schema and TS types across web and api without package publishing; still independent deploys | — Pending |
-| Build the web app with vinext instead of Next.js's own toolchain | User decision. Vite-based dev/build while keeping the Next.js API surface; accepted trade-off is vinext's pre-1.0 maturity and ~94% API coverage | ⚠️ Revisit if a blocking compatibility gap appears |
-| Deploy vinext via its Node/Nitro standalone path in Docker, not Cloudflare Workers | PRD mandates Docker + Dokploy with local volume storage, which Workers cannot provide; Workers would pull R2 and managed Postgres into scope | — Pending |
+| Link-based teammate invites, matched to verified OAuth email | Email sending is out of scope; an invite link plus email match on sign-in needs no mail provider | — Pending |
+| Statuses as per-product editable rows with a fixed underlying type, shared by posts and roadmap items | Admin-definable Kanban columns are required; a shared set makes post↔item status sync automatic; the fixed type lets filters and loop-closing know what "shipped" means after renames | — Pending |
+| All portals publicly readable; private toggle dropped from v1 | "Login-required" with global OAuth accounts is not real privacy; an allowlist was not worth v1 cost | — Pending |
+| Bun-workspace monorepo, two Docker images | Shared schema and types without package publishing; independent deploys | — Pending |
+| Build the web app with vinext instead of Next.js's own toolchain | User decision. Vite-based dev/build while keeping the Next.js API surface; accepted trade-off is open self-hosting bugs and ~94% API coverage; `next build` fallback kept cheap by lint rule | ⚠️ Revisit if a blocking compatibility gap appears |
+| Deploy vinext via native standalone output on Node in Docker | PRD mandates Docker + Dokploy with local volume storage, which Workers cannot provide; Nitro preset has a blocking 500 bug | — Pending |
+| Better Auth instead of NextAuth.js | vinext's own checker marks next-auth unsupported and Better Auth supported; NextAuth v5 is still beta and in security-only maintenance | — Pending |
+| Auth hosted in NestJS, web forwards cookies | API owns sessions and DB; web image has no DB credentials; OAuth redirects avoid vinext's untested path | — Pending |
+| Drizzle ORM + drizzle-kit instead of Prisma | User decision. Explicit column lists in core `select()` also make public-response allowlists natural | — Pending |
+| Bun as package manager only, Node 24 LTS runtime | User decision. Bun runtime has open bugs hitting NestJS decorator metadata and cheap-VPS CPUs; vinext does not test on Bun | — Pending |
 | All image processing (WebP via sharp) in NestJS API | sharp is a listed vinext gap; centralizing uploads in the API is also the cleaner decoupled design | — Pending |
 
 ## Evolution
@@ -165,4 +175,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-01 after initialization*
+*Last updated: 2026-10-01 after research decisions (Better Auth in NestJS, Drizzle, Bun package manager, private toggle dropped)*

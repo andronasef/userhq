@@ -366,4 +366,4 @@ Package provenance for the UI dependencies (`@radix-ui/react-avatar`, `-dropdown
 - [x] Dimension 6 Registry Safety: PASS
 - [x] Dimension 7 Inventory Provenance: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-10-01

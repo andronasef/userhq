@@ -1,7 +1,8 @@
 ---
 phase: "1"
 slug: "walking-skeleton"
-status: draft
+status: approved
+reviewed_at: "2026-10-01"
 shadcn_initialized: false
 preset: none
 created: "2026-10-01"
@@ -72,6 +73,12 @@ Raw HTML is fine for headings, paragraphs, `<label>`, and the native `<input typ
 | Footer | None in Phase 1. |
 
 ---
+
+### Focal Points (per screen)
+
+- `/login`: the h1 plus the provider button stack.
+- `/` (signed in): the 64px avatar and the "Signed in as {name}" heading.
+- `/dev/upload`: the "Upload image" button before an upload; the preview image after one.
 
 ## Spacing Scale
 
@@ -351,12 +358,12 @@ Package provenance for the UI dependencies (`@radix-ui/react-avatar`, `-dropdown
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
-- [ ] Dimension 7 Inventory Provenance: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: FLAG (focal points added post-review)
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
+- [x] Dimension 7 Inventory Provenance: PASS
 
 **Approval:** pending

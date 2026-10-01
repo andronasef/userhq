@@ -113,12 +113,18 @@ User (global platform account, OAuth)
 - Greenfield project. Empty directory, fresh git repo, no existing code to integrate with.
 - The PRD arrived unusually complete: scope, stack, personas, user flows, and explicit exclusions were all specified up front. Questioning filled gaps the PRD left open rather than discovering the product.
 - The stack is pre-decided by the PRD and is not an open question for planning: Next.js, Tailwind CSS, Radix UI, NestJS, PostgreSQL via Prisma, NextAuth.js, local file storage with WebP optimization, Docker + Dokploy with volumes for persistence.
+- **The web app is built with [vinext](https://github.com/cloudflare/vinext), not Next.js's own compiler.** vinext is a Cloudflare Vite plugin that reimplements the Next.js API surface on top of Vite. The app is still written as a Next.js app — App Router, React Server Components, route handlers, middleware, `next/link`, `next/image`, `next/navigation`, Metadata API all remain available. Only the build and dev toolchain changes. This pins the project to Next.js 16.x and Vite 8+, and rules out Turbopack/webpack config.
+- vinext carries real adoption risk that planning must account for. Its README states it is "not yet a drop-in replacement for every application or production workload" and to "expect compatibility gaps, especially in newer App Router features," covering roughly 94% of the Next.js 16 API surface. Two gaps matter here: build-time image/font optimization, and native modules (notably `sharp`) in App Router development. NextAuth.js compatibility under vinext is unverified and must be proven early.
+- Because `sharp` is a known vinext gap, **all image processing and WebP conversion happens in the NestJS API, never in the web app.** The web app uploads to the API; the API optimizes and writes to the Docker volume. This sidesteps the gap entirely and is the cleaner split for a decoupled architecture regardless.
+- vinext's primary deployment target is Cloudflare Workers, but this project deliberately uses its secondary Node/Nitro path to honor the PRD's Docker + Dokploy requirement. Local-disk uploads on a Docker volume are incompatible with Workers, and moving to Workers would drag R2 and managed Postgres into scope. Verifying the standalone Node build works under Docker is an early-phase risk to retire.
 - Admin-editable statuses mean status cannot be a Postgres enum or hardcoded union — statuses are per-product rows. Every status reference is a foreign key, and deleting a status needs a defined fallback for posts and items sitting in it.
 - The dual-layer roadmap is the main privacy-correctness risk in the product. Internal fields must never be serialized into a public response. This wants enforcement at the query/DTO boundary, not a conditional in the UI.
 
 ## Constraints
 
 - **Tech stack**: Next.js + Tailwind + Radix UI (web), NestJS (API), PostgreSQL + Prisma, NextAuth.js — Specified in the PRD as locked for v1; decoupled frontend/backend is a deliberate scalability choice.
+- **Web build toolchain**: vinext (Vite 8+) building a Next.js 16.x app, not `next build` — User decision. Pins Next.js to 16.x; no Turbopack/webpack config; accept vinext's documented compatibility gaps.
+- **Image processing location**: WebP conversion and all `sharp` usage live in `apps/api` only — `sharp` is a known vinext gap in App Router; keeping it in NestJS avoids it.
 - **Repo shape**: pnpm monorepo, two Docker images — `apps/web`, `apps/api`, `packages/db` (Prisma schema + client), `packages/types` (shared DTOs). Shared schema and types without publishing packages; independent deploys as two Dokploy apps.
 - **File storage**: Local server storage on a Docker volume, images converted to WebP — Cost-efficiency for V1; no cloud storage dependency.
 - **Infrastructure**: Docker + Dokploy, Docker volumes for persistence — Self-hosted deployment target; uploads and Postgres data must survive container replacement.
@@ -137,6 +143,9 @@ User (global platform account, OAuth)
 | Statuses as per-product editable rows, shared by posts and roadmap items | Admin-definable Kanban columns are required, and a shared set makes post↔item status sync fall out for free instead of needing a mapping table | — Pending |
 | Public/private portal toggle scoped to the product | A company may run one public portal and one private beta portal under the same workspace | — Pending |
 | pnpm monorepo, two Docker images | Shared Prisma schema and TS types across web and api without package publishing; still independent deploys | — Pending |
+| Build the web app with vinext instead of Next.js's own toolchain | User decision. Vite-based dev/build while keeping the Next.js API surface; accepted trade-off is vinext's pre-1.0 maturity and ~94% API coverage | ⚠️ Revisit if a blocking compatibility gap appears |
+| Deploy vinext via its Node/Nitro standalone path in Docker, not Cloudflare Workers | PRD mandates Docker + Dokploy with local volume storage, which Workers cannot provide; Workers would pull R2 and managed Postgres into scope | — Pending |
+| All image processing (WebP via sharp) in NestJS API | sharp is a listed vinext gap; centralizing uploads in the API is also the cleaner decoupled design | — Pending |
 
 ## Evolution
 

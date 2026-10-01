@@ -15,6 +15,7 @@ Tenant isolation and public-response contract tests start in Phase 2 and grow wi
 ## Phases
 
 **Phase Numbering:**
+
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
@@ -29,32 +30,66 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Phase Details
 
 ### Phase 1: Walking Skeleton
+
 **Goal:** As a user, I want to sign in with Google or GitHub on the live stack and stay signed in, so that every later feature has a proven foundation.
 **Mode:** mvp
 **Depends on**: Nothing (first phase)
 **Requirements**: AUTH-01, AUTH-02, AUTH-03, UPLD-01, OPS-01, OPS-02
 **Success Criteria** (what must be TRUE):
+
   1. On the Dockerized stack (web and API on one domain, with `/api/*` and `/uploads/*` routed to NestJS), a user can sign in with Google and with GitHub, see their name and avatar on a server-rendered page, stay signed in across refreshes, and sign out from any page.
   2. A signed-in user can upload a PNG, JPEG, WebP, or GIF under the size limit and get it back as WebP from `/uploads/...`. SVGs, oversized images, and non-image files (including renamed ones) are rejected with a clear error.
   3. After either container is redeployed (`docker compose down && up` locally, a Dokploy redeploy on the VPS), earlier uploads and database rows are still there, and a newly added migration was applied automatically when the API started.
   4. From the Oracle VPS, the API container can open an authenticated SMTP session to Brevo on port 587 (or 2525/465 as a fallback). The working port is recorded for Phase 3.
   5. The deployed web app is served from vinext's standalone output, and the same app code also passes a `next build` canary in CI. If a blocking vinext defect appears, the phase exits by switching the build to `next build`.
+
 **Plans:** 11 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 01-01-PLAN.md — Toolchain: pinned Bun workspace, shared contracts, lint guards, human-reviewed lockfile
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 01-02-PLAN.md — API container migrates Postgres at boot under an advisory lock; [BLOCKING] live-schema gate
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 01-03-PLAN.md — Better Auth in Nest: /api/v1/me, refresh-safe default-deny guard, origin check, session lifecycle tests
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 01-04-PLAN.md — vinext web shell in Docker behind Caddy: server-rendered identity, Tailwind tokens, `next build` canary
-- [ ] 01-05-PLAN.md — /login with Google/GitHub, safe `?next=`, OAuth error mapping; Caddy dev loop
-- [ ] 01-06-PLAN.md — Header and user menu on every page, sign-out, browser keep-alive, global pages, session e2e
 - [ ] 01-07-PLAN.md — Upload pipeline (2 MB, magic bytes, WebP ≤1600px) on the uploads volume; new migration applied at start (API track, runs beside 01-04..01-06)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 01-05-PLAN.md — /login with Google/GitHub, safe `?next=`, OAuth error mapping; Caddy dev loop
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 01-06-PLAN.md — Header and user menu on every page, sign-out, browser keep-alive, global pages, session e2e
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
 - [ ] 01-08-PLAN.md — Dev-only /dev/upload page with runtime flag gating and every UI state; routed upload e2e (joins web and API tracks)
+
+**Wave 8** *(blocked on Wave 7 completion)*
+
 - [ ] 01-09-PLAN.md — Durability: redeploy persistence, migration race/idempotency tests, SMTP probe, Mailpit profile
+
+**Wave 9** *(blocked on Wave 8 completion)*
+
 - [ ] 01-10-PLAN.md — GitHub Actions CI, one human-action for external setup, staging auto-deploy on the VPS
+
+**Wave 10** *(blocked on Wave 9 completion)*
+
 - [ ] 01-11-PLAN.md — Tag-driven prod release, Brevo port recorded, isolation and VPS persistence proofs, blocking real-account sign-in gate on staging and prod
+
 **UI hint**: yes
 **Notes**: Research flag (`/gsd-plan-phase --research-phase`):
+
 - Better Auth inside NestJS with `bodyParser: false`
 - `__Secure-` cookies over internal http
 - Bun isolated linker with vinext standalone (one React copy)
@@ -63,11 +98,13 @@ Plans:
 Lint rules land here: no Vite-isms in app code; the web app may not import db, drizzle, pg, sharp, or the Better Auth server; no exclusion-mode column selection. Settle Tailwind wiring (`postcss` vs `@tailwindcss/vite`) and confirm that runtime env vars take effect without a rebuild.
 
 ### Phase 2: Workspaces, Products & Platform Owner
+
 **Goal:** As an invited company admin, I want to set up my workspace, team, and product portals, so that my customers have a branded place to visit.
 **Mode:** mvp
 **Depends on**: Phase 1
 **Requirements**: PLAT-01, PLAT-02, PLAT-03, PLAT-04, PLAT-05, PLAT-06, PLAT-07, WORK-01, WORK-02, WORK-03, WORK-04, WORK-05, WORK-06, PROD-01, PROD-02, PROD-03, PROD-04, PROD-05, STAT-01, STAT-02, STAT-03, STAT-04, STAT-05
 **Success Criteria** (what must be TRUE):
+
   1. The platform owner role belongs to the verified email in server config, and no in-app control grants it. The owner can:
      - create a single-use, expiring workspace invite link for a specific email
      - see each invite's state (pending, used and by whom, expired, revoked) and revoke unused ones
@@ -91,9 +128,11 @@ Lint rules land here: no Vite-isms in app code; the web app may not import db, d
      - choose which status new posts start in
      - delete a status only by choosing a replacement (the default status and the last remaining status can't be deleted)
   5. The platform owner can suspend a workspace: its portals show an "unavailable" page, its dashboard goes offline, and its data is kept. The owner can also ban a user, who then can't sign in or act anywhere. Lifting a suspension or ban restores access.
+
 **Plans**: TBD
 **UI hint**: yes
 **Notes**: This phase starts several things that later phases extend:
+
 - the cross-tenant 404 test suite
 - the split between public and admin controllers
 - the scaffold for public-response contract tests
@@ -102,11 +141,13 @@ Lint rules land here: no Vite-isms in app code; the web app may not import db, d
 Suspend and ban checks go in the shared guards, so every later feature inherits them. The transaction that reassigns a deleted status must take in posts (Phase 3) and roadmap items (Phase 4) as those tables arrive. Status seeding happens in the same transaction that creates the product.
 
 ### Phase 3: Feedback Board & Conversations
+
 **Goal:** As a customer, I want to post, vote on, and discuss ideas on a product's board, so that the team sees what I actually need.
 **Mode:** mvp
 **Depends on**: Phase 2
 **Requirements**: AUTH-04, WORK-07, PROD-06, POST-01, POST-02, POST-03, POST-04, POST-05, POST-06, POST-07, POST-08, POST-09, POST-10, POST-11, CMNT-01, CMNT-02, CMNT-03, CMNT-04, MOD-01, MOD-02, MOD-03, MOD-04, MOD-05, NOTF-01, NOTF-02, NOTF-03, OPS-03
 **Success Criteria** (what must be TRUE):
+
   1. A signed-out visitor can read the board. Trying to post, vote, or comment prompts sign-in and then returns them to the same spot. A signed-in user can:
      - submit a post with a title, a plain-text description, and a category (Bug and Feature Request are seeded, and admins can edit categories)
      - edit their own post
@@ -122,9 +163,11 @@ Suspend and ban checks go in the shared guards, so every later feature inherits 
      - see who voted (the public sees only the count)
      - merge a duplicate post into another: votes move without double-counting, comments move, and the duplicate's link redirects
   5. When someone else comments on a post that a user created or commented on, that user gets an email. In development it lands in Mailpit; in production it goes through Brevo, configured only by env settings. Users can turn these emails off in account settings, and every email has a one-click unsubscribe link. If sending fails, the comment still appears and the email is retried automatically.
+
 **Plans**: TBD
 **UI hint**: yes
 **Notes**:
+
 - Votes use idempotent PUT/DELETE with an atomic counter.
 - Board search uses Postgres full-text search.
 - Writes are throttled.
@@ -133,11 +176,13 @@ Suspend and ban checks go in the shared guards, so every later feature inherits 
 - Deleting a status must also reassign its posts.
 
 ### Phase 4: Dual-Layer Roadmap & Closing the Loop
+
 **Goal:** As an admin, I want to plan privately and share a public roadmap, so that users hear back when their feedback moves.
 **Mode:** mvp
 **Depends on**: Phase 3
 **Requirements**: ROAD-01, ROAD-02, ROAD-03, ROAD-04, ROAD-05, ROAD-06, ROAD-07, ROAD-08, ROAD-09, ROAD-10, ROAD-11, ROAD-12, STAT-06, LOOP-01, LOOP-02, LOOP-03, LOOP-04, LOOP-05
 **Success Criteria** (what must be TRUE):
+
   1. An admin sees an internal Kanban board with one column per status. On it they can:
      - create items with an internal title and description
      - drag items between columns (which changes their status) and within a column (the order survives a reload)
@@ -155,9 +200,11 @@ Suspend and ban checks go in the shared guards, so every later feature inherits 
   5. When a post's status changes (set directly by an admin or through a roadmap move), each user who created, voted on, or commented on it gets an in-app notification that includes any public note:
      - the bell shows the unread count, groups repeated changes to the same post, and lets the user mark notifications as read
      - "My activity" lists the posts the user created, voted on, or commented on, and marks the ones whose status changed or that got new comments since their last visit
+
 **Plans**: TBD
 **UI hint**: yes
 **Notes**: Research flag (`/gsd-plan-phase --research-phase`):
+
 - the dnd-kit 0.5 Kanban
 - fractional positions
 - Drizzle composite FKs on `(id, product_id)` and partial indexes
@@ -165,16 +212,19 @@ Suspend and ban checks go in the shared guards, so every later feature inherits 
 Internal fields live in a separate 1:1 table. Public reads go through explicit `select()` column maps into hand-written `Public*` types. Deleting a status must also reassign roadmap items. Merging posts must respect the rule that a post links to at most one item.
 
 ### Phase 5: Changelog & FAQ
+
 **Goal:** As an admin, I want to publish release notes and FAQ answers, so that customers see what shipped and can help themselves.
 **Mode:** mvp
 **Depends on**: Phase 3 (can run in parallel with Phase 4)
 **Requirements**: CHLG-01, CHLG-02, CHLG-03, CHLG-04, CHLG-05, CHLG-06, CHLG-07, CHLG-08, FAQ-01, FAQ-02, FAQ-03, FAQ-04, FAQ-05, FAQ-06, FAQ-07
 **Success Criteria** (what must be TRUE):
+
   1. An admin can write a changelog entry in a rich-text editor (headings, lists, bold, italics, links) and insert images, which are stored as WebP. Anything outside that formatting never runs on the public page. Entries can be tagged: New, Improved, and Fixed are seeded, and admins can add, rename, and delete tags. A draft can be saved that the public can't see.
   2. An admin can publish an entry, edit it after publishing, unpublish it back to draft, and delete it. Anyone can read a product's published entries, newest first. Each entry has a permanent link that shows a title and image preview when shared.
   3. An admin can create, rename, and delete FAQ categories, and create, edit, and delete questions with rich-text answers. Categories can be reordered, and so can the questions within a category.
   4. A visitor can browse the FAQ by category and search questions and answers by text. Opening a question's own link shows the FAQ with that question expanded.
   5. FAQ search results end with a "Didn't find it?" button that opens the new-post form on that product's feedback board.
+
 **Plans**: TBD
 **UI hint**: yes
 **Notes**: Research flag: the Tiptap static renderer under vinext RSC, and CSP nonces (vinext #3205). Rich text is stored as Tiptap JSON in jsonb, checked against a strict Zod allowlist, and never rendered with `dangerouslySetInnerHTML`. Changelog work needs only Phase 2. FAQ-07 needs Phase 3's new-post form.

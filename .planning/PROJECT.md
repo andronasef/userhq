@@ -19,6 +19,8 @@ An admin can see what their users actually want, ranked by demand, and close the
 
 ## Personas
 
+**The Platform Owner (operator of UserSaid itself)** — runs the platform. Decides who may create a workspace (invite-only at launch), can see every workspace, product, and user, and can suspend workspaces or ban users when something goes wrong. Identified by email in server configuration, never by an in-app setting.
+
 **The Admin (Workspace Owner / Product Manager)** — wants to gather user feedback, filter out noise, plan the development cycle privately, and showcase product progress publicly.
 
 **The End-User (Customer)** — wants to suggest ideas, vote on existing suggestions, see what the company is building, and find quick answers to common issues without waiting for support.
@@ -39,6 +41,8 @@ User (global platform account, OAuth)
 ```
 
 - A **user account is global**: one Google/GitHub sign-in participates in any company's portal on the platform. No per-workspace or per-product re-registration.
+- **Creating a workspace is invite-only at launch.** The platform owner issues a single-use, expiring invite link tied to one email; only its holder can create a workspace. End-users are not gated: anyone can sign in to post, vote, and comment on any portal.
+- Above all workspaces sits the **platform owner**, with a separate dashboard to manage platform invites, browse all tenants, and suspend workspaces or ban users.
 - A **workspace** holds the company identity and team. It owns no feedback content directly.
 - A **product** is the unit that end-users actually visit. One company with three apps runs three independent portals under one workspace and one team.
 - **Every product portal is publicly readable in v1.** Anyone can browse feedback, the public roadmap, the changelog, and the FAQ. Signing in is required only to post, vote, or comment. There is no private/login-required portal in v1 (see Out of Scope).
@@ -52,10 +56,16 @@ User (global platform account, OAuth)
 
 ### Active
 
+**Platform Owner**
+
+- [ ] Platform owner (identified by email in server config) has a dashboard to issue and revoke workspace-creation invites
+- [ ] Platform owner can browse all workspaces, products, and users
+- [ ] Platform owner can suspend a workspace or ban a user, and reverse either
+
 **Workspace, Product & Auth**
 
 - [ ] User can sign in with Google or GitHub (OAuth only in v1)
-- [ ] User can create a workspace with a name, slug, and uploaded logo
+- [ ] User holding a platform invite can create a workspace with a name, slug, and uploaded logo
 - [ ] Admin can create multiple products inside one workspace, each with its own name, slug, and logo
 - [ ] Admin can invite teammates to a workspace via a shareable invite link, accepted by signing in with a matching verified email (no email is sent)
 - [ ] Portal resolves by path at `/{workspace}/{product}`
@@ -96,12 +106,17 @@ User (global platform account, OAuth)
 - [ ] End-user can browse FAQ categories
 - [ ] End-user can search FAQ questions
 
+**Email Notifications**
+
+- [ ] User receives an email when someone else comments on a post they created or commented on, and can turn these emails off
+
 Research surfaced further table-stakes features (own-vote removal, post editing, admin moderation, duplicate merge, post status timeline, "My activity", changelog drafts). These are scoped in REQUIREMENTS.md, not here.
 
 ### Out of Scope
 
 - **AI chat assistant and automated duplicate detection** — explicitly deferred in the PRD; the MVP must prove the manual loop works first.
-- **Email notifications of any kind** — MVP relies purely on in-app status; avoids taking an email-provider dependency (Resend is also out of scope). This is also why teammate invites are link-based.
+- **Email beyond comment notifications** — Amended from the PRD by user decision: v1 sends exactly one email type (someone commented on your post) because email is reserved for important notifications. Sign-in, invite, status-change, and digest emails are out; the in-app bell and "My activity" cover status changes. Teammate invites remain link-based.
+- **Self-hosted mail server** — Oracle Cloud blocks outbound port 25 for tenancies created after June 2021 (platform-level, not overridable by egress rules), and mail from cloud IPs has poor deliverability. Email is relayed through Brevo over SMTP instead.
 - **Third-party integrations (Jira, Slack, GitHub issues)** — deferred; none are needed to validate the core loop.
 - **External cloud storage (S3 and similar)** — local server storage on a Docker volume is sufficient at MVP scale and keeps hosting costs flat.
 - **Email+password and magic-link sign-in** — OAuth-only in v1. Better Auth supports both natively, so adding them is a configuration change, not a rewrite.
@@ -133,6 +148,7 @@ Research surfaced further table-stakes features (own-vote removal, post editing,
 - **Repo shape**: Bun-workspace monorepo, two Docker images — `apps/web`, `apps/api`, `packages/db` (Drizzle schema, used by the API only), `packages/types` (shared DTOs and public response types).
 - **File storage**: Local server storage on a named Docker volume, images converted to WebP in the API — Cost-efficiency for v1; no cloud storage dependency.
 - **Infrastructure**: Docker + Dokploy, named Docker volumes for Postgres and uploads — Self-hosted deployment target; data must survive container replacement.
+- **Email**: SMTP via Brevo's free tier (300 emails/day) in production, configured entirely by environment settings so the provider can be swapped; Mailpit container catches all mail in development — User decision. Hosting is a free Oracle Cloud VPS, where outbound port 25 is blocked; Phase 1 must confirm Brevo's submission port (587, or 2525/465 as fallbacks) is reachable from the VPS. Email sends from an outbox with retries so a provider failure never blocks a user action.
 - **Privacy**: Internal roadmap fields must be unreachable from any public endpoint — Core trust guarantee of the dual-layer roadmap; a leak here is the product's worst failure mode.
 - **Tenant isolation**: Every query is scoped by product/workspace, enforced by NestJS guards and covered by a cross-tenant test suite that grows with each feature.
 
@@ -155,6 +171,9 @@ Research surfaced further table-stakes features (own-vote removal, post editing,
 | Auth hosted in NestJS, web forwards cookies | API owns sessions and DB; web image has no DB credentials; OAuth redirects avoid vinext's untested path | — Pending |
 | Drizzle ORM + drizzle-kit instead of Prisma | User decision. Explicit column lists in core `select()` also make public-response allowlists natural | — Pending |
 | Bun as package manager only, Node 24 LTS runtime | User decision. Bun runtime has open bugs hitting NestJS decorator metadata and cheap-VPS CPUs; vinext does not test on Bun | — Pending |
+| Invite-only workspace creation, issued by the platform owner as copy-able links | User decision: controlled onboarding at launch; links keep email reserved for notifications. Open self-serve sign-up is a v2 candidate | — Pending |
+| Platform owner identified by email in server configuration | No in-app path can grant the highest-privilege role, so it cannot be escalated through a bug or a compromised admin account | — Pending |
+| Email for comment notifications only, via Brevo SMTP | User decision: email reserved for important notifications; Oracle free VPS blocks port 25 so self-hosting a mail server is not viable; plain SMTP keeps the provider swappable | — Pending |
 | All image processing (WebP via sharp) in NestJS API | sharp is a listed vinext gap; centralizing uploads in the API is also the cleaner decoupled design | — Pending |
 
 ## Evolution
@@ -175,4 +194,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-01 after research decisions (Better Auth in NestJS, Drizzle, Bun package manager, private toggle dropped)*
+*Last updated: 2026-10-01 after requirements scoping (comment emails, platform owner, invite-only workspaces)*

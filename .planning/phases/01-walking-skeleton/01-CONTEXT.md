@@ -40,6 +40,7 @@ Requirements: AUTH-01, AUTH-02, AUTH-03, UPLD-01, OPS-01, OPS-02. Workspaces, pr
 - **D-12:** Each environment is **one Dokploy compose app** (web, api, postgres) with Traefik path labels: `/api` and `/uploads` go to the api container, everything else to web. The same compose shape is used locally. Postgres 18 data is mounted at `/var/lib/postgresql`.
 - **D-13:** CI is **GitHub Actions**. It runs lint (including the Phase 1 lint rules), tests, the vinext build, and the `next build` canary on PRs and on main. Images are built by Dokploy on deploy; there is no registry push.
 - **D-14:** Deploy triggers: **a merge to main auto-deploys staging, and a release tag (`v*`) deploys prod**.
+- **D-18:** The VPS is an **Oracle Ampere A1 (arm64)**. Images run on `linux/arm64` (Docker on the VPS builds natively). Because the VPS is not x64, the Bun 1.4.2 SSE4.2 hang does not apply there. D-13 stays as is: images are built on the VPS by Dokploy. If a build runs out of memory, the user has **deferred** that problem. Do not plan a GHCR or CI-build path now. A swap file may be added if needed.
 - **D-15:** **Staging catches mail in Mailpit.** Only prod sends through Brevo, so staging never emails real people or uses up the 300/day quota. The Brevo port reachability check (587, then 2525/465) still runs once from the VPS, and the working port is recorded for Phase 3.
 
 ### Skeleton UI fidelity

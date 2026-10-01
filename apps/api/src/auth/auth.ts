@@ -15,6 +15,9 @@ export function createAuth(
     basePath: "/api/auth",
     secret: env.BETTER_AUTH_SECRET,
     database: drizzleAdapter(db, { provider: "pg", schema }),
+    advanced: {
+      disableOriginCheck: false,
+    },
     socialProviders: {
       google: {
         clientId: env.GOOGLE_CLIENT_ID,

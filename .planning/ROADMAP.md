@@ -39,7 +39,20 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. After either container is redeployed (`docker compose down && up` locally, a Dokploy redeploy on the VPS), earlier uploads and database rows are still there, and a newly added migration was applied automatically when the API started.
   4. From the Oracle VPS, the API container can open an authenticated SMTP session to Brevo on port 587 (or 2525/465 as a fallback). The working port is recorded for Phase 3.
   5. The deployed web app is served from vinext's standalone output, and the same app code also passes a `next build` canary in CI. If a blocking vinext defect appears, the phase exits by switching the build to `next build`.
-**Plans**: TBD
+**Plans:** 11 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Toolchain: pinned Bun workspace, shared contracts, lint guards, human-reviewed lockfile
+- [ ] 01-02-PLAN.md — API container migrates Postgres at boot under an advisory lock; [BLOCKING] live-schema gate
+- [ ] 01-03-PLAN.md — Better Auth in Nest: /api/v1/me, refresh-safe default-deny guard, origin check, session lifecycle tests
+- [ ] 01-04-PLAN.md — vinext web shell in Docker behind Caddy: server-rendered identity, Tailwind tokens, `next build` canary
+- [ ] 01-05-PLAN.md — /login with Google/GitHub, safe `?next=`, OAuth error mapping; Caddy dev loop
+- [ ] 01-06-PLAN.md — Header and user menu on every page, sign-out, browser keep-alive, global pages, session e2e
+- [ ] 01-07-PLAN.md — Upload pipeline (2 MB, magic bytes, WebP ≤1600px) on the uploads volume; new migration applied at start
+- [ ] 01-08-PLAN.md — Dev-only /dev/upload page with runtime flag gating and every UI state
+- [ ] 01-09-PLAN.md — Durability: redeploy persistence, migration race/idempotency tests, SMTP probe, Mailpit profile
+- [ ] 01-10-PLAN.md — GitHub Actions CI, one human-action for external setup, staging auto-deploy on the VPS
+- [ ] 01-11-PLAN.md — Tag-driven prod release, Brevo port recorded, isolation and VPS persistence proofs, COVERAGE.md
 **UI hint**: yes
 **Notes**: Research flag (`/gsd-plan-phase --research-phase`):
 - Better Auth inside NestJS with `bodyParser: false`
@@ -173,7 +186,7 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once P
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Walking Skeleton | 0/TBD | Not started | - |
+| 1. Walking Skeleton | 0/11 | Planned | - |
 | 2. Workspaces, Products & Platform Owner | 0/TBD | Not started | - |
 | 3. Feedback Board & Conversations | 0/TBD | Not started | - |
 | 4. Dual-Layer Roadmap & Closing the Loop | 0/TBD | Not started | - |

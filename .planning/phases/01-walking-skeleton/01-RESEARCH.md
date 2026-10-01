@@ -694,7 +694,16 @@ http://localhost {
 | A9 | `next build` will add Next's TS plugin and `next-env.d.ts` to `apps/web/tsconfig.json` on first run | Pattern 8 | A CI-dirty tree. Commit the generated changes once. |
 | A10 | Mailpit inline `MP_UI_AUTH` exists (only `MP_UI_AUTH_FILE` was confirmed in the docs) | Pattern 7 | Use `MP_UI_AUTH_FILE` |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+Resolutions recorded at planning time (2026-10-01, from CONTEXT D-18 and the plan-phase orchestrator):
+1. **VPS shape:** RESOLVED. Oracle Ampere A1, arm64 (D-18). RAM and disk are captured in plan 01-10's human-action checkpoint; add a swap file if memory is short.
+2. **Build location vs D-13:** RESOLVED. Keep D-13: Dokploy builds images on the VPS. The user deferred any out-of-memory handling; no GHCR or CI-build path is planned.
+3. **Domains and DNS:** RESOLVED. Collected in the single human-action checkpoint (plan 01-10, Task 2).
+4. **GitHub repo:** RESOLVED. Created by the human in the same checkpoint, with rulesets on main and release; Claude adds the remote and pushes (01-10 Task 3).
+5. **Gating staging on CI:** RESOLVED. Dokploy's native push-to-main trigger for Phase 1, as research recommends; revisit if a red build reaches staging.
+
+Original questions, kept for the record:
 
 1. **VPS shape (blocking for deploy plans).**
    - What we know: Oracle free tier; "limited RAM"; Dokploy needs ≥2 GB.

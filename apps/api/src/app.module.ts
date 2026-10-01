@@ -1,12 +1,22 @@
 import {
   Module,
+  type DynamicModule,
   type OnApplicationShutdown,
   Injectable,
   Inject,
 } from "@nestjs/common";
-import { DB, createDb } from "@userhq/db";
+import { APP_GUARD, APP_FILTER } from "@nestjs/core";
+import type { NestExpressApplication } from "@nestjs/platform-express";
+import helmet from "helmet";
 import type pg from "pg";
+import { AuthModule } from "@thallesp/nestjs-better-auth";
+import { DB, type Db } from "@userhq/db";
+import { ENV, type Env } from "./env.js";
+import { AUTH, type Auth } from "./auth/auth.js";
 import { HealthController } from "./health/health.controller.js";
+import { MeController } from "./auth/me.controller.js";
+import { OriginGuard, SessionGuard } from "./auth/guards.js";
+import { ApiErrorFilter } from "./common/api-error.filter.js";
 
 const DB_POOL = Symbol.for("@userhq/api/db-pool");
 
@@ -19,29 +29,66 @@ export class DbLifecycleService implements OnApplicationShutdown {
   }
 }
 
-function getDbInstance() {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    throw new Error("api: DATABASE_URL environment variable is required");
+@Module({})
+export class AppModule {
+  static register(deps: {
+    env: Env;
+    db: Db;
+    pool: pg.Pool;
+    auth: Auth;
+  }): DynamicModule {
+    return {
+      module: AppModule,
+      global: true,
+      imports: [
+        AuthModule.forRoot({
+          auth: deps.auth,
+          disableGlobalAuthGuard: true,
+          bodyParser: {
+            json: { limit: "100kb" },
+          },
+        }),
+      ],
+      controllers: [HealthController, MeController],
+      providers: [
+        {
+          provide: ENV,
+          useValue: deps.env,
+        },
+        {
+          provide: DB,
+          useValue: deps.db,
+        },
+        {
+          provide: DB_POOL,
+          useValue: deps.pool,
+        },
+        {
+          provide: AUTH,
+          useValue: deps.auth,
+        },
+        DbLifecycleService,
+        {
+          provide: APP_GUARD,
+          useClass: OriginGuard,
+        },
+        {
+          provide: APP_GUARD,
+          useClass: SessionGuard,
+        },
+        {
+          provide: APP_FILTER,
+          useClass: ApiErrorFilter,
+        },
+      ],
+      exports: [ENV, DB, AUTH],
+    };
   }
-  return createDb(databaseUrl);
 }
 
-const dbInstance = getDbInstance();
-
-@Module({
-  controllers: [HealthController],
-  providers: [
-    {
-      provide: DB_POOL,
-      useValue: dbInstance.pool,
-    },
-    {
-      provide: DB,
-      useValue: dbInstance.db,
-    },
-    DbLifecycleService,
-  ],
-  exports: [DB],
-})
-export class AppModule {}
+export function configureApp(app: NestExpressApplication, _env: Env): void {
+  app.setGlobalPrefix("api/v1");
+  app.set("trust proxy", 1);
+  app.use(helmet());
+  app.enableShutdownHooks();
+}

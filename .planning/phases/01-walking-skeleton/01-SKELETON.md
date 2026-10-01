@@ -33,7 +33,7 @@ A user signs in with Google or GitHub on the Dockerized stack (vinext web and Ne
 - `apps/web/app/` (routes), `components/ui/` (primitives), `components/` (shell), `lib/` (server and client helpers); `proxy.ts`
 - `packages/db/src/schema/*.ts`, `packages/db/migrations/` (+ `meta/`), `packages/db/src/{index.ts, migrate.ts}`
 - `packages/types/src/index.ts` (all cross-app contracts)
-- Root: `compose.yaml` (prod shape), `compose.local.yaml`, `compose.dev.yaml`, `docker/Caddyfile.{dev,local}`, `.github/workflows/{ci,release}.yml`, `docs/deploy.md`, `tools/` (lint plugin)
+- Root: `compose.yaml` (prod shape), `compose.local.yaml`, `compose.dev.yaml`, `docker/Caddyfile.{dev,local}`, `.github/workflows/{ci,release}.yml`, `docs/deploy.md`, `tools/` (lint plugin, `signin-evidence.mjs` for the live sign-in gate)
 
 ## Stack Touched in Phase 1
 

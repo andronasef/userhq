@@ -48,11 +48,11 @@ Plans:
 - [ ] 01-04-PLAN.md — vinext web shell in Docker behind Caddy: server-rendered identity, Tailwind tokens, `next build` canary
 - [ ] 01-05-PLAN.md — /login with Google/GitHub, safe `?next=`, OAuth error mapping; Caddy dev loop
 - [ ] 01-06-PLAN.md — Header and user menu on every page, sign-out, browser keep-alive, global pages, session e2e
-- [ ] 01-07-PLAN.md — Upload pipeline (2 MB, magic bytes, WebP ≤1600px) on the uploads volume; new migration applied at start
-- [ ] 01-08-PLAN.md — Dev-only /dev/upload page with runtime flag gating and every UI state
+- [ ] 01-07-PLAN.md — Upload pipeline (2 MB, magic bytes, WebP ≤1600px) on the uploads volume; new migration applied at start (API track, runs beside 01-04..01-06)
+- [ ] 01-08-PLAN.md — Dev-only /dev/upload page with runtime flag gating and every UI state; routed upload e2e (joins web and API tracks)
 - [ ] 01-09-PLAN.md — Durability: redeploy persistence, migration race/idempotency tests, SMTP probe, Mailpit profile
 - [ ] 01-10-PLAN.md — GitHub Actions CI, one human-action for external setup, staging auto-deploy on the VPS
-- [ ] 01-11-PLAN.md — Tag-driven prod release, Brevo port recorded, isolation and VPS persistence proofs, COVERAGE.md
+- [ ] 01-11-PLAN.md — Tag-driven prod release, Brevo port recorded, isolation and VPS persistence proofs, blocking real-account sign-in gate on staging and prod
 **UI hint**: yes
 **Notes**: Research flag (`/gsd-plan-phase --research-phase`):
 - Better Auth inside NestJS with `bodyParser: false`

@@ -5,8 +5,8 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
     }
   },
   "dependencies": {
@@ -24,7 +24,7 @@
     "vitest": "5.0.3"
   },
   "scripts": {
-    "build": "tsdown src/index.ts src/migrate.ts --format esm --dts",
+    "build": "tsdown src/index.ts src/migrate.ts --format esm --dts && cp dist/migrate.mjs dist/migrate.js && cp dist/index.mjs dist/index.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
     "db:generate": "drizzle-kit generate",

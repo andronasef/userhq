@@ -17,7 +17,7 @@
     "typescript": "catalog:"
   },
   "scripts": {
-    "build": "tsdown src/index.ts --format esm --dts",
+    "build": "tsdown src/index.ts --format esm --dts && cp dist/index.mjs dist/index.js",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   }
 }

@@ -216,12 +216,108 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 1 | Pending |
+| AUTH-04 | Phase 3 | Pending |
+| PLAT-01 | Phase 2 | Pending |
+| PLAT-02 | Phase 2 | Pending |
+| PLAT-03 | Phase 2 | Pending |
+| PLAT-04 | Phase 2 | Pending |
+| PLAT-05 | Phase 2 | Pending |
+| PLAT-06 | Phase 2 | Pending |
+| PLAT-07 | Phase 2 | Pending |
+| WORK-01 | Phase 2 | Pending |
+| WORK-02 | Phase 2 | Pending |
+| WORK-03 | Phase 2 | Pending |
+| WORK-04 | Phase 2 | Pending |
+| WORK-05 | Phase 2 | Pending |
+| WORK-06 | Phase 2 | Pending |
+| WORK-07 | Phase 3 | Pending |
+| PROD-01 | Phase 2 | Pending |
+| PROD-02 | Phase 2 | Pending |
+| PROD-03 | Phase 2 | Pending |
+| PROD-04 | Phase 2 | Pending |
+| PROD-05 | Phase 2 | Pending |
+| PROD-06 | Phase 3 | Pending |
+| STAT-01 | Phase 2 | Pending |
+| STAT-02 | Phase 2 | Pending |
+| STAT-03 | Phase 2 | Pending |
+| STAT-04 | Phase 2 | Pending |
+| STAT-05 | Phase 2 | Pending |
+| STAT-06 | Phase 4 | Pending |
+| POST-01 | Phase 3 | Pending |
+| POST-02 | Phase 3 | Pending |
+| POST-03 | Phase 3 | Pending |
+| POST-04 | Phase 3 | Pending |
+| POST-05 | Phase 3 | Pending |
+| POST-06 | Phase 3 | Pending |
+| POST-07 | Phase 3 | Pending |
+| POST-08 | Phase 3 | Pending |
+| POST-09 | Phase 3 | Pending |
+| POST-10 | Phase 3 | Pending |
+| POST-11 | Phase 3 | Pending |
+| CMNT-01 | Phase 3 | Pending |
+| CMNT-02 | Phase 3 | Pending |
+| CMNT-03 | Phase 3 | Pending |
+| CMNT-04 | Phase 3 | Pending |
+| MOD-01 | Phase 3 | Pending |
+| MOD-02 | Phase 3 | Pending |
+| MOD-03 | Phase 3 | Pending |
+| MOD-04 | Phase 3 | Pending |
+| MOD-05 | Phase 3 | Pending |
+| LOOP-01 | Phase 4 | Pending |
+| LOOP-02 | Phase 4 | Pending |
+| LOOP-03 | Phase 4 | Pending |
+| LOOP-04 | Phase 4 | Pending |
+| LOOP-05 | Phase 4 | Pending |
+| ROAD-01 | Phase 4 | Pending |
+| ROAD-02 | Phase 4 | Pending |
+| ROAD-03 | Phase 4 | Pending |
+| ROAD-04 | Phase 4 | Pending |
+| ROAD-05 | Phase 4 | Pending |
+| ROAD-06 | Phase 4 | Pending |
+| ROAD-07 | Phase 4 | Pending |
+| ROAD-08 | Phase 4 | Pending |
+| ROAD-09 | Phase 4 | Pending |
+| ROAD-10 | Phase 4 | Pending |
+| ROAD-11 | Phase 4 | Pending |
+| ROAD-12 | Phase 4 | Pending |
+| CHLG-01 | Phase 5 | Pending |
+| CHLG-02 | Phase 5 | Pending |
+| CHLG-03 | Phase 5 | Pending |
+| CHLG-04 | Phase 5 | Pending |
+| CHLG-05 | Phase 5 | Pending |
+| CHLG-06 | Phase 5 | Pending |
+| CHLG-07 | Phase 5 | Pending |
+| CHLG-08 | Phase 5 | Pending |
+| FAQ-01 | Phase 5 | Pending |
+| FAQ-02 | Phase 5 | Pending |
+| FAQ-03 | Phase 5 | Pending |
+| FAQ-04 | Phase 5 | Pending |
+| FAQ-05 | Phase 5 | Pending |
+| FAQ-06 | Phase 5 | Pending |
+| FAQ-07 | Phase 5 | Pending |
+| NOTF-01 | Phase 3 | Pending |
+| NOTF-02 | Phase 3 | Pending |
+| NOTF-03 | Phase 3 | Pending |
+| UPLD-01 | Phase 1 | Pending |
+| OPS-01 | Phase 1 | Pending |
+| OPS-02 | Phase 1 | Pending |
+| OPS-03 | Phase 3 | Pending |
 
 **Coverage:**
 - v1 requirements: 89 total
-- Mapped to phases: 0
-- Unmapped: 89 ⚠️
+- Mapped to phases: 89
+- Unmapped: 0 ✓
+
+**Per phase:**
+- Phase 1 (Walking Skeleton): 6
+- Phase 2 (Workspaces, Products & Platform Owner): 23
+- Phase 3 (Feedback Board & Conversations): 27
+- Phase 4 (Dual-Layer Roadmap & Closing the Loop): 18
+- Phase 5 (Changelog & FAQ): 15
 
 ---
 *Requirements defined: 2026-10-01*
-*Last updated: 2026-10-01 after initial definition*
+*Last updated: 2026-10-01 after roadmap creation (traceability mapped)*

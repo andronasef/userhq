@@ -65,7 +65,7 @@ Raw HTML is fine for headings, paragraphs, `<label>`, and the native `<input typ
 |--------|----------|
 | Page frame | `min-h-dvh flex flex-col bg-background text-foreground`. `<html lang="en">`. Minimum supported width is 320px. Single column at every breakpoint; no sidebar. |
 | Container | `mx-auto w-full max-w-5xl px-4 sm:px-6` (1024px max; 16px gutters, 24px from 640px up). The header and the main content share it. |
-| Header | Full-width bar, `h-14` (56px), `border-b border-border bg-background`. The inner container is `flex items-center justify-between`. Left: wordmark "UserSaid", 16px / 600, linked to `/`. Right: the 40px user-menu trigger, or a `Sign in` button (`outline`, `default` size). Not sticky. *(Claude's choice)* |
+| Header | Full-width bar, `h-14` (56px), `border-b border-border bg-background`. The inner container is `flex items-center justify-between`. Left: wordmark "UserHQ", 16px / 600, linked to `/`. Right: the 40px user-menu trigger, or a `Sign in` button (`outline`, `default` size). Not sticky. *(Claude's choice)* |
 | Main | `flex-1`, `py-8 sm:py-12` (32px mobile, 48px from 640px). Content column `max-w-3xl` (768px), left-aligned in the container. |
 | `/login` | No content column. Card centered horizontally, `mt-8 sm:mt-16` (32 / 64px). Card: `w-full max-w-sm` (384px), `bg-card border border-border rounded-lg p-6 sm:p-8`, internal stack `gap-6`. Buttons stack `gap-2`. |
 | `/` | Stack `gap-6`. The identity block is a row: 64px avatar + text stack (`gap-1`), `gap-4` between them. On mobile it wraps under 360px wide. |
@@ -238,11 +238,11 @@ Voice: plain, short, second person, sentence case, no exclamation marks. Each er
 
 | Surface | Element | Copy |
 |---------|---------|------|
-| All | `<title>` | `Sign in · UserSaid`, `UserSaid` (home), `Upload test · UserSaid`, `Page not found · UserSaid`, `Error · UserSaid` |
-| Header | Wordmark | `UserSaid` |
+| All | `<title>` | `Sign in · UserHQ`, `UserHQ` (home), `Upload test · UserHQ`, `Page not found · UserHQ`, `Error · UserHQ` |
+| Header | Wordmark | `UserHQ` |
 | Header | Trigger `aria-label` | `Open account menu` |
 | Header | Dev menu item | `Upload test` |
-| `/login` | h1 | `Sign in to UserSaid` |
+| `/login` | h1 | `Sign in to UserHQ` |
 | `/login` | Description | `Use your Google or GitHub account to continue.` |
 | `/` signed in | h1 | `Signed in as {name}` (if the name is empty: `You're signed in`) |
 | `/` signed in | Body | `You'll stay signed in on this device for 14 days after your last visit.` |
@@ -274,7 +274,7 @@ Codes come from Better Auth's OAuth `redirectOnError` (the documented error list
 
 ### `/dev/upload` error mapping (API `code` → alert copy)
 
-The UI keys off a stable `code` in the shared error shape (`@usersaid/types`); the planner defines these codes in that package. HTTP status is shown for orientation only.
+The UI keys off a stable `code` in the shared error shape (`@userhq/types`); the planner defines these codes in that package. HTTP status is shown for orientation only.
 
 | API `code` (status) | Alert title | Alert body |
 |---------------------|-------------|------------|

@@ -130,7 +130,7 @@ FAQ is **not a standard feature** of Canny, Nolt, or Frill. Featurebase has a se
 
 ### Q2: Closing the loop without email (minimum in-app mechanism)
 
-**What competitors do.** Canny auto-enrolls voters for updates when they vote, sends status-change emails to voters (with an optional admin comment and image), and has an in-app **bell with unread preview plus a full notifications page**. Triggers: new comments, status updates, merges, mentions, vote milestones. Featurebase has a **notification center/inbox** that separates seen from unseen, a **"My profile"** page listing the user's posts, comments, and upvotes, and status updates that "appear on the Request itself". Frill has "Automatic Notifications" when followed ideas update. Every one of them uses email as the primary channel. Bell, inbox, and profile are the in-app complements, and they are what UserSaid has to build.
+**What competitors do.** Canny auto-enrolls voters for updates when they vote, sends status-change emails to voters (with an optional admin comment and image), and has an in-app **bell with unread preview plus a full notifications page**. Triggers: new comments, status updates, merges, mentions, vote milestones. Featurebase has a **notification center/inbox** that separates seen from unseen, a **"My profile"** page listing the user's posts, comments, and upvotes, and status updates that "appear on the Request itself". Frill has "Automatic Notifications" when followed ideas update. Every one of them uses email as the primary channel. Bell, inbox, and profile are the in-app complements, and they are what UserHQ has to build.
 
 **Recommended minimum (v1).** Four pieces, all LOW–MEDIUM:
 
@@ -161,13 +161,13 @@ FAQ is **not a standard feature** of Canny, Nolt, or Frill. Featurebase has a se
 | **Frill** | Ideas board + roadmap by status | "Private Ideas" on a public board | Status-grouped ideas |
 | **Productboard Portal** | Internal feature hierarchy; selected items published as portal cards | Everything internal by default | **Separate public name and description per card** ("portal description is separate from the internal description") |
 
-**Implication for UserSaid.** The PRD's model (roadmap **items** separate from posts, linked many-to-one, with a public title and description) matches **Productboard's** approach, not Canny's or Featurebase's (where the roadmap *is* the posts). That is a reasonable choice and gives the strongest privacy story. It also means UserSaid must build two things Canny gets for free:
+**Implication for UserHQ.** The PRD's model (roadmap **items** separate from posts, linked many-to-one, with a public title and description) matches **Productboard's** approach, not Canny's or Featurebase's (where the roadmap *is* the posts). That is a reasonable choice and gives the strongest privacy story. It also means UserHQ must build two things Canny gets for free:
 - **(a)** Vote aggregation on public roadmap cards.
 - **(b)** The rule that a post links to at most one item.
 
 The internal/public split must be enforced with separate public DTOs and queries, as PROJECT.md already states. Every vendor treats internal data as "never visible", not "hidden in the UI".
 
-**Status deletion.** Only Featurebase documents its behavior: affected requests move to the current default status, and it advises reviewing them first. UserSaid should do the same, with an explicit picker. Details are in the Statuses table above.
+**Status deletion.** Only Featurebase documents its behavior: affected requests move to the current default status, and it advises reviewing them first. UserHQ should do the same, with an explicit picker. Details are in the Statuses table above.
 
 ---
 
@@ -195,7 +195,7 @@ These line up with the Core Value ("ranked by demand, close the loop publicly") 
 | Prioritization scoring (RICE/impact-effort matrices) | Canny and Frill ("2D matrix") have it | Large feature, needs custom factors UI; the PRD's internal fields cover v1 | Assignee + deadline + vote count is enough to prioritize |
 | Public ETAs / dates on public roadmap | Customers ask "when?" | Overpromising; missed public dates hurt trust. PRD rightly keeps deadline internal. | Status column is the public commitment |
 | Timeline/Gantt roadmap views, multiple roadmaps per product | Planning teams like them | Scope creep into Jira/Linear territory | One Kanban per product |
-| Multiple boards per product | Canny/Featurebase have boards | UserSaid's **product** already plays the role of a board; boards inside products adds a fourth tenancy level | Categories inside the product's single board |
+| Multiple boards per product | Canny/Featurebase have boards | UserHQ's **product** already plays the role of a board; boards inside products adds a fourth tenancy level | Categories inside the product's single board |
 | Custom post fields | Canny Pro ("up to three") | Form builder, validation, filtering complexity | Title + description + category |
 | Embeddable widget / JS SDK / in-app changelog popup | Featurebase and Frill selling point | Cross-origin auth, CSP, versioned SDK. Effectively an integration, which is out of scope. | Link to the portal; RSS |
 | Rich-text editor for end-user posts/comments | Nicer formatting | XSS surface on public pages; image-abuse surface | Plain text with line breaks + auto-linked URLs; rich text for admin-authored changelog/FAQ only |
@@ -371,7 +371,7 @@ All accessed 2026-10-01. Per-source seam tier is LOW (web provider); the "table 
 
 ### Unverified / gaps
 
-- Whether Canny or Featurebase let **end users** edit or delete their own posts: neither help article covers it. The UserSaid recommendation is an inference.
+- Whether Canny or Featurebase let **end users** edit or delete their own posts: neither help article covers it. The UserHQ recommendation is an inference.
 - Canny's behavior when a custom status is deleted: undocumented.
 - Whether merge dedupes a user who voted on both posts: Canny docs are silent. Dedupe is required by our UNIQUE constraint regardless.
 - The Featurebase notification-center details come from search snippets of its changelog, not a dedicated help article *(single source)*.

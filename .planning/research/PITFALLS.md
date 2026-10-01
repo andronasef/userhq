@@ -45,7 +45,7 @@ The Docker image builds, but the server boots with dev React, crashes with "Inco
 
 **Why it happens:** the README says plainly that "Cloudflare Workers has the deepest integration; Node.js and other platforms are available with different levels of support." Open issues that hit this exact stack (pnpm monorepo, Radix, Docker):
 
-| Issue | State | Impact on UserSaid |
+| Issue | State | Impact on UserHQ |
 |---|---|---|
 | #3444: standalone `server.js` does not default `NODE_ENV=production` | open (fix PR #3466 open) | React dev bundle in prod, which is slow and noisy, if the Dockerfile forgets `ENV NODE_ENV=production` |
 | #3443: standalone copies the **wrong package version** when several are installed in a monorepo | open (fix PR #3576 open) | If any workspace package pins a different `react`, every page returns 500 with "Incompatible React versions" |
@@ -296,7 +296,7 @@ It gets **expensive (multiple days)** if the code uses `import.meta.env`, `VITE_
 - Scaling the API to 2+ replicas on Swarm across nodes puts each replica on a different local volume. *(Inferred.)*
 
 **How to avoid:**
-- Use a **named volume** (for example `usersaid_uploads`) mounted at a fixed absolute container path. The code reads `UPLOAD_DIR=/data/uploads` from env and fails fast at boot if the path is missing or unwritable: write a probe file on startup.
+- Use a **named volume** (for example `userhq_uploads`) mounted at a fixed absolute container path. The code reads `UPLOAD_DIR=/data/uploads` from env and fails fast at boot if the path is missing or unwritable: write a probe file on startup.
 - Dockerfile: `RUN mkdir -p /data/uploads && chown -R node:node /data` **before** `USER node`, so a freshly created named volume inherits the ownership.
 - Enable Dokploy Volume Backups for the uploads volume plus Postgres backups, on the same schedule. Document a restore drill.
 - Run a single API replica in v1, and say so in the deploy docs.
@@ -359,7 +359,7 @@ It gets **expensive (multiple days)** if the code uses `import.meta.env`, `VITE_
 - Duplicates fragment votes ("dark mode" x 7).
 - Voters never learn the outcome, so they stop coming back, and the board reads as a suggestion-box graveyard.
 - Vote count becomes the sole prioritisation signal, though it is biased toward loud or free users.
-- UserSaid **excludes email notifications in v1**, which removes the standard loop-closing channel (the "your idea shipped" email). Without a replacement, the stated Core Value ("close the loop publicly") and the success metric (roadmap moves + changelog entries) are undermined.
+- UserHQ **excludes email notifications in v1**, which removes the standard loop-closing channel (the "your idea shipped" email). Without a replacement, the stated Core Value ("close the loop publicly") and the success metric (roadmap moves + changelog entries) are undermined.
 
 **How to avoid (all within v1 scope):**
 - **Manual merge duplicates** (moving votes with dedupe, per Pitfall 8, and leaving a redirect stub). AI dedupe is out of scope, so manual merge is the substitute and should be table stakes.

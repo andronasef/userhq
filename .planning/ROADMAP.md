@@ -1,8 +1,8 @@
-# Roadmap: UserSaid
+# Roadmap: UserHQ
 
 ## Overview
 
-UserSaid ships in five vertical slices, and each one leaves something you can click through.
+UserHQ ships in five vertical slices, and each one leaves something you can click through.
 
 1. **Walking skeleton.** This phase proves the unproven stack end to end in Docker: vinext standalone, Better Auth OAuth through NestJS, Drizzle migrations at boot, WebP uploads on a named volume, and Brevo SMTP reachability from the Oracle VPS. If vinext has a blocking defect, the phase switches to `next build`.
 2. **Tenancy.** The platform owner can admit companies. Each company sets up its workspace, team, products, and statuses, and every product gets a live public portal.

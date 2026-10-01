@@ -89,7 +89,7 @@ Phase 1 is a blocking spike that proves an unproven chain inside Docker. Most of
 There is one **real defect in the obvious design**. The library's global `AuthGuard` calls `auth.api.getSession({ headers })` on every Nest request. When `updateAge` is due, that call extends the DB session, but the refreshed `Set-Cookie` is dropped, both on server-to-server RSC calls and on internal API calls. After that, `shouldBeUpdated` is false for another day. In practice the browser cookie never slides, and the user is logged out 14 days after sign-in. That breaks D-04. **Fix:** set `disableGlobalAuthGuard: true` and register your own guard that calls `getSession({ headers, query: { disableRefresh: true } })`. Then let only the browser's own `GET /api/auth/get-session` (a tiny `SessionKeepAlive` client component in the header) perform the refresh, because only there does the `Set-Cookie` reach the browser.
 
 On the build and deploy side, three earlier assumptions need correcting:
-1. **Bun `--filter api` does not include workspace dependencies.** Use `--filter '@usersaid/api...'` (the trailing `...` selects the workspaces it depends on).
+1. **Bun `--filter api` does not include workspace dependencies.** Use `--filter '@userhq/api...'` (the trailing `...` selects the workspaces it depends on).
 2. **Dokploy's "tag" trigger fires on any tag and still clones the configured branch with `--depth 1`.** It never checks out the tag, so it cannot deploy "the `v*` commit". Deploy prod from a `release` branch that a GitHub Action fast-forwards to the tag commit.
 3. **Dokploy "Isolated Deployments" must be on.** Without it, the staging and prod stacks share `dokploy-network` with identical service names (`api`, `postgres`), and DNS can cross-wire staging into the prod DB.
 
@@ -273,7 +273,7 @@ Do NOT install Tiptap, dnd-kit, nuqs, or drizzle-zod in Phase 1. No phase-1 feat
 ├─ package.json             # workspaces.packages + workspaces.catalog (react, react-dom, rsdw, zod); packageManager bun@1.4.2
 ├─ bun.lock  bunfig.toml    # [install] linker = "isolated" (explicit); flip to "hoisted" only if the spike needs it
 ├─ .oxlintrc.json           # restricted imports per directory + local jsPlugin rules
-├─ tools/oxlint-usersaid.mjs  # local rules: no-import-meta-env, no-exclusion-columns (+ fixture test)
+├─ tools/oxlint-userhq.mjs  # local rules: no-import-meta-env, no-exclusion-columns (+ fixture test)
 ├─ compose.yaml             # prod shape: web, api, postgres (+ mailpit profile "mail", caddy profile "local")
 ├─ compose.dev.yaml         # dev infra: postgres, mailpit, caddy → host.docker.internal:{3000,4000}
 ├─ docker/Caddyfile.dev  docker/Caddyfile.local
@@ -288,9 +288,9 @@ Do NOT install Tiptap, dnd-kit, nuqs, or drizzle-zod in Phase 1. No phase-1 feat
 │      auth/{auth.ts (createAuth), session.guard.ts, public.decorator.ts, current-user.decorator.ts, me.controller.ts}
 │      uploads/{uploads.controller.ts, uploads.service.ts, image-pipeline.ts}
 │      health/health.controller.ts   scripts/smtp-check.ts
-├─ packages/db/             # @usersaid/db (tsdown → dist)
+├─ packages/db/             # @userhq/db (tsdown → dist)
 │   └─ src/{schema/auth.ts, schema/uploads.ts, schema/index.ts, client.ts, migrate.ts}  migrations/ (+meta/_journal.json)  drizzle.config.ts
-└─ packages/types/          # @usersaid/types: zod MeResponse, UploadResponse, error shape
+└─ packages/types/          # @userhq/types: zod MeResponse, UploadResponse, error shape
 ```
 
 ### Pattern 1: Better Auth in Nest with a refresh-safe session guard
@@ -338,9 +338,9 @@ Verified drizzle-orm 0.45.3 behavior (from the published tarball):
 
 ### Pattern 6: Docker images (Node runtime, Bun as PM)
 Use STACK.md's Dockerfile sketch with these corrections:
-1. **Filters must include workspace dependencies:** `bun install --frozen-lockfile --filter '@usersaid/api...'` (and `'@usersaid/web...'`). `foo...` selects "`foo` and the workspaces it depends on, directly or transitively" [VERIFIED: bun@1.4.2 docs/pm/filter.mdx:31-37]. Plain `--filter api` would skip `packages/db`'s own dependencies (drizzle-orm, pg).
+1. **Filters must include workspace dependencies:** `bun install --frozen-lockfile --filter '@userhq/api...'` (and `'@userhq/web...'`). `foo...` selects "`foo` and the workspaces it depends on, directly or transitively" [VERIFIED: bun@1.4.2 docs/pm/filter.mdx:31-37]. Plain `--filter api` would skip `packages/db`'s own dependencies (drizzle-orm, pg).
 2. The root `package.json` is excluded from a filtered install unless selected. Tools needed at build time (typescript, tsdown) must be devDependencies **of the workspace that builds**, or you add `--filter './'`.
-3. Prod deps: `bun install --frozen-lockfile --production --filter '@usersaid/api...'` in a separate stage. Fallback: `bun prune --production --filter '@usersaid/api'` after the build. `bun prune` landed in Bun 1.4.0, and a layout-detection fix landed on 2026-09-01 [VERIFIED: oven-sh/bun commits on docs/pm/cli/prune.mdx; release dates]. Which of the two works under the isolated linker is a **spike check**.
+3. Prod deps: `bun install --frozen-lockfile --production --filter '@userhq/api...'` in a separate stage. Fallback: `bun prune --production --filter '@userhq/api'` after the build. `bun prune` landed in Bun 1.4.0, and a layout-detection fix landed on 2026-09-01 [VERIFIED: oven-sh/bun commits on docs/pm/cli/prune.mdx; release dates]. Which of the two works under the isolated linker is a **spike check**.
 4. The `oven/bun` slim image puts the binary at `/usr/local/bin/bun`, uses the `x64-baseline` build on amd64, and is multi-arch [VERIFIED: oven-sh/bun dockerhub/debian-slim/Dockerfile:18,52-54]. `bunx` is a symlink that is **not** copied, so use `bun x`.
 5. Web runtime: `ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000 VINEXT_TRUST_PROXY=1`, `CMD ["node","server.js"]` from `dist/standalone`. `HOST`, not `HOSTNAME` [VERIFIED: vinext@1.0.0 docs/deploying/other-platforms.mdx]. `VINEXT_TRUST_PROXY` is read at module load from `process.env` [VERIFIED: vinext src/server/proxy-trust.ts], so it is a runtime env var.
 6. API runtime: `RUN mkdir -p /data/uploads && chown -R node:node /data` **before** `USER node`. Mount the named volume at `/data/uploads`. At boot `main.ts` writes and deletes `.probe`, and refuses to start if the volume is not writable.
@@ -371,8 +371,8 @@ Use STACK.md's Dockerfile sketch with these corrections:
   2. `bun run lint` (oxlint + local rules)
   3. `bun run typecheck`
   4. `bun run test`
-  5. `bun run --filter @usersaid/web build` (vinext)
-  6. `bun run --filter @usersaid/web build:next` (canary, `next build`)
+  5. `bun run --filter @userhq/web build` (vinext)
+  6. `bun run --filter @userhq/web build:next` (canary, `next build`)
   7. Optionally `docker compose build` to catch Dockerfile drift.
 - **Staging:** Dokploy compose app with GitHub provider, branch `main`, Auto Deploy on, `triggerType: push`.
 - **Prod (D-14):**
@@ -389,11 +389,11 @@ Use STACK.md's Dockerfile sketch with these corrections:
 
 ### Pattern 10: Lint rules that land this phase
 - **oxlint `no-restricted-imports` with `overrides` per directory** (native rule, configurable `paths`/`patterns` with `message` [CITED: oxc.rs no-restricted-imports]):
-  - `apps/web/**` bans `@usersaid/db`, `drizzle-orm`, `drizzle-orm/*`, `pg`, `sharp`, the `radix-ui` barrel, `next-auth`, `vinext`/`vinext/*`, and `better-auth` except `better-auth/react`, `better-auth/cookies`, and `better-auth/client`. Use a pattern group `["better-auth", "better-auth/*", "!better-auth/react", "!better-auth/cookies", "!better-auth/client"]`.
+  - `apps/web/**` bans `@userhq/db`, `drizzle-orm`, `drizzle-orm/*`, `pg`, `sharp`, the `radix-ui` barrel, `next-auth`, `vinext`/`vinext/*`, and `better-auth` except `better-auth/react`, `better-auth/cookies`, and `better-auth/client`. Use a pattern group `["better-auth", "better-auth/*", "!better-auth/react", "!better-auth/cookies", "!better-auth/client"]`.
   - `apps/web/**` also bans the Vite query-suffix imports (`*?raw`, `*?url`, `*?inline`).
 - **Local JS plugin** (`jsPlugins`, ESLint-compatible API; alpha and not semver-stable [CITED: oxc.rs js-plugins]) with two AST rules:
-  - `usersaid/no-import-meta-env`: `MemberExpression` whose object is `import.meta` and property `env`, under `apps/web/**`.
-  - `usersaid/no-exclusion-columns`: an object property `columns` whose value has any `false` literal, anywhere under `apps/api/**` and `packages/db/**`.
+  - `userhq/no-import-meta-env`: `MemberExpression` whose object is `import.meta` and property `env`, under `apps/web/**`.
+  - `userhq/no-exclusion-columns`: an object property `columns` whose value has any `false` literal, anywhere under `apps/api/**` and `packages/db/**`.
   - Add a fixture test that proves each rule fires. If JS plugins misbehave, fall back to a dependency-free `scripts/check-forbidden.mjs` regex check in CI.
 
 ### Anti-Patterns to Avoid
@@ -532,8 +532,8 @@ Use STACK.md's Dockerfile sketch with these corrections:
 // apps/api/src/auth/auth.ts  — Sources: better-auth options docs (Context7), cookies/index.ts@v1.7.7
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
-import * as authSchema from "@usersaid/db/schema/auth";
-import type { Db } from "@usersaid/db";
+import * as authSchema from "@userhq/db/schema/auth";
+import type { Db } from "@userhq/db";
 import type { Env } from "../env.js";
 
 export function createAuth(db: Db, env: Env, extraPlugins: any[] = []) {
@@ -671,13 +671,13 @@ http://localhost {
 | Old Approach | Current Approach | When Changed | Impact |
 |--------------|------------------|--------------|--------|
 | `middleware.ts` / `export function middleware` | `proxy.ts` / `export function proxy` (Node runtime) | Next.js 16 | Use `proxy.ts`. vinext supports it. |
-| class-validator DTOs | Nest 12 `StandardSchemaValidationPipe` + `@Body({ schema })`, `StandardSchemaSerializerInterceptor` + `@SerializeOptions({ schema })` | Nest 12 (2026-08) | Zod schemas from `@usersaid/types` are used directly [CITED: docs.nestjs.com validation/serialization] |
+| class-validator DTOs | Nest 12 `StandardSchemaValidationPipe` + `@Body({ schema })`, `StandardSchemaSerializerInterceptor` + `@SerializeOptions({ schema })` | Nest 12 (2026-08) | Zod schemas from `@userhq/types` are used directly [CITED: docs.nestjs.com validation/serialization] |
 | Nest CJS + Jest | ESM (`"type":"module"`, `nodenext`) + Vitest + `unplugin-swc` | Nest 12 `nest new` default | file-type and better-auth are ESM. Relative imports need `.js` extensions. |
 | Postgres image `VOLUME /var/lib/postgresql/data` | `VOLUME /var/lib/postgresql`, `PGDATA=/var/lib/postgresql/18/docker` | postgres:18 | Mount the parent directory (D-12) |
 | Dokploy push-only auto deploy | `triggerType` enum `push \| tag` | Dokploy 0.2x–0.30 | Tag mode deploys branch HEAD on any tag. Don't rely on it. |
 | Bun hoisted workspaces | Isolated linker default for new workspaces, `foo...` filter relations, `bun prune` | Bun 1.3–1.4 | Use `...` in Docker filters |
 
-**Deprecated/outdated:** STACK.md's `--filter api` / `--filter web` lines (replace with `'@usersaid/api...'`); ARCHITECTURE.md's "Vite `server.proxy` for local dev" (superseded by D-10 Caddy); STACK.md's suggestion of `trustedOrigins: [PUBLIC_URL]` (drop it, see Pattern 1).
+**Deprecated/outdated:** STACK.md's `--filter api` / `--filter web` lines (replace with `'@userhq/api...'`); ARCHITECTURE.md's "Vite `server.proxy` for local dev" (superseded by D-10 Caddy); STACK.md's suggestion of `trustedOrigins: [PUBLIC_URL]` (drop it, see Pattern 1).
 
 ## Assumptions Log
 
@@ -686,7 +686,7 @@ http://localhost {
 | A1 | Docker Compose reads `COMPOSE_PROFILES` from the `.env` Dokploy writes, so `mailpit` runs only on staging | Pattern 7 | Mailpit missing on staging, or running on prod. Fall back to a separate `compose.staging.yaml` override or an explicit service toggle. |
 | A2 | `sharp.concurrency(1)` + `cache(false)` + a single queue keeps memory acceptable on the VPS | Pattern 4 | OOM under burst. Measure in the spike. |
 | A3 | `limitInputPixels: 40_000_000` is acceptable UX (48 MP originals rejected) | Pitfall 7 | Some phone photos are rejected. Raise to 50M if memory allows. |
-| A4 | Bun `--production --filter '@usersaid/api...'` yields a working runtime `node_modules` under the isolated linker (else `bun prune`) | Pattern 6 | API image crashes at boot. Spike check with both strategies. |
+| A4 | Bun `--production --filter '@userhq/api...'` yields a working runtime `node_modules` under the isolated linker (else `bun prune`) | Pattern 6 | API image crashes at boot. Spike check with both strategies. |
 | A5 | vinext's standalone copier follows Bun `.bun` store symlinks and produces exactly one `react` | Pattern 6 | 500s with "Incompatible React versions". Fall back to `linker = "hoisted"`. |
 | A6 | The Oracle VPS is Ampere A1 (arm64) with enough RAM for Dokploy plus on-host builds | Pitfall 10 | x64 SSE4.2/AVX Bun hang, or build OOM. Probe before any deploy work. |
 | A7 | Vite HMR works through Caddy without `server.hmr.clientPort` (the client defaults to the page's port) | Pattern 7 | HMR doesn't reconnect. Set `hmr.clientPort: 80`. |

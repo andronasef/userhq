@@ -1,4 +1,4 @@
-# Requirements: UserSaid
+# Requirements: UserHQ
 
 **Defined:** 2026-10-01
 **Core Value:** An admin can see what their users actually want, ranked by demand, and close the loop publicly — feedback in, roadmap out, changelog shipped.

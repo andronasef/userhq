@@ -11,7 +11,7 @@
 ## TL;DR: decisions the roadmap must absorb
 
 1. **Better Auth replaces NextAuth.js.** This changes a locked PRD choice and has been accepted by the coordinator. vinext's checker (`packages/vinext/src/check.ts` @ 1.0.0) marks `next-auth` and `@auth/nextjs` `unsupported` and `better-auth` `supported`, and a Better Auth ecosystem fixture lives in vinext's test suite. **HIGH**
-2. **Run Better Auth inside NestJS, not in the vinext app.** The API owns OAuth, sessions and the database. The web app only forwards cookies, so the web image never imports `@usersaid/db`. If the team keeps auth in the web app anyway, use the shared `createAuth(db)` package pattern below. **MEDIUM-HIGH**
+2. **Run Better Auth inside NestJS, not in the vinext app.** The API owns OAuth, sessions and the database. The web app only forwards cookies, so the web image never imports `@userhq/db`. If the team keeps auth in the web app anyway, use the shared `createAuth(db)` package pattern below. **MEDIUM-HIGH**
 3. **Bun is the package manager and workspace/script runner only. Node 24 LTS is the runtime in both containers.** This is reading (a). Running on Bun's runtime, reading (b), is not recommended for v1. Bun 1.4.2 has an open bug where it spins at 100% CPU on KVM/QEMU VMs that hide SSE4.2, which is typical VPS hardware for Dokploy (#43683). Its decorator-metadata emit diverges from tsc (#44120). vinext has no Bun-runtime CI. **(a) MEDIUM-HIGH / (b) LOW**
 4. **Drizzle ORM 0.45.3 + drizzle-kit 0.31.11 (latest stable). Do not start on the 1.0 RC.** Use the `pg` (node-postgres) driver. Generate SQL migrations at dev time with drizzle-kit, commit them, and apply them at container start with `migrate()` from `drizzle-orm/node-postgres/migrator`, so drizzle-kit is not shipped in the production image. Public DTO queries use explicit column allowlists. **HIGH (versions) / MEDIUM (patterns)**
 5. **Deploy vinext with `output: "standalone"` (`node dist/standalone/server.js`), not Nitro.** Nitro has an open "500 on every route" bug that shows up in larger apps (#3478). **HIGH**
@@ -120,8 +120,8 @@ How (a) actually behaves: `bun run <script>` **respects `#!/usr/bin/env node` sh
 |---|---|---|
 | Vitest **5.0.3** | Unit and integration tests | Runs on Node via shebang under `bun run`. Nest 12's ESM default. Don't use `bun test` for Nest code, because it would put decorators on Bun's transpiler (#44120). |
 | Playwright **1.63.0** | E2E against the Docker-built images | Includes the privacy test: public roadmap JSON contains no internal fields |
-| oxlint 1.86 + Prettier 3.9 | Lint and format | `no-restricted-imports`: `apps/web` may not import `@usersaid/db`, `drizzle-orm`, `pg`, `sharp`, or `better-auth` other than `better-auth/react`/`better-auth/cookies`. Also forbid exclusion-mode `columns: { x: false }` in public query modules. |
-| drizzle-kit 0.31.11 | `bun run --filter @usersaid/db db:generate` / `db:studio` / `db:check` | Runs on Node. SQL output is committed to `packages/db/migrations/`. |
+| oxlint 1.86 + Prettier 3.9 | Lint and format | `no-restricted-imports`: `apps/web` may not import `@userhq/db`, `drizzle-orm`, `pg`, `sharp`, or `better-auth` other than `better-auth/react`/`better-auth/cookies`. Also forbid exclusion-mode `columns: { x: false }` in public query modules. |
+| drizzle-kit 0.31.11 | `bun run --filter @userhq/db db:generate` / `db:studio` / `db:check` | Runs on Node. SQL output is committed to `packages/db/migrations/`. |
 | `npx auth generate` (`auth` 1.7.7) | Generates the Drizzle auth schema once | Commit it as `packages/db/src/schema/auth.ts` and own it from then on |
 | `vinext check` | Scans `apps/web` for unsupported imports | Run in CI |
 | docker compose (dev) | Postgres 18 and a local Traefik/Caddy mirroring production path routing | Same-origin cookies in dev |
@@ -135,9 +135,9 @@ How (a) actually behaves: `bun run <script>` **respects `#!/usr/bin/env node` sh
 ├─ package.json            # "workspaces": { "packages": ["apps/*","packages/*"], "catalog": { react, react-dom, react-server-dom-webpack, zod, @tiptap/* ... } }
 ├─ bun.lock                # text lockfile, committed
 ├─ bunfig.toml             # [install] linker = "isolated" (default for new workspaces; flip to "hoisted" if the spike needs it)
-├─ apps/web                # vinext; deps: @usersaid/types (workspace:*) — NEVER @usersaid/db
-├─ apps/api                # NestJS; deps: @usersaid/db, @usersaid/types
-├─ packages/db             # @usersaid/db — Drizzle (was "Prisma schema + client")
+├─ apps/web                # vinext; deps: @userhq/types (workspace:*) — NEVER @userhq/db
+├─ apps/api                # NestJS; deps: @userhq/db, @userhq/types
+├─ packages/db             # @userhq/db — Drizzle (was "Prisma schema + client")
 │   ├─ src/schema/auth.ts        # generated once by `npx auth generate`, then owned
 │   ├─ src/schema/tenancy.ts     # workspaces, products, memberships
 │   ├─ src/schema/feedback.ts    # posts, votes, comments, categories, statuses
@@ -150,14 +150,14 @@ How (a) actually behaves: `bun run <script>` **respects `#!/usr/bin/env node` sh
 │   ├─ src/migrate.ts            # runs migrate() under a pg advisory lock
 │   ├─ migrations/               # drizzle-kit SQL output (committed)
 │   └─ drizzle.config.ts
-└─ packages/types          # @usersaid/types — zod only; request + response schemas (Public*/Admin*)
+└─ packages/types          # @userhq/types — zod only; request + response schemas (Public*/Admin*)
 ```
 
-Keep the package name `@usersaid/db`. Only its contents change, so the PRD's four-package shape stays the same.
+Keep the package name `@userhq/db`. Only its contents change, so the PRD's four-package shape stays the same.
 
 **How web and API share the schema:**
-- **Recommended (auth in Nest):** they don't. `packages/db` has one consumer, the API. The web app shares only `@usersaid/types` (Zod contracts). The API validates sessions in-process with Better Auth. This is the strongest privacy boundary: the web image has no DB credentials.
-- **If the team keeps Better Auth in the vinext app** (the sibling ARCHITECTURE.md draft): add `packages/auth` exporting `createAuth(db)`, with one `betterAuth({...})` config (Drizzle adapter, providers, cookie settings, secret). Both apps import `@usersaid/db` + `@usersaid/auth`. Web mounts `toNextJsHandler(auth)` at `app/api/auth/[...all]/route.ts`. Nest validates with **`auth.api.getSession({ headers })` from the same config**, not with hand-rolled `session` table lookups, so cookie signing, cookie names and cookie-cache semantics can't drift. Drizzle + `pg` are pure JS, and vinext's standalone copier ships `pg` as a server external, so this is workable. The costs are the OAuth flow running inside vinext (untested upstream) and DB credentials in the web image.
+- **Recommended (auth in Nest):** they don't. `packages/db` has one consumer, the API. The web app shares only `@userhq/types` (Zod contracts). The API validates sessions in-process with Better Auth. This is the strongest privacy boundary: the web image has no DB credentials.
+- **If the team keeps Better Auth in the vinext app** (the sibling ARCHITECTURE.md draft): add `packages/auth` exporting `createAuth(db)`, with one `betterAuth({...})` config (Drizzle adapter, providers, cookie settings, secret). Both apps import `@userhq/db` + `@userhq/auth`. Web mounts `toNextJsHandler(auth)` at `app/api/auth/[...all]/route.ts`. Nest validates with **`auth.api.getSession({ headers })` from the same config**, not with hand-rolled `session` table lookups, so cookie signing, cookie names and cookie-cache semantics can't drift. Drizzle + `pg` are pure JS, and vinext's standalone copier ships `pg` as a server external, so this is workable. The costs are the OAuth flow running inside vinext (untested upstream) and DB credentials in the web image.
 
 ---
 
@@ -209,14 +209,14 @@ Browser ──► https://app.example.com
 
 ## Q6: Validation and shared DTOs
 
-**Zod 4 in `@usersaid/types` (zod-only dependency), consumed directly by both apps.** HIGH (peers) / MEDIUM (Nest APIs)
+**Zod 4 in `@userhq/types` (zod-only dependency), consumed directly by both apps.** HIGH (peers) / MEDIUM (Nest APIs)
 - Nest: a global `StandardSchemaValidationPipe` and `@Body({ schema: CreatePostInput })`, plus a global `StandardSchemaSerializerInterceptor` with `@SerializeOptions({ schema: PublicRoadmapItem })` on every public handler. Add a test that asserts every `@AllowAnonymous()`/`@OptionalAuth()` route declares a serializer schema.
 - Web: `zodResolver(CreatePostInput)` with the same messages as the server.
 - Not class-validator: it duplicates the schemas and can't be shared with the browser. Not nestjs-zod: its peers stop at Nest 11. Not drizzle-zod for public responses: derived schemas include internal columns.
 
 ## Q7: Data fetching (web to API)
 
-**Reads in Server Components over the internal network. Mutations from Client Components via TanStack Query to same-origin `/api/v1`, followed by `router.refresh()`/`invalidateQueries`.** MEDIUM. No Server Actions for app mutations (an extra hop and a second auth path in vinext). Treat all pages as dynamic: don't plan on ISR or `"use cache"`, because vinext's Node cache is in-memory per container. Use a hand-written thin client typed from `@usersaid/types`, and defer OpenAPI codegen.
+**Reads in Server Components over the internal network. Mutations from Client Components via TanStack Query to same-origin `/api/v1`, followed by `router.refresh()`/`invalidateQueries`.** MEDIUM. No Server Actions for app mutations (an extra hop and a second auth path in vinext). Treat all pages as dynamic: don't plan on ISR or `"use cache"`, because vinext's Node cache is in-memory per container. Use a hand-written thin client typed from `@userhq/types`, and defer OpenAPI codegen.
 
 ---
 
@@ -238,7 +238,7 @@ bun add @nestjs/core@12.1.2 @nestjs/common@12.1.2 @nestjs/platform-express@12.1.
   @nestjs/config @nestjs/throttler @nestjs/serve-static @nestjs/terminus @nestjs/swagger \
   better-auth@1.7.7 @better-auth/drizzle-adapter@1.7.7 @thallesp/nestjs-better-auth@2.8.0 \
   sharp@0.35.5 file-type helmet nestjs-pino pino zod@4.6.5 \
-  "@usersaid/db@workspace:*" "@usersaid/types@workspace:*" --cwd apps/api
+  "@userhq/db@workspace:*" "@userhq/types@workspace:*" --cwd apps/api
 bun add -d @nestjs/cli@12.0.8 zod-openapi --cwd apps/api
 
 # apps/web  (scaffold: bunx create-vinext-app@latest web --platform=node)
@@ -250,7 +250,7 @@ bun add vinext@1.0.0 react@catalog: react-dom@catalog: react-server-dom-webpack@
   @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-slot @radix-ui/react-popover \
   @radix-ui/react-select @radix-ui/react-switch @radix-ui/react-tabs @radix-ui/react-tooltip \
   class-variance-authority clsx tailwind-merge @fontsource-variable/inter \
-  "@usersaid/types@workspace:*" --cwd apps/web
+  "@userhq/types@workspace:*" --cwd apps/web
 bun add -d vite@8.3.1 @vitejs/plugin-rsc@0.5.35 @vitejs/plugin-react@6.1.1 \
   tailwindcss@4.3.3 @tailwindcss/postcss@4.3.3 postcss --cwd apps/web
 
@@ -278,7 +278,7 @@ RUN --mount=type=cache,target=/root/.bun/install/cache \
 COPY packages/types packages/types
 COPY apps/web apps/web
 ARG NEXT_PUBLIC_APP_URL              # NEXT_PUBLIC_* inlined at build time
-RUN bun run --filter @usersaid/types build && bun run --filter web build   # vite runs on Node (shebang)
+RUN bun run --filter @userhq/types build && bun run --filter web build   # vite runs on Node (shebang)
 
 FROM node:24-bookworm-slim AS runtime
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000      # vinext #3444; HOST not HOSTNAME
@@ -308,7 +308,7 @@ FROM manifests AS build
 RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile --filter api
 COPY packages packages
 COPY apps/api apps/api
-RUN bun run --filter @usersaid/types build && bun run --filter @usersaid/db build && bun run --filter api build
+RUN bun run --filter @userhq/types build && bun run --filter @userhq/db build && bun run --filter api build
 
 FROM manifests AS prod-deps
 RUN --mount=type=cache,target=/root/.bun/install/cache \
@@ -398,5 +398,5 @@ Notes: Bun has no `pnpm deploy` equivalent, so the production `node_modules` com
 - **Web** (LOW unless corroborated): [sharp install](https://sharp.pixelplumbing.com/install) (Bun support, SSE4.2/glibc requirements; fetched, MEDIUM), [NestJS v12 is Now Available (Trilon)](https://trilon.io/blog/nestjs-12-is-now-available), [NestJS v12 release](https://github.com/nestjs/nest/releases/tag/v12.0.0), [NestJS and TypeScript 7](https://fernforge.github.io/devnotes/nestjs-typescript-7/) (corroborated by peer ranges, MEDIUM), [Auth.js is now part of Better Auth](https://better-auth.com/blog/authjs-joins-better-auth), [Dokploy Domains](https://docs.dokploy.com/docs/core/domains), [Postgres 18 Docker PGDATA change](https://aronschueler.de/blog/2025/10/30/fixing-postgres-18-docker-compose-startup/) (several consistent reports, MEDIUM)
 
 ---
-*Stack research for: multi-tenant customer feedback / public roadmap SaaS (UserSaid)*
+*Stack research for: multi-tenant customer feedback / public roadmap SaaS (UserHQ)*
 *Researched: 2026-10-01 (revised: Drizzle + Bun)*

@@ -1,8 +1,8 @@
-# UserSaid
+# UserHQ
 
 ## What This Is
 
-UserSaid is a centralized customer feedback and product management platform. It gives B2B SaaS companies, agencies, and creators a clean, branded portal where their customers can submit and upvote ideas, watch a public roadmap, read release notes, and self-serve answers from an FAQ — while the product team plans privately behind the same data.
+UserHQ is a centralized customer feedback and product management platform. It gives B2B SaaS companies, agencies, and creators a clean, branded portal where their customers can submit and upvote ideas, watch a public roadmap, read release notes, and self-serve answers from an FAQ — while the product team plans privately behind the same data.
 
 The core philosophy is to bridge the gap between what users want and what the product team actually builds, without the noise of traditional support tickets.
 
@@ -19,7 +19,7 @@ An admin can see what their users actually want, ranked by demand, and close the
 
 ## Personas
 
-**The Platform Owner (operator of UserSaid itself)** — runs the platform. Decides who may create a workspace (invite-only at launch), can see every workspace, product, and user, and can suspend workspaces or ban users when something goes wrong. Identified by email in server configuration, never by an in-app setting.
+**The Platform Owner (operator of UserHQ itself)** — runs the platform. Decides who may create a workspace (invite-only at launch), can see every workspace, product, and user, and can suspend workspaces or ban users when something goes wrong. Identified by email in server configuration, never by an in-app setting.
 
 **The Admin (Workspace Owner / Product Manager)** — wants to gather user feedback, filter out noise, plan the development cycle privately, and showcase product progress publicly.
 

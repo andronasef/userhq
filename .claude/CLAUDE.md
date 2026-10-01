@@ -2,9 +2,9 @@
 
 ## Project
 
-**UserSaid**
+**UserHQ**
 
-UserSaid is a centralized customer feedback and product management platform. It gives B2B SaaS companies, agencies, and creators a clean, branded portal where their customers can submit and upvote ideas, watch a public roadmap, read release notes, and self-serve answers from an FAQ — while the product team plans privately behind the same data.
+UserHQ is a centralized customer feedback and product management platform. It gives B2B SaaS companies, agencies, and creators a clean, branded portal where their customers can submit and upvote ideas, watch a public roadmap, read release notes, and self-serve answers from an FAQ — while the product team plans privately behind the same data.
 
 The core philosophy is to bridge the gap between what users want and what the product team actually builds, without the noise of traditional support tickets.
 
@@ -112,16 +112,16 @@ The core philosophy is to bridge the gap between what users want and what the pr
 |---|---|---|
 | Vitest **5.0.3** | Unit and integration tests | Runs on Node via shebang under `bun run`. Nest 12's ESM default. Don't use `bun test` for Nest code, because it would put decorators on Bun's transpiler (#44120). |
 | Playwright **1.63.0** | E2E against the Docker-built images | Includes the privacy test: public roadmap JSON contains no internal fields |
-| oxlint 1.86 + Prettier 3.9 | Lint and format | `no-restricted-imports`: `apps/web` may not import `@usersaid/db`, `drizzle-orm`, `pg`, `sharp`, or `better-auth` other than `better-auth/react`/`better-auth/cookies`. Also forbid exclusion-mode `columns: { x: false }` in public query modules. |
-| drizzle-kit 0.31.11 | `bun run --filter @usersaid/db db:generate` / `db:studio` / `db:check` | Runs on Node. SQL output is committed to `packages/db/migrations/`. |
+| oxlint 1.86 + Prettier 3.9 | Lint and format | `no-restricted-imports`: `apps/web` may not import `@userhq/db`, `drizzle-orm`, `pg`, `sharp`, or `better-auth` other than `better-auth/react`/`better-auth/cookies`. Also forbid exclusion-mode `columns: { x: false }` in public query modules. |
+| drizzle-kit 0.31.11 | `bun run --filter @userhq/db db:generate` / `db:studio` / `db:check` | Runs on Node. SQL output is committed to `packages/db/migrations/`. |
 | `npx auth generate` (`auth` 1.7.7) | Generates the Drizzle auth schema once | Commit it as `packages/db/src/schema/auth.ts` and own it from then on |
 | `vinext check` | Scans `apps/web` for unsupported imports | Run in CI |
 | docker compose (dev) | Postgres 18 and a local Traefik/Caddy mirroring production path routing | Same-origin cookies in dev |
 
 ## Monorepo layout (Bun workspaces)
 
-- **Recommended (auth in Nest):** they don't. `packages/db` has one consumer, the API. The web app shares only `@usersaid/types` (Zod contracts). The API validates sessions in-process with Better Auth. This is the strongest privacy boundary: the web image has no DB credentials.
-- **If the team keeps Better Auth in the vinext app** (the sibling ARCHITECTURE.md draft): add `packages/auth` exporting `createAuth(db)`, with one `betterAuth({...})` config (Drizzle adapter, providers, cookie settings, secret). Both apps import `@usersaid/db` + `@usersaid/auth`. Web mounts `toNextJsHandler(auth)` at `app/api/auth/[...all]/route.ts`. Nest validates with **`auth.api.getSession({ headers })` from the same config**, not with hand-rolled `session` table lookups, so cookie signing, cookie names and cookie-cache semantics can't drift. Drizzle + `pg` are pure JS, and vinext's standalone copier ships `pg` as a server external, so this is workable. The costs are the OAuth flow running inside vinext (untested upstream) and DB credentials in the web image.
+- **Recommended (auth in Nest):** they don't. `packages/db` has one consumer, the API. The web app shares only `@userhq/types` (Zod contracts). The API validates sessions in-process with Better Auth. This is the strongest privacy boundary: the web image has no DB credentials.
+- **If the team keeps Better Auth in the vinext app** (the sibling ARCHITECTURE.md draft): add `packages/auth` exporting `createAuth(db)`, with one `betterAuth({...})` config (Drizzle adapter, providers, cookie settings, secret). Both apps import `@userhq/db` + `@userhq/auth`. Web mounts `toNextJsHandler(auth)` at `app/api/auth/[...all]/route.ts`. Nest validates with **`auth.api.getSession({ headers })` from the same config**, not with hand-rolled `session` table lookups, so cookie signing, cookie names and cookie-cache semantics can't drift. Drizzle + `pg` are pure JS, and vinext's standalone copier ships `pg` as a server external, so this is workable. The costs are the OAuth flow running inside vinext (untested upstream) and DB credentials in the web image.
 
 ## Drizzle specifics
 

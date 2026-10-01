@@ -15,7 +15,7 @@
 One public origin. Traefik (managed by Dokploy) routes by path, so the browser sees one site and the NextAuth session cookie reaches both the web and API containers with no CORS and no cross-domain cookie setup.
 
 ```
-                           Browser  (https://usersaid.app)
+                           Browser  (https://userhq.app)
                                 │
 ┌───────────────────────────────┴──────────────────────────────────────────┐
 │                     Traefik (Dokploy-managed), path routing               │
@@ -70,7 +70,7 @@ One public origin. Traefik (managed by Dokploy) routes by path, so the browser s
 ## Recommended Project Structure
 
 ```
-usersaid/
+userhq/
 ├── apps/
 │   ├── web/
 │   │   ├── app/
@@ -703,7 +703,7 @@ export function portalHref(t: PortalTenant, path = ''): string {
 ```
 
 - **v1 (path-based):** the App Router params `[workspace]/[product]` are the tenant. Layout `app/[workspace]/[product]/layout.tsx` calls `GET /api/v1/portal/:ws/:product` once (name, logo, visibility, statuses, categories) and passes it down; 404 if unknown, sign-in redirect if PRIVATE and anonymous.
-- **Later (subdomains/custom domains):** `proxy.ts` (Next 16's middleware) reads the `Host`, looks up the tenant, and **rewrites** `acme.usersaid.app/app1/roadmap` → `/acme/app1/roadmap` internally. The route tree, data loaders, and API stay unchanged; only `portalHref()` becomes host-aware and a `Domain` table is added. That is the whole abstraction. Do not build more now.
+- **Later (subdomains/custom domains):** `proxy.ts` (Next 16's middleware) reads the `Host`, looks up the tenant, and **rewrites** `acme.userhq.app/app1/roadmap` → `/acme/app1/roadmap` internally. The route tree, data loaders, and API stay unchanged; only `portalHref()` becomes host-aware and a `Domain` table is added. That is the whole abstraction. Do not build more now.
 - **API portal routes:** `/api/v1/portal/:workspaceSlug/:productSlug/{posts,roadmap,changelog,faq}`. `PortalGuard` does one query: `product.findFirst({ where: { slug: productSlug, workspace: { slug: workspaceSlug } } })` via the `@@unique([workspaceId, slug])` + `Workspace.slug @unique` indexes. Optional in-process LRU (60 s TTL) if it ever shows up in profiles.
 - **Admin routes use ids, not slugs** (`/products/:productId/...`), so renaming a slug never breaks the dashboard. Slug renames break public links in v1; a `SlugRedirect` table is a later additive fix.
 
@@ -890,5 +890,5 @@ Direction is strictly **web → api → db/volume**. The API never calls the web
 - Vote counter, status sync, tenancy guard design — reasoning from established multi-tenant SaaS practice plus the above primitives — MEDIUM-HIGH
 
 ---
-*Architecture research for: multi-tenant customer feedback & public roadmap SaaS (UserSaid)*
+*Architecture research for: multi-tenant customer feedback & public roadmap SaaS (UserHQ)*
 *Researched: 2026-10-01*

@@ -12,7 +12,7 @@
 | google: additional or incremental scopes (Drive, Calendar, Contacts) | OPT-OUT | explicitly out of scope: sign-in needs only openid, email, profile |
 | google: One Tap / FedCM sign-in | OPT-OUT | not needed: the dedicated /login page is the only entry point (D-02) |
 | google: consent screen publishing / verification | OPT-OUT | not needed yet: Testing mode with listed users covers Phase 1; tracked as a launch concern in STATE.md |
-| google: provider token revocation on sign-out | OPT-OUT | not needed: sign-out ends the UserSaid session only |
+| google: provider token revocation on sign-out | OPT-OUT | not needed: sign-out ends the UserHQ session only |
 | google: profile re-sync on later sign-ins | OPT-OUT | explicitly out of scope per D-03 (copied once) |
 | github: sign-in via OAuth App authorization code | INTEGRATE | |
 | github: profile name and avatar copied at first sign-in (D-03) | INTEGRATE | |

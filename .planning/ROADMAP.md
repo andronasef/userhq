@@ -43,12 +43,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. From the Oracle VPS, the API container can open an authenticated SMTP session to Brevo on port 587 (or 2525/465 as a fallback). The working port is recorded for Phase 3.
   5. The deployed web app is served from vinext's standalone output, and the same app code also passes a `next build` canary in CI. If a blocking vinext defect appears, the phase exits by switching the build to `next build`.
 
-**Plans:** 11 plans
+**Plans:** 1/11 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 01-01-PLAN.md — Toolchain: pinned Bun workspace, shared contracts, lint guards, human-reviewed lockfile
+- [x] 01-01-PLAN.md — Toolchain: pinned Bun workspace, shared contracts, lint guards, human-reviewed lockfile
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -236,7 +236,7 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once P
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Walking Skeleton | 0/11 | Planned | - |
+| 1. Walking Skeleton | 1/11 | In Progress|  |
 | 2. Workspaces, Products & Platform Owner | 0/TBD | Not started | - |
 | 3. Feedback Board & Conversations | 0/TBD | Not started | - |
 | 4. Dual-Layer Roadmap & Closing the Loop | 0/TBD | Not started | - |

@@ -1,0 +1,13 @@
+**/node_modules
+**/dist
+**/.next
+**/.data
+.git
+.github
+.planning
+.claude
+docs
+tools
+coverage
+.env
+.env.*

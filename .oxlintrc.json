@@ -1,0 +1,115 @@
+{
+  "jsPlugins": [
+    "./tools/oxlint-userhq.mjs"
+  ],
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/.next/**",
+    "packages/db/migrations/**"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "apps/web/app/**",
+        "apps/web/components/**",
+        "apps/web/lib/**",
+        "apps/web/proxy.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@userhq/db",
+                "message": "apps/web must not import DB code directly to keep DB credentials out of the web image"
+              },
+              {
+                "name": "drizzle-orm",
+                "message": "apps/web must not import drizzle-orm; DB access is reserved for apps/api"
+              },
+              {
+                "name": "pg",
+                "message": "apps/web must not import pg driver; DB access is reserved for apps/api"
+              },
+              {
+                "name": "sharp",
+                "message": "sharp is restricted to apps/api; native modules fail in RSC dev"
+              },
+              {
+                "name": "next-auth",
+                "message": "next-auth is unsupported in vinext; use better-auth"
+              },
+              {
+                "name": "radix-ui",
+                "message": "radix-ui barrel hangs the build under isolated installs; use individual @radix-ui/react-* packages"
+              },
+              {
+                "name": "next/image",
+                "message": "next/image is served unresized on Node; use plain img with API-generated WebP widths"
+              },
+              {
+                "name": "next/font/google",
+                "message": "next/font/google loads from runtime CDN; use @fontsource-variable/*"
+              },
+              {
+                "name": "vinext",
+                "message": "vinext should not be imported in web app code to keep next build escape hatch open"
+              }
+            ],
+            "patterns": [
+              {
+                "group": [
+                  "drizzle-orm/*"
+                ],
+                "message": "apps/web must not import drizzle-orm subpaths"
+              },
+              {
+                "group": [
+                  "vinext/*"
+                ],
+                "message": "vinext/* imports are forbidden in web app code"
+              },
+              {
+                "group": [
+                  "@auth/*"
+                ],
+                "message": "@auth/* is unsupported under vinext"
+              },
+              {
+                "group": [
+                  "*?raw",
+                  "*?url",
+                  "*?inline"
+                ],
+                "message": "Vite query suffixes (*?raw, *?url, *?inline) break the next build escape hatch"
+              },
+              {
+                "group": [
+                  "better-auth",
+                  "better-auth/*",
+                  "!better-auth/react",
+                  "!better-auth/cookies",
+                  "!better-auth/client"
+                ],
+                "message": "apps/web may only import client entries (better-auth/react, better-auth/cookies, better-auth/client)"
+              }
+            ]
+          }
+        ],
+        "userhq/no-import-meta-env": "error",
+        "react/no-danger": "error"
+      }
+    },
+    {
+      "files": [
+        "apps/api/**",
+        "packages/db/**"
+      ],
+      "rules": {
+        "userhq/no-exclusion-columns": "error"
+      }
+    }
+  ]
+}

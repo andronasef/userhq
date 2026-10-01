@@ -1,0 +1,49 @@
+{
+  "name": "@userhq/api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@better-auth/drizzle-adapter": "1.7.7",
+    "@nestjs/common": "12.1.2",
+    "@nestjs/core": "12.1.2",
+    "@nestjs/platform-express": "12.1.2",
+    "@thallesp/nestjs-better-auth": "2.8.0",
+    "@userhq/db": "workspace:*",
+    "@userhq/types": "workspace:*",
+    "better-auth": "1.7.7",
+    "drizzle-orm": "0.45.3",
+    "file-type": "22.1.1",
+    "helmet": "8.3.0",
+    "nodemailer": "10.0.13",
+    "pg": "8.23.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "sharp": "0.35.5",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "12.0.8",
+    "@nestjs/testing": "12.1.2",
+    "@swc/core": "1.16.13",
+    "@types/express": "5.0.6",
+    "@types/multer": "2.3.0",
+    "@types/node": "26.6.4",
+    "@types/nodemailer": "8.0.2",
+    "@types/pg": "8.23.1",
+    "@types/supertest": "7.2.1",
+    "supertest": "7.3.0",
+    "typescript": "catalog:",
+    "unplugin-swc": "2.0.0",
+    "vitest": "5.0.3"
+  },
+  "scripts": {
+    "build": "node ./node_modules/@nestjs/cli/bin/nest.js build --path tsconfig.json",
+    "dev": "node --env-file-if-exists=../../.env ./node_modules/@nestjs/cli/bin/nest.js start --watch --path tsconfig.json",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "smtp:check": "node dist/scripts/smtp-check.js"
+  }
+}

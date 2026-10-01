@@ -4,7 +4,7 @@ node_modules/
 
 # Environment files
 .env
-.env*.local
+.env.*
 !.env.example
 
 # Build artifacts
@@ -12,9 +12,13 @@ dist/
 build/
 .next/
 .vinext/
+apps/web/next-env.d.ts
 dist/standalone/
 
 # Cache & Planning locks
+.data/
+coverage/
+*.tsbuildinfo
 .planning/research/.cache/
 .planning/*.lock
 

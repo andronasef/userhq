@@ -50,6 +50,11 @@ Requirements: PLAT-01–07, WORK-01–06, PROD-01–05, STAT-01–05. Feedback, 
 - **D-20:** A suspended workspace shows its admins an "unavailable" notice in place of the dashboard, and its portals show the public "unavailable" page. No suspension reason is shown in v1.
 - **D-21:** The status editor reorders with drag handles. Colors come from a preset palette plus a free hex input.
 
+### Planning-time decisions (2026-10-03, after research)
+- **D-22:** `/platform` returns the normal 404 to signed-out visitors as well as to signed-in non-owners (strict PLAT-07). It is NOT in `proxy.ts`'s redirect list. The owner signs in at `/login` like anyone (D-06) and reaches the console through the user-menu link (D-05). This supersedes the `/platform` part of the `proxy.ts` note under Existing Code Insights.
+- **D-23:** Add Playwright 1.63.0 this phase and cover the UI-SPEC backstop checks as browser tests: status drag reorder (pointer and keyboard, then reload), the 320px dashboard header screenshot, computed portal accent styles, and portal OG/favicon tags.
+- **D-24:** Pin `react-hook-form` at 7.88.0, not 7.89.0, because 7.89.0 was flagged as too new by the supply-chain check.
+
 ### Claude's Discretion
 - How reorder is implemented: @dnd-kit/react (already chosen for the Phase 4 Kanban), or a lighter approach if that's simpler.
 - The preset palette values, the contrast algorithm for accent text, and the slug format rules (length, charset).
@@ -87,7 +92,7 @@ Requirements: PLAT-01–07, WORK-01–06, PROD-01–05, STAT-01–05. Feedback, 
 - `apps/web/components/ui/{button,avatar,dropdown-menu,alert}.tsx`, `header.tsx`, `user-menu.tsx`: the shell to extend (switcher, `/platform` link).
 - `apps/web/lib/safe-next.ts`: same-origin `next` validation for the invite → login round trip.
 - `apps/web/lib/api-server.ts`: RSC cookie-forwarding fetch (`getMe`).
-- `apps/web/proxy.ts`: optimistic redirect for `/dashboard`, `/platform`, and `/invite`.
+- `apps/web/proxy.ts`: optimistic redirect for `/dashboard` and `/invite` (not `/platform`; see D-22).
 
 ### Established Patterns
 - Drizzle schema in `packages/db/src/schema/*.ts`, with committed SQL in `packages/db/migrations/`.

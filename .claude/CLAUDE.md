@@ -91,7 +91,7 @@ The core philosophy is to bridge the gap between what users want and what the pr
 | Library | Version | Purpose | When to Use | Confidence |
 |---|---|---|---|---|
 | `@tanstack/react-query` | 5.104.0 | Client mutations, optimistic updates | Votes, comments, Kanban moves, admin CRUD. Not for initial page data, which RSC fetches. | HIGH |
-| `react-hook-form` + `@hookform/resolvers` | 7.89.0 / 5.9.1 | Forms with `zodResolver(sharedSchema)` | All forms | HIGH |
+| `react-hook-form` + `@hookform/resolvers` | 7.88.0 / 5.9.1 | Forms with `zodResolver(sharedSchema)` | All forms | HIGH |
 | `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`, `@tiptap/extension-image`, `@tiptap/static-renderer` | **3.31.4** (identical, via catalog) | Changelog editor and rendering stored JSON | Editor in a `"use client"` boundary with `immediatelyRender: false`. Read side uses `renderToReactElement` (`@tiptap/static-renderer/pm/react`) in an RSC. | MEDIUM |
 | `@dnd-kit/react` + `@dnd-kit/helpers` | **0.5.0** (pin exact) | Roadmap Kanban | `move()` helper for grouped column state, and the "multiple sortable lists" guide | MEDIUM |
 | `nuqs` | 2.10.1 | URL search-param state (filters, sort, FAQ search) | Listed as tested in vinext's compatibility doc | HIGH |

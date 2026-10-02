@@ -65,7 +65,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 01-05-PLAN.md — /login with Google/GitHub, safe `?next=`, OAuth error mapping; Caddy dev loop
+- [x] 01-05-PLAN.md — /login with Google/GitHub, safe `?next=`, OAuth error mapping; Caddy dev loop
 
 **Wave 6** *(blocked on Wave 5 completion)*
 

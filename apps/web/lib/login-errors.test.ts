@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { loginErrorCopy, isDisplayableErrorCode } from "./login-errors.js";
+import { loginErrorCopy, isDisplayableErrorCode } from "./login-errors";
 
 describe("loginErrorCopy and isDisplayableErrorCode", () => {
   it("maps access_denied", () => {

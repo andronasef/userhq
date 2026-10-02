@@ -26,6 +26,7 @@
     "build": "bun run build:packages && bun run --filter '@userhq/api' build && bun run --filter '@userhq/web' build",
     "typecheck": "bun run --filter '@userhq/*' typecheck",
     "test": "bun run test:lint-rules && bun run --filter '@userhq/db' test && bun run --filter '@userhq/api' test && bun run --filter '@userhq/web' test",
+    "ci:check": "bun run lint && bun run typecheck && bun run build:packages && bun run --filter '@userhq/api' build && bun run test && bun run --filter '@userhq/web' build && bun run --filter '@userhq/web' build:next && bun run --filter '@userhq/db' db:check",
     "format": "prettier --write .",
     "stack:up": "docker compose -f compose.yaml -f compose.local.yaml --env-file .env.docker up -d --build --wait",
     "stack:down": "docker compose -f compose.yaml -f compose.local.yaml --env-file .env.docker down"

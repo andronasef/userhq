@@ -1,0 +1,81 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-24.04
+
+    # Service containers for integration tests
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: userhq
+          POSTGRES_PASSWORD: userhq
+          POSTGRES_DB: userhq_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U userhq -d userhq_dev"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+      mailpit:
+        image: axllent/mailpit:v1.31.3
+        env:
+          MP_SMTP_AUTH_ACCEPT_ANY: "1"
+          MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+        ports:
+          - 1025:1025
+          - 8025:8025
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf37fdd5 # v2.0.1
+        with:
+          bun-version: 1.4.2
+
+      - name: Setup Node
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832e0b5 # v4.0.3
+        with:
+          node-version: 24.21.0
+
+      - name: Install dependencies (frozen lockfile)
+        run: bun install --frozen-lockfile
+
+      # Note: E2E test suites (test:e2e) require the full multi-container running stack
+      # and remain local and staging pre-deploy gates, not part of this CI workflow.
+      - name: Run CI verification chain
+        env:
+          TEST_DATABASE_ADMIN_URL: postgres://userhq:userhq@127.0.0.1:5432/postgres
+          MAILPIT_HOST: 127.0.0.1
+        run: bun run ci:check
+
+      - name: Verify Docker compose build
+        env:
+          POSTGRES_PASSWORD: ci-dummy-postgres-password
+          PUBLIC_URL: http://localhost:8080
+          BETTER_AUTH_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+          GOOGLE_CLIENT_ID: ci-dummy-google-client-id
+          GOOGLE_CLIENT_SECRET: ci-dummy-google-client-secret
+          GITHUB_CLIENT_ID: ci-dummy-github-client-id
+          GITHUB_CLIENT_SECRET: ci-dummy-github-client-secret
+        run: docker compose build

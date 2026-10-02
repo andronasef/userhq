@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "../components/ui/button.js";
+import { Button } from "../components/ui/button";
 
 export interface ErrorProps {
   error: Error & { digest?: string };

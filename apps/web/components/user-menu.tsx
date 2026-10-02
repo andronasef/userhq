@@ -4,8 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ImageUp, LogOut, LoaderCircle } from "lucide-react";
-import { Button } from "./ui/button.js";
-import { Avatar } from "./ui/avatar.js";
+import { Button } from "./ui/button";
+import { Avatar } from "./ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -13,8 +13,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from "./ui/dropdown-menu.js";
-import { authClient } from "../lib/auth-client.js";
+} from "./ui/dropdown-menu";
+import { authClient } from "../lib/auth-client";
 
 export interface UserMenuProps {
   user: {

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { getMe } from "../../lib/api-server.js";
-import { safeNext } from "../../lib/safe-next.js";
-import { LoginButtons } from "./login-buttons.js";
+import { getMe } from "../../lib/api-server";
+import { safeNext } from "../../lib/safe-next";
+import { LoginButtons } from "./login-buttons";
 
 export const metadata = {
   title: "Sign in · UserHQ",

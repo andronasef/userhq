@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { authClient } from "../lib/auth-client.js";
+import { authClient } from "../lib/auth-client";
 
 const THROTTLE_MS = 10 * 60 * 1000; // 10 minutes
 let lastRefreshTime = 0;

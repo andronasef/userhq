@@ -3,8 +3,8 @@
 import * as React from "react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import { User } from "lucide-react";
-import { cn } from "../../lib/utils.js";
-import { initials } from "../../lib/initials.js";
+import { cn } from "../../lib/utils";
+import { initials } from "../../lib/initials";
 
 export interface AvatarProps extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> {
   src?: string | null;

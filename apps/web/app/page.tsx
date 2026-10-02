@@ -1,9 +1,9 @@
 import * as React from "react";
 import Link from "next/link";
-import { getMe } from "../lib/api-server.js";
-import { isDevUploadEnabled } from "../lib/dev-flags.js";
-import { Avatar } from "../components/ui/avatar.js";
-import { Button } from "../components/ui/button.js";
+import { getMe } from "../lib/api-server";
+import { isDevUploadEnabled } from "../lib/dev-flags";
+import { Avatar } from "../components/ui/avatar";
+import { Button } from "../components/ui/button";
 
 export default async function HomePage(): Promise<React.JSX.Element> {
   const { user } = await getMe();

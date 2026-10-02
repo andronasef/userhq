@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { uploadErrorCopy, formatFileSize } from "./upload-errors.js";
+import { uploadErrorCopy, formatFileSize } from "./upload-errors";
 
 describe("uploadErrorCopy", () => {
   it("maps file_too_large (413)", () => {

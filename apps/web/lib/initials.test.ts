@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initials } from "./initials.js";
+import { initials } from "./initials";
 
 describe("initials", () => {
   it("extracts first letter of first two words", () => {

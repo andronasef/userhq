@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "@fontsource-variable/inter";
 import "./globals.css";
-import { Header } from "../components/header.js";
+import { Header } from "../components/header";
 
 export const metadata: Metadata = {
   title: "UserHQ",

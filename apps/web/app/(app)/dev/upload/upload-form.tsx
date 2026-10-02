@@ -4,8 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import { LoaderCircle, Copy, Check } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Alert } from "../../../components/ui/alert";
+import { Button } from "../../../../components/ui/button";
+import { Alert } from "../../../../components/ui/alert";
 import {
   UploadResponseSchema,
   type UploadResponse,
@@ -14,7 +14,7 @@ import {
   uploadErrorCopy,
   formatFileSize,
   type UploadErrorCopy,
-} from "../../../lib/upload-errors";
+} from "../../../../lib/upload-errors";
 
 interface MutationError {
   status?: number;

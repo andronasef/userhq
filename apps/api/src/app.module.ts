@@ -19,6 +19,7 @@ import { OriginGuard, SessionGuard } from "./auth/guards.js";
 import { ApiErrorFilter } from "./common/api-error.filter.js";
 
 import { UploadsModule } from "./uploads/uploads.module.js";
+import { PortalModule } from "./portal/portal.module.js";
 
 const DB_POOL = Symbol.for("@userhq/api/db-pool");
 
@@ -51,6 +52,7 @@ export class AppModule {
           },
         }),
         UploadsModule,
+        PortalModule,
       ],
       controllers: [HealthController, MeController],
       providers: [

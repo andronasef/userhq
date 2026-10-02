@@ -10,7 +10,7 @@ export async function Header(): Promise<React.JSX.Element> {
   const devUploadEnabled = isDevUploadEnabled();
 
   return (
-    <header className="h-14 border-b border-border bg-background">
+    <header data-shell="app" className="h-14 border-b border-border bg-background">
       <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 flex items-center justify-between h-full">
         <Link href="/" className="text-base font-semibold">
           UserHQ

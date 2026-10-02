@@ -22,8 +22,11 @@ export const API_ERROR_CODES = [
   "image_too_large",
   "image_unreadable",
   "internal_error",
+  "workspace_suspended",
 ] as const;
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];
+
+export * from "./tenancy.js";
 
 export const ApiErrorSchema = z.object({
   code: z.enum(API_ERROR_CODES),

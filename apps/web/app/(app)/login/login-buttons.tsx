@@ -2,18 +2,18 @@
 
 import * as React from "react";
 import { LoaderCircle } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Alert } from "../../components/ui/alert";
+import { Button } from "../../../components/ui/button";
+import { Alert } from "../../../components/ui/alert";
 import {
   GoogleIcon,
   GitHubIcon,
-} from "../../components/icons/provider-icons";
-import { authClient } from "../../lib/auth-client";
+} from "../../../components/icons/provider-icons";
+import { authClient } from "../../../lib/auth-client";
 import {
   loginErrorCopy,
   isDisplayableErrorCode,
   type LoginErrorCopy,
-} from "../../lib/login-errors";
+} from "../../../lib/login-errors";
 
 export interface LoginButtonsProps {
   next: string;

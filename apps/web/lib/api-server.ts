@@ -1,7 +1,13 @@
 import "server-only";
 import { headers } from "next/headers";
 import { cache } from "react";
-import { MeResponseSchema, type MeResponse } from "@userhq/types";
+import { z } from "zod";
+import {
+  MeResponseSchema,
+  type MeResponse,
+  PublicPortalProductSchema,
+  type PublicPortalProduct,
+} from "@userhq/types";
 
 export async function apiServer(
   path: string,
@@ -55,3 +61,44 @@ export const getMe: () => Promise<MeResponse> = cache(async () => {
     return { user: null };
   }
 });
+
+export type ApiReadResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; status: number; code: string | null };
+
+export async function apiRead<T>(
+  path: string,
+  schema: z.ZodType<T>
+): Promise<ApiReadResult<T>> {
+  const res = await apiServer(path, { method: "GET" });
+
+  if (res.ok) {
+    const json = await res.json();
+    return { ok: true, data: schema.parse(json) };
+  }
+
+  if (res.status >= 400 && res.status < 500) {
+    let code: string | null = null;
+    try {
+      const errJson = await res.json();
+      if (errJson && typeof errJson.code === "string") {
+        code = errJson.code;
+      }
+    } catch {
+      // unreadable body
+    }
+    return { ok: false, status: res.status, code };
+  }
+
+  throw new Error(`apiRead error: ${res.status} ${res.statusText} for ${path}`);
+}
+
+export const getPortalProduct = cache(
+  (ws: string, product: string): Promise<ApiReadResult<PublicPortalProduct>> => {
+    return apiRead(
+      "/api/v1/portal/" + encodeURIComponent(ws) + "/" + encodeURIComponent(product),
+      PublicPortalProductSchema
+    );
+  }
+);
+

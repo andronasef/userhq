@@ -1,8 +1,8 @@
 import * as React from "react";
 import { notFound, redirect } from "next/navigation";
-import { isDevUploadEnabled } from "../../../lib/dev-flags";
-import { getMe } from "../../../lib/api-server";
-import { QueryProvider } from "../../../lib/query-client";
+import { isDevUploadEnabled } from "../../../../lib/dev-flags";
+import { getMe } from "../../../../lib/api-server";
+import { QueryProvider } from "../../../../lib/query-client";
 import { UploadForm } from "./upload-form";
 
 export const metadata = {

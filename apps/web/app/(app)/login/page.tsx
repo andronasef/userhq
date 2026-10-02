@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { getMe } from "../../lib/api-server";
-import { safeNext } from "../../lib/safe-next";
+import { getMe } from "../../../lib/api-server";
+import { safeNext } from "../../../lib/safe-next";
 import { LoginButtons } from "./login-buttons";
 
 export const metadata = {

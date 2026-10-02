@@ -6,14 +6,17 @@ const { Pool, Client } = pg;
 import { fileURLToPath } from "node:url";
 import * as authSchema from "./schema/auth.js";
 import * as uploadsSchema from "./schema/uploads.js";
+import * as tenancySchema from "./schema/tenancy.js";
 
 export const schema = {
   ...authSchema,
   ...uploadsSchema,
+  ...tenancySchema,
 };
 
 export * from "./schema/auth.js";
 export * from "./schema/uploads.js";
+export * from "./schema/tenancy.js";
 
 export type Db = NodePgDatabase<typeof schema>;
 export const DB: unique symbol = Symbol.for("@userhq/db");

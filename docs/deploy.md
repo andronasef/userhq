@@ -98,24 +98,20 @@ Google and GitHub require explicit redirect callback URLs.
 
 ---
 
-## 5. Release Workflow & Production Rollback
+## 5. Tag-Driven Release Workflow
 
-Production deployments are strictly tag-driven to prevent untested commits from hitting live users:
+Releases are strictly managed through semver git tags:
 
 1. Changes merge into `main` after passing GitHub Actions CI.
-2. In full dual-environment setups, `main` auto-deploys to Staging.
-3. When ready for release, the operator creates and pushes an annotated semver git tag:
+2. When ready for a release, the operator creates and pushes an annotated semver git tag:
    ```bash
    git tag -a v0.1.0 -m "Release v0.1.0"
    git push origin v0.1.0
    ```
-4. GitHub Actions `release.yml` triggers on `v*`:
+3. GitHub Actions `release.yml` triggers on `v*`:
    - Runs `jobs.ci` using `.github/workflows/ci.yml` (the exact CI checks).
-   - Once green, `jobs.promote` forces the `release` pointer branch to the tag commit:
-     ```bash
-     git push origin "${GITHUB_SHA}:refs/heads/release" --force
-     ```
-5. Dokploy detects the `release` branch update and automatically builds and deploys `userhq-prod`.
+   - Once CI passes, it automatically creates an official GitHub Release with release notes.
+4. Dokploy deploys the released version directly.
 
 ### Rollback Procedure
 If a production issue requires rolling back to a previously known good commit, simply tag that commit with the next patch tag:
@@ -123,7 +119,6 @@ If a production issue requires rolling back to a previously known good commit, s
 git tag -a v0.1.1 <known-good-commit-sha> -m "Rollback to <sha>"
 git push origin v0.1.1
 ```
-The release workflow will run CI on that commit and force-update the `release` pointer branch to it. Dokploy will deploy the specified version.
 
 ### Dokploy API Fallback (Webhook Alternative)
 If Dokploy's Git webhook does not automatically fire on GITHUB_TOKEN-authored branch pushes, use the Dokploy API deploy fallback:

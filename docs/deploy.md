@@ -98,22 +98,42 @@ Google and GitHub require explicit redirect callback URLs.
 
 ---
 
-## 5. Release Workflow (Overview)
+## 5. Release Workflow & Production Rollback
 
 Production deployments are strictly tag-driven to prevent untested commits from hitting live users:
 
 1. Changes merge into `main` after passing GitHub Actions CI.
-2. Main auto-deploys to Staging via Dokploy push trigger.
-3. Once staging verification passes, the operator creates a semver git tag:
+2. In full dual-environment setups, `main` auto-deploys to Staging.
+3. When ready for release, the operator creates and pushes an annotated semver git tag:
    ```bash
-   git tag v0.1.0
+   git tag -a v0.1.0 -m "Release v0.1.0"
    git push origin v0.1.0
    ```
 4. GitHub Actions `release.yml` triggers on `v*`:
-   - Executes full CI test matrix against the tagged SHA.
-   - Fast-forwards the `release` branch to the tagged commit:
-     `git push origin <tag-sha>:refs/heads/release --force-with-lease`
+   - Runs `jobs.ci` using `.github/workflows/ci.yml` (the exact CI checks).
+   - Once green, `jobs.promote` forces the `release` pointer branch to the tag commit:
+     ```bash
+     git push origin "${GITHUB_SHA}:refs/heads/release" --force
+     ```
 5. Dokploy detects the `release` branch update and automatically builds and deploys `userhq-prod`.
+
+### Rollback Procedure
+If a production issue requires rolling back to a previously known good commit, simply tag that commit with the next patch tag:
+```bash
+git tag -a v0.1.1 <known-good-commit-sha> -m "Rollback to <sha>"
+git push origin v0.1.1
+```
+The release workflow will run CI on that commit and force-update the `release` pointer branch to it. Dokploy will deploy the specified version.
+
+### Dokploy API Fallback (Webhook Alternative)
+If Dokploy's Git webhook does not automatically fire on GITHUB_TOKEN-authored branch pushes, use the Dokploy API deploy fallback:
+1. Generate an API Key in Dokploy (**Dokploy → Settings → API Keys**).
+2. Set the repository secret `DOKPLOY_API_KEY` in GitHub:
+   ```bash
+   gh secret set DOKPLOY_API_KEY
+   ```
+3. Call the Dokploy Compose Deploy endpoint:
+   `POST https://<DOKPLOY_HOST>/api/compose.deploy` with header `x-api-key: $DOKPLOY_API_KEY`.
 
 ---
 

@@ -1,0 +1,33 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  promote:
+    needs: ci
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag commit and promote release branch
+        run: |
+          TAG_COMMIT=$(git rev-list -n 1 "$GITHUB_REF")
+          if [ "$TAG_COMMIT" != "$GITHUB_SHA" ]; then
+            echo "Error: Tag commit $TAG_COMMIT does not match GITHUB_SHA $GITHUB_SHA"
+            exit 1
+          fi
+          git push origin "${GITHUB_SHA}:refs/heads/release" --force

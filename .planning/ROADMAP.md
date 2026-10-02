@@ -69,7 +69,7 @@ Plans:
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
-- [ ] 01-06-PLAN.md — Header and user menu on every page, sign-out, browser keep-alive, global pages, session e2e
+- [x] 01-06-PLAN.md — Header and user menu on every page, sign-out, browser keep-alive, global pages, session e2e
 
 **Wave 7** *(blocked on Wave 6 completion)*
 

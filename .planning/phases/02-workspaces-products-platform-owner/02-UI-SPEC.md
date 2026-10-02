@@ -47,7 +47,7 @@ There is no Component Inventory section because Tool is `none` and no installed 
 |-----------|------|--------|
 | `Button` | `components/ui/button.tsx` | Add variant `destructive`: `bg-destructive text-destructive-foreground`. Use it **only** on the confirm button inside a destructive `ConfirmDialog`. Add size `sm`: `h-8 px-3` (32px), for row actions in tables and lists. Existing variants and sizes are unchanged. |
 | `Avatar` | `components/ui/avatar.tsx` | No change. Team and user lists use `size="sm"` (32px). |
-| `DropdownMenu` | `components/ui/dropdown-menu.tsx` | No API change. The switcher and row-action menus reuse it. For destructive items (`Delete`, `Remove`), add `text-destructive` to the item. |
+| `DropdownMenu` | `components/ui/dropdown-menu.tsx` | No API change. The switcher and row-action menus reuse it. For destructive items (`Delete status`), add `text-destructive` to the item. |
 | `Alert` | `components/ui/alert.tsx` | No change. Inline errors for forms and dialogs use it. |
 | `UserMenu` | `components/user-menu.tsx` | Add two items between the name label and the dev item, in this order. **`Dashboard`** (lucide `LayoutDashboard`) links to `/dashboard` and appears only when `me.workspaceCount ≥ 1`. **`Platform console`** (lucide `ShieldCheck`) links to `/platform` and appears only when `me.isPlatformOwner` (D-05). Put a `Separator` after this group when either item renders. |
 
@@ -61,14 +61,14 @@ There is no Component Inventory section because Tool is `none` and no installed 
 | `Field` | `components/ui/field.tsx` | `<label>` + slot | Vertical stack, `gap-2`. Label: 14px / 600, `htmlFor` the control. Helper: 14px / 400 `text-muted-foreground`, `id={id}-help`. Error: 14px / 400 `text-destructive`, a lucide `CircleAlert` `size-4` before the text, `id={id}-error`. The control gets `aria-describedby` (helper, plus error when present) and `aria-invalid` when invalid. The error replaces the helper; they are never shown together. |
 | `SlugInput` | `components/slug-input.tsx` | `Input` | A joined control. The prefix `<span>` shows `{host}/` (for a product: `{host}/{ws}/`), styled `px-3 flex items-center bg-muted border border-r-0 border-input rounded-l-md text-sm text-muted-foreground`, and the input has `rounded-l-none font-mono`. The slug auto-derives from the name field until the user edits the slug. After that it never auto-changes. On settings pages it is read-only, with a `Copy URL` ghost `sm` button beside it. |
 | `EntityLogo` | `components/entity-logo.tsx` | `<img>` | A square logo with `rounded-md` (sizes 20–32) or `rounded-lg` (40, 64), `border border-border bg-background object-contain`. Sizes: 20, 24, 32, 40, 64 (`size-5/6/8/10/16`). **Fallback** when there is no logo or it fails to load: a tile with `bg-[var(--entity-accent)]` showing the first letter of the name, uppercased, in the computed accent foreground, weight 600. Text size: 12px for sizes 20–24, 14px for 32, 16px for 40, 24px for 64. For products, `--entity-accent` is the product accent; for workspaces it is `--primary`. Always `alt=""`, because the name always renders beside it. The one exception is the portal header logo, which is decorative inside a link that has its own text. |
-| `LogoField` | `components/logo-field.tsx` | `EntityLogo` + hidden `<input type="file">` | Row, `gap-4`: a 64px `EntityLogo` preview, then a stack (`gap-2`) holding a button row and the helper text. The button row has `Upload logo` (`outline`, lucide `Upload`) and `Remove` (`ghost`, shown only when a logo is set). The hidden input has `accept="image/png,image/jpeg,image/webp,image/gif"`. Selecting a file uploads it **immediately** (`POST /api/v1/uploads`, the same TanStack mutation as Phase 1), and the form stores the returned upload id. Pending: the button shows `LoaderCircle` and `Uploading…`, and the form's submit is disabled. Errors render an `Alert` under the row, using the Phase 1 upload error mapping (`lib/upload-errors.ts`). The logo is **optional**. Without one, the initials fallback is used everywhere. *(Claude's choice: WORK-01/PROD-01 list the logo as a capability, and making it required adds friction for no safety gain.)* |
+| `LogoField` | `components/logo-field.tsx` | `EntityLogo` + hidden `<input type="file">` | Row, `gap-4`: a 64px `EntityLogo` preview, then a stack (`gap-2`) holding a button row and the helper text. The button row has `Upload logo` (`outline`, lucide `Upload`) and `Remove logo` (`ghost`, shown only when a logo is set). The hidden input has `accept="image/png,image/jpeg,image/webp,image/gif"`. Selecting a file uploads it **immediately** (`POST /api/v1/uploads`, the same TanStack mutation as Phase 1), and the form stores the returned upload id. Pending: the button shows `LoaderCircle` and `Uploading…`, and the form's submit is disabled. Errors render an `Alert` under the row, using the Phase 1 upload error mapping (`lib/upload-errors.ts`). The logo is **optional**. Without one, the initials fallback is used everywhere. *(Claude's choice: WORK-01/PROD-01 list the logo as a capability, and making it required adds friction for no safety gain.)* |
 | `ColorField` | `components/color-field.tsx` | native radios + `Input` | Preset swatches render as a `role="radiogroup"` of visually hidden native radios. Each visible swatch is a `size-8` (32px) `rounded-full` circle. The selected swatch gets `ring-2 ring-ring ring-offset-2` and a lucide `Check` (`size-4`) in the computed foreground. Each swatch's `aria-label` is the preset name. Next to the swatches is a hex `Input` (`w-32 font-mono`) with a `size-6` `rounded-md` preview square on its left. Typing a valid hex deselects the swatches unless it matches a preset. Valid pattern: `^#[0-9A-Fa-f]{6}$`. Store it uppercased. |
 | `AccentPreview` | inside product settings | `accentTokens()` | A `rounded-lg border border-border p-4` panel. It shows a sample `default` Button (`Sample button`) and a sample link (`Sample link`), both rendered with the computed tokens on a wrapper, so they look exactly as on the portal. When `primaryText` falls back to dark, show a 14px muted note (copy below). |
 | `CopyField` | `components/copy-field.tsx` | `Input` (read-only) + `Button` | Row, `gap-2`: a read-only `Input` with `font-mono` showing the full value, and a `Copy link` `outline` button with lucide `Copy`. After `navigator.clipboard.writeText` succeeds, the button shows lucide `Check` and `Copied` for 2 seconds. If the clipboard API fails, select the input text and show the helper `Press Ctrl+C or ⌘C to copy.` |
 | `Badge` | `components/ui/badge.tsx` | `<span>` + cva | `inline-flex items-center h-6 px-2 rounded-full text-xs font-semibold`. Variants: `neutral` (`bg-muted text-foreground`), `outline` (`border border-border text-muted-foreground`), `danger` (`bg-destructive/10 text-destructive`). Never use status or accent colors on a Badge. |
 | `StatusBadge` | `components/status-badge.tsx` | `Badge` `outline` | `gap-2`, a `size-2 rounded-full` dot filled with the status hex, and the status name in `text-foreground`. The text color never depends on the status color, so contrast holds for any hex. Phase 3 reuses this unchanged. |
-| `ConfirmDialog` | `components/ui/confirm-dialog.tsx` | `@radix-ui/react-alert-dialog` | Overlay `fixed inset-0 bg-foreground/40`. Content: `fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-32px)] max-w-md bg-background border border-border rounded-lg p-6 flex flex-col gap-4 shadow-lg`. Title: 16px / 600. Description: 14px muted. An optional body slot holds the type-to-confirm input or the replacement select. Footer: `flex justify-end gap-2`, with `Cancel` (`outline`) first and the confirm button (`destructive`) second. Focus starts on `Cancel`. While pending, the confirm button shows a spinner and a pending label, both buttons are disabled, and Esc is ignored. Server errors render an `Alert` above the footer, and the dialog stays open. |
-| `Dialog` | `components/ui/dialog.tsx` | `@radix-ui/react-dialog` | Same overlay and content box as `ConfirmDialog`, but `max-w-lg`, with a ghost `icon` close button at top-right (`aria-label="Close"`). Used by the status add/edit form. |
+| `ConfirmDialog` | `components/ui/confirm-dialog.tsx` | `@radix-ui/react-alert-dialog` | Overlay `fixed inset-0 bg-foreground/40`. Content: `fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-32px)] max-w-md bg-background border border-border rounded-lg p-6 flex flex-col gap-4 shadow-lg`. Title: 16px / 600. Description: 14px muted. An optional body slot holds the type-to-confirm input or the replacement select. Footer: `flex justify-end gap-2`, with the dismiss button (`outline`) first and the confirm button (`destructive`) second. **Both labels are required props** (`dismissLabel`, `confirmLabel`), taken from the Destructive confirmations table. There is no default `Cancel` label. Focus starts on the dismiss button. While pending, the confirm button shows a spinner and a pending label, both buttons are disabled, and Esc is ignored. Server errors render an `Alert` above the footer, and the dialog stays open. |
+| `Dialog` | `components/ui/dialog.tsx` | `@radix-ui/react-dialog` | Same overlay and content box as `ConfirmDialog`, but `max-w-lg`, with a ghost `icon` close button at top-right (`aria-label="Close dialog"`). Footer buttons are passed in by the caller with specific labels; there is no generic `Cancel`. Used by the status add/edit form. |
 | `Drawer` | `components/ui/drawer.tsx` | `@radix-ui/react-dialog` | The mobile sidebar. Content: `fixed inset-y-0 left-0 w-72 bg-muted border-r border-border p-4 overflow-y-auto`. Title is visually hidden: `Navigation`. It closes on route change and on Esc. |
 | `TabNav` | `components/tab-nav.tsx` | `<nav>` + `Link` | `flex gap-6 border-b border-border overflow-x-auto`. Each tab is `h-10 inline-flex items-center text-sm border-b-2 -mb-px`. Inactive tabs: `border-transparent text-muted-foreground hover:text-foreground`. The active tab: `border-primary text-[var(--primary-text)] font-semibold`, with `aria-current="page"`. Used by `/platform`, and by the portal from Phase 3 on. **When given zero tabs it renders nothing** (no empty bar). |
 | `PageHeader` | `components/page-header.tsx` | — | `flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8`. Left: an h1 (24px / 600) and an optional description (14px muted, `mt-1`). Right: at most one primary action. |
@@ -138,12 +138,12 @@ The Phase 1 root layout currently wraps every page in the app header and the `ma
 | Sidebar section label | 12px / 600 `text-muted-foreground`, `px-3 mb-1`, sentence case. The Products label row also holds a `ghost` `icon` button: `size-8` instead of `size-10`, lucide `Plus`, `aria-label="New product"`, linking to `/dashboard/{ws}/new`. |
 | Sidebar item | `flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-background`. Active: `bg-background font-semibold` with `aria-current="page"`. Icon `size-4`. The label is `truncate`. |
 | Sidebar: Workspace section | Label `Workspace`. Items: `Products` (lucide `LayoutGrid`) → `/dashboard/{ws}`, `Team` (`Users`) → `/team`, `Settings` (`Settings`) → `/settings`. |
-| Sidebar: Products section | Label `Products`. There is one item per live product: a 20px `EntityLogo` and the product name, linking to `/dashboard/{ws}/{product}/statuses`, sorted by name. The **current** product expands into nested items (`pl-9`): `Statuses` (`CircleDot`), `Settings` (`SlidersHorizontal`), and `View portal` (`ExternalLink`, `target="_blank" rel="noopener"`, which opens `/{ws}/{product}`). Phases 3–5 add Board, Roadmap, Changelog, and FAQ above `Statuses`. With zero products, show the 14px muted line `No products yet`. |
+| Sidebar: Products section | Label `Products`. There is one item per live product: a 20px `EntityLogo` and the product name, linking to `/dashboard/{ws}/{product}/statuses`, sorted by name. The **current** product expands into nested items (`pl-10`): `Statuses` (`CircleDot`), `Settings` (`SlidersHorizontal`), and `View portal` (`ExternalLink`, `target="_blank" rel="noopener"`, which opens `/{ws}/{product}`). Phases 3–5 add Board, Roadmap, Changelog, and FAQ above `Statuses`. With zero products, show the 14px muted line `No products yet`. |
 | Dashboard main | `flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-8 sm:py-12`. The content column is `w-full max-w-3xl` (768px), left-aligned. Each page starts with a `PageHeader`. |
 | Settings page sections | Each section is a `<section>` with an h2 (16px / 600) and an optional 14px muted description (`gap-1`), then fields (`gap-6`), then the actions row (`mt-6`, Save left-aligned). Sections are separated by `border-t border-border pt-8 mt-8`. The **Danger zone** section is a `rounded-lg border border-destructive/30 p-6` box with an h2 `Danger zone` in `text-destructive`. |
 | Status list | `rounded-lg border border-border divide-y divide-border`. Row: `flex items-center gap-4 h-14 px-4 bg-background`. Contents in order: drag handle, `size-3` color dot, name (14px / 600, `truncate`, `flex-1 min-w-0`), type `Badge` (`outline`), `Default` `Badge` (`neutral`, only on the default status), and the row-actions menu trigger (`ghost` `icon` `size-8`, lucide `Ellipsis`). The drag handle is a `ghost` button, `size-8`, lucide `GripVertical`, `cursor-grab`, with `aria-label="Reorder {name}"`. |
 | **Portal frame** | `min-h-dvh flex flex-col bg-background`. The root `<div>` carries inline `style` with `--primary`, `--primary-foreground`, `--primary-text`, and `--entity-accent` from `accentTokens(product.accentColor)`. `--ring` stays neutral. |
-| Portal header | `border-b border-border`. Inner container `mx-auto max-w-5xl px-4 sm:px-6 min-h-16 py-3 flex items-center gap-4` (64px minimum). Left: a link to `/{ws}/{product}` wrapping a 32px `EntityLogo` and a stack holding the product name (16px / 600, `truncate`) and the tagline (14px muted, `truncate`, hidden below 640px). Right (`ml-auto flex items-center gap-4`): the website link `Back to {company}` (14px, `text-[var(--primary-text)] hover:underline`, lucide `ArrowUpRight` `size-4`, hidden below 640px, `rel="noopener"`, rendered only when a website URL resolves), then `Sign in` (`outline`) or `UserMenu`. Below the header row sits `TabNav` in the same container. It renders nothing in Phase 2 (D-07). |
+| Portal header | `border-b border-border`. Inner container `mx-auto max-w-5xl px-4 sm:px-6 min-h-16 py-2 flex items-center gap-4` (64px minimum). Left: a link to `/{ws}/{product}` wrapping a 32px `EntityLogo` and a stack holding the product name (16px / 600, `truncate`) and the tagline (14px muted, `truncate`, hidden below 640px). Right (`ml-auto flex items-center gap-4`): the website link `Back to {company}` (14px, `text-[var(--primary-text)] hover:underline`, lucide `ArrowUpRight` `size-4`, hidden below 640px, `rel="noopener"`, rendered only when a website URL resolves), then `Sign in` (`outline`) or `UserMenu`. Below the header row sits `TabNav` in the same container. It renders nothing in Phase 2 (D-07). |
 | Portal body | `flex-1`, container `max-w-5xl px-4 sm:px-6 py-8 sm:py-12`. This is the slot Phases 3–5 fill. |
 | Portal footer | `border-t border-border py-6`, centered: `Powered by UserHQ` as 12px muted text, with `UserHQ` linking to the app origin (D-11). Always rendered, no toggle. |
 | Coming-soon body | An `EmptyState` with lucide `Hammer`, `max-w-xl mx-auto`, on `bg-background`. No accent fill. |
@@ -182,6 +182,8 @@ Exceptions (fixed component dimensions, all multiples of 4, not spacing tokens):
 - Widths: sidebar 240px, mobile drawer 288px, dialogs 448px (confirm) or 512px (form), hex input 128px.
 - Logo sizes: 20, 24, 32, 40, and 64px. Swatches are 32px. Status dot in rows: 12px. Badge dot: 8px.
 - Touch targets: the drag handle, the row-actions trigger, and the sidebar `+` button are 32px (`size-8`). That is above the WCAG 2.5.8 24px minimum. They sit in 56px rows, so no other control is within 8px vertically.
+- 12px horizontal inset (`px-3`) inside 32–36px-tall controls only: `Input`, `NativeSelect`, the `SlugInput` prefix, sidebar items and section labels, and the `sm` button. 8px is too tight for text in a bordered control, and 16px wastes width in the 240px sidebar. It is never used as a gap or section spacing.
+- 40px nested-nav indent (`pl-10`) for a product's sub-items in the sidebar. It equals the parent item's 12px inset + 20px logo + 8px gap, so sub-item icons line up under the product name.
 - `-mb-px` on TabNav tabs, so the active underline overlaps the 1px nav border. This 1px offset is the only sub-4px value allowed.
 
 No arbitrary values except the ones listed above. Those are `w-[calc(100%-32px)]` for dialogs and the CSS-variable color utilities `text-[var(--primary-text)]` and `bg-[var(--entity-accent)]`.
@@ -241,10 +243,10 @@ Accent is **not** used for: the active sidebar item (`bg-background` + semibold)
 
 **Destructive (`--destructive`) is reserved for:**
 - the `destructive` Button inside `ConfirmDialog`
-- destructive menu items (`Delete`, `Remove`)
+- destructive menu items (`Delete status`)
 - the Danger zone border and title
 - the `danger` Badge (`Suspended`, `Banned`)
-- destructive-text row actions (`Revoke`, `Remove`, `Ban`, `Suspend`), which are `ghost` `sm` buttons with `text-destructive`
+- destructive-text row actions (`Revoke invite`, `Remove teammate`, `Ban user`, `Suspend workspace`), which are `ghost` `sm` buttons with `text-destructive`
 - inline error text and `Alert`s
 
 **Palette preset** *(Claude's choice)*: one constant serves both status colors and product accents (D-21). Swatch order:
@@ -341,14 +343,14 @@ Token rules from Phase 1 still hold: no raw palette classes and no hex literals 
 
 ### Workspace settings (`/dashboard/{ws}/settings`, D-09, D-10)
 - **General** section: `Workspace name`; `URL` (read-only + `Copy URL`); `Logo`; `Website` (`https://` only, helper `Your portals link back here, and visitors land here when the product directory is off.`). Save behaves the same as on product settings.
-- **Product directory** section: a native checkbox (`size-4 accent-[var(--primary)]`) with label `Show a public list of products at /{ws}` and the helper copy below. It is on by default. Save is `outline`.
+- **Product directory** section: a native checkbox (`size-4 accent-foreground`, neutral, not the accent) with label `Show a public list of products at /{ws}` and the helper copy below. It is on by default. Save is `outline`.
 - There is no workspace delete in Phase 2.
 
 ### Status editor (`/dashboard/{ws}/{product}/statuses`, STAT-01 to STAT-05, D-21)
 - PageHeader `Statuses`, description `Statuses show where each post stands. Drag to change the order customers see.`, action `Add status` (`default`).
-- **Add and edit** use a `Dialog` (`Add status` / `Edit status`). Fields: `Name` (1–30 characters, unique per product, case-insensitive), `Type` (`NativeSelect` with the five fixed types and the helper copy below), and `Color` (`ColorField` with the 10 presets, defaulting to Gray for a new status). The footer has `Cancel` (`outline`) and `Add status` / `Save changes` (`default`). Pending: `Saving…`. On success the dialog closes and the toast reads `Status added` or `Status updated`.
-- **Row actions menu:** `Edit`, then `Make default` (hidden on the current default), a separator, and `Delete` (destructive).
-  - On the default status and on a product's only status, `Delete` is disabled and shows a second line (12px muted): `The default status can't be deleted` or `A product needs at least one status`.
+- **Add and edit** use a `Dialog` (`Add status` / `Edit status`). Fields: `Name` (1–30 characters, unique per product, case-insensitive), `Type` (`NativeSelect` with the five fixed types and the helper copy below), and `Color` (`ColorField` with the 10 presets, defaulting to Gray for a new status). The footer has `Discard changes` (`outline`, closes without saving) and `Add status` / `Save status` (`default`). Pending: `Saving…`. On success the dialog closes and the toast reads `Status added` or `Status updated`.
+- **Row actions menu** (trigger `aria-label="Actions for {name}"`): `Edit status`, then `Make default` (hidden on the current default), a separator, and `Delete status` (destructive).
+  - On the default status and on a product's only status, `Delete status` is disabled and shows a second line (12px muted): `The default status can't be deleted` or `A product needs at least one status`.
 - **Make default** applies immediately with no confirmation (it is reversible), and the toast reads `New posts will start in {name}`.
 - **Delete** opens a `ConfirmDialog` with a required `NativeSelect` labelled `Move its posts to`. The select lists every other status and preselects the default. Confirm: `Delete status`. On success the toast reads `{name} deleted`.
 - **Reorder** uses `@dnd-kit/react` with pointer and keyboard sensors. Only the handle starts a drag.
@@ -361,8 +363,8 @@ Token rules from Phase 1 still hold: no raw palette classes and no hex literals 
 ### Team (`/dashboard/{ws}/team`, WORK-03 to WORK-06, D-14, D-17)
 - PageHeader `Team`, description `Everyone here is an admin of {workspace}.`
 - **Members** section: a `DataTable` with columns Name (32px Avatar + name + email in 14px muted, stacked), Role (`Badge`: `Owner` or `Admin`), and Joined (date), plus an actions column.
-  - The action is `Remove` (`ghost` `sm`, destructive text). It is never shown on the owner's row or on the viewer's own row.
-  - The viewer's own row gets a `You` badge (`outline`). If the viewer is not the owner, it also gets a `Leave` action that opens the leave `ConfirmDialog`.
+  - The action is `Remove teammate` (`ghost` `sm`, destructive text, `aria-label="Remove {name}"`). It is never shown on the owner's row or on the viewer's own row.
+  - The viewer's own row gets a `You` badge (`outline`). If the viewer is not the owner, it also gets a `Leave workspace` action that opens the leave `ConfirmDialog`.
   - After leaving: `window.location.assign("/")`.
 - **Invite a teammate** section (`InviteCreator`): an `Email` field (`Input type="email"`) and the `Create invite link` button (`default`) in one row from 640px up, stacked below that.
   - On success, a `bg-muted rounded-lg p-4 flex flex-col gap-2` panel appears under the form, holding a title, a `CopyField` with the link, and the one-time note.
@@ -370,7 +372,7 @@ Token rules from Phase 1 still hold: no raw palette classes and no hex literals 
 - **Invites** list (`InviteList`): a `DataTable` with columns Email, State, Details, and an actions column. Rows are newest first.
   - State `Badge`s: `Pending` (`outline`), `Used` (`neutral`), `Expired` (`neutral`), `Revoked` (`neutral`).
   - Details (14px muted): `Expires {date}`, `Used by {name} on {date}`, `Expired {date}`, or `Revoked {date}`.
-  - The `Revoke` action appears on pending rows only and opens a `ConfirmDialog`.
+  - The `Revoke invite` action (`aria-label="Revoke invite for {email}"`) appears on pending rows only and opens a `ConfirmDialog`.
 - Dates use `Intl.DateTimeFormat("en", {dateStyle: "medium"})` (for example, `Oct 9, 2026`). Do not add a date library.
 
 ### Platform console (`/platform`, PLAT-02 to PLAT-06)
@@ -378,13 +380,13 @@ Token rules from Phase 1 still hold: no raw palette classes and no hex literals 
 - **Invites:** the same `InviteCreator` and `InviteList` with `kind="platform"`. The Details column shows `Used by {name} · {workspace}` once used.
 - **Workspaces:**
   - A search `Input` (`type="search"`, `w-full sm:w-72`, placeholder `Search by name or URL`) above the table. It is bound to `?q=` and submits on Enter.
-  - Table columns: Workspace (24px `EntityLogo` + name linking to the detail page), URL (`/{slug}`, mono), Products, Members, Posts, Votes (all right-aligned), and Status (`Active` `outline` or `Suspended` `danger`), plus actions: `Suspend` (destructive text, opens a confirm) or `Lift suspension` (`ghost` `sm`, no confirm, toast `Suspension lifted`).
+  - Table columns: Workspace (24px `EntityLogo` + name linking to the detail page), URL (`/{slug}`, mono), Products, Members, Posts, Votes (all right-aligned), and Status (`Active` `outline` or `Suspended` `danger`), plus actions: `Suspend workspace` (destructive text, `aria-label="Suspend {workspace}"`, opens a confirm) or `Lift suspension` (`ghost` `sm`, no confirm, toast `Suspension lifted`).
   - 50 rows per page, newest first, with `Previous` and `Next` `outline` `sm` buttons below the table bound to `?page=`. Each is hidden when not applicable.
 - **Workspace detail** (`/platform/workspaces/{id}`):
   - Header: a 40px logo, an h1 with the name, the `/{slug}` link to the public directory, the status badge, and the Suspend or Lift action.
   - Sections: `Products` (table: Product, URL, Posts, Votes, State `Live` `outline` / `Deleted` `neutral`) and `Members` (table: Name + email, Role, Joined).
 - **Users:**
-  - Search (`Search by name or email`), then a table with columns User (Avatar + name + email), Workspaces, Posts, Votes, Joined, and Status (`Active` `outline` / `Banned` `danger`), plus actions: `Ban` (destructive text, opens a confirm) or `Lift ban` (no confirm, toast `Ban lifted`).
+  - Search (`Search by name or email`), then a table with columns User (Avatar + name + email), Workspaces, Posts, Votes, Joined, and Status (`Active` `outline` / `Banned` `danger`), plus actions: `Ban user` (destructive text, `aria-label="Ban {name}"`, opens a confirm) or `Lift ban` (no confirm, toast `Ban lifted`).
   - The owner's own row has a `You` badge and no action. Pagination works as on Workspaces.
 - Counts for posts and votes show `0` until Phase 3 lands, rendered from the API. They are never hard-coded.
 - Non-owners get the normal `not-found` page from every `/platform` route, and the API returns 404 (PLAT-07).
@@ -439,17 +441,17 @@ Voice is the same as Phase 1: plain, short, second person, sentence case, no exc
 
 ### Destructive confirmations (all use `ConfirmDialog`)
 
-| Action | Title | Body | Confirm (pending) | Success toast |
-|--------|-------|------|-------------------|---------------|
-| Delete product (D-18) | `Delete {product}?` | `Its public portal goes offline right away, and its URL can't be used again. This can't be undone.` + input label `Type {product} to confirm` | `Delete product` (`Deleting…`) | `{product} deleted` |
-| Delete status (STAT-04) | `Delete {status}?` | `Posts in this status will move to the status you choose.` + select label `Move its posts to` | `Delete status` (`Deleting…`) | `{status} deleted` |
-| Remove teammate (WORK-05) | `Remove {name}?` | `They'll lose access to {workspace} right away. Anything they created stays.` | `Remove teammate` (`Removing…`) | `{name} removed` |
-| Leave workspace (WORK-06) | `Leave {workspace}?` | `You'll lose access to its dashboard. To come back, an admin has to send you a new invite link.` | `Leave workspace` (`Leaving…`) | none (the page navigates away) |
-| Revoke invite (D-17) | `Revoke this invite?` | `The link for {email} stops working right away. You can create a new one at any time.` | `Revoke invite` (`Revoking…`) | `Invite revoked` |
-| Suspend workspace (PLAT-05) | `Suspend {workspace}?` | `Its portals will show an unavailable page and its admins lose dashboard access. No data is deleted, and you can lift the suspension at any time.` | `Suspend workspace` (`Suspending…`) | `{workspace} suspended` |
-| Ban user (PLAT-06) | `Ban {name}?` | `They'll be signed out everywhere and can't sign in until you lift the ban. Their posts and comments stay.` | `Ban user` (`Banning…`) | `{name} banned` |
+| Action | Title | Body | Dismiss | Confirm (pending) | Success toast |
+|--------|-------|------|---------|-------------------|---------------|
+| Delete product (D-18) | `Delete {product}?` | `Its public portal goes offline right away, and its URL can't be used again. This can't be undone.` + input label `Type {product} to confirm` | `Keep product` | `Delete product` (`Deleting…`) | `{product} deleted` |
+| Delete status (STAT-04) | `Delete {status}?` | `Posts in this status will move to the status you choose.` + select label `Move its posts to` | `Keep status` | `Delete status` (`Deleting…`) | `{status} deleted` |
+| Remove teammate (WORK-05) | `Remove {name}?` | `They'll lose access to {workspace} right away. Anything they created stays.` | `Keep teammate` | `Remove teammate` (`Removing…`) | `{name} removed` |
+| Leave workspace (WORK-06) | `Leave {workspace}?` | `You'll lose access to its dashboard. To come back, an admin has to send you a new invite link.` | `Stay in workspace` | `Leave workspace` (`Leaving…`) | none (the page navigates away) |
+| Revoke invite (D-17) | `Revoke this invite?` | `The link for {email} stops working right away. You can create a new one at any time.` | `Keep invite` | `Revoke invite` (`Revoking…`) | `Invite revoked` |
+| Suspend workspace (PLAT-05) | `Suspend {workspace}?` | `Its portals will show an unavailable page and its admins lose dashboard access. No data is deleted, and you can lift the suspension at any time.` | `Keep workspace active` | `Suspend workspace` (`Suspending…`) | `{workspace} suspended` |
+| Ban user (PLAT-06) | `Ban {name}?` | `They'll be signed out everywhere and can't sign in until you lift the ban. Their posts and comments stay.` | `Don't ban` | `Ban user` (`Banning…`) | `{name} banned` |
 
-Not confirmed (reversible): `Make default`, `Lift suspension`, `Lift ban`, `Remove` logo (it applies on save), reorder.
+Not confirmed (reversible): `Make default`, `Lift suspension`, `Lift ban`, `Remove logo` (it applies on save), reorder.
 
 ### Page text
 
@@ -462,7 +464,7 @@ Not confirmed (reversible): `Make default`, `Lift suspension`, `Lift ban`, `Remo
 | `/dashboard/new` | h1 / description | `Create your workspace` / `You can change the name and logo later. The URL is permanent.` |
 | Create forms | Labels | `Workspace name`, `Product name`, `URL`, `Logo` |
 | Slug field | Helper | `Lowercase letters, numbers, and hyphens, 2–32 characters. You can't change this later.` |
-| Logo field | Buttons / helper | `Upload logo` (`Uploading…`), `Remove` / `PNG, JPEG, WebP, or GIF, up to 2 MB. Square images look best.` |
+| Logo field | Buttons / helper | `Upload logo` (`Uploading…`), `Remove logo` / `PNG, JPEG, WebP, or GIF, up to 2 MB. Square images look best.` |
 | Product settings | h1 / description / section h2s | `Product settings` / `Changes appear on the public portal right away.` / `General`, `Branding`, `Danger zone` |
 | Product settings | Tagline label / helper | `Tagline` / `One line shown on your portal and in link previews. {n}/80` |
 | Product settings | Website label / helper | `Website` / `Shown as "Back to {workspace}" on your portal. Leave empty to use the workspace website.` |
@@ -476,14 +478,15 @@ Not confirmed (reversible): `Make default`, `Lift suspension`, `Lift ban`, `Remo
 | Statuses | Type label / helper | `Type` / `The type decides how the status behaves, for example which posts count as done.` |
 | Statuses | Type option labels | `Review`, `Planned`, `Active`, `Completed`, `Closed` |
 | Statuses | Color label | `Color` |
-| Statuses | Badges / menu | `Default` / `Edit`, `Make default`, `Delete` |
+| Statuses | Dialog buttons | `Discard changes` / `Add status` or `Save status` (`Saving…`) |
+| Statuses | Badges / menu | `Default` / `Edit status`, `Make default`, `Delete status` |
 | Team | h1 / description / section h2s | `Team` / `Everyone here is an admin of {workspace}.` / `Members`, `Invite a teammate`, `Invites` |
-| Team | Badges / actions | `Owner`, `Admin`, `You` / `Remove`, `Leave` |
+| Team | Badges / actions | `Owner`, `Admin`, `You` / `Remove teammate`, `Leave workspace`, `Revoke invite` |
 | Invite creator | Email label / helper | `Email` / `Only someone signed in with this email can use the link.` |
 | Invite created panel | Title / note | `Invite link created` / `Only {email} can use this link. It works once and expires on {date}. Copy it now, because it won't be shown again.` |
 | Invite list | States / details | `Pending`, `Used`, `Expired`, `Revoked` / `Expires {date}`, `Used by {name} on {date}`, `Expired {date}`, `Revoked {date}` |
 | Platform | h1 / description / tabs | `Platform` / `Only you can see this page.` / `Invites`, `Workspaces`, `Users` |
-| Platform | Status badges / actions | `Active`, `Suspended`, `Banned`, `Live`, `Deleted` / `Suspend`, `Lift suspension`, `Ban`, `Lift ban` |
+| Platform | Status badges / actions | `Active`, `Suspended`, `Banned`, `Live`, `Deleted` / `Suspend workspace`, `Lift suspension`, `Ban user`, `Lift ban` |
 | Platform | Pagination | `Previous`, `Next` |
 | Sidebar | Labels | `Workspace`, `Products`, `Products` (item), `Team`, `Settings`, `Statuses`, `View portal`, `No products yet` |
 | Switcher | Label / create item | `Workspaces` / `Create workspace` |
@@ -505,7 +508,7 @@ Not confirmed (reversible): `Make default`, `Lift suspension`, `Lift ban`, `Remo
 | Revoked | `This invite was canceled` | `The person who created this link revoked it. Ask them for a new one.` | `Go to home` |
 | Not found or malformed | `This invite link isn't valid` | `Check that you copied the whole link, or ask for a new one.` | `Go to home` |
 | Workspace suspended | `This workspace is unavailable` | `You can't join {workspace} right now. Ask the person who invited you.` | `Go to home` |
-| Accept failed (network or 5xx) | `Couldn't join {workspace}` | `Something went wrong on our end. Try again in a moment.` | `Try again` (`default`, retries the POST), `Go to home` |
+| Accept failed (network or 5xx) | `Couldn't join {workspace}` | `Something went wrong on our end. Try again in a moment.` | `Retry joining` (`default`, retries the POST), `Go to home` |
 
 ### Unavailable pages (D-20)
 
@@ -561,7 +564,7 @@ Applicable state considerations resolved: 30 covered, 4 backstop, 2 unresolved.
 | empty | Optional website and tagline (static-content) | ✅ covered | With no resolvable website, the "Back to {company}" link is omitted. With no tagline, the header line is omitted, and meta and OG descriptions use the fallback copy |
 | zero-one-many | Landing routing (nav) | ✅ covered | 0 workspaces stays on `/` (create or invite-only state), 1 redirects to `/dashboard/{ws}`, and 2 or more redirect to the `/dashboard` picker (D-02) |
 | zero-one-many | `/{ws}` directory (nav) | ✅ covered | 0 live products shows the empty state, 1 redirects to that portal, and 2 or more show the card grid (D-10) |
-| zero-one-many | Statuses (list-collection) | ✅ covered | `Delete` is disabled on the default status and, with the reason text, on a product's last remaining status |
+| zero-one-many | Statuses (list-collection) | ✅ covered | `Delete status` is disabled on the default status and, with the reason text, on a product's last remaining status |
 | zero-one-many | Workspace switcher (nav) | ✅ covered | With one workspace the switcher still opens, listing it, plus `Create workspace` when allowed |
 | loading | All create and save forms (form) | ✅ covered | The submit button shows a spinner and its pending label ("Creating…", "Saving…"), fields are disabled, and submit is blocked while a logo upload is pending |
 | loading | Logo upload (media) | ✅ covered | The upload button shows "Uploading…" with a spinner, and the preview updates only on success |

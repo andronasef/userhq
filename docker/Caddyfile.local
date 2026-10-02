@@ -1,4 +1,5 @@
 :80 {
+	uri query -error_description
 	@api path /api/* /uploads/*
 	handle @api {
 		reverse_proxy api:4000

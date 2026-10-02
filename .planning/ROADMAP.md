@@ -81,7 +81,7 @@ Plans:
 
 **Wave 9** *(blocked on Wave 8 completion)*
 
-- [ ] 01-10-PLAN.md — GitHub Actions CI, one human-action for external setup, staging auto-deploy on the VPS
+- [x] 01-10-PLAN.md — GitHub Actions CI, one human-action for external setup, staging auto-deploy on the VPS
 
 **Wave 10** *(blocked on Wave 9 completion)*
 

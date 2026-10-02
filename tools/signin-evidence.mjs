@@ -133,7 +133,7 @@ try {
 let dbData;
 try {
   dbData = JSON.parse(dbJsonRaw);
-} catch (err) {
+} catch {
   console.error(`Failed to parse psql JSON response: ${dbJsonRaw}`);
   process.exit(2);
 }

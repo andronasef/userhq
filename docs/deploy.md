@@ -10,8 +10,7 @@ This document is the operator runbook for deploying and managing UserHQ across e
 |-------------|---------|------------|---------------|-------------------|-------------------|
 | **Dev** | Local native development | `http://localhost` | Local working tree | Manual (`bun run dev`) | Native Vite + NestJS behind Caddy dev proxy; local Postgres & Mailpit |
 | **Local Smoke** | Local container verification | `http://localhost:8080` | Local working tree | Manual (`bun run stack:up`) | `compose.yaml` + `compose.local.yaml` with host ports 8080 & 5433 |
-| **Staging** | Pre-production testing & QA | `https://${STAGING_DOMAIN}` | `main` | Automatic on push to `main` | Dokploy Compose app `userhq-staging`; Mailpit profile active (`COMPOSE_PROFILES=mail`) |
-| **Prod** | Live production | `https://${PROD_DOMAIN}` | `release` | Automated via GitHub Actions release workflow on `v*` tags | Dokploy Compose app `userhq-prod`; Brevo SMTP relay; `DEV_UPLOAD_PAGE=false` |
+| **Prod** | Live deployment | `https://userhq.increasinglabs.com` | `main` | Push to `main` via Dokploy | Dokploy Compose app `userhq-prod`; Traefik SSL/TLS; Postgres 18 |
 
 ---
 

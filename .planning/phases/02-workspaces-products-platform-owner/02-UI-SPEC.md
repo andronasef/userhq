@@ -1,7 +1,8 @@
 ---
 phase: "2"
 slug: "workspaces-products-platform-owner"
-status: draft
+status: approved
+reviewed_at: "2026-10-02"
 shadcn_initialized: false
 preset: none
 created: "2026-10-02"
@@ -317,6 +318,7 @@ Token rules from Phase 1 still hold: no raw palette classes and no hex literals 
   2. One item per workspace: a 20px `EntityLogo`, the name, and lucide `Check` on the current one. Each item links to `/dashboard/{slug}`.
   3. A separator and `Create workspace` (lucide `Plus`) → `/dashboard/new`, only when `canCreateWorkspace`.
 - With one workspace the menu still opens, showing that workspace and, if allowed, the create item.
+- With many workspaces the list scrolls inside the menu (`max-h-96 overflow-y-auto`); the separator and `Create workspace` stay pinned below it.
 
 ### Mobile navigation
 - Below 1024px, the `PanelLeft` button opens the `Drawer` with the full `DashboardSidebar`.
@@ -550,7 +552,7 @@ The planner owns the exact error code that Better Auth's sign-in hook emits. The
 
 ## UI Considerations
 
-Applicable state considerations resolved: 30 covered, 4 backstop, 2 unresolved.
+Applicable state considerations resolved: 33 covered, 4 backstop, 2 unresolved.
 
 | Category | Element(s) | Status | Resolution / Reason |
 |----------|------------|--------|---------------------|
@@ -586,6 +588,9 @@ Applicable state considerations resolved: 30 covered, 4 backstop, 2 unresolved.
 | long-text | Emails and invite links (static-content) | ✅ covered | Emails `truncate` in table cells with the full value in `title`. Invite links sit in a read-only mono input that scrolls horizontally, so they are never cut off |
 | overflow | Platform tables (list-collection) | ✅ covered | Tables scroll horizontally inside their bordered wrapper on narrow screens, and lists page at 50 rows with Previous and Next |
 | overflow | Sidebar product list (nav) | ✅ covered | The sidebar and drawer scroll vertically (`overflow-y-auto`) independently of main content |
+| overflow | Workspace switcher menu with many workspaces (nav) | ✅ covered | Menu content is capped at `max-h-96 overflow-y-auto` (384px); the `Create workspace` item stays after the scrolling list |
+| overflow | Team members and invites tables (list-collection) | ✅ covered | Both use the `DataTable` wrapper (`overflow-x-auto`), so narrow screens scroll the table, not the page. No pagination in v1: team size is small |
+| long-text | Status names in editor rows and StatusBadge (list-collection) | ✅ covered | Names are capped at 30 characters (`name_too_long`) and `truncate` in single-line rows with the full name in `title` |
 | partial | Status reorder in flight (list-collection) | 🧪 backstop | Dragging a status shows the optimistic order immediately, and a reload after the save shows the same order, verified by an e2e drag (pointer and keyboard) plus a reload |
 | long-text | 320px viewport: dashboard header, switcher, invite CopyField (nav) | 🧪 backstop | At 320px wide, the dashboard header (menu button, wordmark, switcher, avatar) fits on one line without horizontal page scroll, and the CopyField stays usable, verified by a 320px Playwright screenshot |
 | populated | Portal accent theming (media) | 🧪 backstop | A product with accent `#FACC15` renders portal buttons with dark text and the website link in #171717, and one with `#2563EB` renders white button text and a blue link, verified by a rendered-portal e2e check on computed styles |
@@ -634,12 +639,12 @@ New npm packages in this phase: `@radix-ui/react-dialog`, `@radix-ui/react-alert
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
-- [ ] Dimension 7 Inventory Provenance: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
+- [x] Dimension 7 Inventory Provenance: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-10-02

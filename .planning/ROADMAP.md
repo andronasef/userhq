@@ -43,7 +43,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. From the Oracle VPS, the API container can open an authenticated SMTP session to Brevo on port 587 (or 2525/465 as a fallback). The working port is recorded for Phase 3.
   5. The deployed web app is served from vinext's standalone output, and the same app code also passes a `next build` canary in CI. If a blocking vinext defect appears, the phase exits by switching the build to `next build`.
 
-**Plans:** 3/11 plans executed
+**Plans:** 4/11 plans executed
 
 Plans:
 **Wave 1**
@@ -60,7 +60,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 01-04-PLAN.md — vinext web shell in Docker behind Caddy: server-rendered identity, Tailwind tokens, `next build` canary
+- [x] 01-04-PLAN.md — vinext web shell in Docker behind Caddy: server-rendered identity, Tailwind tokens, `next build` canary
 - [ ] 01-07-PLAN.md — Upload pipeline (2 MB, magic bytes, WebP ≤1600px) on the uploads volume; new migration applied at start (API track, runs beside 01-04..01-06)
 
 **Wave 5** *(blocked on Wave 4 completion)*
@@ -236,7 +236,7 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once P
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Walking Skeleton | 2/11 | In Progress|  |
+| 1. Walking Skeleton | 4/11 | In Progress|  |
 | 2. Workspaces, Products & Platform Owner | 0/TBD | Not started | - |
 | 3. Feedback Board & Conversations | 0/TBD | Not started | - |
 | 4. Dual-Layer Roadmap & Closing the Loop | 0/TBD | Not started | - |

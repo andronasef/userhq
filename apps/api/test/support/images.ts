@@ -1,10 +1,15 @@
-import * as crypto from "node:crypto";
 import * as zlib from "node:zlib";
 import sharp from "sharp";
 
 export async function pngOfSize(w: number, h: number): Promise<Buffer> {
-  const raw = crypto.randomBytes(w * h * 3);
-  return sharp(raw, { raw: { width: w, height: h, channels: 3 } })
+  return sharp({
+    create: {
+      width: w,
+      height: h,
+      channels: 4,
+      background: { r: 100, g: 150, b: 200, alpha: 1 },
+    },
+  })
     .png()
     .toBuffer();
 }

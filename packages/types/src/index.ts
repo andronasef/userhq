@@ -1,16 +1,8 @@
 import { z } from "zod";
 
-export const PublicUserSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  image: z.string().nullable(),
-});
-export type PublicUser = z.infer<typeof PublicUserSchema>;
-
-export const MeResponseSchema = z.object({
-  user: PublicUserSchema.nullable(),
-});
-export type MeResponse = z.infer<typeof MeResponseSchema>;
+export * from "./user.js";
+export * from "./slugs.js";
+export * from "./tenancy.js";
 
 export const API_ERROR_CODES = [
   "unauthorized",
@@ -23,10 +15,25 @@ export const API_ERROR_CODES = [
   "image_unreadable",
   "internal_error",
   "workspace_suspended",
+  "validation_failed",
+  "slug_taken",
+  "slug_reserved",
+  "slug_invalid",
+  "name_required",
+  "name_too_long",
+  "status_name_taken",
+  "invalid_url",
+  "invalid_color",
+  "tagline_too_long",
+  "invalid_email",
+  "already_member",
+  "invite_pending",
+  "not_allowed",
+  "delete_default_status",
+  "delete_last_status",
+  "account_banned",
 ] as const;
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];
-
-export * from "./tenancy.js";
 
 export const ApiErrorSchema = z.object({
   code: z.enum(API_ERROR_CODES),

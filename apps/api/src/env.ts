@@ -16,6 +16,7 @@ export const EnvSchema = z.object({
   GITHUB_CLIENT_ID: z.string().min(1),
   GITHUB_CLIENT_SECRET: z.string().min(1),
   UPLOAD_DIR: z.string().default("./.data/uploads"),
+  PLATFORM_OWNER_EMAIL: z.string().email().transform((s) => s.toLowerCase()),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

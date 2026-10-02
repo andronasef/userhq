@@ -3,6 +3,7 @@ import request from "supertest";
 import { Controller, Get, Post, Body, HttpCode } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 import { schema } from "@userhq/db";
+import { ANONYMOUS_ME } from "@userhq/types";
 import { Public } from "../src/auth/decorators.js";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
 
@@ -35,10 +36,10 @@ describe("Auth & Session Hardening (Plan 01-03)", () => {
   });
 
   // Tracer cases from Task 1
-  it("anonymous GET /api/v1/me returns { user: null }", async () => {
+  it("anonymous GET /api/v1/me returns ANONYMOUS_ME", async () => {
     const res = await request(testApp.http).get("/api/v1/me");
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ user: null });
+    expect(res.body).toEqual(ANONYMOUS_ME);
   });
 
   it("signed-in GET /api/v1/me returns the user with exactly id, name, image (no email)", async () => {
@@ -191,7 +192,7 @@ describe("Auth & Session Hardening (Plan 01-03)", () => {
       .set("Cookie", cookie);
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ user: null });
+    expect(res.body).toEqual(ANONYMOUS_ME);
   });
 
   it("sign-out revokes session in DB and invalidates subsequent calls", async () => {
@@ -214,7 +215,7 @@ describe("Auth & Session Hardening (Plan 01-03)", () => {
       .get("/api/v1/me")
       .set("Cookie", cookie);
     expect(meRes.status).toBe(200);
-    expect(meRes.body).toEqual({ user: null });
+    expect(meRes.body).toEqual(ANONYMOUS_ME);
   });
 
   it("default-deny 401: non-public route requires session", async () => {

@@ -78,4 +78,5 @@ jobs:
           GOOGLE_CLIENT_SECRET: ci-dummy-google-client-secret
           GITHUB_CLIENT_ID: ci-dummy-github-client-id
           GITHUB_CLIENT_SECRET: ci-dummy-github-client-secret
+          PLATFORM_OWNER_EMAIL: ci-owner@example.test
         run: docker compose build

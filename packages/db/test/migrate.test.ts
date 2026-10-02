@@ -63,6 +63,10 @@ async function createTempDb(): Promise<{
   return { url, drop };
 }
 
+const journalPath = path.resolve(packageRoot, "migrations/meta/_journal.json");
+const journal = JSON.parse(fs.readFileSync(journalPath, "utf-8"));
+const totalMigrations = (journal.entries as unknown[]).length;
+
 describe("Migration Runner Properties (Plan 01-09)", () => {
   it("concurrent start: two racing migrate processes apply migrations once without crash", async () => {
     const tempDb = await createTempDb();
@@ -85,8 +89,8 @@ describe("Migration Runner Properties (Plan 01-09)", () => {
         }>(
           "SELECT count(*)::int as count, count(distinct hash)::int as distinct_hashes FROM drizzle.__drizzle_migrations"
         );
-        expect(Number(rowsRes.rows[0].count)).toBe(2);
-        expect(Number(rowsRes.rows[0].distinct_hashes)).toBe(2);
+        expect(Number(rowsRes.rows[0].count)).toBe(totalMigrations);
+        expect(Number(rowsRes.rows[0].distinct_hashes)).toBe(totalMigrations);
       } finally {
         await client.end();
       }
@@ -103,7 +107,9 @@ describe("Migration Runner Properties (Plan 01-09)", () => {
 
       const thirdRun = await runMigrateCli({ DATABASE_URL: tempDb.url });
       expect(thirdRun.code).toBe(0);
-      expect(thirdRun.stdout).toContain("up to date (2 applied in total)");
+      expect(thirdRun.stdout).toContain(
+        `up to date (${totalMigrations} applied in total)`
+      );
 
       const client = new Client({ connectionString: tempDb.url });
       await client.connect();
@@ -111,7 +117,7 @@ describe("Migration Runner Properties (Plan 01-09)", () => {
         const rowsRes = await client.query<{ count: string }>(
           "SELECT count(*)::int as count FROM drizzle.__drizzle_migrations"
         );
-        expect(Number(rowsRes.rows[0].count)).toBe(2);
+        expect(Number(rowsRes.rows[0].count)).toBe(totalMigrations);
       } finally {
         await client.end();
       }
@@ -132,10 +138,10 @@ describe("Migration Runner Properties (Plan 01-09)", () => {
       fs.cpSync(originalMigrationsDir, tempMigrationsDir, { recursive: true });
 
       // Rewrite copy's journal to have only entry 0000_auth
-      const journalPath = path.join(tempMigrationsDir, "meta/_journal.json");
-      const journalContent = JSON.parse(fs.readFileSync(journalPath, "utf-8"));
+      const journalCopyPath = path.join(tempMigrationsDir, "meta/_journal.json");
+      const journalContent = JSON.parse(fs.readFileSync(journalCopyPath, "utf-8"));
       journalContent.entries = [journalContent.entries[0]];
-      fs.writeFileSync(journalPath, JSON.stringify(journalContent, null, 2));
+      fs.writeFileSync(journalCopyPath, JSON.stringify(journalContent, null, 2));
 
       // 1. Run with partial folder (1 migration)
       const res1 = await runMigrateCli({
@@ -152,14 +158,14 @@ describe("Migration Runner Properties (Plan 01-09)", () => {
         );
         expect(Number(rows1.rows[0].count)).toBe(1);
 
-        // 2. Run with real folder (adds second migration)
+        // 2. Run with real folder (adds remaining migrations)
         const res2 = await runMigrateCli({ DATABASE_URL: tempDb.url });
         expect(res2.code).toBe(0);
 
         const rows2 = await client.query<{ count: string }>(
           "SELECT count(*)::int as count FROM drizzle.__drizzle_migrations"
         );
-        expect(Number(rows2.rows[0].count)).toBe(2);
+        expect(Number(rows2.rows[0].count)).toBe(totalMigrations);
       } finally {
         await client.end();
       }

@@ -80,6 +80,8 @@ export async function createTestApp(
         os.tmpdir(),
         "userhq-test-uploads-" + randomBytes(4).toString("hex")
       ),
+    PLATFORM_OWNER_EMAIL:
+      overrides?.PLATFORM_OWNER_EMAIL ?? "owner@example.test",
     ...overrides,
   };
 
@@ -112,10 +114,10 @@ export async function createTestApp(
 
 export async function signedInCookie(
   test: TestHelpers,
-  user?: { name?: string; image?: string | null }
+  user?: { name?: string; image?: string | null; email?: string; emailVerified?: boolean }
 ): Promise<{ cookie: string; userId: string; email: string }> {
   const randomHex = randomBytes(4).toString("hex");
-  const email = `e2e-${randomHex}@example.test`;
+  const email = user?.email ?? `e2e-${randomHex}@example.test`;
   const name = user?.name ?? "E2E User";
   const image = user?.image !== undefined ? user.image : null;
 
@@ -135,6 +137,6 @@ export async function signedInCookie(
   return {
     cookie,
     userId: saved.id,
-    email,
+    email: saved.email,
   };
 }

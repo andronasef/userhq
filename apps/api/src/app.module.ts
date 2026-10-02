@@ -5,7 +5,7 @@ import {
   Injectable,
   Inject,
 } from "@nestjs/common";
-import { APP_GUARD, APP_FILTER } from "@nestjs/core";
+import { APP_GUARD, APP_FILTER, APP_PIPE } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import helmet from "helmet";
 import type pg from "pg";
@@ -17,9 +17,11 @@ import { HealthController } from "./health/health.controller.js";
 import { MeController } from "./auth/me.controller.js";
 import { OriginGuard, SessionGuard } from "./auth/guards.js";
 import { ApiErrorFilter } from "./common/api-error.filter.js";
+import { validationPipe } from "./common/validation.js";
 
 import { UploadsModule } from "./uploads/uploads.module.js";
 import { PortalModule } from "./portal/portal.module.js";
+import { WorkspacesModule } from "./workspaces/workspaces.module.js";
 
 const DB_POOL = Symbol.for("@userhq/api/db-pool");
 
@@ -53,6 +55,7 @@ export class AppModule {
         }),
         UploadsModule,
         PortalModule,
+        WorkspacesModule,
       ],
       controllers: [HealthController, MeController],
       providers: [
@@ -80,6 +83,10 @@ export class AppModule {
         {
           provide: APP_GUARD,
           useClass: SessionGuard,
+        },
+        {
+          provide: APP_PIPE,
+          useValue: validationPipe,
         },
         {
           provide: APP_FILTER,

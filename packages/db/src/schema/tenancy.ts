@@ -1,14 +1,19 @@
 import { relations, sql } from "drizzle-orm";
 import {
   pgTable,
+  pgEnum,
   uuid,
   text,
   boolean,
   timestamp,
   check,
   unique,
+  primaryKey,
+  uniqueIndex,
+  index,
 } from "drizzle-orm/pg-core";
 import { uploads } from "./uploads.js";
+import { user } from "./auth.js";
 
 export const workspaces = pgTable(
   "workspaces",
@@ -56,12 +61,36 @@ export const products = pgTable(
   ]
 );
 
+export const memberRole = pgEnum("member_role", ["owner", "admin"]);
+
+export const workspaceMembers = pgTable(
+  "workspace_members",
+  {
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    role: memberRole("role").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.workspaceId, table.userId] }),
+    uniqueIndex("workspace_members_one_owner")
+      .on(table.workspaceId)
+      .where(sql`${table.role} = 'owner'`),
+    index("workspace_members_user_idx").on(table.userId),
+  ]
+);
+
 export const workspacesRelations = relations(workspaces, ({ one, many }) => ({
   logo: one(uploads, {
     fields: [workspaces.logoUploadId],
     references: [uploads.id],
   }),
   products: many(products),
+  members: many(workspaceMembers),
 }));
 
 export const productsRelations = relations(products, ({ one }) => ({
@@ -72,5 +101,16 @@ export const productsRelations = relations(products, ({ one }) => ({
   logo: one(uploads, {
     fields: [products.logoUploadId],
     references: [uploads.id],
+  }),
+}));
+
+export const workspaceMembersRelations = relations(workspaceMembers, ({ one }) => ({
+  workspace: one(workspaces, {
+    fields: [workspaceMembers.workspaceId],
+    references: [workspaces.id],
+  }),
+  user: one(user, {
+    fields: [workspaceMembers.userId],
+    references: [user.id],
   }),
 }));

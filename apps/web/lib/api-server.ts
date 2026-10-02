@@ -7,6 +7,9 @@ import {
   type MeResponse,
   PublicPortalProductSchema,
   type PublicPortalProduct,
+  WorkspaceSchema,
+  type Workspace,
+  ANONYMOUS_ME,
 } from "@userhq/types";
 
 export async function apiServer(
@@ -51,14 +54,14 @@ export const getMe: () => Promise<MeResponse> = cache(async () => {
     const res = await apiServer("/api/v1/me");
     if (!res.ok) {
       console.error(`getMe failed: ${res.status}`);
-      return { user: null };
+      return ANONYMOUS_ME;
     }
     const data = await res.json();
     return MeResponseSchema.parse(data);
   } catch (error) {
     const errorName = error instanceof Error ? error.message : String(error);
     console.error(`getMe failed: ${errorName}`);
-    return { user: null };
+    return ANONYMOUS_ME;
   }
 });
 
@@ -101,4 +104,22 @@ export const getPortalProduct = cache(
     );
   }
 );
+
+export const getWorkspace = cache(
+  (ws: string): Promise<ApiReadResult<Workspace>> => {
+    return apiRead(
+      "/api/v1/workspaces/" + encodeURIComponent(ws),
+      WorkspaceSchema
+    );
+  }
+);
+
+export async function publicHost(): Promise<string> {
+  const incomingHeaders = await headers();
+  return (
+    incomingHeaders.get("x-forwarded-host") ??
+    incomingHeaders.get("host") ??
+    "localhost:8080"
+  );
+}
 

@@ -61,6 +61,7 @@ Secrets must never be committed to git, printed in CI logs, or shared in chat. C
 | `GOOGLE_CLIENT_SECRET` | `<staging-google-secret>` | `<prod-google-secret>` | Google OAuth 2.0 Client Secret for this environment |
 | `GITHUB_CLIENT_ID` | `<staging-github-client-id>` | `<prod-github-client-id>` | GitHub OAuth App Client ID for this environment |
 | `GITHUB_CLIENT_SECRET` | `<staging-github-secret>` | `<prod-github-secret>` | GitHub OAuth App Client Secret for this environment |
+| `PLATFORM_OWNER_EMAIL` | `<platform owner's verified email>` | `<platform owner's verified email>` | The platform owner (PLAT-01); compose refuses to deploy without it; set it in Dokploy before pushing Phase 2 to main |
 | `DEV_UPLOAD_PAGE` | `true` | `false` | Enables `/dev/upload` testing interface on staging; disabled on prod |
 | `COMPOSE_PROFILES` | `mail` | *(unset / empty)* | Activates staging Mailpit service. Unset in prod to disable Mailpit container |
 | `SMTP_HOST` | *(unset)* | `smtp-relay.brevo.com` | Brevo SMTP relay host (prod only) |

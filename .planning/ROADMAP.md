@@ -21,7 +21,7 @@ Tenant isolation and public-response contract tests start in Phase 2 and grow wi
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Walking Skeleton** - Users sign in with Google/GitHub on the full Docker stack; uploads become WebP on a persistent volume; migrations run at boot; Brevo SMTP is reachable from the VPS
+- [x] **Phase 1: Walking Skeleton** - Users sign in with Google/GitHub on the full Docker stack; uploads become WebP on a persistent volume; migrations run at boot; Brevo SMTP is reachable from the VPS
 - [ ] **Phase 2: Workspaces, Products & Platform Owner** - Platform owner admits companies by invite; companies set up their workspace, team, products, and statuses; every product gets a public portal
 - [ ] **Phase 3: Feedback Board & Conversations** - Customers post, vote, search, and comment; admins moderate and merge; commenters get reply emails
 - [ ] **Phase 4: Dual-Layer Roadmap & Closing the Loop** - Private Kanban, a public roadmap that can't leak internal fields, linked-post status sync, in-app notifications, and My activity
@@ -43,7 +43,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. From the Oracle VPS, the API container can open an authenticated SMTP session to Brevo on port 587 (or 2525/465 as a fallback). The working port is recorded for Phase 3.
   5. The deployed web app is served from vinext's standalone output, and the same app code also passes a `next build` canary in CI. If a blocking vinext defect appears, the phase exits by switching the build to `next build`.
 
-**Plans:** 5/11 plans executed
+**Plans:** 11/11 plans executed (Complete)
 
 Plans:
 **Wave 1**
@@ -85,7 +85,7 @@ Plans:
 
 **Wave 10** *(blocked on Wave 9 completion)*
 
-- [ ] 01-11-PLAN.md — Tag-driven prod release, Brevo port recorded, isolation and VPS persistence proofs, blocking real-account sign-in gate on staging and prod
+- [x] 01-11-PLAN.md — Tag-driven prod release, Brevo port recorded, isolation and VPS persistence proofs, blocking real-account sign-in gate on staging and prod
 
 **UI hint**: yes
 **Notes**: Research flag (`/gsd-plan-phase --research-phase`):

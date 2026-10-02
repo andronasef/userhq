@@ -2,18 +2,18 @@
 gsd_state_version: "1.0"
 current_phase: 01
 current_phase_name: Walking Skeleton
-status: executing
-stopped_at: Completed 01-10-PLAN.md
-last_updated: "2026-10-02T10:30:00.000Z"
+status: completed
+stopped_at: Completed Phase 1 (Plan 01-11)
+last_updated: "2026-10-02T10:45:00.000Z"
 last_activity: 2026-10-02
-last_activity_desc: Phase 01 Plan 10 completed
-state_head: cfefcab
+last_activity_desc: Phase 01 Plan 11 completed; Phase 1 complete
+state_head: 4e7f072
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 11
-  completed_plans: 10
-  percent: 91
+  completed_plans: 11
+  percent: 100
 ---
 
 # Project State
@@ -23,30 +23,30 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-01)
 
 **Core value:** An admin can see what their users actually want, ranked by demand, and close the loop publicly — feedback in, roadmap out, changelog shipped.
-**Current focus:** Phase 01 — Walking Skeleton
+**Current focus:** Phase 01 — Walking Skeleton (Completed) → Next: Phase 02 (Workspaces, Products & Platform Owner)
 
 ## Current Position
 
-Phase: 01 (Walking Skeleton) — EXECUTING
-Plan: 11 of 11 (ready for Wave 10: Plan 01-11)
-Status: Ready to execute Plan 01-11
-Last activity: 2026-10-02 — Plan 01-10 completed
+Phase: 01 (Walking Skeleton) — COMPLETED
+Plan: 11 of 11 executed and verified
+Status: Phase 1 complete. Ready to plan Phase 02.
+Last activity: 2026-10-02 — Plan 01-11 completed (Tag-driven release v0.1.0 & live sign-in gate verified)
 
-Progress: [█████████░] 91%
+Progress: [██████████] 100% (Phase 1)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 10
+- Total plans completed: 11
 - Average duration: 15 min
-- Total execution time: 2.5 hours
+- Total execution time: ~2.8 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| Phase 01 | 10 | 150 min | 15 min |
+| Phase 01 | 11 | 165 min | 15 min |
 
 **Recent Trend:**
 
@@ -68,6 +68,7 @@ Progress: [█████████░] 91%
 | Phase 01 P08 | 15 min | 2 tasks | 8 files |
 | Phase 01 P09 | 15 min | 3 tasks | 6 files |
 | Phase 01 P10 | 15 min | 3 tasks | 24 files |
+| Phase 01 P11 | 15 min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -76,21 +77,20 @@ Progress: [█████████░] 91%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [Roadmap]: Coarse granularity with 5 vertical MVP phases. Statuses are folded into tenancy (Phase 2). Changelog and FAQ share Phase 5. Research's hardening phase is split up across the other phases.
-- [Roadmap]: Phase 1 is a blocking walking skeleton. Its exit option is to switch the web build to `next build` if vinext hits a blocking defect.
-- [Roadmap]: WORK-07 (delete account → "Deleted user") is in Phase 3 and STAT-06 (public roadmap columns) is in Phase 4. Each is placed where it first becomes observable.
-- [Roadmap]: Status-change notifications and My activity (LOOP) are built in Phase 4. They cover admin status changes from Phase 3 as well as roadmap moves.
+- [Release]: Tag-based releases (`v*`) via GitHub Releases and GitHub Actions; no separate release branch.
+- [Hosting]: Production stack deployed directly on Dokploy (`userhq.increasinglabs.com`) tracking `main`.
+- [Build]: `vinext` standalone in production container; `next build` canary verified in CI.
+- [Auth]: Better Auth inside NestJS with origin check, CSRF defense, and session persistence.
+- [Uploads]: 2 MB max, magic byte validation, WebP conversion, persistent Docker volume.
 
 ### Pending Todos
 
-None yet.
+None for Phase 1. Ready for Phase 2.
 
 ### Blockers/Concerns
 
-- [Phase 1]: vinext 1.0.0 is not yet proven on self-hosted Node standalone. The `next build` fallback must stay cheap, and a lint rule enforces this.
-- [Phase 1]: Brevo SMTP reachability from the Oracle VPS is unconfirmed (port 25 is blocked; try 587, then 2525/465).
 - [Phase 2→4]: The transaction that reassigns a deleted status must grow to cover posts (Phase 3) and roadmap items (Phase 4).
-- [Launch]: No v1 requirement covers volume backups with a restore drill, publishing the Google OAuth consent screen, or per-environment OAuth apps. Handle them before public launch.
+- [Launch]: Volume backups with restore drill and publishing Google OAuth consent screen before general public launch.
 
 ## Deferred Items
 
@@ -102,6 +102,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-01T23:37:25.876Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-10-02T10:45:00.000Z
+Stopped at: Completed Phase 1 (Plan 01-11)
 Resume file: None

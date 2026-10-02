@@ -128,8 +128,49 @@ Lint rules land here: no Vite-isms in app code; the web app may not import db, d
      - choose which status new posts start in
      - delete a status only by choosing a replacement (the default status and the last remaining status can't be deleted)
   5. The platform owner can suspend a workspace: its portals show an "unavailable" page, its dashboard goes offline, and its data is kept. The owner can also ban a user, who then can't sign in or act anywhere. Lifting a suspension or ban restores access.
+**Plans:** 0/11 plans executed
 
-**Plans**: TBD
+Plans:
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — Pin minimal dialog, form, toast, and dnd-kit packages under human verification
+- [ ] 02-02-PLAN.md — Tenancy schema, migration, and public portal route tracer
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 02-03-PLAN.md — Platform owner email detection and single-use workspace invite tracer
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 02-04-PLAN.md — Workspace creation form, slug reservation, and invite acceptance
+
+**Wave 4** *(blocked on Wave 2 completion)*
+
+- [ ] 02-05-PLAN.md — Platform owner invites console, revocation, and 404 access control
+
+**Wave 5** *(blocked on Wave 3 and 4 completion)*
+
+- [ ] 02-06-PLAN.md — Workspace switcher, dashboard picker, layout shell, and settings
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 02-07-PLAN.md — Teammate invite links, email-matching verification, and member management
+
+**Wave 7** *(blocked on Wave 5 completion)*
+
+- [ ] 02-08-PLAN.md — Product CRUD, soft delete, and default status seeding
+
+**Wave 8** *(blocked on Wave 7 completion)*
+
+- [ ] 02-09-PLAN.md — Status management, drag-and-drop reorder, and safe replacement on delete
+
+**Wave 9** *(blocked on Wave 7 and 8 completion)*
+
+- [ ] 02-10-PLAN.md — Public portal branding, product card directory, and auto-redirect
+
+**Wave 10** *(blocked on Wave 9 completion)*
+
+- [ ] 02-11-PLAN.md — Platform owner workspaces/users console, workspace suspension, and user bans
 **UI hint**: yes
 **Notes**: This phase starts several things that later phases extend:
 
@@ -236,8 +277,8 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once P
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Walking Skeleton | 5/11 | In Progress|  |
-| 2. Workspaces, Products & Platform Owner | 0/TBD | Not started | - |
+| 1. Walking Skeleton | 11/11 | Complete | 2026-10-02 |
+| 2. Workspaces, Products & Platform Owner | 0/11 | Planned | - |
 | 3. Feedback Board & Conversations | 0/TBD | Not started | - |
 | 4. Dual-Layer Roadmap & Closing the Loop | 0/TBD | Not started | - |
 | 5. Changelog & FAQ | 0/TBD | Not started | - |

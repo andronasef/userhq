@@ -6,7 +6,7 @@
     {
       "number": "1",
       "name": "Walking Skeleton",
-      "status": "in_progress"
+      "status": "complete"
     },
     {
       "number": "2",
@@ -32,7 +32,7 @@
   "next": {
     "command": "/gsd-progress --next",
     "label": "Advance to the next step",
-    "reason": "Phase 2 of 5 · 0% · executing"
+    "reason": "Phase 2 of 5 · 20% · executing"
   },
-  "updated_at": "2026-10-02T22:13:54.435Z"
+  "updated_at": "2026-10-02T22:20:37.273Z"
 }

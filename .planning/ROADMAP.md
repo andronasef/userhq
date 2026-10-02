@@ -77,7 +77,7 @@ Plans:
 
 **Wave 8** *(blocked on Wave 7 completion)*
 
-- [ ] 01-09-PLAN.md — Durability: redeploy persistence, migration race/idempotency tests, SMTP probe, Mailpit profile
+- [x] 01-09-PLAN.md — Durability: redeploy persistence, migration race/idempotency tests, SMTP probe, Mailpit profile
 
 **Wave 9** *(blocked on Wave 8 completion)*
 

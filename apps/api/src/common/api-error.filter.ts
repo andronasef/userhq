@@ -77,6 +77,45 @@ export class ApiErrorFilter implements ExceptionFilter {
           }
           break;
       }
+    } else if (
+      typeof (exception as any)?.status === "number" ||
+      typeof (exception as any)?.statusCode === "number"
+    ) {
+      const errStatus =
+        (exception as any).status ?? (exception as any).statusCode;
+      status = errStatus;
+      const defaultMessage = (exception as any).message || "";
+      switch (status) {
+        case HttpStatus.UNAUTHORIZED:
+          code = "unauthorized";
+          message = defaultMessage || "Unauthorized";
+          break;
+        case HttpStatus.FORBIDDEN:
+          code = "forbidden";
+          message = defaultMessage || "Forbidden";
+          break;
+        case HttpStatus.NOT_FOUND:
+          code = "not_found";
+          message = defaultMessage || "Not Found";
+          break;
+        case HttpStatus.PAYLOAD_TOO_LARGE:
+          code = "file_too_large";
+          message = defaultMessage || "File too large";
+          break;
+        case HttpStatus.UNSUPPORTED_MEDIA_TYPE:
+          code = "unsupported_type";
+          message = defaultMessage || "Unsupported media type";
+          break;
+        default:
+          if (status >= 400 && status < 500) {
+            code = "internal_error";
+            message = defaultMessage || "Request Error";
+          } else {
+            code = "internal_error";
+            message = "Something went wrong on our end.";
+          }
+          break;
+      }
     }
 
     if (status >= 500) {

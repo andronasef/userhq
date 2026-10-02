@@ -18,6 +18,8 @@ import { MeController } from "./auth/me.controller.js";
 import { OriginGuard, SessionGuard } from "./auth/guards.js";
 import { ApiErrorFilter } from "./common/api-error.filter.js";
 
+import { UploadsModule } from "./uploads/uploads.module.js";
+
 const DB_POOL = Symbol.for("@userhq/api/db-pool");
 
 @Injectable()
@@ -48,6 +50,7 @@ export class AppModule {
             json: { limit: "100kb" },
           },
         }),
+        UploadsModule,
       ],
       controllers: [HealthController, MeController],
       providers: [
@@ -86,9 +89,24 @@ export class AppModule {
   }
 }
 
-export function configureApp(app: NestExpressApplication, _env: Env): void {
+export function configureApp(app: NestExpressApplication, env: Env): void {
   app.setGlobalPrefix("api/v1");
   app.set("trust proxy", 1);
   app.use(helmet());
   app.enableShutdownHooks();
+
+  app.useStaticAssets(env.UPLOAD_DIR, {
+    prefix: "/uploads",
+    immutable: true,
+    maxAge: "365d",
+    index: false,
+    redirect: false,
+    dotfiles: "deny",
+    fallthrough: false,
+    setHeaders: (res: any) => {
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader("Content-Security-Policy", "default-src 'none'");
+      res.setHeader("Cross-Origin-Resource-Policy", "same-origin");
+    },
+  });
 }

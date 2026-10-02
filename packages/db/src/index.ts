@@ -5,11 +5,17 @@ import pg from "pg";
 const { Pool, Client } = pg;
 import { fileURLToPath } from "node:url";
 import * as authSchema from "./schema/auth.js";
+import * as uploadsSchema from "./schema/uploads.js";
 
-export * as schema from "./schema/auth.js";
+export const schema = {
+  ...authSchema,
+  ...uploadsSchema,
+};
+
 export * from "./schema/auth.js";
+export * from "./schema/uploads.js";
 
-export type Db = NodePgDatabase<typeof authSchema>;
+export type Db = NodePgDatabase<typeof schema>;
 export const DB: unique symbol = Symbol.for("@userhq/db");
 
 export function createDb(
@@ -18,7 +24,7 @@ export function createDb(
 ): { db: Db; pool: pg.Pool } {
   const max = opts?.max ?? 10;
   const pool = new Pool({ connectionString, max });
-  const db = drizzle(pool, { schema: authSchema });
+  const db = drizzle(pool, { schema });
   return { db, pool };
 }
 

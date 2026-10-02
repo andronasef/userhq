@@ -36,9 +36,9 @@
     "vitest": "5.0.3"
   },
   "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
-    "start": "node server.js",
+    "dev": "vinext dev --port 3000",
+    "build": "vinext build",
+    "start": "node dist/standalone/server.js",
     "build:next": "next build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"

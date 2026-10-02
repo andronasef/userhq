@@ -36,6 +36,18 @@ services:
     volumes:
       - uploads:/data/uploads
 
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    init: true
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      API_INTERNAL_URL: ${API_INTERNAL_URL:-http://api:4000}
+      DEV_UPLOAD_PAGE: ${DEV_UPLOAD_PAGE:-false}
+
 volumes:
   pgdata:
   uploads:

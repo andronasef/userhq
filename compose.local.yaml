@@ -1,0 +1,15 @@
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:5433:5432"
+
+  caddy:
+    image: caddy:2.11.4
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - ./docker/Caddyfile.local:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - web
+      - api

@@ -73,7 +73,7 @@ Plans:
 
 **Wave 7** *(blocked on Wave 6 completion)*
 
-- [ ] 01-08-PLAN.md — Dev-only /dev/upload page with runtime flag gating and every UI state; routed upload e2e (joins web and API tracks)
+- [x] 01-08-PLAN.md — Dev-only /dev/upload page with runtime flag gating and every UI state; routed upload e2e (joins web and API tracks)
 
 **Wave 8** *(blocked on Wave 7 completion)*
 

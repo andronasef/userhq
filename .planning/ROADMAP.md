@@ -207,7 +207,7 @@ Suspend and ban checks go in the shared guards, so every later feature inherits 
      - merge a duplicate post into another: votes move without double-counting, comments move, and the duplicate's link redirects
   5. When someone else comments on a post that a user created or commented on, that user gets an email. In development it lands in Mailpit; in production it goes through Brevo, configured only by env settings. Users can turn these emails off in account settings, and every email has a one-click unsubscribe link. If sending fails, the comment still appears and the email is retried automatically.
 
-**Plans:** 8/16 plans executed
+**Plans:** 9/16 plans executed
 
 Plans:
 **Wave 1**
@@ -238,7 +238,7 @@ Plans:
 
 **Wave 7** *(blocked on Wave 6 completion)*
 
-- [ ] 03-09-PLAN.md — Status change with public note + activity log, post edit/delete lock rule, portal Admin menu
+- [x] 03-09-PLAN.md — Status change with public note + activity log, post edit/delete lock rule, portal Admin menu
 
 **Wave 8** *(blocked on Wave 7 completion)*
 

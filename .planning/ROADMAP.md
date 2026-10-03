@@ -22,7 +22,7 @@ Tenant isolation and public-response contract tests start in Phase 2 and grow wi
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Walking Skeleton** - Users sign in with Google/GitHub on the full Docker stack; uploads become WebP on a persistent volume; migrations run at boot; Brevo SMTP is reachable from the VPS
-- [ ] **Phase 2: Workspaces, Products & Platform Owner** - Platform owner admits companies by invite; companies set up their workspace, team, products, and statuses; every product gets a public portal
+- [x] **Phase 2: Workspaces, Products & Platform Owner** - Platform owner admits companies by invite; companies set up their workspace, team, products, and statuses; every product gets a public portal
 - [ ] **Phase 3: Feedback Board & Conversations** - Customers post, vote, search, and comment; admins moderate and merge; commenters get reply emails
 - [ ] **Phase 4: Dual-Layer Roadmap & Closing the Loop** - Private Kanban, a public roadmap that can't leak internal fields, linked-post status sync, in-app notifications, and My activity
 - [ ] **Phase 5: Changelog & FAQ** - Rich-text release notes with WebP images, tags, drafts, and permalinks; a searchable FAQ that links to the feedback board
@@ -128,49 +128,49 @@ Lint rules land here: no Vite-isms in app code; the web app may not import db, d
      - choose which status new posts start in
      - delete a status only by choosing a replacement (the default status and the last remaining status can't be deleted)
   5. The platform owner can suspend a workspace: its portals show an "unavailable" page, its dashboard goes offline, and its data is kept. The owner can also ban a user, who then can't sign in or act anywhere. Lifting a suspension or ban restores access.
-**Plans:** 0/11 plans executed
+**Plans:** 11/11 plans executed (Complete)
 
 Plans:
 **Wave 1**
 
-- [ ] 02-01-PLAN.md — Pin minimal dialog, form, toast, and dnd-kit packages under human verification
-- [ ] 02-02-PLAN.md — Tenancy schema, migration, and public portal route tracer
+- [x] 02-01-PLAN.md — Pin minimal dialog, form, toast, and dnd-kit packages under human verification
+- [x] 02-02-PLAN.md — Tenancy schema, migration, and public portal route tracer
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 02-03-PLAN.md — Platform owner email detection and single-use workspace invite tracer
+- [x] 02-03-PLAN.md — Platform owner email detection and single-use workspace invite tracer
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 02-04-PLAN.md — Workspace creation form, slug reservation, and invite acceptance
+- [x] 02-04-PLAN.md — Workspace creation form, slug reservation, and invite acceptance
 
 **Wave 4** *(blocked on Wave 2 completion)*
 
-- [ ] 02-05-PLAN.md — Platform owner invites console, revocation, and 404 access control
+- [x] 02-05-PLAN.md — Platform owner invites console, revocation, and 404 access control
 
 **Wave 5** *(blocked on Wave 3 and 4 completion)*
 
-- [ ] 02-06-PLAN.md — Workspace switcher, dashboard picker, layout shell, and settings
+- [x] 02-06-PLAN.md — Workspace switcher, dashboard picker, layout shell, and settings
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
-- [ ] 02-07-PLAN.md — Teammate invite links, email-matching verification, and member management
+- [x] 02-07-PLAN.md — Teammate invite links, email-matching verification, and member management
 
 **Wave 7** *(blocked on Wave 5 completion)*
 
-- [ ] 02-08-PLAN.md — Product CRUD, soft delete, and default status seeding
+- [x] 02-08-PLAN.md — Product CRUD, soft delete, and default status seeding
 
 **Wave 8** *(blocked on Wave 7 completion)*
 
-- [ ] 02-09-PLAN.md — Status management, drag-and-drop reorder, and safe replacement on delete
+- [x] 02-09-PLAN.md — Status management, drag-and-drop reorder, and safe replacement on delete
 
 **Wave 9** *(blocked on Wave 7 and 8 completion)*
 
-- [ ] 02-10-PLAN.md — Public portal branding, product card directory, and auto-redirect
+- [x] 02-10-PLAN.md — Public portal branding, product card directory, and auto-redirect
 
 **Wave 10** *(blocked on Wave 9 completion)*
 
-- [ ] 02-11-PLAN.md — Platform owner workspaces/users console, workspace suspension, and user bans
+- [x] 02-11-PLAN.md — Platform owner workspaces/users console, workspace suspension, and user bans
 **UI hint**: yes
 **Notes**: This phase starts several things that later phases extend:
 

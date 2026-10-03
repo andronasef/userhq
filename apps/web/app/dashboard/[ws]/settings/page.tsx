@@ -24,7 +24,7 @@ export async function generateMetadata({
 
 export default async function WorkspaceSettingsPage({
   params,
-}: WorkspaceSettingsPageProps): Promise<React.JSX.Element> {
+}: WorkspaceSettingsPageProps): Promise<React.JSX.Element | null> {
   const { ws } = await params;
   const [wsResult, host] = await Promise.all([
     getWorkspace(ws),
@@ -32,6 +32,9 @@ export default async function WorkspaceSettingsPage({
   ]);
 
   if (!wsResult.ok) {
+    if (wsResult.status === 403 && wsResult.code === "workspace_suspended") {
+      return null;
+    }
     notFound();
   }
 

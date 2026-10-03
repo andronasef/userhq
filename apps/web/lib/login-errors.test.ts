@@ -61,6 +61,14 @@ describe("loginErrorCopy and isDisplayableErrorCode", () => {
     expect(res.body).toBe("Check your connection and try again.");
   });
 
+  it("maps account_banned to This account can't sign in", () => {
+    const res = loginErrorCopy("account_banned");
+    expect(res.title).toBe("This account can't sign in");
+    expect(res.body).toBe(
+      "Your access to UserHQ has been suspended. If you think this is a mistake, contact the UserHQ team."
+    );
+  });
+
   it("maps unknown or unlisted code to Sign-in failed fallback", () => {
     const res = loginErrorCopy("some_unknown_error_code");
     expect(res.title).toBe("Sign-in failed");

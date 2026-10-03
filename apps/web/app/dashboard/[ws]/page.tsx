@@ -29,11 +29,14 @@ export async function generateMetadata({
 
 export default async function DashboardPage({
   params,
-}: DashboardPageProps): Promise<React.JSX.Element> {
+}: DashboardPageProps): Promise<React.JSX.Element | null> {
   const { ws } = await params;
   const wsResult = await getWorkspace(ws);
 
   if (!wsResult.ok) {
+    if (wsResult.status === 403 && wsResult.code === "workspace_suspended") {
+      return null;
+    }
     notFound();
   }
 

@@ -8,6 +8,9 @@ import { WorkspaceSwitcher } from "../../../components/dashboard/workspace-switc
 import { DashboardSidebar } from "../../../components/dashboard/sidebar";
 import { MobileNav } from "../../../components/dashboard/mobile-nav";
 import { AppToaster } from "../../../components/ui/toaster";
+import { AppShell } from "../../../components/app-shell";
+import { StatePage } from "../../../components/state-page";
+import { Button } from "../../../components/ui/button";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -22,6 +25,31 @@ export default async function DashboardLayout({
   const result = await getWorkspace(ws);
 
   if (!result.ok) {
+    if (result.status === 403 && result.code === "workspace_suspended") {
+      const me = await getMe();
+      const wsInfo = me.workspaces.find((w) => w.slug === ws);
+      const name = wsInfo?.name ?? ws;
+      return (
+        <AppShell>
+          <StatePage
+            title={`${name} is unavailable`}
+            body="This workspace has been suspended by the UserHQ team. Your data is kept. Contact the UserHQ team to restore access."
+            actions={
+              <>
+                <Button variant="outline" asChild>
+                  <Link href="/">Go to home</Link>
+                </Button>
+                {me.workspaces.length > 1 && (
+                  <Button variant="outline" asChild>
+                    <Link href="/dashboard">Switch workspace</Link>
+                  </Button>
+                )}
+              </>
+            }
+          />
+        </AppShell>
+      );
+    }
     if (result.status === 404) {
       notFound();
     }

@@ -277,3 +277,75 @@ export const ReorderStatusesInputSchema = z.object({
   ids: z.array(z.uuid()).min(1),
 });
 export type ReorderStatusesInput = z.infer<typeof ReorderStatusesInputSchema>;
+
+export const PlatformListQuerySchema = z.object({
+  q: z.string().trim().max(100).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+});
+export type PlatformListQuery = z.infer<typeof PlatformListQuerySchema>;
+
+export const PlatformWorkspaceRowSchema = z.object({
+  id: z.uuid(),
+  slug: z.string(),
+  name: z.string(),
+  logoUrl: z.string().nullable(),
+  productCount: z.number().int(),
+  memberCount: z.number().int(),
+  postCount: z.number().int(),
+  voteCount: z.number().int(),
+  suspended: z.boolean(),
+  createdAt: z.string(),
+});
+export type PlatformWorkspaceRow = z.infer<typeof PlatformWorkspaceRowSchema>;
+
+export const PlatformWorkspaceProductSchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  live: z.boolean(),
+  postCount: z.number().int(),
+  voteCount: z.number().int(),
+});
+export type PlatformWorkspaceProduct = z.infer<typeof PlatformWorkspaceProductSchema>;
+
+export const PlatformWorkspaceMemberSchema = z.object({
+  name: z.string(),
+  email: z.string(),
+  role: MemberRoleSchema,
+  joinedAt: z.string(),
+});
+export type PlatformWorkspaceMember = z.infer<typeof PlatformWorkspaceMemberSchema>;
+
+export const PlatformWorkspaceDetailSchema = PlatformWorkspaceRowSchema.extend({
+  products: z.array(PlatformWorkspaceProductSchema),
+  members: z.array(PlatformWorkspaceMemberSchema),
+});
+export type PlatformWorkspaceDetail = z.infer<typeof PlatformWorkspaceDetailSchema>;
+
+export const PlatformUserRowSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  image: z.string().nullable(),
+  workspaceCount: z.number().int(),
+  postCount: z.number().int(),
+  voteCount: z.number().int(),
+  banned: z.boolean(),
+  isPlatformOwner: z.boolean(),
+  createdAt: z.string(),
+});
+export type PlatformUserRow = z.infer<typeof PlatformUserRowSchema>;
+
+export function pageOf<T extends z.ZodTypeAny>(row: T) {
+  return z.object({
+    rows: z.array(row),
+    page: z.number().int(),
+    hasNext: z.boolean(),
+  });
+}
+
+export const PlatformWorkspacePageSchema = pageOf(PlatformWorkspaceRowSchema);
+export type PlatformWorkspacePage = z.infer<typeof PlatformWorkspacePageSchema>;
+
+export const PlatformUserPageSchema = pageOf(PlatformUserRowSchema);
+export type PlatformUserPage = z.infer<typeof PlatformUserPageSchema>;
+

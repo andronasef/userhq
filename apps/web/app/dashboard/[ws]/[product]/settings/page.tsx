@@ -26,7 +26,7 @@ export async function generateMetadata({
 
 export default async function ProductSettingsPage({
   params,
-}: ProductSettingsPageProps): Promise<React.JSX.Element> {
+}: ProductSettingsPageProps): Promise<React.JSX.Element | null> {
   const { ws, product } = await params;
   const [productRes, wsRes, host] = await Promise.all([
     getProduct(ws, product),
@@ -35,6 +35,9 @@ export default async function ProductSettingsPage({
   ]);
 
   if (!productRes.ok || !wsRes.ok) {
+    if (!wsRes.ok && wsRes.status === 403 && wsRes.code === "workspace_suspended") {
+      return null;
+    }
     notFound();
   }
 

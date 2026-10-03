@@ -23,6 +23,12 @@ import {
   type ProductDetail,
   StatusSchema,
   type Status,
+  PlatformWorkspacePageSchema,
+  type PlatformWorkspacePage,
+  PlatformWorkspaceDetailSchema,
+  type PlatformWorkspaceDetail,
+  PlatformUserPageSchema,
+  type PlatformUserPage,
   ANONYMOUS_ME,
 } from "@userhq/types";
 
@@ -183,6 +189,35 @@ export const getPortalDirectory = cache(
       "/api/v1/portal/" + encodeURIComponent(ws),
       PublicPortalDirectorySchema
     );
+  }
+);
+
+export const getPlatformWorkspaces = cache(
+  (q?: string, page?: number): Promise<ApiReadResult<PlatformWorkspacePage>> => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (page && page > 1) params.set("page", String(page));
+    const qs = params.toString() ? `?${params.toString()}` : "";
+    return apiRead(`/api/v1/platform/workspaces${qs}`, PlatformWorkspacePageSchema);
+  }
+);
+
+export const getPlatformWorkspace = cache(
+  (id: string): Promise<ApiReadResult<PlatformWorkspaceDetail>> => {
+    return apiRead(
+      `/api/v1/platform/workspaces/${encodeURIComponent(id)}`,
+      PlatformWorkspaceDetailSchema
+    );
+  }
+);
+
+export const getPlatformUsers = cache(
+  (q?: string, page?: number): Promise<ApiReadResult<PlatformUserPage>> => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (page && page > 1) params.set("page", String(page));
+    const qs = params.toString() ? `?${params.toString()}` : "";
+    return apiRead(`/api/v1/platform/users${qs}`, PlatformUserPageSchema);
   }
 );
 

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
 import { schema } from "@userhq/db";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { createHash } from "node:crypto";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
 import { inviteState, hashInviteToken } from "../src/invites/invites.service.js";
@@ -43,6 +43,23 @@ describe("Platform Owner Console & Invites API (Plan 02-05)", () => {
         .where(inArray(schema.invites.id, createdInviteIds));
     }
     if (createdWorkspaceIds.length > 0) {
+      await testApp.db
+        .delete(schema.statuses)
+        .where(
+          inArray(
+            schema.statuses.productId,
+            testApp.db
+              .select({ id: schema.products.id })
+              .from(schema.products)
+              .where(inArray(schema.products.workspaceId, createdWorkspaceIds))
+          )
+        );
+      await testApp.db
+        .delete(schema.products)
+        .where(inArray(schema.products.workspaceId, createdWorkspaceIds));
+      await testApp.db
+        .delete(schema.invites)
+        .where(inArray(schema.invites.workspaceId, createdWorkspaceIds));
       await testApp.db
         .delete(schema.workspaces)
         .where(inArray(schema.workspaces.id, createdWorkspaceIds));
@@ -498,4 +515,547 @@ describe("Platform Owner Console & Invites API (Plan 02-05)", () => {
       expect(foundPending.state).toBe("pending");
     });
   });
+
+  describe("Workspaces Oversight & Detail (Plan 02-11 Task 1)", () => {
+    it("tracer: owner lists workspaces with counts and opens one", async () => {
+      const ts = Date.now();
+      const wsSlug1 = `ws-trace1-${ts}`;
+      const wsSlug2 = `ws-trace2-${ts}`;
+
+      // Workspace 1: 2 products (1 live, 1 deleted), 2 members
+      const [ws1] = await testApp.db
+        .insert(schema.workspaces)
+        .values({
+          slug: wsSlug1,
+          name: `Alpha Tracer ${ts}`,
+          createdAt: new Date(ts + 2000),
+        })
+        .returning();
+      createdWorkspaceIds.push(ws1.id);
+
+      // Workspace 2: 0 products, 1 member
+      const [ws2] = await testApp.db
+        .insert(schema.workspaces)
+        .values({
+          slug: wsSlug2,
+          name: `Beta Tracer ${ts}`,
+          createdAt: new Date(ts + 1000),
+        })
+        .returning();
+      createdWorkspaceIds.push(ws2.id);
+
+      // Members for ws1
+      const user1 = await signedInCookie(testApp.test, {
+        name: "Trace User 1",
+        emailVerified: true,
+      });
+      const user2 = await signedInCookie(testApp.test, {
+        name: "Trace User 2",
+        emailVerified: true,
+      });
+
+      await testApp.db.insert(schema.workspaceMembers).values([
+        { workspaceId: ws1.id, userId: user1.userId, role: "owner", createdAt: new Date(ts + 2100) },
+        { workspaceId: ws1.id, userId: user2.userId, role: "admin", createdAt: new Date(ts + 2200) },
+        { workspaceId: ws2.id, userId: user1.userId, role: "owner", createdAt: new Date(ts + 1100) },
+      ]);
+
+      // Products for ws1: 1 live, 1 deleted
+      const [prodLive] = await testApp.db
+        .insert(schema.products)
+        .values({
+          workspaceId: ws1.id,
+          slug: `live-prod-${ts}`,
+          name: "Live Product",
+          createdAt: new Date(ts + 2300),
+        })
+        .returning();
+
+      const [prodDeleted] = await testApp.db
+        .insert(schema.products)
+        .values({
+          workspaceId: ws1.id,
+          slug: `del-prod-${ts}`,
+          name: "Deleted Product",
+          deletedAt: new Date(ts + 2400),
+          createdAt: new Date(ts + 2350),
+        })
+        .returning();
+
+      // Owner queries GET /api/v1/platform/workspaces?q=Tracer {ts}
+      const listRes = await request(testApp.http)
+        .get(`/api/v1/platform/workspaces?q=Tracer ${ts}`)
+        .set("Cookie", ownerCookie);
+
+      expect(listRes.status).toBe(200);
+      const listData = listRes.body;
+      expect(listData.rows.length).toBe(2);
+
+      // Newest first
+      expect(listData.rows[0].id).toBe(ws1.id);
+      expect(listData.rows[1].id).toBe(ws2.id);
+
+      // ws1 counts: productCount 1 (deleted excluded), memberCount 2, postCount 0, voteCount 0
+      expect(listData.rows[0].productCount).toBe(1);
+      expect(listData.rows[0].memberCount).toBe(2);
+      expect(listData.rows[0].postCount).toBe(0);
+      expect(listData.rows[0].voteCount).toBe(0);
+      expect(listData.rows[0].suspended).toBe(false);
+
+      // ws2 counts: productCount 0, memberCount 1, postCount 0, voteCount 0
+      expect(listData.rows[1].productCount).toBe(0);
+      expect(listData.rows[1].memberCount).toBe(1);
+      expect(listData.rows[1].postCount).toBe(0);
+      expect(listData.rows[1].voteCount).toBe(0);
+
+      // Detail: GET /api/v1/platform/workspaces/:id
+      const detailRes = await request(testApp.http)
+        .get(`/api/v1/platform/workspaces/${ws1.id}`)
+        .set("Cookie", ownerCookie);
+
+      expect(detailRes.status).toBe(200);
+      const detail = detailRes.body;
+      expect(detail.id).toBe(ws1.id);
+      expect(detail.name).toBe(`Alpha Tracer ${ts}`);
+      expect(detail.productCount).toBe(1);
+      expect(detail.memberCount).toBe(2);
+
+      // Products include deleted with live flags
+      expect(detail.products.length).toBe(2);
+      const liveP = detail.products.find((p: any) => p.slug === prodLive.slug);
+      expect(liveP).toBeDefined();
+      expect(liveP.live).toBe(true);
+      expect(liveP.postCount).toBe(0);
+      expect(liveP.voteCount).toBe(0);
+
+      const delP = detail.products.find((p: any) => p.slug === prodDeleted.slug);
+      expect(delP).toBeDefined();
+      expect(delP.live).toBe(false);
+
+      // Members
+      expect(detail.members.length).toBe(2);
+      const m1 = detail.members.find((m: any) => m.name === "Trace User 1");
+      expect(m1).toBeDefined();
+      expect(m1.role).toBe("owner");
+      const m2 = detail.members.find((m: any) => m.name === "Trace User 2");
+      expect(m2).toBeDefined();
+      expect(m2.role).toBe("admin");
+    });
+
+    it("PLAT-04: 50 vs 51 boundary pagination", async () => {
+      const ts = Date.now();
+      const prefix = `boundary-${ts}`;
+
+      // Seed 51 workspaces
+      const values = Array.from({ length: 51 }, (_, i) => ({
+        slug: `bws-${i}-${ts}`,
+        name: `${prefix} WS ${i.toString().padStart(2, "0")}`,
+        createdAt: new Date(ts + i * 100),
+      }));
+
+      const inserted = await testApp.db
+        .insert(schema.workspaces)
+        .values(values)
+        .returning();
+      createdWorkspaceIds.push(...inserted.map((w) => w.id));
+
+      // Page 1 with 51 matches -> exactly 50 rows, hasNext: true
+      const page1Res = await request(testApp.http)
+        .get(`/api/v1/platform/workspaces?q=${prefix}&page=1`)
+        .set("Cookie", ownerCookie);
+
+      expect(page1Res.status).toBe(200);
+      expect(page1Res.body.rows.length).toBe(50);
+      expect(page1Res.body.page).toBe(1);
+      expect(page1Res.body.hasNext).toBe(true);
+
+      // Page 2 with 51 matches -> exactly 1 row (the 51st), hasNext: false
+      const page2Res = await request(testApp.http)
+        .get(`/api/v1/platform/workspaces?q=${prefix}&page=2`)
+        .set("Cookie", ownerCookie);
+
+      expect(page2Res.status).toBe(200);
+      expect(page2Res.body.rows.length).toBe(1);
+      expect(page2Res.body.page).toBe(2);
+      expect(page2Res.body.hasNext).toBe(false);
+
+      // Now delete the 51st workspace so exactly 50 matching rows remain
+      await testApp.db
+        .delete(schema.workspaces)
+        .where(eq(schema.workspaces.id, inserted[0].id));
+      const idx = createdWorkspaceIds.indexOf(inserted[0].id);
+      if (idx !== -1) createdWorkspaceIds.splice(idx, 1);
+
+      // Exactly 50 matches -> 50 rows, hasNext: false
+      const pageExact50Res = await request(testApp.http)
+        .get(`/api/v1/platform/workspaces?q=${prefix}&page=1`)
+        .set("Cookie", ownerCookie);
+
+      expect(pageExact50Res.status).toBe(200);
+      expect(pageExact50Res.body.rows.length).toBe(50);
+      expect(pageExact50Res.body.hasNext).toBe(false);
+    });
+
+    it("PLAT-04: wildcard escapes (% and _) and query validation", async () => {
+      const ts = Date.now();
+      const [wsPercent] = await testApp.db
+        .insert(schema.workspaces)
+        .values({
+          slug: `pct-${ts}`,
+          name: `Special 100% Promo ${ts}`,
+        })
+        .returning();
+      createdWorkspaceIds.push(wsPercent.id);
+
+      const [wsUnder] = await testApp.db
+        .insert(schema.workspaces)
+        .values({
+          slug: `und-${ts}`,
+          name: `Special a_b Group ${ts}`,
+        })
+        .returning();
+      createdWorkspaceIds.push(wsUnder.id);
+
+      const [wsNormal] = await testApp.db
+        .insert(schema.workspaces)
+        .values({
+          slug: `norm-${ts}`,
+          name: `Special axb Normal ${ts}`,
+        })
+        .returning();
+      createdWorkspaceIds.push(wsNormal.id);
+
+      // Search "% Promo" -> should match only wsPercent
+      const resPct = await request(testApp.http)
+        .get(`/api/v1/platform/workspaces?q=% Promo ${ts}`)
+        .set("Cookie", ownerCookie);
+      expect(resPct.status).toBe(200);
+      expect(resPct.body.rows.length).toBe(1);
+      expect(resPct.body.rows[0].id).toBe(wsPercent.id);
+
+      // Search "a_b Group" -> should match ONLY wsUnder, NOT wsNormal
+      const resUnder = await request(testApp.http)
+        .get(`/api/v1/platform/workspaces?q=a_b Group ${ts}`)
+        .set("Cookie", ownerCookie);
+      expect(resUnder.status).toBe(200);
+      expect(resUnder.body.rows.length).toBe(1);
+      expect(resUnder.body.rows[0].id).toBe(wsUnder.id);
+
+      // Search with 101 characters -> 400 validation_failed
+      const longQ = "a".repeat(101);
+      const resLong = await request(testApp.http)
+        .get(`/api/v1/platform/workspaces?q=${longQ}`)
+        .set("Cookie", ownerCookie);
+      expect(resLong.status).toBe(400);
+      expect(resLong.body.code).toBe("validation_failed");
+
+      // No match search -> empty array, hasNext false
+      const resNone = await request(testApp.http)
+        .get(`/api/v1/platform/workspaces?q=nonexistent-term-random-string-${ts}`)
+        .set("Cookie", ownerCookie);
+      expect(resNone.status).toBe(200);
+      expect(resNone.body.rows).toEqual([]);
+      expect(resNone.body.hasNext).toBe(false);
+    });
+
+    it("GET platform/workspaces/:id returns 404 for malformed or unknown id", async () => {
+      const malformedRes = await request(testApp.http)
+        .get("/api/v1/platform/workspaces/not-a-valid-uuid")
+        .set("Cookie", ownerCookie);
+      expect(malformedRes.status).toBe(404);
+      expect(malformedRes.body.code).toBe("not_found");
+
+      const unknownRes = await request(testApp.http)
+        .get("/api/v1/platform/workspaces/00000000-0000-0000-0000-000000000000")
+        .set("Cookie", ownerCookie);
+      expect(unknownRes.status).toBe(404);
+      expect(unknownRes.body.code).toBe("not_found");
+    });
+  });
+
+  describe("Workspace Suspension & Lift (Plan 02-11 Task 2)", () => {
+    it("suspend and lift is non-destructive snapshot and restores exact access", async () => {
+      const ts = Date.now();
+      const wsSlug = `sus-ws-${ts}`;
+
+      // 1. Seed workspace
+      const [ws] = await testApp.db
+        .insert(schema.workspaces)
+        .values({
+          slug: wsSlug,
+          name: `Suspended Workspace ${ts}`,
+        })
+        .returning();
+      createdWorkspaceIds.push(ws.id);
+
+      // 2. Seed owner and admin member
+      const wsOwner = await signedInCookie(testApp.test, {
+        name: "WS Owner",
+        email: `ws-owner-${ts}@example.com`,
+        emailVerified: true,
+      });
+      const wsAdmin = await signedInCookie(testApp.test, {
+        name: "WS Admin",
+        email: `ws-admin-${ts}@example.com`,
+        emailVerified: true,
+      });
+
+      await testApp.db.insert(schema.workspaceMembers).values([
+        { workspaceId: ws.id, userId: wsOwner.userId, role: "owner" },
+        { workspaceId: ws.id, userId: wsAdmin.userId, role: "admin" },
+      ]);
+
+      // 3. Seed product and default status
+      const [prod] = await testApp.db
+        .insert(schema.products)
+        .values({
+          workspaceId: ws.id,
+          slug: `app-${ts}`,
+          name: "Main App",
+        })
+        .returning();
+
+      await testApp.db
+        .insert(schema.statuses)
+        .values({
+          productId: prod.id,
+          name: "Backlog",
+          color: "#2563EB",
+          type: "review",
+          position: 0,
+          isDefault: true,
+        })
+        .returning();
+
+      // 4. Seed teammate invite
+      const inviteEmail = `invited-mate-${ts}@example.com`;
+      const createInvRes = await request(testApp.http)
+        .post(`/api/v1/workspaces/${ws.slug}/invites`)
+        .set("Cookie", wsOwner.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ email: inviteEmail });
+
+      expect(createInvRes.status).toBe(201);
+      const inviteToken = createInvRes.body.link.split("/invite/")[1];
+
+      // SNAPSHOT BEFORE SUSPEND
+      const [membersCountBefore] = await testApp.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(schema.workspaceMembers)
+        .where(eq(schema.workspaceMembers.workspaceId, ws.id));
+      const [productsCountBefore] = await testApp.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(schema.products)
+        .where(eq(schema.products.workspaceId, ws.id));
+      const [statusesCountBefore] = await testApp.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(schema.statuses)
+        .where(eq(schema.statuses.productId, prod.id));
+      const [invitesCountBefore] = await testApp.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(schema.invites)
+        .where(eq(schema.invites.workspaceId, ws.id));
+
+      expect(membersCountBefore.count).toBe(2);
+      expect(productsCountBefore.count).toBe(1);
+      expect(statusesCountBefore.count).toBe(1);
+      expect(invitesCountBefore.count).toBe(1);
+
+      // SUSPEND: POST /platform/workspaces/:id/suspend
+      const suspendRes1 = await request(testApp.http)
+        .post(`/api/v1/platform/workspaces/${ws.id}/suspend`)
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      expect(suspendRes1.status).toBe(204);
+
+      // Suspend again -> 204 idempotent
+      const suspendRes2 = await request(testApp.http)
+        .post(`/api/v1/platform/workspaces/${ws.id}/suspend`)
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      expect(suspendRes2.status).toBe(204);
+
+      // SNAPSHOT AFTER SUSPEND (strictly identical)
+      const [membersCountSus] = await testApp.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(schema.workspaceMembers)
+        .where(eq(schema.workspaceMembers.workspaceId, ws.id));
+      const [productsCountSus] = await testApp.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(schema.products)
+        .where(eq(schema.products.workspaceId, ws.id));
+      const [statusesCountSus] = await testApp.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(schema.statuses)
+        .where(eq(schema.statuses.productId, prod.id));
+      const [invitesCountSus] = await testApp.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(schema.invites)
+        .where(eq(schema.invites.workspaceId, ws.id));
+
+      expect(membersCountSus.count).toBe(membersCountBefore.count);
+      expect(productsCountSus.count).toBe(productsCountBefore.count);
+      expect(statusesCountSus.count).toBe(statusesCountBefore.count);
+      expect(invitesCountSus.count).toBe(invitesCountBefore.count);
+
+      // VERIFY LOCKED ACCESS (403 workspace_suspended on all workspace routes)
+      // 1. GET /workspaces/:ws
+      const getWsRes = await request(testApp.http)
+        .get(`/api/v1/workspaces/${ws.slug}`)
+        .set("Cookie", wsAdmin.cookie);
+      expect(getWsRes.status).toBe(403);
+      expect(getWsRes.body.code).toBe("workspace_suspended");
+
+      // 2. GET /workspaces/:ws/members
+      const getMembersRes = await request(testApp.http)
+        .get(`/api/v1/workspaces/${ws.slug}/members`)
+        .set("Cookie", wsAdmin.cookie);
+      expect(getMembersRes.status).toBe(403);
+      expect(getMembersRes.body.code).toBe("workspace_suspended");
+
+      // 3. GET /workspaces/:ws/invites
+      const getInvitesRes = await request(testApp.http)
+        .get(`/api/v1/workspaces/${ws.slug}/invites`)
+        .set("Cookie", wsAdmin.cookie);
+      expect(getInvitesRes.status).toBe(403);
+      expect(getInvitesRes.body.code).toBe("workspace_suspended");
+
+      // 4. GET /workspaces/:ws/products
+      const getProductsRes = await request(testApp.http)
+        .get(`/api/v1/workspaces/${ws.slug}/products`)
+        .set("Cookie", wsAdmin.cookie);
+      expect(getProductsRes.status).toBe(403);
+      expect(getProductsRes.body.code).toBe("workspace_suspended");
+
+      // 5. GET /workspaces/:ws/products/:prod/statuses
+      const getStatusesRes = await request(testApp.http)
+        .get(`/api/v1/workspaces/${ws.slug}/products/${prod.slug}/statuses`)
+        .set("Cookie", wsAdmin.cookie);
+      expect(getStatusesRes.status).toBe(403);
+      expect(getStatusesRes.body.code).toBe("workspace_suspended");
+
+      // 6. Non-member gets 404 not_found
+      const outsider = await signedInCookie(testApp.test, {
+        name: "Outsider",
+        emailVerified: true,
+      });
+      const outsiderRes = await request(testApp.http)
+        .get(`/api/v1/workspaces/${ws.slug}`)
+        .set("Cookie", outsider.cookie);
+      expect(outsiderRes.status).toBe(404);
+      expect(outsiderRes.body.code).toBe("not_found");
+
+      // 7. Portal API -> 403 workspace_suspended
+      const portalDirRes = await request(testApp.http)
+        .get(`/api/v1/portal/${ws.slug}`);
+      expect(portalDirRes.status).toBe(403);
+      expect(portalDirRes.body.code).toBe("workspace_suspended");
+
+      const portalProdRes = await request(testApp.http)
+        .get(`/api/v1/portal/${ws.slug}/${prod.slug}`);
+      expect(portalProdRes.status).toBe(403);
+      expect(portalProdRes.body.code).toBe("workspace_suspended");
+
+      // 8. Accepting teammate invite -> 403 workspace_suspended
+      const invitedUser = await signedInCookie(testApp.test, {
+        name: "Invited Teammate",
+        email: inviteEmail,
+        emailVerified: true,
+      });
+      const claimRes = await request(testApp.http)
+        .post(`/api/v1/invites/${inviteToken}/accept`)
+        .set("Cookie", invitedUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      expect(claimRes.status).toBe(403);
+      expect(claimRes.body.code).toBe("workspace_suspended");
+
+      // LIFT SUSPENSION: DELETE /platform/workspaces/:id/suspend
+      const liftRes1 = await request(testApp.http)
+        .delete(`/api/v1/platform/workspaces/${ws.id}/suspend`)
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      expect(liftRes1.status).toBe(204);
+
+      // Lift again -> 204 idempotent
+      const liftRes2 = await request(testApp.http)
+        .delete(`/api/v1/platform/workspaces/${ws.id}/suspend`)
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      expect(liftRes2.status).toBe(204);
+
+      // SNAPSHOT AFTER LIFT (strictly identical)
+      const [membersCountLift] = await testApp.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(schema.workspaceMembers)
+        .where(eq(schema.workspaceMembers.workspaceId, ws.id));
+      const [productsCountLift] = await testApp.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(schema.products)
+        .where(eq(schema.products.workspaceId, ws.id));
+      const [statusesCountLift] = await testApp.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(schema.statuses)
+        .where(eq(schema.statuses.productId, prod.id));
+      const [invitesCountLift] = await testApp.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(schema.invites)
+        .where(eq(schema.invites.workspaceId, ws.id));
+
+      expect(membersCountLift.count).toBe(membersCountBefore.count);
+      expect(productsCountLift.count).toBe(productsCountBefore.count);
+      expect(statusesCountLift.count).toBe(statusesCountBefore.count);
+      expect(invitesCountLift.count).toBe(invitesCountBefore.count);
+
+      // RESTORED ACCESS
+      const restoredWsRes = await request(testApp.http)
+        .get(`/api/v1/workspaces/${ws.slug}`)
+        .set("Cookie", wsAdmin.cookie);
+      expect(restoredWsRes.status).toBe(200);
+      expect(restoredWsRes.body.role).toBe("admin");
+
+      const restoredPortalRes = await request(testApp.http)
+        .get(`/api/v1/portal/${ws.slug}`);
+      expect(restoredPortalRes.status).toBe(200);
+
+      // Claim invite now succeeds
+      const restoredClaimRes = await request(testApp.http)
+        .post(`/api/v1/invites/${inviteToken}/accept`)
+        .set("Cookie", invitedUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      expect(restoredClaimRes.status).toBe(200);
+      expect(restoredClaimRes.body.workspaceSlug).toBe(ws.slug);
+    });
+
+    it("suspending and lifting on unknown or invalid id returns 404", async () => {
+      const malformedId = "not-a-valid-uuid";
+      const unknownId = "00000000-0000-0000-0000-000000000000";
+
+      // POST suspend
+      const malformedPost = await request(testApp.http)
+        .post(`/api/v1/platform/workspaces/${malformedId}/suspend`)
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      expect(malformedPost.status).toBe(404);
+
+      const unknownPost = await request(testApp.http)
+        .post(`/api/v1/platform/workspaces/${unknownId}/suspend`)
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      expect(unknownPost.status).toBe(404);
+
+      // DELETE suspend
+      const malformedDel = await request(testApp.http)
+        .delete(`/api/v1/platform/workspaces/${malformedId}/suspend`)
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      expect(malformedDel.status).toBe(404);
+
+      const unknownDel = await request(testApp.http)
+        .delete(`/api/v1/platform/workspaces/${unknownId}/suspend`)
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      expect(unknownDel.status).toBe(404);
+    });
+  });
 });
+

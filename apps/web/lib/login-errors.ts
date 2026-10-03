@@ -52,6 +52,10 @@ export const LOGIN_ERRORS: Record<string, LoginErrorCopy> = {
     title: "Couldn't start sign-in",
     body: "Check your connection and try again.",
   },
+  account_banned: {
+    title: "This account can't sign in",
+    body: "Your access to UserHQ has been suspended. If you think this is a mistake, contact the UserHQ team.",
+  },
 };
 
 export function loginErrorCopy(code: string): LoginErrorCopy {

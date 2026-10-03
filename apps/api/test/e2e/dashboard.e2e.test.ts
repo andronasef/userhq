@@ -172,7 +172,7 @@ describe("Dashboard Frame & Navigation (Plan 02-04)", () => {
     expect(html).toContain("Choose a workspace");
     expect(html.indexOf("Alpha Co")).toBeLessThan(html.indexOf("Zeta Co"));
     expect(html).toContain("Owner");
-    expect(html).toContain("<span>Dashboard</span>");
+    expect(html).toContain('aria-label="Open account menu"');
   });
 
   it("/dashboard picker redirects to / with 0 workspaces and to /dashboard/{ws} with 1 workspace", async () => {

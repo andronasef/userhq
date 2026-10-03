@@ -31,7 +31,7 @@ export async function generateMetadata({
 
 export default async function TeamPage({
   params,
-}: TeamPageProps): Promise<React.JSX.Element> {
+}: TeamPageProps): Promise<React.JSX.Element | null> {
   const { ws } = await params;
   const [workspaceResult, membersResult, invitesResult, me] = await Promise.all([
     getWorkspace(ws),
@@ -41,6 +41,9 @@ export default async function TeamPage({
   ]);
 
   if (!workspaceResult.ok || !membersResult.ok || !invitesResult.ok) {
+    if (!workspaceResult.ok && workspaceResult.status === 403 && workspaceResult.code === "workspace_suspended") {
+      return null;
+    }
     notFound();
   }
 

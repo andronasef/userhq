@@ -24,11 +24,14 @@ export async function generateMetadata({
 
 export default async function NewProductPage({
   params,
-}: NewProductPageProps): Promise<React.JSX.Element> {
+}: NewProductPageProps): Promise<React.JSX.Element | null> {
   const { ws } = await params;
   const result = await getWorkspace(ws);
 
   if (!result.ok) {
+    if (result.status === 403 && result.code === "workspace_suspended") {
+      return null;
+    }
     notFound();
   }
 

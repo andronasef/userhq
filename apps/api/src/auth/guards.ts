@@ -63,8 +63,9 @@ export class SessionGuard implements CanActivate {
       query: { disableRefresh: true },
     });
 
-    req.session = session ?? null;
-    req.user = session?.user ?? null;
+    const active = session && !(session.user as any).bannedAt ? session : null;
+    req.session = active;
+    req.user = active?.user ?? null;
 
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC, [
       ctx.getHandler(),
@@ -75,7 +76,7 @@ export class SessionGuard implements CanActivate {
       return true;
     }
 
-    if (!session) {
+    if (!active) {
       throw new ApiException(
         "unauthorized",
         HttpStatus.UNAUTHORIZED,

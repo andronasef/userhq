@@ -43,6 +43,13 @@
       "when": 1791011966576,
       "tag": "0005_statuses",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791016603872,
+      "tag": "0006_ban",
+      "breakpoints": true
     }
   ]
 }

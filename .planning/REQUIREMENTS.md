@@ -12,7 +12,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **AUTH-01**: User can sign in with a Google account
 - [ ] **AUTH-02**: User can sign in with a GitHub account
 - [ ] **AUTH-03**: User stays signed in across browser refreshes and can sign out from any page
-- [ ] **AUTH-04**: User's OAuth display name and avatar appear on their posts and comments; their email is never shown publicly
+- [x] **AUTH-04**: User's OAuth display name and avatar appear on their posts and comments; their email is never shown publicly
 
 ### Platform Owner
 
@@ -219,7 +219,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-01 | Phase 1 | Pending |
 | AUTH-02 | Phase 1 | Pending |
 | AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 3 | Pending |
+| AUTH-04 | Phase 3 | Complete |
 | PLAT-01 | Phase 2 | Pending |
 | PLAT-02 | Phase 2 | Pending |
 | PLAT-03 | Phase 2 | Pending |

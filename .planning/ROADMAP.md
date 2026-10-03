@@ -207,7 +207,7 @@ Suspend and ban checks go in the shared guards, so every later feature inherits 
      - merge a duplicate post into another: votes move without double-counting, comments move, and the duplicate's link redirects
   5. When someone else comments on a post that a user created or commented on, that user gets an email. In development it lands in Mailpit; in production it goes through Brevo, configured only by env settings. Users can turn these emails off in account settings, and every email has a one-click unsubscribe link. If sending fails, the comment still appears and the email is retried automatically.
 
-**Plans:** 14/16 plans executed
+**Plans:** 15/16 plans executed
 
 Plans:
 **Wave 1**
@@ -262,7 +262,7 @@ Plans:
 
 **Wave 13** *(blocked on Wave 12 completion)*
 
-- [ ] 03-15-PLAN.md — Account deletion: "Deleted user", ownership transfer / workspace soft delete everywhere
+- [x] 03-15-PLAN.md — Account deletion: "Deleted user", ownership transfer / workspace soft delete everywhere
 
 **Wave 14** *(blocked on Wave 13 completion)*
 
@@ -341,6 +341,6 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once P
 |-------|----------------|--------|-----------|
 | 1. Walking Skeleton | 11/11 | Complete | 2026-10-02 |
 | 2. Workspaces, Products & Platform Owner | 0/11 | Planned | - |
-| 3. Feedback Board & Conversations | 3/16 | In Progress|  |
+| 3. Feedback Board & Conversations | 15/16 | In Progress|  |
 | 4. Dual-Layer Roadmap & Closing the Loop | 0/TBD | Not started | - |
 | 5. Changelog & FAQ | 0/TBD | Not started | - |

@@ -30,17 +30,27 @@ async function getMailpitMessagesFor(email: string) {
 }
 
 async function getMailpitMessageDetail(id: string) {
-  const res = await fetch(`${mailpitApiUrl}/message/${id}`);
+  const [res, headersRes] = await Promise.all([
+    fetch(`${mailpitApiUrl}/message/${id}`),
+    fetch(`${mailpitApiUrl}/message/${id}/headers`),
+  ]);
   if (!res.ok) {
     throw new Error(`Failed to fetch Mailpit message detail: ${res.status}`);
   }
-  return res.json() as Promise<{
+  const data = (await res.json()) as any;
+  const headers = headersRes.ok
+    ? ((await headersRes.json()) as Record<string, string[]>)
+    : {};
+  return {
+    ...data,
+    Headers: headers,
+  } as {
     Text: string;
     HTML: string;
     Headers: Record<string, string[]>;
     Subject: string;
     From: { Address: string; Name: string };
-  }>;
+  };
 }
 
 describe("Email Outbox and Worker (Plan 03-10)", () => {
@@ -1274,5 +1284,100 @@ describe("Email Outbox and Worker (Plan 03-10)", () => {
         SMTP_HOST: "mail.example.com",
       })
     ).toThrow(/SMTP_FROM/);
+  });
+
+  it("Mailpit message for a comment <b>& arrives HTML-escaped with one-click unsubscribe headers", async () => {
+    const rand = randomBytes(4).toString("hex");
+    const recipient = await signedInCookie(testApp.test, {
+      name: "Header Recipient",
+      email: `header-${rand}@mail.test`,
+      emailVerified: true,
+    });
+
+    const commenter = await signedInCookie(testApp.test, {
+      name: "Commenter Html",
+      email: `html-${rand}@mail.test`,
+      emailVerified: true,
+    });
+
+    const [defStatus] = await testApp.db
+      .select()
+      .from(schema.statuses)
+      .where(eq(schema.statuses.productId, prodId))
+      .limit(1);
+
+    const [{ count }] = await testApp.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(schema.posts)
+      .where(eq(schema.posts.productId, prodId));
+    const postNum = count + 1;
+
+    const [post] = await testApp.db
+      .insert(schema.posts)
+      .values({
+        productId: prodId,
+        number: postNum,
+        title: `Header Post ${rand}`,
+        description: "desc",
+        statusId: defStatus.id,
+        authorId: recipient.userId,
+        authorIsAdmin: false,
+        voteCount: 1,
+      })
+      .returning();
+    await testApp.db.insert(schema.votes).values({ postId: post.id, userId: recipient.userId });
+
+    await testApp.db.delete(schema.commentEmailBatches);
+
+    // Comment containing HTML special characters
+    const commentRes = await request(testApp.http)
+      .post(`/api/v1/portal/${wsSlug}/${prodSlug}/posts/${postNum}/comments`)
+      .set("Cookie", commenter.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({ body: "<b>& hi" });
+    expect(commentRes.status).toBe(201);
+
+    // Deliver via worker
+    const futureDate = new Date(Date.now() + 25 * 3600_000);
+    const run = await emailWorker.runOnce(futureDate);
+    expect(run.claimed).toBe(1);
+    expect(run.sent).toBe(1);
+
+    // Fetch from Mailpit API
+    const msgs = await getMailpitMessagesFor(recipient.email);
+    expect(msgs.length).toBeGreaterThanOrEqual(1);
+
+    const msg = msgs[msgs.length - 1];
+    const detail = await getMailpitMessageDetail(msg.ID);
+
+    // 1. HTML part contains escaped HTML: &lt;b&gt;&amp; hi
+    expect(detail.HTML).toContain("&lt;b&gt;&amp; hi");
+    expect(detail.HTML).not.toContain("<b>& hi");
+
+    // 2. Text part contains raw text
+    expect(detail.Text).toContain("<b>& hi");
+
+    // 3. Headers: List-Unsubscribe and List-Unsubscribe-Post: List-Unsubscribe=One-Click
+    const getHeader = (name: string): string | undefined => {
+      const lower = name.toLowerCase();
+      const match = Object.entries(detail.Headers).find(
+        ([k]) => k.toLowerCase() === lower
+      );
+      return match?.[1]?.[0];
+    };
+
+    const listUnsub = getHeader("List-Unsubscribe");
+    expect(listUnsub).toBeDefined();
+    expect(listUnsub).toMatch(
+      new RegExp(`^<${testApp.env.PUBLIC_URL}/api/v1/unsubscribe/[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+>$`)
+    );
+
+    const listUnsubPost = getHeader("List-Unsubscribe-Post");
+    expect(listUnsubPost).toBe("List-Unsubscribe=One-Click");
+
+    // 4. From display name: {workspace} via UserHQ
+    expect(detail.From.Name).toContain("via UserHQ");
+
+    await testApp.db.delete(schema.commentEmailBatches);
   });
 });

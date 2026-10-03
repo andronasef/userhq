@@ -1,8 +1,7 @@
-import nodemailer from "nodemailer";
-import type SMTPTransport from "nodemailer/lib/smtp-transport";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 import process from "node:process";
+import { createSmtpTransport } from "../email/transport.js";
 
 export type SmtpProbeResult = {
   port: number;
@@ -38,18 +37,14 @@ export async function runSmtpCheck(
       ? "starttls"
       : "plain";
 
-    const transportOptions = {
+    const transporter = createSmtpTransport({
       host: opts.host,
       port,
-      secure: isTls,
-      requireTLS: !isTls && requireTls,
-      connectionTimeout: timeoutMs,
-      greetingTimeout: timeoutMs,
-      socketTimeout: timeoutMs,
-      ...(opts.user ? { auth: { user: opts.user, pass: opts.pass ?? "" } } : {}),
-    };
-
-    const transporter = nodemailer.createTransport(transportOptions as SMTPTransport.Options);
+      user: opts.user,
+      pass: opts.pass,
+      requireTls,
+      timeoutMs,
+    });
     try {
       await transporter.verify();
       results.push({ port, mode, ok: true, detail: "ok" });

@@ -9,6 +9,7 @@ import type {
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
 import { isWorkspaceAdmin } from "./membership.js";
+import { enqueueCommentEmail } from "../email/outbox.js";
 
 export interface CommentRowWithAuthor {
   id: string;
@@ -87,6 +88,13 @@ export class CommentsService {
           body: input.body,
         })
         .returning();
+
+      await enqueueCommentEmail(tx, {
+        postId: p.id,
+        commentId: newComment.id,
+        actorId: currentUser.id,
+        workspaceId: portal.workspaceId,
+      });
 
       return {
         id: newComment.id,

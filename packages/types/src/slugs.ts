@@ -26,7 +26,7 @@ export const RESERVED_PRODUCT_SLUGS = [
   "settings",
 ] as const;
 
-export function slugify(name: string): string {
+export function slugify(name: string, max: number = SLUG_MAX_LENGTH): string {
   const normalized = name
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -34,7 +34,7 @@ export function slugify(name: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-  const sliced = normalized.slice(0, SLUG_MAX_LENGTH);
+  const sliced = normalized.slice(0, max);
   return sliced.replace(/-+$/, "");
 }
 

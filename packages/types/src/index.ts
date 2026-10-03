@@ -4,6 +4,7 @@ export * from "./user.js";
 export * from "./slugs.js";
 export * from "./tenancy.js";
 export * from "./palette.js";
+export * from "./feedback.js";
 
 export const API_ERROR_CODES = [
   "unauthorized",
@@ -33,6 +34,27 @@ export const API_ERROR_CODES = [
   "delete_default_status",
   "delete_last_status",
   "account_banned",
+  "post_not_found",
+  "comment_not_found",
+  "post_locked",
+  "edit_conflict",
+  "merge_target_invalid",
+  "category_invalid",
+  "category_name_taken",
+  "category_name_too_long",
+  "rate_limited",
+  "invalid_token",
+  "owned_workspaces_unresolved",
+  "transfer_target_invalid",
+  "platform_owner_account",
+  "title_required",
+  "title_too_short",
+  "title_too_long",
+  "description_too_long",
+  "category_required",
+  "comment_required",
+  "comment_too_long",
+  "note_too_long",
 ] as const;
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];
 

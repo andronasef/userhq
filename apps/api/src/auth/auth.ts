@@ -23,6 +23,7 @@ export function createAuth(
     user: {
       additionalFields: {
         bannedAt: { type: "date", required: false, input: false },
+        deletedAt: { type: "date", required: false, input: false },
       },
     },
     databaseHooks: {

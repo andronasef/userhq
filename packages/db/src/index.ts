@@ -7,16 +7,19 @@ import { fileURLToPath } from "node:url";
 import * as authSchema from "./schema/auth.js";
 import * as uploadsSchema from "./schema/uploads.js";
 import * as tenancySchema from "./schema/tenancy.js";
+import * as feedbackSchema from "./schema/feedback.js";
 
 export const schema = {
   ...authSchema,
   ...uploadsSchema,
   ...tenancySchema,
+  ...feedbackSchema,
 };
 
 export * from "./schema/auth.js";
 export * from "./schema/uploads.js";
 export * from "./schema/tenancy.js";
+export * from "./schema/feedback.js";
 
 export type Db = NodePgDatabase<typeof schema>;
 export const DB: unique symbol = Symbol.for("@userhq/db");

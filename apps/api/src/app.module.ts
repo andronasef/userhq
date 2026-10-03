@@ -25,6 +25,7 @@ import { WorkspacesModule } from "./workspaces/workspaces.module.js";
 import { InvitesModule } from "./invites/invites.module.js";
 import { PlatformModule } from "./platform/platform.module.js";
 import { ProductsModule } from "./products/products.module.js";
+import { FeedbackModule } from "./feedback/feedback.module.js";
 
 const DB_POOL = Symbol.for("@userhq/api/db-pool");
 
@@ -62,6 +63,7 @@ export class AppModule {
         InvitesModule,
         PlatformModule,
         ProductsModule,
+        FeedbackModule,
       ],
       controllers: [HealthController, MeController],
       providers: [

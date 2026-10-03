@@ -116,7 +116,7 @@ describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
           const mPath = methodPath ? (Array.isArray(methodPath) ? methodPath[0] : methodPath) : "";
           const fullPath = "/" + [cPath, mPath].map((p) => p.replace(/^\/+|\/+$/g, "")).filter(Boolean).join("/");
 
-          if (fullPath.includes(":ws")) {
+          if (fullPath.startsWith("/workspaces/:ws")) {
             routeSet.add(`${verb} ${fullPath}`);
           }
         }

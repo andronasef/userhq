@@ -26,6 +26,7 @@ export const workspaces = pgTable(
     websiteUrl: text("website_url"),
     directoryEnabled: boolean("directory_enabled").notNull().default(true),
     suspendedAt: timestamp("suspended_at", { withTimezone: true }),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
@@ -50,6 +51,7 @@ export const products = pgTable(
     tagline: text("tagline"),
     websiteUrl: text("website_url"),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
+    nextPostNumber: integer("next_post_number").notNull().default(1),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [

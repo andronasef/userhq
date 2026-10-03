@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getAccount, getMe } from "@/lib/api-server";
 import { PageHeader } from "@/components/page-header";
 import { EmailPreferences } from "./email-preferences";
+import { DeleteAccount } from "./delete-account";
 
 export const metadata: Metadata = {
   title: "Account · UserHQ",
@@ -37,7 +38,7 @@ export default async function AccountPage(): Promise<React.JSX.Element> {
           <EmailPreferences initialCommentEmails={account.commentEmails} />
         </section>
 
-        {/* Slot for 03-15 Danger zone */}
+        <DeleteAccount isPlatformOwner={account.isPlatformOwner} />
       </div>
     </div>
   );

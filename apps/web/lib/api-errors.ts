@@ -44,6 +44,12 @@ export const API_ERROR_COPY: Record<string, string> = {
   target_post_invalid: "Choose another post to merge into.",
   post_not_found: "That post couldn't be found.",
   cannot_vote_closed: "You can't vote on closed or completed posts.",
+  owned_workspaces_unresolved:
+    "Choose what happens to each of your workspaces first.",
+  transfer_target_invalid:
+    "That person is no longer a member of {workspace}. Choose someone else.",
+  platform_owner_account:
+    "This is the platform owner account. It's set in server configuration and can't be deleted here.",
 };
 
 export const FIELD_FOR_CODE: Record<string, string> = {

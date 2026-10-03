@@ -75,7 +75,12 @@ export class SessionGuard implements CanActivate {
       query: { disableRefresh: true },
     });
 
-    const active = session && !(session.user as any).bannedAt ? session : null;
+    const active =
+      session &&
+      !(session.user as any).bannedAt &&
+      !(session.user as any).deletedAt
+        ? session
+        : null;
     req.session = active;
     req.user = active?.user ?? null;
 

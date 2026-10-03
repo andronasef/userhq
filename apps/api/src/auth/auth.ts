@@ -31,10 +31,13 @@ export function createAuth(
         create: {
           async before(session) {
             const [row] = await db
-              .select({ bannedAt: userTable.bannedAt })
+              .select({
+                bannedAt: userTable.bannedAt,
+                deletedAt: userTable.deletedAt,
+              })
               .from(userTable)
               .where(eq(userTable.id, session.userId));
-            if (row?.bannedAt) {
+            if (row?.bannedAt || row?.deletedAt) {
               throw APIError.from("FORBIDDEN", {
                 code: "account_banned",
                 message: "This account can't sign in.",

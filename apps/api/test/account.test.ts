@@ -4,6 +4,10 @@ import { randomBytes } from "node:crypto";
 import { eq, and } from "drizzle-orm";
 import {
   user,
+  session,
+  account,
+  votes,
+  comments,
   workspaces,
   products,
   statuses,
@@ -127,6 +131,16 @@ describe("Account Settings & Preferences (Plan 03-14)", () => {
       image: null,
       commentEmails: true,
       isPlatformOwner: false,
+      ownedWorkspaces: [
+        {
+          slug: wsSlug,
+          name: "Account Workspace",
+          logoUrl: null,
+          productCount: 1,
+          postCount: 0,
+          members: [],
+        },
+      ],
     });
     expect(getRes.body.email).toBeUndefined();
     expect(Object.keys(getRes.body).sort()).toEqual([
@@ -134,6 +148,7 @@ describe("Account Settings & Preferences (Plan 03-14)", () => {
       "image",
       "isPlatformOwner",
       "name",
+      "ownedWorkspaces",
     ]);
 
     // 2. Setup a post and a comment while commentEmails is true -> batch is enqueued
@@ -225,5 +240,170 @@ describe("Account Settings & Preferences (Plan 03-14)", () => {
       .set("Cookie", ownerUser.cookie);
     expect(ownerRes.status).toBe(200);
     expect(ownerRes.body.isPlatformOwner).toBe(true);
+  });
+});
+
+describe("Account deletion (Plan 03-15)", () => {
+  let testApp: Awaited<ReturnType<typeof createTestApp>>;
+  let rand: string;
+  let wsSlug: string;
+  let wsId: string;
+  let prodSlug: string;
+  let prodId: string;
+  let statusId: string;
+  let ownerId: string;
+
+  const mkUser = async (name: string) => {
+    const email = `del-${randomBytes(4).toString("hex")}@mail.test`;
+    return {
+      ...(await signedInCookie(testApp.test, { name, email, emailVerified: true })),
+      email,
+      name,
+    };
+  };
+  const mkPost = async (authorId: string, number: number, title: string) => {
+    const [p] = await testApp.db
+      .insert(posts)
+      .values({ productId: prodId, number, title, statusId, authorId })
+      .returning();
+    return p;
+  };
+  const del = (cookie: string, workspacesInput: unknown[] = []) =>
+    request(testApp.http)
+      .post("/api/v1/account/delete")
+      .set("Cookie", cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({ workspaces: workspacesInput });
+  const portalUrl = (n: number) =>
+    `/api/v1/portal/${wsSlug}/${prodSlug}/posts/${n}`;
+
+  const mkWorkspace = async (slug: string, ownerUserId: string, members: string[] = []) => {
+    const [w] = await testApp.db
+      .insert(workspaces)
+      .values({ name: `WS ${slug}`, slug })
+      .returning();
+    await testApp.db.insert(workspaceMembers).values([
+      { workspaceId: w.id, userId: ownerUserId, role: "owner" as const },
+      ...members.map((m) => ({ workspaceId: w.id, userId: m, role: "admin" as const })),
+    ]);
+    return w;
+  };
+
+  beforeAll(async () => {
+    testApp = await createTestApp();
+    rand = randomBytes(4).toString("hex");
+    const owner = await mkUser("Board Owner");
+    ownerId = owner.userId;
+    wsSlug = `del-ws-${rand}`;
+    const w = await mkWorkspace(wsSlug, ownerId);
+    wsId = w.id;
+    prodSlug = `del-prod-${rand}`;
+    const [prod] = await testApp.db
+      .insert(products)
+      .values({ workspaceId: wsId, name: "Del Product", slug: prodSlug })
+      .returning();
+    prodId = prod.id;
+    const seeded = await testApp.db
+      .insert(statuses)
+      .values(
+        SEEDED_STATUSES.map((s, idx) => ({
+          productId: prodId,
+          name: s.name,
+          type: s.type,
+          color: s.color,
+          position: idx,
+          isDefault: s.type === "review",
+        }))
+      )
+      .returning();
+    statusId = seeded.find((s) => s.isDefault)!.id;
+  });
+
+  afterAll(async () => {
+    await testApp.close();
+  });
+
+  it("tracer: deleting an account scrubs identity and keeps content and votes", async () => {
+    const u = await mkUser("Doomed Dana");
+    const other = await mkUser("Other Olive");
+    const p1 = await mkPost(u.userId, 1, "Dana's idea");
+    const p2 = await mkPost(other.userId, 2, "Olive's idea");
+    const p3 = await mkPost(other.userId, 3, "Olive's second idea");
+
+    const cRes = await request(testApp.http)
+      .post(`${portalUrl(2)}/comments`)
+      .set("Cookie", u.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({ body: "Dana was here" });
+    expect(cRes.status).toBe(201);
+    const vRes = await request(testApp.http)
+      .put(`${portalUrl(3)}/vote`)
+      .set("Cookie", u.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL);
+    expect(vRes.status).toBe(200);
+    const votesBefore = vRes.body.voteCount;
+
+    const res = await del(u.cookie);
+    expect(res.status).toBe(204);
+
+    const [row] = await testApp.db.select().from(user).where(eq(user.id, u.userId));
+    expect(row.name).toBe("");
+    expect(row.image).toBeNull();
+    expect(row.email).toBe(`deleted-${u.userId}@deleted.invalid`);
+    expect(row.emailVerified).toBe(false);
+    expect(row.commentEmails).toBe(false);
+    expect(row.deletedAt).not.toBeNull();
+    expect(await testApp.db.select().from(session).where(eq(session.userId, u.userId))).toHaveLength(0);
+    expect(await testApp.db.select().from(account).where(eq(account.userId, u.userId))).toHaveLength(0);
+
+    // Old cookie is dead, and a second delete is a 401 (scrubbed exactly once)
+    const me = await request(testApp.http).get("/api/v1/account").set("Cookie", u.cookie);
+    expect(me.status).toBe(401);
+    expect((await del(u.cookie)).status).toBe(401);
+
+    // Content stays, shown as Deleted user
+    const post1 = await request(testApp.http).get(portalUrl(1));
+    expect(post1.status).toBe(200);
+    expect(post1.body.post.author).toMatchObject({ name: null, image: null, isAdmin: false, deleted: true });
+    expect(JSON.stringify(post1.body)).not.toContain("Doomed Dana");
+    const post2 = await request(testApp.http).get(portalUrl(2));
+    const mine = post2.body.timeline.find(
+      (t: any) => t.kind === "comment" && t.comment.body === "Dana was here"
+    );
+    expect(mine.comment.author).toMatchObject({ name: null, deleted: true });
+    expect(JSON.stringify(post2.body)).not.toContain(u.email);
+
+    // Votes and content rows are untouched
+    const post3 = await request(testApp.http).get(portalUrl(3));
+    expect(post3.body.post.voteCount).toBe(votesBefore);
+    expect(await testApp.db.select().from(votes).where(eq(votes.userId, u.userId))).toHaveLength(1);
+    expect(await testApp.db.select().from(comments).where(eq(comments.authorId, u.userId))).toHaveLength(1);
+    expect(p1.id && p2.id && p3.id).toBeTruthy();
+  });
+
+  it("refuses the platform owner account", async () => {
+    const owner = await signedInCookie(testApp.test, {
+      name: "Platform Owner",
+      email: testApp.env.PLATFORM_OWNER_EMAIL,
+      emailVerified: true,
+    });
+    const res = await del(owner.cookie);
+    expect(res.status).toBe(403);
+    expect(res.body.code).toBe("platform_owner_account");
+    const [row] = await testApp.db.select().from(user).where(eq(user.id, owner.userId));
+    expect(row.deletedAt).toBeNull();
+  });
+
+  it("Better Auth's own delete-user endpoint is not available", async () => {
+    const u = await mkUser("Survivor Sam");
+    const res = await request(testApp.http)
+      .post("/api/auth/delete-user")
+      .set("Cookie", u.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({});
+    expect(res.status).toBeGreaterThanOrEqual(400);
+    const [row] = await testApp.db.select().from(user).where(eq(user.id, u.userId));
+    expect(row.deletedAt).toBeNull();
+    expect(row.email).toBe(u.email);
   });
 });

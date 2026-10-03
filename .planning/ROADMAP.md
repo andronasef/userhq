@@ -205,7 +205,54 @@ Suspend and ban checks go in the shared guards, so every later feature inherits 
      - merge a duplicate post into another: votes move without double-counting, comments move, and the duplicate's link redirects
   5. When someone else comments on a post that a user created or commented on, that user gets an email. In development it lands in Mailpit; in production it goes through Brevo, configured only by env settings. Users can turn these emails off in account settings, and every email has a one-click unsubscribe link. If sending fails, the comment still appears and the email is retried automatically.
 
-**Plans**: TBD
+**Plans:** 13 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 03-01-PLAN.md — Dependency gate: human-verified @nestjs/throttler 6.7.1 and nuqs 2.10.1, one lockfile change
+- [ ] 03-02-PLAN.md — Tracer: submit a post → permalink → board; whole Phase 3 schema (0007); D-12 redirect decision checkpoint
+- [ ] 03-03-PLAN.md — Production mail gate: SMTP_* pass-through, Brevo port probe + DKIM check on the VPS, port recorded
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 03-04-PLAN.md — Categories: dashboard editor, category on posts, seeded Feature Request/Bug + backfill (0008)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 03-05-PLAN.md — Votes: optimistic idempotent PUT/DELETE, atomic counter, per-user throttling, 429 rate_limited
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 03-06-PLAN.md — Board browse: nuqs URL state (early vinext proof), prefix FTS search, filters, Load more
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 03-07-PLAN.md — Comments: one-level threads, stubs, edit/delete with versions, Admin badge, sign-in prompts
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 03-08-PLAN.md — Status change with public note + activity log, post edit/delete lock rule, portal Admin menu
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
+- [ ] 03-09-PLAN.md — Comment email: transactional outbox, daily per-workspace batches, worker with retries, Mailpit
+
+**Wave 8** *(blocked on Wave 7 completion)*
+
+- [ ] 03-10-PLAN.md — Dashboard board: table, post detail with voters and admin comments, Deleted tab with restore
+
+**Wave 9** *(blocked on Wave 8 completion)*
+
+- [ ] 03-11-PLAN.md — Merge: portal Merge into… and dashboard bulk merge, vote dedupe, merged-link redirects
+
+**Wave 10** *(blocked on Wave 9 completion)*
+
+- [ ] 03-12-PLAN.md — Opt-out: unsubscribe page + RFC 8058 one-click, per-post mute, account comment-email toggle
+
+**Wave 11** *(blocked on Wave 10 completion)*
+
+- [ ] 03-13-PLAN.md — Account deletion: "Deleted user", ownership transfer / workspace soft delete, platform Deleted badge and counts
 **UI hint**: yes
 **Notes**:
 
@@ -279,6 +326,6 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once P
 |-------|----------------|--------|-----------|
 | 1. Walking Skeleton | 11/11 | Complete | 2026-10-02 |
 | 2. Workspaces, Products & Platform Owner | 0/11 | Planned | - |
-| 3. Feedback Board & Conversations | 0/TBD | Not started | - |
+| 3. Feedback Board & Conversations | 0/13 | Planned | - |
 | 4. Dual-Layer Roadmap & Closing the Loop | 0/TBD | Not started | - |
 | 5. Changelog & FAQ | 0/TBD | Not started | - |

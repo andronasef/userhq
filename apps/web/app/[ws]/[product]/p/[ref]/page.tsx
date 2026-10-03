@@ -129,11 +129,11 @@ export default async function PostPage({
           signedIn={viewer.signedIn}
         />
         <div className="flex-1 min-w-0 flex flex-col gap-2">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
             <h1 className="text-2xl font-semibold break-words flex-1 text-foreground">
               {post.title}
             </h1>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               {viewer.signedIn && viewer.inConversation && viewer.commentEmailsOn && (
                 <MuteToggle
                   ws={ws}

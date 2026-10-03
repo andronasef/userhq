@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { workspaceSlugSchema } from "./slugs.js";
+import { workspaceSlugSchema, productSlugSchema } from "./slugs.js";
 import { PublicUserSchema } from "./user.js";
+import { HEX_COLOR_RE } from "./palette.js";
 
 export const PublicPortalProductSchema = z.object({
   workspace: z.object({
@@ -130,6 +131,82 @@ export const AcceptInviteResultSchema = z.object({
   workspaceSlug: z.string(),
 });
 export type AcceptInviteResult = z.infer<typeof AcceptInviteResultSchema>;
+
+export const HexColorSchema = z
+  .string()
+  .regex(HEX_COLOR_RE, { message: "invalid_color" })
+  .transform((s) => s.toUpperCase());
+export type HexColor = z.infer<typeof HexColorSchema>;
+
+export const WebsiteUrlSchema = z
+  .string()
+  .trim()
+  .transform((val) => (val === "" ? null : val))
+  .nullable()
+  .refine(
+    (val) => {
+      if (val === null) return true;
+      try {
+        const parsed = new URL(val);
+        if (parsed.protocol !== "https:") return false;
+        const host = parsed.hostname;
+        if (!host || host.startsWith(".") || host.endsWith(".")) return false;
+        const parts = host.split(".");
+        if (parts.length < 2) return false;
+        return parts.every((p) => /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/i.test(p));
+      } catch {
+        return false;
+      }
+    },
+    { message: "invalid_url" }
+  );
+export type WebsiteUrl = z.infer<typeof WebsiteUrlSchema>;
+
+export const TaglineSchema = z
+  .string()
+  .trim()
+  .transform((val) => (val === "" ? null : val))
+  .nullable()
+  .refine((val) => val === null || val.length <= 80, {
+    message: "tagline_too_long",
+  });
+export type Tagline = z.infer<typeof TaglineSchema>;
+
+export const CreateProductInputSchema = z.object({
+  name: NameSchema,
+  slug: productSlugSchema,
+  logoUploadId: z.uuid().nullable().optional(),
+});
+export type CreateProductInput = z.infer<typeof CreateProductInputSchema>;
+
+export const ProductCreatedSchema = z.object({
+  slug: z.string(),
+});
+export type ProductCreated = z.infer<typeof ProductCreatedSchema>;
+
+export const ProductSummarySchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  logoUrl: z.string().nullable(),
+  accentColor: z.string(),
+});
+export type ProductSummary = z.infer<typeof ProductSummarySchema>;
+
+export const ProductDetailSchema = ProductSummarySchema.extend({
+  logoUploadId: z.uuid().nullable(),
+  tagline: z.string().nullable(),
+  websiteUrl: z.string().nullable(),
+});
+export type ProductDetail = z.infer<typeof ProductDetailSchema>;
+
+export const UpdateProductInputSchema = z.object({
+  name: NameSchema.optional(),
+  logoUploadId: z.uuid().nullable().optional(),
+  tagline: TaglineSchema.optional(),
+  websiteUrl: WebsiteUrlSchema.optional(),
+  accentColor: HexColorSchema.optional(),
+});
+export type UpdateProductInput = z.infer<typeof UpdateProductInputSchema>;
 
 export const HealthResponseSchema = z.object({
   status: z.literal("ok"),

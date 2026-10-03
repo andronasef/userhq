@@ -33,6 +33,23 @@ const CROSS_TENANT_ROUTES: Record<
   "DELETE /workspaces/:ws/invites/:id": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/invites/${s.b.inviteId}`,
   }),
+  "POST /workspaces/:ws/products": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products`,
+    body: { name: "Test Product", slug: "p-test" },
+  }),
+  "GET /workspaces/:ws/products": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products`,
+  }),
+  "GET /workspaces/:ws/products/:product": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}`,
+  }),
+  "PATCH /workspaces/:ws/products/:product": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}`,
+    body: { name: "Changed" },
+  }),
+  "DELETE /workspaces/:ws/products/:product": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}`,
+  }),
 };
 
 describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
@@ -133,4 +150,14 @@ describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
       expect(res.body.code).toBe("not_found");
     });
   }
+
+  it("workspace A's slug with workspace B's product slug returns 404", async () => {
+    const res = await request(testApp.http)
+      .get(`/api/v1/workspaces/${seed.a.slug}/products/${seed.b.productSlug}`)
+      .set("Cookie", seed.a.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL);
+
+    expect(res.status).toBe(404);
+    expect(res.body.code).toBe("not_found");
+  });
 });

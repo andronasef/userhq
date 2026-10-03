@@ -11,6 +11,7 @@ import {
   primaryKey,
   uniqueIndex,
   index,
+  integer,
 } from "drizzle-orm/pg-core";
 import { uploads } from "./uploads.js";
 import { user } from "./auth.js";
@@ -61,6 +62,44 @@ export const products = pgTable(
   ]
 );
 
+export const statusType = pgEnum("status_type", [
+  "review",
+  "planned",
+  "active",
+  "completed",
+  "closed",
+]);
+
+export const statuses = pgTable(
+  "statuses",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    color: text("color").notNull(),
+    type: statusType("type").notNull(),
+    position: integer("position").notNull(),
+    isDefault: boolean("is_default").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("statuses_id_product_unique").on(table.id, table.productId),
+    uniqueIndex("statuses_product_name_ci").on(
+      table.productId,
+      sql`lower(${table.name})`
+    ),
+    uniqueIndex("statuses_one_default")
+      .on(table.productId)
+      .where(sql`${table.isDefault}`),
+    index("statuses_product_position_idx").on(table.productId, table.position),
+    check("statuses_color_hex", sql`${table.color} ~ '^#[0-9A-F]{6}$'`),
+  ]
+);
+
 export const memberRole = pgEnum("member_role", ["owner", "admin"]);
 
 export const workspaceMembers = pgTable(
@@ -93,7 +132,7 @@ export const workspacesRelations = relations(workspaces, ({ one, many }) => ({
   members: many(workspaceMembers),
 }));
 
-export const productsRelations = relations(products, ({ one }) => ({
+export const productsRelations = relations(products, ({ one, many }) => ({
   workspace: one(workspaces, {
     fields: [products.workspaceId],
     references: [workspaces.id],
@@ -101,6 +140,14 @@ export const productsRelations = relations(products, ({ one }) => ({
   logo: one(uploads, {
     fields: [products.logoUploadId],
     references: [uploads.id],
+  }),
+  statuses: many(statuses),
+}));
+
+export const statusesRelations = relations(statuses, ({ one }) => ({
+  product: one(products, {
+    fields: [statuses.productId],
+    references: [products.id],
   }),
 }));
 

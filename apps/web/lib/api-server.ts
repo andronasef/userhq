@@ -15,6 +15,10 @@ import {
   type InviteLookup,
   MemberRowSchema,
   type MemberRow,
+  ProductSummarySchema,
+  type ProductSummary,
+  ProductDetailSchema,
+  type ProductDetail,
   ANONYMOUS_ME,
 } from "@userhq/types";
 
@@ -141,6 +145,24 @@ export const getTeamInvites = cache((ws: string): Promise<ApiReadResult<InviteRo
     z.array(InviteRowSchema)
   );
 });
+
+export const getProducts = cache(
+  (ws: string): Promise<ApiReadResult<ProductSummary[]>> => {
+    return apiRead(
+      "/api/v1/workspaces/" + encodeURIComponent(ws) + "/products",
+      z.array(ProductSummarySchema)
+    );
+  }
+);
+
+export const getProduct = cache(
+  (ws: string, product: string): Promise<ApiReadResult<ProductDetail>> => {
+    return apiRead(
+      "/api/v1/workspaces/" + encodeURIComponent(ws) + "/products/" + encodeURIComponent(product),
+      ProductDetailSchema
+    );
+  }
+);
 
 export async function publicHost(): Promise<string> {
   const incomingHeaders = await headers();

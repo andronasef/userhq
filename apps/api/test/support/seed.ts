@@ -9,6 +9,8 @@ export interface TenantSeed {
   userId: string;
   memberUserId?: string;
   inviteId?: string;
+  productSlug?: string;
+  productId?: string;
 }
 
 export interface Seed {
@@ -49,6 +51,17 @@ export async function seedTenants(
     role: "owner",
   });
 
+  const prodSlugA = `prod-a-${randA}`;
+  const [prodA] = await testApp.db
+    .insert(schema.products)
+    .values({
+      workspaceId: wsA.id,
+      name: `Product A ${randA}`,
+      slug: prodSlugA,
+      accentColor: "#2563EB",
+    })
+    .returning();
+
   const [wsB] = await testApp.db
     .insert(schema.workspaces)
     .values({
@@ -86,12 +99,25 @@ export async function seedTenants(
     })
     .returning();
 
+  const prodSlugB = `prod-b-${randB}`;
+  const [prodB] = await testApp.db
+    .insert(schema.products)
+    .values({
+      workspaceId: wsB.id,
+      name: `Product B ${randB}`,
+      slug: prodSlugB,
+      accentColor: "#2563EB",
+    })
+    .returning();
+
   return {
     a: {
       slug: slugA,
       id: wsA.id,
       cookie: userA.cookie,
       userId: userA.userId,
+      productSlug: prodSlugA,
+      productId: prodA.id,
     },
     b: {
       slug: slugB,
@@ -100,6 +126,8 @@ export async function seedTenants(
       userId: userB.userId,
       memberUserId: memberB.userId,
       inviteId: inviteB.id,
+      productSlug: prodSlugB,
+      productId: prodB.id,
     },
   };
 }

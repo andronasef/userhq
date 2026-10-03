@@ -9,6 +9,7 @@ export interface EntityLogoProps {
   name: string;
   size: 20 | 24 | 32 | 40 | 64;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const SIZE_CLASSES: Record<EntityLogoProps["size"], { box: string; text: string; rounded: string }> = {
@@ -19,7 +20,7 @@ const SIZE_CLASSES: Record<EntityLogoProps["size"], { box: string; text: string;
   64: { box: "size-16", text: "text-[24px]", rounded: "rounded-lg" },
 };
 
-export function EntityLogo({ src, name, size, className }: EntityLogoProps) {
+export function EntityLogo({ src, name, size, className, style }: EntityLogoProps) {
   const [hasError, setHasError] = React.useState(false);
   const config = SIZE_CLASSES[size] ?? SIZE_CLASSES[24];
 
@@ -36,6 +37,7 @@ export function EntityLogo({ src, name, size, className }: EntityLogoProps) {
         src={src}
         alt=""
         onError={() => setHasError(true)}
+        style={style}
         className={cn(
           config.box,
           config.rounded,
@@ -49,6 +51,7 @@ export function EntityLogo({ src, name, size, className }: EntityLogoProps) {
   return (
     <span
       aria-hidden="true"
+      style={style}
       className={cn(
         config.box,
         config.rounded,
@@ -61,3 +64,4 @@ export function EntityLogo({ src, name, size, className }: EntityLogoProps) {
     </span>
   );
 }
+

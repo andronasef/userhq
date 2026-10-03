@@ -3,6 +3,7 @@ import { z } from "zod";
 export * from "./user.js";
 export * from "./slugs.js";
 export * from "./tenancy.js";
+export * from "./palette.js";
 
 export const API_ERROR_CODES = [
   "unauthorized",

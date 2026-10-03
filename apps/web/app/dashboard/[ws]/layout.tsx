@@ -1,7 +1,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getWorkspace, getMe } from "../../../lib/api-server";
+import { getWorkspace, getMe, getProducts } from "../../../lib/api-server";
 import { isDevUploadEnabled } from "../../../lib/dev-flags";
 import { UserMenu } from "../../../components/user-menu";
 import { WorkspaceSwitcher } from "../../../components/dashboard/workspace-switcher";
@@ -31,6 +31,8 @@ export default async function DashboardLayout({
   const workspace = result.data;
   const me = await getMe();
   const devUploadEnabled = isDevUploadEnabled();
+  const productsResult = await getProducts(ws);
+  const products = productsResult.ok ? productsResult.data : [];
 
   return (
     <div className="min-h-dvh flex flex-col">
@@ -39,7 +41,7 @@ export default async function DashboardLayout({
         className="h-14 border-b border-border bg-background px-4 flex items-center gap-2 min-w-0"
       >
         <MobileNav>
-          <DashboardSidebar ws={ws} products={[]} />
+          <DashboardSidebar ws={ws} products={products} />
         </MobileNav>
         <Link href="/dashboard" className="text-base font-semibold text-foreground shrink-0">
           UserHQ
@@ -66,7 +68,7 @@ export default async function DashboardLayout({
 
       <div className="flex flex-1 min-h-0">
         <aside className="hidden lg:flex flex-col w-60 shrink-0 border-r border-border bg-muted p-4 gap-6 overflow-y-auto">
-          <DashboardSidebar ws={ws} products={[]} />
+          <DashboardSidebar ws={ws} products={products} />
         </aside>
         <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           <div className="w-full max-w-3xl">

@@ -36,6 +36,13 @@
       "when": 1791009241691,
       "tag": "0004_invites",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791011966576,
+      "tag": "0005_statuses",
+      "breakpoints": true
     }
   ]
 }

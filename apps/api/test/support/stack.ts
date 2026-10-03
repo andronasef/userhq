@@ -188,3 +188,21 @@ export async function grantPlatformInvite(
     .returning({ id: schema.invites.id });
   return { id: row.id, token };
 }
+
+export async function createProductViaApi(
+  cookie: string,
+  ws: string,
+  input: { name: string; slug: string; logoUploadId?: string | null }
+): Promise<{ slug: string }> {
+  const res = await apiCall(`/api/v1/workspaces/${ws}/products`, {
+    method: "POST",
+    cookie,
+    body: input,
+  });
+  if (res.status !== 201) {
+    const text = await res.text();
+    throw new Error(`createProductViaApi failed (${res.status}): ${text}`);
+  }
+  return res.json();
+}
+

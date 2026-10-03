@@ -165,6 +165,7 @@ export default async function PostPage({
           postSlug={post.slug}
           initialTimeline={timeline}
           signedIn={viewer.signedIn}
+          viewerIsAdmin={viewer.isAdmin}
         />
       </section>
     </div>

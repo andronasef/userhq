@@ -20,6 +20,7 @@ export interface CommentComposerProps {
   onDraftChange?: (draft: string) => void;
   onSuccess: (comment: PublicComment) => void;
   onCancel?: () => void;
+  discardLabel?: string;
 }
 
 export function CommentComposer({

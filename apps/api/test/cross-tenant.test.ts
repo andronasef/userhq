@@ -111,7 +111,16 @@ const CROSS_TENANT_ROUTES: Record<
   "POST /workspaces/:ws/products/:product/comments/:id/restore": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/comments/${s.b.commentId}/restore`,
   }),
+  "POST /workspaces/:ws/products/:product/posts/:number/merge": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts/${s.b.postNumber}/merge`,
+    body: { targetNumber: s.b.postNumber },
+  }),
+  "POST /workspaces/:ws/products/:product/posts/merge": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts/merge`,
+    body: { keepNumber: s.b.postNumber, mergeNumbers: [s.b.postNumber] },
+  }),
 };
+
 
 describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
   let testApp: Awaited<ReturnType<typeof createTestApp>>;

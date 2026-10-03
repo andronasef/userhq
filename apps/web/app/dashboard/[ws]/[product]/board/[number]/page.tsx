@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { Metadata } from "next";
-import { notFound, permanentRedirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   getProduct,
   getStatuses,
@@ -67,7 +67,7 @@ export default async function DashboardPostPage({
   }
 
   if (postRes.data.kind === "redirect") {
-    permanentRedirect(
+    redirect(
       `/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/board/${postRes.data.number}`
     );
   }

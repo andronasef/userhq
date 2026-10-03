@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { TimelineItem, PublicComment } from "@userhq/types";
 import { CommentItem } from "@/components/post/comment-item";
 import { CommentComposer } from "@/components/post/comment-composer";
+import { SignInPrompt } from "@/components/post/sign-in-prompt";
 
 export interface PostTimelineProps {
   ws: string;
@@ -235,7 +236,7 @@ export function PostTimeline({
         </ol>
       )}
 
-      {signedIn && (
+      {signedIn ? (
         <div className="mt-2">
           <CommentComposer
             ws={ws}
@@ -243,6 +244,10 @@ export function PostTimeline({
             postNumber={postNumber}
             onSuccess={handleCommentSuccess}
           />
+        </div>
+      ) : (
+        <div className="mt-2">
+          <SignInPrompt postHref={`/${ws}/${product}/p/${postRef}`} />
         </div>
       )}
     </div>

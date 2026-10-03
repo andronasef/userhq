@@ -33,4 +33,23 @@ describe("Portal Isolation (Plan 03-02)", () => {
     expect(res.status).toBe(404);
     expect(res.body.code).toBe("not_found");
   });
+
+  it("workspace A's portal never patches or deletes workspace B's comment id (404 comment_not_found)", async () => {
+    const patchRes = await request(testApp.http)
+      .patch(`/api/v1/portal/${seed.a.slug}/${seed.a.productSlug}/comments/${seed.b.commentId}`)
+      .set("Cookie", seed.a.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({ body: "Cross-tenant edit attempt", version: 1 });
+
+    expect(patchRes.status).toBe(404);
+    expect(patchRes.body.code).toBe("comment_not_found");
+
+    const delRes = await request(testApp.http)
+      .delete(`/api/v1/portal/${seed.a.slug}/${seed.a.productSlug}/comments/${seed.b.commentId}`)
+      .set("Cookie", seed.a.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL);
+
+    expect(delRes.status).toBe(404);
+    expect(delRes.body.code).toBe("comment_not_found");
+  });
 });

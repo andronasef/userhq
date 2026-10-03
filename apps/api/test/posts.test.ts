@@ -162,10 +162,16 @@ describe("Public Posts API (Plan 03-02)", () => {
   });
 
   it("validates titles and details according to shared Zod constraints", async () => {
+    const valUser = await signedInCookie(testApp.test, {
+      name: "Validation User",
+      email: "val@feedback.test",
+      emailVerified: true,
+    });
+
     // Empty title after trimming -> title_required
     const emptyRes = await request(testApp.http)
       .post(`/api/v1/portal/${wsSlug}/${prodSlug}/posts`)
-      .set("Cookie", authorUser.cookie)
+      .set("Cookie", valUser.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)
       .send({ title: "   " });
     expect(emptyRes.status).toBe(400);
@@ -174,7 +180,7 @@ describe("Public Posts API (Plan 03-02)", () => {
     // Title 1-2 chars after trimming -> title_too_short
     const shortRes = await request(testApp.http)
       .post(`/api/v1/portal/${wsSlug}/${prodSlug}/posts`)
-      .set("Cookie", authorUser.cookie)
+      .set("Cookie", valUser.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)
       .send({ title: "  ab  " });
     expect(shortRes.status).toBe(400);
@@ -183,7 +189,7 @@ describe("Public Posts API (Plan 03-02)", () => {
     // Title 121 chars -> title_too_long
     const longRes = await request(testApp.http)
       .post(`/api/v1/portal/${wsSlug}/${prodSlug}/posts`)
-      .set("Cookie", authorUser.cookie)
+      .set("Cookie", valUser.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)
       .send({ title: "a".repeat(121) });
     expect(longRes.status).toBe(400);
@@ -192,7 +198,7 @@ describe("Public Posts API (Plan 03-02)", () => {
     // Description 5,001 chars -> description_too_long
     const longDescRes = await request(testApp.http)
       .post(`/api/v1/portal/${wsSlug}/${prodSlug}/posts`)
-      .set("Cookie", authorUser.cookie)
+      .set("Cookie", valUser.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)
       .send({ title: "Valid Title", description: "a".repeat(5001) });
     expect(longDescRes.status).toBe(400);
@@ -201,7 +207,7 @@ describe("Public Posts API (Plan 03-02)", () => {
     // Description "   " -> stored as NULL
     const emptyDescRes = await request(testApp.http)
       .post(`/api/v1/portal/${wsSlug}/${prodSlug}/posts`)
-      .set("Cookie", authorUser.cookie)
+      .set("Cookie", valUser.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)
       .send({ title: "Valid Post Empty Description", description: "   " });
     expect(emptyDescRes.status).toBe(201);
@@ -214,10 +220,16 @@ describe("Public Posts API (Plan 03-02)", () => {
   });
 
   it("handles merged posts by redirecting or 404 if target is gone", async () => {
+    const mergeUser = await signedInCookie(testApp.test, {
+      name: "Merge User",
+      email: "merge@feedback.test",
+      emailVerified: true,
+    });
+
     // Create target post
     const targetRes = await request(testApp.http)
       .post(`/api/v1/portal/${wsSlug}/${prodSlug}/posts`)
-      .set("Cookie", authorUser.cookie)
+      .set("Cookie", mergeUser.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)
       .send({ title: "Merge Target Post" });
     expect(targetRes.status).toBe(201);
@@ -225,7 +237,7 @@ describe("Public Posts API (Plan 03-02)", () => {
     // Create post to merge
     const sourceRes = await request(testApp.http)
       .post(`/api/v1/portal/${wsSlug}/${prodSlug}/posts`)
-      .set("Cookie", authorUser.cookie)
+      .set("Cookie", mergeUser.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)
       .send({ title: "Source Post To Merge" });
     expect(sourceRes.status).toBe(201);
@@ -277,10 +289,16 @@ describe("Public Posts API (Plan 03-02)", () => {
   });
 
   it("returns 404 post_not_found for deleted post, unknown number, 0, or non-numeric", async () => {
+    const delUser = await signedInCookie(testApp.test, {
+      name: "Deleted Post User",
+      email: "del@feedback.test",
+      emailVerified: true,
+    });
+
     // Deleted post
     const delPost = await request(testApp.http)
       .post(`/api/v1/portal/${wsSlug}/${prodSlug}/posts`)
-      .set("Cookie", authorUser.cookie)
+      .set("Cookie", delUser.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)
       .send({ title: "To Be Deleted Post" });
     expect(delPost.status).toBe(201);

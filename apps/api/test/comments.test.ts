@@ -52,6 +52,7 @@ describe("Comments API (Plan 03-08)", () => {
         slug: prodSlug,
         name: "Comments Product",
         accentColor: "#2563EB",
+        nextPostNumber: 2,
       })
       .returning();
     prodId = prod.id;
@@ -364,5 +365,53 @@ describe("Comments API (Plan 03-08)", () => {
       .get(`/api/v1/portal/${wsSlug}/${prodSlug}/posts/${postNumber}`);
     const found = postRes.body.timeline.find((t: any) => t.kind === "comment" && t.comment.id === cId);
     expect(found.comment.version).toBe(initialVersion);
+  });
+
+  it("throttles post creation at 5/min and comment creation at 10/min per user (429 rate_limited)", async () => {
+    const poster = await signedInCookie(testApp.test, {
+      name: "Fast Poster",
+      email: "poster@comments.test",
+      emailVerified: true,
+    });
+
+    for (let i = 1; i <= 5; i++) {
+      const res = await request(testApp.http)
+        .post(`/api/v1/portal/${wsSlug}/${prodSlug}/posts`)
+        .set("Cookie", poster.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ title: `Fast Post ${i}`, description: "Testing throttle" });
+      expect(res.status).toBe(201);
+    }
+
+    const post6Res = await request(testApp.http)
+      .post(`/api/v1/portal/${wsSlug}/${prodSlug}/posts`)
+      .set("Cookie", poster.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({ title: "Fast Post 6", description: "Should be throttled" });
+    expect(post6Res.status).toBe(429);
+    expect(post6Res.body.code).toBe("rate_limited");
+
+    const commenter = await signedInCookie(testApp.test, {
+      name: "Fast Commenter",
+      email: "commenter@comments.test",
+      emailVerified: true,
+    });
+
+    for (let i = 1; i <= 10; i++) {
+      const res = await request(testApp.http)
+        .post(`/api/v1/portal/${wsSlug}/${prodSlug}/posts/${postNumber}/comments`)
+        .set("Cookie", commenter.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ body: `Fast Comment ${i}` });
+      expect(res.status).toBe(201);
+    }
+
+    const comment11Res = await request(testApp.http)
+      .post(`/api/v1/portal/${wsSlug}/${prodSlug}/posts/${postNumber}/comments`)
+      .set("Cookie", commenter.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({ body: "Fast Comment 11 - throttled" });
+    expect(comment11Res.status).toBe(429);
+    expect(comment11Res.body.code).toBe("rate_limited");
   });
 });

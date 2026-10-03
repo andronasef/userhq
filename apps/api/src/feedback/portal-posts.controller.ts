@@ -31,6 +31,9 @@ import { ApiException } from "../common/api-error.filter.js";
 import { PortalGuard } from "../portal/portal.guard.js";
 import { PostsService } from "./posts.service.js";
 
+import { Throttle } from "@nestjs/throttler";
+import { UserThrottlerGuard } from "./throttle.js";
+
 const postNumberParamSchema = z.coerce.number().int().positive();
 
 @Controller("portal/:ws/:product")
@@ -69,6 +72,8 @@ export class PortalPostsController {
   }
 
   @Post("posts")
+  @UseGuards(UserThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @HttpCode(HttpStatus.CREATED)
   @SerializeOptions({ schema: PostCreatedSchema })
   async createPost(

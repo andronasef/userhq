@@ -51,6 +51,14 @@ describe("Board E2E (Plan 03-04)", () => {
       name: `Product ${rand}`,
       slug: pSlug,
     });
+
+    const [prodRow] = await stack.db
+      .select({ id: schema.products.id })
+      .from(schema.products)
+      .where(eq(schema.products.slug, pSlug));
+    await stack.db
+      .delete(schema.categories)
+      .where(eq(schema.categories.productId, prodRow.id));
   });
 
   afterAll(async () => {
@@ -274,12 +282,19 @@ describe("Board E2E (Plan 03-04)", () => {
   });
 
   it("renders text safely with no HTML execution and wraps links with rel nofollow", async () => {
+    const safeUser = await mintSession(stack, {
+      name: "Safe Author",
+      email: `safe-${randomBytes(3).toString("hex")}@example.com`,
+      emailVerified: true,
+    });
+    userIds.push(safeUser.userId);
+
     const safeTitle = `Safe post ${randomBytes(3).toString("hex")}`;
     const safeDesc = `<script>alert(1)</script> **bold** javascript:alert(1) https://example.com/x.`;
 
     const createRes = await apiCall(`/api/v1/portal/${wsSlug}/${pSlug}/posts`, {
       method: "POST",
-      cookie: userCookie,
+      cookie: safeUser.cookie,
       body: {
         title: safeTitle,
         description: safeDesc,
@@ -370,11 +385,18 @@ describe("Board E2E (Plan 03-04)", () => {
   });
 
   it("permalink has <title>{post title} · {product}</title> and canonical tag", async () => {
+    const seoUser = await mintSession(stack, {
+      name: "SEO Author",
+      email: `seo-${randomBytes(3).toString("hex")}@example.com`,
+      emailVerified: true,
+    });
+    userIds.push(seoUser.userId);
+
     const postTitle = `SEO test ${randomBytes(3).toString("hex")}`;
     const postDesc = "This is a detailed description of the feature request for metadata tests.";
     const createRes = await apiCall(`/api/v1/portal/${wsSlug}/${pSlug}/posts`, {
       method: "POST",
-      cookie: userCookie,
+      cookie: seoUser.cookie,
       body: {
         title: postTitle,
         description: postDesc,

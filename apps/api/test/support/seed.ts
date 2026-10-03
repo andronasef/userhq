@@ -14,6 +14,7 @@ export interface TenantSeed {
   statusId?: string;
   categoryId?: string;
   postNumber?: number;
+  commentId?: string;
 }
 
 export interface Seed {
@@ -168,6 +169,15 @@ export async function seedTenants(
     })
     .returning();
 
+  const [commentB] = await testApp.db
+    .insert(schema.comments)
+    .values({
+      postId: postB.id,
+      authorId: userB.userId,
+      body: "Tenant B Comment 1",
+    })
+    .returning();
+
   return {
     a: {
       slug: slugA,
@@ -190,6 +200,7 @@ export async function seedTenants(
       statusId: statusB.id,
       categoryId: catB.id,
       postNumber: 1,
+      commentId: commentB.id,
     },
   };
 }

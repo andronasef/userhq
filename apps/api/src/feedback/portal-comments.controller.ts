@@ -26,6 +26,8 @@ import { CurrentUser } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { PortalGuard } from "../portal/portal.guard.js";
 import { CommentsService } from "./comments.service.js";
+import { Throttle } from "@nestjs/throttler";
+import { UserThrottlerGuard } from "./throttle.js";
 
 const postNumberParamSchema = z.coerce.number().int().positive();
 const uuidParamSchema = z.string().uuid();
@@ -37,6 +39,8 @@ export class PortalCommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   @Post("posts/:number/comments")
+  @UseGuards(UserThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.CREATED)
   @SerializeOptions({ schema: PublicCommentSchema })
   async createComment(

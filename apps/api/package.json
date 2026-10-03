@@ -8,6 +8,7 @@
     "@nestjs/common": "12.1.2",
     "@nestjs/core": "12.1.2",
     "@nestjs/platform-express": "12.1.2",
+    "@nestjs/throttler": "6.7.1",
     "@thallesp/nestjs-better-auth": "2.8.0",
     "@userhq/db": "workspace:*",
     "@userhq/types": "workspace:*",

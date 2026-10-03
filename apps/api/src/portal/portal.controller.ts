@@ -9,11 +9,13 @@ import {
 } from "@nestjs/common";
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
 import { alias } from "drizzle-orm/pg-core";
-import { eq } from "drizzle-orm";
+import { eq, and, isNull, asc } from "drizzle-orm";
 import { DB, type Db, workspaces, products, uploads } from "@userhq/db";
 import {
   PublicPortalProductSchema,
+  PublicPortalDirectorySchema,
   type PublicPortalProduct,
+  type PublicPortalDirectory,
 } from "@userhq/types";
 import { Public } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
@@ -27,6 +29,71 @@ const workspaceLogo = alias(uploads, "workspace_logo");
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class PortalController {
   constructor(@Inject(DB) private readonly db: Db) {}
+
+  @Get(":ws")
+  @UseGuards(PortalGuard)
+  @SerializeOptions({ schema: PublicPortalDirectorySchema })
+  async getPortalDirectory(@Req() req: any): Promise<PublicPortalDirectory> {
+    const { workspaceId } = req.portal ?? {};
+    if (!workspaceId) {
+      throw new ApiException("not_found", 404, "Not found.");
+    }
+
+    const [wsRow] = await this.db
+      .select({
+        slug: workspaces.slug,
+        name: workspaces.name,
+        websiteUrl: workspaces.websiteUrl,
+        directoryEnabled: workspaces.directoryEnabled,
+        logoKey: workspaceLogo.storageKey,
+      })
+      .from(workspaces)
+      .leftJoin(workspaceLogo, eq(workspaces.logoUploadId, workspaceLogo.id))
+      .where(eq(workspaces.id, workspaceId))
+      .limit(1);
+
+    if (!wsRow) {
+      throw new ApiException("not_found", 404, "Not found.");
+    }
+
+    const prodRows = await this.db
+      .select({
+        slug: products.slug,
+        name: products.name,
+        tagline: products.tagline,
+        accentColor: products.accentColor,
+        productLogoKey: productLogo.storageKey,
+        workspaceLogoKey: workspaceLogo.storageKey,
+      })
+      .from(products)
+      .innerJoin(workspaces, eq(products.workspaceId, workspaces.id))
+      .leftJoin(productLogo, eq(products.logoUploadId, productLogo.id))
+      .leftJoin(workspaceLogo, eq(workspaces.logoUploadId, workspaceLogo.id))
+      .where(and(eq(products.workspaceId, workspaceId), isNull(products.deletedAt)))
+      .orderBy(asc(products.name), asc(products.slug));
+
+    const workspaceLogoUrl = wsRow.logoKey ? `/uploads/${wsRow.logoKey}` : null;
+
+    return PublicPortalDirectorySchema.parse({
+      workspace: {
+        slug: wsRow.slug,
+        name: wsRow.name,
+        logoUrl: workspaceLogoUrl,
+        websiteUrl: wsRow.websiteUrl ?? null,
+      },
+      directoryEnabled: wsRow.directoryEnabled,
+      products: prodRows.map((p) => {
+        const logoKey = p.productLogoKey ?? p.workspaceLogoKey ?? null;
+        return {
+          slug: p.slug,
+          name: p.name,
+          tagline: p.tagline ?? null,
+          accentColor: p.accentColor,
+          logoUrl: logoKey ? `/uploads/${logoKey}` : null,
+        };
+      }),
+    });
+  }
 
   @Get(":ws/:product")
   @UseGuards(PortalGuard)

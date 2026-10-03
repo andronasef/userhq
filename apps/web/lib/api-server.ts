@@ -7,6 +7,8 @@ import {
   type MeResponse,
   PublicPortalProductSchema,
   type PublicPortalProduct,
+  PublicPortalDirectorySchema,
+  type PublicPortalDirectory,
   WorkspaceSchema,
   type Workspace,
   InviteRowSchema,
@@ -175,6 +177,15 @@ export const getStatuses = cache(
   }
 );
 
+export const getPortalDirectory = cache(
+  (ws: string): Promise<ApiReadResult<PublicPortalDirectory>> => {
+    return apiRead(
+      "/api/v1/portal/" + encodeURIComponent(ws),
+      PublicPortalDirectorySchema
+    );
+  }
+);
+
 export async function publicHost(): Promise<string> {
   const incomingHeaders = await headers();
   return (
@@ -182,5 +193,12 @@ export async function publicHost(): Promise<string> {
     incomingHeaders.get("host") ??
     "localhost:8080"
   );
+}
+
+export async function publicOrigin(): Promise<string> {
+  const incomingHeaders = await headers();
+  const proto = incomingHeaders.get("x-forwarded-proto") ?? "http";
+  const host = await publicHost();
+  return `${proto}://${host}`;
 }
 

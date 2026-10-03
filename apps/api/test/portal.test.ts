@@ -162,4 +162,138 @@ describe("Portal API (Plan 02-02)", () => {
     const bodyStr = JSON.stringify(res.body);
     expect(bodyStr).not.toContain(upload.id);
   });
+
+  describe("Portal Directory API (Plan 02-10)", () => {
+    it("tracer: anonymous GET /api/v1/portal/:ws lists live products by name", async () => {
+      const [dirWs] = await testApp.db
+        .insert(schema.workspaces)
+        .values({
+          slug: "dir-test-ws",
+          name: "Directory Test WS",
+          websiteUrl: "https://dir.example",
+          directoryEnabled: true,
+        })
+        .returning();
+
+      // Seed "Zeta" and "alpha" plus a deleted product
+      await testApp.db.insert(schema.products).values([
+        {
+          workspaceId: dirWs.id,
+          slug: "zeta",
+          name: "Zeta Product",
+          tagline: "The last one",
+          accentColor: "#2563EB",
+        },
+        {
+          workspaceId: dirWs.id,
+          slug: "alpha",
+          name: "alpha Product",
+          tagline: "The first one",
+          accentColor: "#10B981",
+        },
+        {
+          workspaceId: dirWs.id,
+          slug: "deleted-prod",
+          name: "Deleted Product",
+          deletedAt: new Date(),
+        },
+      ]);
+
+      const res = await request(testApp.http).get("/api/v1/portal/dir-test-ws");
+      expect(res.status).toBe(200);
+
+      expect(res.body).toEqual({
+        workspace: {
+          slug: "dir-test-ws",
+          name: "Directory Test WS",
+          logoUrl: null,
+          websiteUrl: "https://dir.example",
+        },
+        directoryEnabled: true,
+        products: [
+          {
+            slug: "alpha",
+            name: "alpha Product",
+            tagline: "The first one",
+            accentColor: "#10B981",
+            logoUrl: null,
+          },
+          {
+            slug: "zeta",
+            name: "Zeta Product",
+            tagline: "The last one",
+            accentColor: "#2563EB",
+            logoUrl: null,
+          },
+        ],
+      });
+
+      // Exact keys check
+      expect(Object.keys(res.body).sort()).toEqual([
+        "directoryEnabled",
+        "products",
+        "workspace",
+      ]);
+      expect(Object.keys(res.body.workspace).sort()).toEqual([
+        "logoUrl",
+        "name",
+        "slug",
+        "websiteUrl",
+      ]);
+      expect(Object.keys(res.body.products[0]).sort()).toEqual([
+        "accentColor",
+        "logoUrl",
+        "name",
+        "slug",
+        "tagline",
+      ]);
+
+      // No UUID leak
+      const bodyStr = JSON.stringify(res.body);
+      expect(bodyStr).not.toContain(dirWs.id);
+      expect(bodyStr).not.toMatch(
+        /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
+      );
+    });
+
+    it("directoryEnabled false is still returned", async () => {
+      await testApp.db
+        .insert(schema.workspaces)
+        .values({
+          slug: "disabled-ws",
+          name: "Disabled WS",
+          directoryEnabled: false,
+        });
+
+      const res = await request(testApp.http).get("/api/v1/portal/disabled-ws");
+      expect(res.status).toBe(200);
+      expect(res.body.directoryEnabled).toBe(false);
+    });
+
+    it("directory for suspended workspace returns 403 workspace_suspended", async () => {
+      await testApp.db
+        .insert(schema.workspaces)
+        .values({
+          slug: "suspended-dir-ws",
+          name: "Suspended Dir WS",
+          suspendedAt: new Date(),
+        });
+
+      const res = await request(testApp.http).get("/api/v1/portal/suspended-dir-ws");
+      expect(res.status).toBe(403);
+      expect(res.body).toEqual({
+        code: "workspace_suspended",
+        message: "This portal is unavailable.",
+      });
+    });
+
+    it("directory for unknown workspace returns 404 not_found", async () => {
+      const res = await request(testApp.http).get("/api/v1/portal/non-existent-ws");
+      expect(res.status).toBe(404);
+      expect(res.body).toEqual({
+        code: "not_found",
+        message: "Not found.",
+      });
+    });
+  });
 });

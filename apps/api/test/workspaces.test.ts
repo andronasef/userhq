@@ -49,6 +49,8 @@ describe("Workspaces API (Plan 02-03)", () => {
       slug: "acme",
       name: "Acme Corp",
       logoUrl: null,
+      websiteUrl: null,
+      directoryEnabled: true,
       role: "owner",
     });
 
@@ -349,6 +351,104 @@ describe("Workspaces API (Plan 02-03)", () => {
       const result = slugify(longName);
       expect(result.length).toBeLessThanOrEqual(32);
       expect(result.endsWith("-")).toBe(false);
+    });
+  });
+
+  describe("PATCH /api/v1/workspaces/:ws (Plan 02-10)", () => {
+    it("rename workspace and verify slug immutability", async () => {
+      const res = await request(testApp.http)
+        .patch("/api/v1/workspaces/acme")
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ name: "Acme Inc", slug: "new-slug" });
+
+      expect(res.status).toBe(200);
+      expect(res.body.name).toBe("Acme Inc");
+      expect(res.body.slug).toBe("acme"); // slug unchanged!
+    });
+
+    it("website validation: valid https, invalid http/javascript, empty string to null", async () => {
+      // Invalid http
+      const httpRes = await request(testApp.http)
+        .patch("/api/v1/workspaces/acme")
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ websiteUrl: "http://acme.example" });
+      expect(httpRes.status).toBe(400);
+
+      // Invalid javascript
+      const jsRes = await request(testApp.http)
+        .patch("/api/v1/workspaces/acme")
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ websiteUrl: "javascript:alert(1)" });
+      expect(jsRes.status).toBe(400);
+
+      // Valid https
+      const validRes = await request(testApp.http)
+        .patch("/api/v1/workspaces/acme")
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ websiteUrl: "https://acme.example" });
+      expect(validRes.status).toBe(200);
+      expect(validRes.body.websiteUrl).toBe("https://acme.example");
+
+      // Empty string -> null
+      const nullRes = await request(testApp.http)
+        .patch("/api/v1/workspaces/acme")
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ websiteUrl: "" });
+      expect(nullRes.status).toBe(200);
+      expect(nullRes.body.websiteUrl).toBeNull();
+    });
+
+    it("directoryEnabled toggle", async () => {
+      const offRes = await request(testApp.http)
+        .patch("/api/v1/workspaces/acme")
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ directoryEnabled: false });
+      expect(offRes.status).toBe(200);
+      expect(offRes.body.directoryEnabled).toBe(false);
+
+      const onRes = await request(testApp.http)
+        .patch("/api/v1/workspaces/acme")
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ directoryEnabled: true });
+      expect(onRes.status).toBe(200);
+      expect(onRes.body.directoryEnabled).toBe(true);
+    });
+
+    it("foreign logo upload returns 400 validation_failed", async () => {
+      const otherUser = await signedInCookie(testApp.test, {
+        name: "Other User",
+        email: "other-upload@example.test",
+        emailVerified: true,
+      });
+
+      const [foreignUpload] = await testApp.db
+        .insert(schema.uploads)
+        .values({
+          uploaderId: otherUser.userId,
+          storageKey: "2026/10/foreign-logo.webp",
+          originalName: "logo.png",
+          mimeType: "image/png",
+          bytes: 100,
+          width: 50,
+          height: 50,
+        })
+        .returning();
+
+      const res = await request(testApp.http)
+        .patch("/api/v1/workspaces/acme")
+        .set("Cookie", ownerCookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ logoUploadId: foreignUpload.id });
+
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe("validation_failed");
     });
   });
 });

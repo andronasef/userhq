@@ -175,4 +175,155 @@ describe("Portal E2E (Plan 02-02)", () => {
     expect(countOccurrences(html, 'data-shell="app"')).toBe(1);
     expect(countOccurrences(html, 'data-shell="portal"')).toBe(0);
   });
+
+  describe("Directory /{ws} (Plan 02-10)", () => {
+    let dirWsSlug: string;
+    let dirWsId: string;
+    let prod1Slug: string;
+    let prod1Name: string;
+    let prod2Slug: string;
+    let prod2Name: string;
+
+    let singleWsSlug: string;
+    let singleWsId: string;
+    let singleProdSlug: string;
+
+    let emptyWsSlug: string;
+    let emptyWsId: string;
+
+    let disabledWsSlug: string;
+    let disabledWsId: string;
+
+    beforeAll(async () => {
+      const rand1 = randomBytes(4).toString("hex");
+      dirWsSlug = `dir-e2e-${rand1}`;
+      const [w1] = await dbInstance.db
+        .insert(schema.workspaces)
+        .values({
+          slug: dirWsSlug,
+          name: `Directory WS ${rand1}`,
+          directoryEnabled: true,
+        })
+        .returning();
+      dirWsId = w1.id;
+
+      prod1Slug = `p1-${rand1}`;
+      prod1Name = `Alpha Product ${rand1}`;
+      prod2Slug = `p2-${rand1}`;
+      prod2Name = `Beta Product ${rand1}`;
+
+      await dbInstance.db.insert(schema.products).values([
+        {
+          workspaceId: w1.id,
+          slug: prod1Slug,
+          name: prod1Name,
+          tagline: "Alpha tagline",
+        },
+        {
+          workspaceId: w1.id,
+          slug: prod2Slug,
+          name: prod2Name,
+          tagline: "Beta tagline",
+        },
+      ]);
+
+      // Single product workspace
+      const rand2 = randomBytes(4).toString("hex");
+      singleWsSlug = `single-e2e-${rand2}`;
+      singleProdSlug = `only-prod-${rand2}`;
+      const [w2] = await dbInstance.db
+        .insert(schema.workspaces)
+        .values({
+          slug: singleWsSlug,
+          name: `Single WS ${rand2}`,
+          directoryEnabled: true,
+        })
+        .returning();
+      singleWsId = w2.id;
+
+      await dbInstance.db.insert(schema.products).values({
+        workspaceId: w2.id,
+        slug: singleProdSlug,
+        name: `Single Product ${rand2}`,
+      });
+
+      // Zero products workspace
+      const rand3 = randomBytes(4).toString("hex");
+      emptyWsSlug = `empty-e2e-${rand3}`;
+      const [w3] = await dbInstance.db
+        .insert(schema.workspaces)
+        .values({
+          slug: emptyWsSlug,
+          name: `Empty WS ${rand3}`,
+          directoryEnabled: true,
+        })
+        .returning();
+      emptyWsId = w3.id;
+
+      // Disabled directory with website
+      const rand4 = randomBytes(4).toString("hex");
+      disabledWsSlug = `disabled-e2e-${rand4}`;
+      const [w4] = await dbInstance.db
+        .insert(schema.workspaces)
+        .values({
+          slug: disabledWsSlug,
+          name: `Disabled WS ${rand4}`,
+          directoryEnabled: false,
+          websiteUrl: "https://example.com/company",
+        })
+        .returning();
+      disabledWsId = w4.id;
+    });
+
+    afterAll(async () => {
+      const wsIds = [dirWsId, singleWsId, emptyWsId, disabledWsId].filter(Boolean);
+      for (const wid of wsIds) {
+        await dbInstance.db
+          .delete(schema.statuses)
+          .where(eq(schema.statuses.productId, prodId));
+        await dbInstance.db
+          .delete(schema.products)
+          .where(eq(schema.products.workspaceId, wid));
+        await dbInstance.db
+          .delete(schema.workspaces)
+          .where(eq(schema.workspaces.id, wid));
+      }
+    });
+
+    it("workspace with 2 live products renders directory card grid containing both names", async () => {
+      const res = await fetch(`${baseUrl}/${dirWsSlug}`);
+      expect(res.status).toBe(200);
+      const html = await res.text();
+      expect(html).toContain(prod1Name);
+      expect(html).toContain(prod2Name);
+      expect(html).toContain("Alpha tagline");
+      expect(html).toContain("Beta tagline");
+    });
+
+    it("workspace with 1 live product redirects (307) to that product portal", async () => {
+      const res = await fetch(`${baseUrl}/${singleWsSlug}`, {
+        redirect: "manual",
+      });
+      expect(res.status).toBe(307);
+      const location = res.headers.get("location");
+      expect(location).toBe(`/${singleWsSlug}/${singleProdSlug}`);
+    });
+
+    it("workspace with 0 products renders empty state 'hasn't published any products'", async () => {
+      const res = await fetch(`${baseUrl}/${emptyWsSlug}`);
+      expect(res.status).toBe(200);
+      const html = await res.text();
+      expect(html).toContain("No products yet");
+      expect(html).toContain("hasn&#x27;t published any products");
+    });
+
+    it("workspace with directory disabled redirects to its websiteUrl", async () => {
+      const res = await fetch(`${baseUrl}/${disabledWsSlug}`, {
+        redirect: "manual",
+      });
+      expect(res.status).toBe(307);
+      const location = res.headers.get("location");
+      expect(location).toBe("https://example.com/company");
+    });
+  });
 });

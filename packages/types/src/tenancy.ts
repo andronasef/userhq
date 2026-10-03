@@ -19,6 +19,26 @@ export const PublicPortalProductSchema = z.object({
 });
 export type PublicPortalProduct = z.infer<typeof PublicPortalProductSchema>;
 
+export const PublicPortalDirectorySchema = z.object({
+  workspace: z.object({
+    slug: z.string(),
+    name: z.string(),
+    logoUrl: z.string().nullable(),
+    websiteUrl: z.string().nullable(),
+  }),
+  directoryEnabled: z.boolean(),
+  products: z.array(
+    z.object({
+      slug: z.string(),
+      name: z.string(),
+      tagline: z.string().nullable(),
+      accentColor: z.string(),
+      logoUrl: z.string().nullable(),
+    })
+  ),
+});
+export type PublicPortalDirectory = z.infer<typeof PublicPortalDirectorySchema>;
+
 export const NameSchema = z
   .string()
   .trim()
@@ -44,9 +64,43 @@ export const WorkspaceSchema = z.object({
   slug: z.string(),
   name: z.string(),
   logoUrl: z.string().nullable(),
+  websiteUrl: z.string().nullable(),
+  directoryEnabled: z.boolean(),
   role: MemberRoleSchema,
 });
 export type Workspace = z.infer<typeof WorkspaceSchema>;
+
+export const WebsiteUrlSchema = z
+  .string()
+  .trim()
+  .transform((val) => (val === "" ? null : val))
+  .nullable()
+  .refine(
+    (val) => {
+      if (val === null) return true;
+      try {
+        const parsed = new URL(val);
+        if (parsed.protocol !== "https:") return false;
+        const host = parsed.hostname;
+        if (!host || host.startsWith(".") || host.endsWith(".")) return false;
+        const parts = host.split(".");
+        if (parts.length < 2) return false;
+        return parts.every((p) => /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/i.test(p));
+      } catch {
+        return false;
+      }
+    },
+    { message: "invalid_url" }
+  );
+export type WebsiteUrl = z.infer<typeof WebsiteUrlSchema>;
+
+export const UpdateWorkspaceInputSchema = z.object({
+  name: NameSchema.optional(),
+  logoUploadId: z.uuid().nullable().optional(),
+  websiteUrl: WebsiteUrlSchema.optional(),
+  directoryEnabled: z.boolean().optional(),
+});
+export type UpdateWorkspaceInput = z.infer<typeof UpdateWorkspaceInputSchema>;
 
 export const MeWorkspaceSchema = z.object({
   slug: z.string(),
@@ -137,30 +191,6 @@ export const HexColorSchema = z
   .regex(HEX_COLOR_RE, { message: "invalid_color" })
   .transform((s) => s.toUpperCase());
 export type HexColor = z.infer<typeof HexColorSchema>;
-
-export const WebsiteUrlSchema = z
-  .string()
-  .trim()
-  .transform((val) => (val === "" ? null : val))
-  .nullable()
-  .refine(
-    (val) => {
-      if (val === null) return true;
-      try {
-        const parsed = new URL(val);
-        if (parsed.protocol !== "https:") return false;
-        const host = parsed.hostname;
-        if (!host || host.startsWith(".") || host.endsWith(".")) return false;
-        const parts = host.split(".");
-        if (parts.length < 2) return false;
-        return parts.every((p) => /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/i.test(p));
-      } catch {
-        return false;
-      }
-    },
-    { message: "invalid_url" }
-  );
-export type WebsiteUrl = z.infer<typeof WebsiteUrlSchema>;
 
 export const TaglineSchema = z
   .string()

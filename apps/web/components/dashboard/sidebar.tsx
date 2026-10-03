@@ -10,6 +10,7 @@ import {
   SlidersHorizontal,
   ExternalLink,
   CircleDot,
+  Settings,
 } from "lucide-react";
 import type { ProductSummary } from "@userhq/types";
 import { cn } from "../../lib/utils";
@@ -31,6 +32,7 @@ export function DashboardSidebar({
   const pathname = usePathname();
   const isProductsActive = pathname === `/dashboard/${ws}`;
   const isTeamActive = pathname.startsWith(`/dashboard/${ws}/team`);
+  const isWorkspaceSettingsActive = pathname === `/dashboard/${ws}/settings`;
 
   return (
     <aside className={cn("flex flex-col gap-6", className)}>
@@ -59,6 +61,17 @@ export function DashboardSidebar({
         >
           <Users className="size-4 shrink-0" aria-hidden="true" />
           <span className="truncate">Team</span>
+        </Link>
+        <Link
+          href={`/dashboard/${ws}/settings`}
+          className={cn(
+            "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-background",
+            isWorkspaceSettingsActive && "bg-background font-semibold"
+          )}
+          aria-current={isWorkspaceSettingsActive ? "page" : undefined}
+        >
+          <Settings className="size-4 shrink-0" aria-hidden="true" />
+          <span className="truncate">Settings</span>
         </Link>
       </nav>
 

@@ -14,6 +14,10 @@ const CROSS_TENANT_ROUTES: Record<
   "GET /workspaces/:ws": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}`,
   }),
+  "PATCH /workspaces/:ws": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}`,
+    body: { name: "Renamed" },
+  }),
   "GET /workspaces/:ws/members": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/members`,
   }),

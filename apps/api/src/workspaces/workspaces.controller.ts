@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   HttpCode,
   HttpStatus,
@@ -23,9 +24,11 @@ import {
   CreateWorkspaceInputSchema,
   WorkspaceCreatedSchema,
   WorkspaceSchema,
+  UpdateWorkspaceInputSchema,
   type CreateWorkspaceInput,
   type WorkspaceCreated,
   type Workspace,
+  type UpdateWorkspaceInput,
 } from "@userhq/types";
 import { ENV, type Env } from "../env.js";
 import { CurrentUser } from "../auth/decorators.js";
@@ -126,6 +129,8 @@ export class WorkspaceController {
       .select({
         slug: workspaces.slug,
         name: workspaces.name,
+        websiteUrl: workspaces.websiteUrl,
+        directoryEnabled: workspaces.directoryEnabled,
         logoKey: uploads.storageKey,
       })
       .from(workspaces)
@@ -141,6 +146,82 @@ export class WorkspaceController {
       slug: row.slug,
       name: row.name,
       logoUrl: row.logoKey ? `/uploads/${row.logoKey}` : null,
+      websiteUrl: row.websiteUrl ?? null,
+      directoryEnabled: row.directoryEnabled,
+      role: tenant.role,
+    });
+  }
+
+  @Patch()
+  @SerializeOptions({ schema: WorkspaceSchema })
+  async updateWorkspace(
+    @CurrentTenant() tenant: Tenant,
+    @CurrentUser() user: any,
+    @Body({ schema: UpdateWorkspaceInputSchema }) input: UpdateWorkspaceInput
+  ): Promise<Workspace> {
+    if (input.logoUploadId) {
+      const [upload] = await this.db
+        .select({ id: uploads.id })
+        .from(uploads)
+        .where(
+          and(
+            eq(uploads.id, input.logoUploadId),
+            eq(uploads.uploaderId, user.id)
+          )
+        )
+        .limit(1);
+
+      if (!upload) {
+        throw new ApiException(
+          "validation_failed",
+          400,
+          "That logo can't be used."
+        );
+      }
+    }
+
+    const updates: Partial<{
+      name: string;
+      logoUploadId: string | null;
+      websiteUrl: string | null;
+      directoryEnabled: boolean;
+    }> = {};
+
+    if (input.name !== undefined) updates.name = input.name;
+    if (input.logoUploadId !== undefined) updates.logoUploadId = input.logoUploadId;
+    if (input.websiteUrl !== undefined) updates.websiteUrl = input.websiteUrl;
+    if (input.directoryEnabled !== undefined) updates.directoryEnabled = input.directoryEnabled;
+
+    if (Object.keys(updates).length > 0) {
+      await this.db
+        .update(workspaces)
+        .set(updates)
+        .where(eq(workspaces.id, tenant.workspaceId));
+    }
+
+    const [row] = await this.db
+      .select({
+        slug: workspaces.slug,
+        name: workspaces.name,
+        websiteUrl: workspaces.websiteUrl,
+        directoryEnabled: workspaces.directoryEnabled,
+        logoKey: uploads.storageKey,
+      })
+      .from(workspaces)
+      .leftJoin(uploads, eq(workspaces.logoUploadId, uploads.id))
+      .where(eq(workspaces.id, tenant.workspaceId))
+      .limit(1);
+
+    if (!row) {
+      throw new ApiException("not_found", 404, "Not found.");
+    }
+
+    return WorkspaceSchema.parse({
+      slug: row.slug,
+      name: row.name,
+      logoUrl: row.logoKey ? `/uploads/${row.logoKey}` : null,
+      websiteUrl: row.websiteUrl ?? null,
+      directoryEnabled: row.directoryEnabled,
       role: tenant.role,
     });
   }

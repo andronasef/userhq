@@ -89,6 +89,10 @@ const CROSS_TENANT_ROUTES: Record<
   "DELETE /workspaces/:ws/products/:product/categories/:id": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/categories/${s.b.categoryId}`,
   }),
+  "PUT /workspaces/:ws/products/:product/posts/:number/status": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts/${s.b.postNumber}/status`,
+    body: { statusId: s.b.statusId, version: 1 },
+  }),
 };
 
 describe("Cross-tenant 404 isolation (Plan 02-03)", () => {

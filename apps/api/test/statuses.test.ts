@@ -494,5 +494,128 @@ describe("Statuses API (Plan 02-09)", () => {
         .send({ ids: [] });
       expect(emptyRes.status).toBe(400);
     });
+
+    it("deleting a status reassigns its posts to the moveTo status", async () => {
+      const list = await request(testApp.http)
+        .get(`/api/v1/workspaces/${wsSlug}/products/${prodSlug}/statuses`)
+        .set("Cookie", ownerUser.cookie);
+      const scheduled = list.body.find((s: any) => s.name === "Scheduled");
+      const inProgress = list.body.find((s: any) => s.name === "In Progress");
+
+      // Create 2 posts in In Progress
+      const [post1] = await testApp.db
+        .insert(schema.posts)
+        .values({
+          productId: prodId,
+          number: 801,
+          title: "Post with in progress status 1",
+          statusId: inProgress.id,
+          authorId: ownerUser.userId,
+          authorIsAdmin: true,
+          voteCount: 1,
+        })
+        .returning();
+
+      const [post2] = await testApp.db
+        .insert(schema.posts)
+        .values({
+          productId: prodId,
+          number: 802,
+          title: "Post with in progress status 2",
+          statusId: inProgress.id,
+          authorId: ownerUser.userId,
+          authorIsAdmin: true,
+          voteCount: 1,
+        })
+        .returning();
+
+      // Delete In Progress status with moveTo = Scheduled
+      const delRes = await request(testApp.http)
+        .delete(
+          `/api/v1/workspaces/${wsSlug}/products/${prodSlug}/statuses/${inProgress.id}?moveTo=${scheduled.id}`
+        )
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL);
+
+      expect(delRes.status).toBe(204);
+
+      // Verify in DB that both posts now report Scheduled
+      const [updatedPost1] = await testApp.db
+        .select()
+        .from(schema.posts)
+        .where(eq(schema.posts.id, post1.id));
+      const [updatedPost2] = await testApp.db
+        .select()
+        .from(schema.posts)
+        .where(eq(schema.posts.id, post2.id));
+
+      expect(updatedPost1.statusId).toBe(scheduled.id);
+      expect(updatedPost2.statusId).toBe(scheduled.id);
+
+      // Verify via GET post endpoint
+      const getPostRes = await request(testApp.http)
+        .get(`/api/v1/portal/${wsSlug}/${prodSlug}/posts/${post1.number}`)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      expect(getPostRes.status).toBe(200);
+      expect(getPostRes.body.post.status.id).toBe(scheduled.id);
+    });
+
+    it("renaming status updates board and post pages while activity entry preserves snapshotted name and color", async () => {
+      const list = await request(testApp.http)
+        .get(`/api/v1/workspaces/${wsSlug}/products/${prodSlug}/statuses`)
+        .set("Cookie", ownerUser.cookie);
+      const scheduled = list.body.find((s: any) => s.name === "Scheduled");
+
+      // Create a post
+      const [post] = await testApp.db
+        .insert(schema.posts)
+        .values({
+          productId: prodId,
+          number: 803,
+          title: "Post testing status rename snapshot",
+          statusId: scheduled.id,
+          authorId: ownerUser.userId,
+          authorIsAdmin: true,
+          voteCount: 1,
+        })
+        .returning();
+
+      // Create an activity entry snapshotted with original name "Scheduled" and its color
+      await testApp.db.insert(schema.postActivity).values({
+        postId: post.id,
+        kind: "status_changed",
+        actorId: ownerUser.userId,
+        toStatusId: scheduled.id,
+        statusName: scheduled.name,
+        statusColor: scheduled.color,
+        note: "Initial status note",
+      });
+
+      // Rename "Scheduled" to "On the Radar"
+      const patchRes = await request(testApp.http)
+        .patch(
+          `/api/v1/workspaces/${wsSlug}/products/${prodSlug}/statuses/${scheduled.id}`
+        )
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ name: "On the Radar" });
+
+      expect(patchRes.status).toBe(200);
+
+      // Verify GET post page returns the new name on post.status, but older activity entry still shows snapshotted name
+      const getRes = await request(testApp.http)
+        .get(`/api/v1/portal/${wsSlug}/${prodSlug}/posts/${post.number}`)
+        .set("Origin", testApp.env.PUBLIC_URL);
+
+      expect(getRes.status).toBe(200);
+      expect(getRes.body.post.status.name).toBe("On the Radar");
+      expect(getRes.body.timeline[0]).toMatchObject({
+        kind: "activity",
+        activity: {
+          statusName: "Scheduled",
+          statusColor: scheduled.color,
+        },
+      });
+    });
   });
 });

@@ -18,7 +18,7 @@ import {
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
 import { and, eq, sql, asc, inArray } from "drizzle-orm";
 import { z } from "zod";
-import { DB, type Db, statuses } from "@userhq/db";
+import { DB, type Db, statuses, posts } from "@userhq/db";
 import {
   StatusSchema,
   CreateStatusInputSchema,
@@ -345,7 +345,15 @@ export class StatusesController {
         );
       }
 
-      // Phase 3: UPDATE posts SET status_id = moveTo WHERE status_id = id AND product_id = tenant.productId
+      await tx
+        .update(posts)
+        .set({ statusId: moveTo })
+        .where(
+          and(
+            eq(posts.statusId, statusId),
+            eq(posts.productId, tenant.productId!)
+          )
+        );
       // Phase 4: UPDATE roadmap_items SET status_id = moveTo WHERE status_id = id AND product_id = tenant.productId
 
       await tx

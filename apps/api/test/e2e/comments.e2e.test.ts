@@ -95,6 +95,9 @@ describe("Comments E2E (Plan 03-08)", () => {
               .delete(schema.comments)
               .where(inArray(schema.comments.postId, postIds));
             await stack.db
+              .delete(schema.postActivity)
+              .where(inArray(schema.postActivity.postId, postIds));
+            await stack.db
               .delete(schema.votes)
               .where(inArray(schema.votes.postId, postIds));
             await stack.db
@@ -206,5 +209,45 @@ describe("Comments E2E (Plan 03-08)", () => {
     expect(html).toContain("[Comment deleted]");
     expect(html).not.toContain(secretBody);
     expect(html).not.toContain(`ParentAuthor ${rand}`);
+  });
+
+  it("renders status change activity item with public note in post page HTML", async () => {
+    // Get statuses to find a non-default status
+    const [prodRow] = await stack.db
+      .select({ id: schema.products.id })
+      .from(schema.products)
+      .where(eq(schema.products.slug, pSlug));
+
+    const statusRows = await stack.db
+      .select()
+      .from(schema.statuses)
+      .where(eq(schema.statuses.productId, prodRow.id));
+
+    const targetStatus = statusRows.find((s) => !s.isDefault) ?? statusRows[0];
+
+    // Change status as workspace owner via API
+    const statusRes = await apiCall(
+      `/api/v1/workspaces/${wsSlug}/products/${pSlug}/posts/${postNumber}/status`,
+      {
+        method: "PUT",
+        cookie: postAuthorCookie,
+        body: {
+          statusId: targetStatus.id,
+          note: "Shipping soon",
+          version: 1,
+        },
+      }
+    );
+    expect(statusRes.status).toBe(200);
+
+    // Fetch the post page HTML as a signed-out viewer
+    const postRes = await fetch(
+      `${baseUrl}/${wsSlug}/${pSlug}/p/${postNumber}-${postSlug}`
+    );
+    expect(postRes.status).toBe(200);
+    const html = await postRes.text();
+
+    expect(html).toContain("changed the status to");
+    expect(html).toContain("Shipping soon");
   });
 });

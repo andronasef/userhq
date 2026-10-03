@@ -207,13 +207,13 @@ Suspend and ban checks go in the shared guards, so every later feature inherits 
      - merge a duplicate post into another: votes move without double-counting, comments move, and the duplicate's link redirects
   5. When someone else comments on a post that a user created or commented on, that user gets an email. In development it lands in Mailpit; in production it goes through Brevo, configured only by env settings. Users can turn these emails off in account settings, and every email has a one-click unsubscribe link. If sending fails, the comment still appears and the email is retried automatically.
 
-**Plans:** 1/16 plans executed
+**Plans:** 2/16 plans executed
 
 Plans:
 **Wave 1**
 
 - [x] 03-01-PLAN.md — Dependency gate: human-verified @nestjs/throttler 6.7.1 and nuqs 2.10.1, one lockfile change
-- [ ] 03-02-PLAN.md — Schema and contracts: whole Phase 3 schema (0007), shared DTOs and error codes, public post API, isolation and contract tests
+- [x] 03-02-PLAN.md — Schema and contracts: whole Phase 3 schema (0007), shared DTOs and error codes, public post API, isolation and contract tests
 - [ ] 03-03-PLAN.md — Production mail gate: SMTP_* pass-through, Brevo port probe + DKIM check on the VPS, port recorded
 
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -341,6 +341,6 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once P
 |-------|----------------|--------|-----------|
 | 1. Walking Skeleton | 11/11 | Complete | 2026-10-02 |
 | 2. Workspaces, Products & Platform Owner | 0/11 | Planned | - |
-| 3. Feedback Board & Conversations | 1/16 | In Progress|  |
+| 3. Feedback Board & Conversations | 2/16 | In Progress|  |
 | 4. Dual-Layer Roadmap & Closing the Loop | 0/TBD | Not started | - |
 | 5. Changelog & FAQ | 0/TBD | Not started | - |

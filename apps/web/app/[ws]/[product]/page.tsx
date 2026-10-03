@@ -39,6 +39,7 @@ export default async function PortalBoardPage({
   }
 
   const productName = productResult.data.product.name;
+  const categories = productResult.data.categories;
   const posts = boardResult.ok ? boardResult.data.posts : [];
   const signedIn = !!me.user;
   const defaultOpen = sp?.new === "1";
@@ -55,6 +56,7 @@ export default async function PortalBoardPage({
         <NewPostButton
           ws={ws}
           product={product}
+          categories={categories}
           signedIn={signedIn}
           defaultOpen={defaultOpen}
         />
@@ -68,6 +70,7 @@ export default async function PortalBoardPage({
             <NewPostButton
               ws={ws}
               product={product}
+              categories={categories}
               signedIn={signedIn}
               defaultOpen={defaultOpen}
             />

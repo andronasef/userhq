@@ -54,9 +54,10 @@ describe("Portal API (Plan 02-02)", () => {
         logoUrl: null,
         websiteUrl: "https://acme.example",
       },
+      categories: [],
     });
 
-    expect(Object.keys(res.body)).toEqual(["workspace", "product"]);
+    expect(Object.keys(res.body).sort()).toEqual(["categories", "product", "workspace"].sort());
     expect(Object.keys(res.body.workspace).sort()).toEqual(["name", "slug"]);
     expect(Object.keys(res.body.product).sort()).toEqual([
       "accentColor",

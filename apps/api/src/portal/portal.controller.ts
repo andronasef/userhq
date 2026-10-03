@@ -10,7 +10,7 @@ import {
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
 import { alias } from "drizzle-orm/pg-core";
 import { eq, and, isNull, asc } from "drizzle-orm";
-import { DB, type Db, workspaces, products, uploads } from "@userhq/db";
+import { DB, type Db, workspaces, products, uploads, categories } from "@userhq/db";
 import {
   PublicPortalProductSchema,
   PublicPortalDirectorySchema,
@@ -132,6 +132,15 @@ export class PortalController {
     const logoUrl = logoKey ? `/uploads/${logoKey}` : null;
     const websiteUrl = row.productWebsiteUrl ?? row.workspaceWebsiteUrl ?? null;
 
+    const catRows = await this.db
+      .select({
+        id: categories.id,
+        name: categories.name,
+      })
+      .from(categories)
+      .where(eq(categories.productId, productId))
+      .orderBy(asc(categories.createdAt), asc(categories.id));
+
     return PublicPortalProductSchema.parse({
       workspace: {
         slug: row.workspaceSlug,
@@ -145,6 +154,7 @@ export class PortalController {
         logoUrl,
         websiteUrl,
       },
+      categories: catRows,
     });
   }
 }

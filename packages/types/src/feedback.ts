@@ -39,9 +39,36 @@ export const PostDescriptionSchema = z
     z.string().max(POST_BODY_MAX, { message: "description_too_long" }).nullable()
   );
 
+export const CategoryNameSchema = z
+  .string({ message: "name_required" })
+  .transform((val) => val.trim())
+  .pipe(
+    z
+      .string()
+      .min(1, { message: "name_required" })
+      .max(CATEGORY_NAME_MAX, { message: "category_name_too_long" })
+  );
+
+export const CategoryInputSchema = z.object({
+  name: CategoryNameSchema,
+});
+export type CategoryInput = z.infer<typeof CategoryInputSchema>;
+
+export const CategorySchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  postCount: z.number().int().nonnegative(),
+});
+export type Category = z.infer<typeof CategorySchema>;
+
 export const CreatePostInputSchema = z.object({
   title: PostTitleSchema,
   description: PostDescriptionSchema.optional().default(null),
+  categoryId: z
+    .union([z.string().uuid(), z.null(), z.undefined(), z.literal("")])
+    .transform((val) => (val === "" || val === undefined ? null : val))
+    .nullable()
+    .optional(),
 });
 export type CreatePostInput = z.infer<typeof CreatePostInputSchema>;
 

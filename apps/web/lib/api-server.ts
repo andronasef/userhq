@@ -23,6 +23,8 @@ import {
   type ProductDetail,
   StatusSchema,
   type Status,
+  CategorySchema,
+  type Category,
   PlatformWorkspacePageSchema,
   type PlatformWorkspacePage,
   PlatformWorkspaceDetailSchema,
@@ -220,6 +222,19 @@ export const getStatuses = cache(
     return apiRead(
       "/api/v1/workspaces/" + encodeURIComponent(ws) + "/products/" + encodeURIComponent(product) + "/statuses",
       z.array(StatusSchema)
+    );
+  }
+);
+
+export const getCategories = cache(
+  (ws: string, product: string): Promise<ApiReadResult<Category[]>> => {
+    return apiRead(
+      "/api/v1/workspaces/" +
+        encodeURIComponent(ws) +
+        "/products/" +
+        encodeURIComponent(product) +
+        "/categories",
+      z.array(CategorySchema)
     );
   }
 );

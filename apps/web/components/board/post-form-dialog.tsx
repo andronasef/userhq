@@ -26,6 +26,7 @@ import {
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
@@ -36,6 +37,7 @@ import { postHref, portalHref } from "@/lib/tenant";
 export interface PostFormDialogProps {
   ws: string;
   product: string;
+  categories?: { id: string; name: string }[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -43,6 +45,7 @@ export interface PostFormDialogProps {
 function PostFormDialogInner({
   ws,
   product,
+  categories = [],
   open,
   onOpenChange,
 }: PostFormDialogProps): React.JSX.Element {
@@ -61,6 +64,7 @@ function PostFormDialogInner({
     defaultValues: {
       title: "",
       description: null,
+      categoryId: "",
     },
   });
 
@@ -70,6 +74,7 @@ function PostFormDialogInner({
       reset({
         title: "",
         description: null,
+        categoryId: "",
       });
     }
   }, [open, reset]);
@@ -93,8 +98,8 @@ function PostFormDialogInner({
     onError: (err: unknown) => {
       if (err instanceof ApiClientError && err.code) {
         const field = FIELD_FOR_CODE[err.code];
-        if (field && ["title", "description"].includes(field)) {
-          setError(field as "title" | "description", {
+        if (field && ["title", "description", "categoryId"].includes(field)) {
+          setError(field as "title" | "description" | "categoryId", {
             message: errorCopy(err),
           });
           return;
@@ -106,6 +111,10 @@ function PostFormDialogInner({
 
   const onSubmit = (data: CreatePostInput) => {
     setAlertError(null);
+    if (categories.length > 0 && (!data.categoryId || data.categoryId === "")) {
+      setError("categoryId", { message: "Choose a category." });
+      return;
+    }
     mutation.mutate(data);
   };
 
@@ -128,6 +137,29 @@ function PostFormDialogInner({
                 {...register("title")}
               />
             </Field>
+
+            {categories.length > 0 && (
+              <Field
+                id="post-category"
+                label="Category"
+                error={errors.categoryId?.message}
+              >
+                <NativeSelect
+                  id="post-category"
+                  defaultValue=""
+                  {...register("categoryId")}
+                >
+                  <option value="" disabled>
+                    Choose a category
+                  </option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </Field>
+            )}
 
             <Field
               id="post-details"
@@ -180,6 +212,7 @@ export function PostFormDialog(props: PostFormDialogProps): React.JSX.Element {
 export interface NewPostButtonProps {
   ws: string;
   product: string;
+  categories?: { id: string; name: string }[];
   signedIn?: boolean;
   defaultOpen?: boolean;
 }
@@ -187,6 +220,7 @@ export interface NewPostButtonProps {
 export function NewPostButton({
   ws,
   product,
+  categories = [],
   signedIn,
   defaultOpen = false,
 }: NewPostButtonProps): React.JSX.Element {
@@ -234,6 +268,7 @@ export function NewPostButton({
       <PostFormDialog
         ws={ws}
         product={product}
+        categories={categories}
         open={open}
         onOpenChange={handleOpenChange}
       />

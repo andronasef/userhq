@@ -33,6 +33,42 @@ export function engagedSql(postsTable: typeof posts = posts) {
   )`;
 }
 
+export async function assertCategory(
+  tx: Db | any,
+  productId: string,
+  categoryId?: string | null
+): Promise<string | null> {
+  const prodCategories = await tx
+    .select({ id: categories.id })
+    .from(categories)
+    .where(eq(categories.productId, productId));
+
+  if (prodCategories.length > 0) {
+    if (!categoryId) {
+      throw new ApiException("category_required", 400, "Choose a category.");
+    }
+    const match = prodCategories.find((c: { id: string }) => c.id === categoryId);
+    if (!match) {
+      throw new ApiException(
+        "category_invalid",
+        400,
+        "Choose a category from the list."
+      );
+    }
+    return categoryId;
+  }
+
+  if (categoryId) {
+    throw new ApiException(
+      "category_invalid",
+      400,
+      "Choose a category from the list."
+    );
+  }
+
+  return null;
+}
+
 @Injectable()
 export class PostsService {
   constructor(@Inject(DB) private readonly db: Db) {}
@@ -54,6 +90,12 @@ export class PostsService {
         .set({ nextPostNumber: sql`${products.nextPostNumber} + 1` })
         .where(eq(products.id, portal.productId))
         .returning({ n: sql<number>`${products.nextPostNumber} - 1` });
+
+      const verifiedCategoryId = await assertCategory(
+        tx,
+        portal.productId,
+        input.categoryId
+      );
 
       const [def] = await tx
         .select({ id: statuses.id })
@@ -82,6 +124,7 @@ export class PostsService {
           title: input.title,
           description: input.description ?? null,
           statusId: def.id,
+          categoryId: verifiedCategoryId,
           authorId: currentUser.id,
           authorIsAdmin: isAdmin,
           voteCount: 1,

@@ -16,6 +16,12 @@ export const PublicPortalProductSchema = z.object({
     logoUrl: z.string().nullable(),
     websiteUrl: z.string().nullable(),
   }),
+  categories: z.array(
+    z.object({
+      id: z.string().uuid(),
+      name: z.string(),
+    })
+  ),
 });
 export type PublicPortalProduct = z.infer<typeof PublicPortalProductSchema>;
 

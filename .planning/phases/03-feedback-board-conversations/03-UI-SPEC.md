@@ -1,7 +1,8 @@
 ---
 phase: "3"
 slug: "feedback-board-conversations"
-status: draft
+status: approved
+reviewed_at: "2026-10-03"
 shadcn_initialized: false
 preset: none
 created: "2026-10-03"
@@ -326,7 +327,11 @@ Accent is **not** used for: status pills (they use the status's own color as a d
 - **Comment emails section:** a native checkbox (`size-4 accent-foreground`) labelled `Email me about new comments on posts I'm part of`, with helper copy. Toggling applies immediately: the checkbox is disabled while the request runs, then the toast reads `Comment emails turned on` or `Comment emails turned off`. On failure the checkbox reverts and an `Alert` renders under it. There is no Save button.
 - **Danger zone:** body copy, then `Delete account` (`outline` with `text-destructive border-destructive/30`), opening a `ConfirmDialog` with a type-to-confirm `Input` labelled `Type DELETE to confirm`. Confirm stays disabled until the trimmed value equals `DELETE` exactly.
   - On success: the session ends, `flash("Your account was deleted")` is stored, and the page calls `window.location.assign("/")`.
-  - **Blocked case** *(Claude's choice)*: a user who owns a workspace (or is the platform owner) can't delete their account in v1, because there is no ownership transfer. The button is disabled, and the danger-zone body shows the blocked copy instead. The server enforces the same rule with `owns_workspace`.
+  - **Owned workspaces (user decision, CONTEXT D-26):** a user who owns one or more workspaces can still delete their account. Before the type-to-confirm step, the dialog shows a `Your workspaces` step listing each owned workspace (logo, name, `{n} products · {n} posts`). Each row asks the owner to pick one of two choices with a native radio group (`role="radiogroup"`, label `What happens to {workspace}`):
+    - `Transfer ownership to…` followed by a `NativeSelect` of that workspace's other members (admins). This option is disabled with the 12px muted reason `No other members to transfer to` when the owner is the only member.
+    - `Delete this workspace`, with the 14px destructive line `Its products, portals, posts, and comments are removed for everyone.`
+    `Continue` (`default`) stays disabled until every workspace has a choice, and every transfer has a member selected. The type-to-confirm step then repeats a plain summary (`{workspace}: transferred to {name}` / `{workspace}: deleted`) above the body copy. The server applies all choices and the account deletion in one transaction and rejects a request that leaves any owned workspace unresolved with `owned_workspaces_unresolved`. Deleted workspaces are soft-deleted (the Phase 2 D-18 product rule extended to workspaces): their portals and `/{ws}` page return the normal not-found page.
+  - **Platform owner:** the account whose email matches `PLATFORM_OWNER_EMAIL` can't be deleted from the UI (the identity lives in server config). The button is disabled, and the danger-zone body shows the platform-owner copy. The server returns `platform_owner_account`.
   - After deletion, the user's posts and comments show `Deleted user` with the fallback avatar. Their votes still count. Their workspace memberships are removed. They receive no further email (D-20).
 
 ### Unsubscribe and mute landing page (`/unsubscribe/{token}`; NOTF-02, D-25)
@@ -356,7 +361,7 @@ Accent is **not** used for: status pills (they use the status's own color as a d
 - Autolinks opening in a new tab use `target="_blank"` with the required `rel`. Their visible text is the URL itself.
 - After a successful delete of a post, comment, or category, focus moves to the nearest stable heading (`h1` or the `Comments` h2), because the trigger is gone.
 - Live region announcements: `Loaded {n} more posts` after Load more, and the result count after a merge search (`{n} posts found`).
-- Disabled menu items with a reason (post lock, restore blocked, account deletion blocked) show the reason as visible text, never as a tooltip only (Phase 2 rule).
+- Disabled menu items with a reason (post lock, restore blocked, platform-owner account deletion, transfer with no other members) show the reason as visible text, never as a tooltip only (Phase 2 rule).
 - Color is never the only signal: a voted box is also announced through `aria-pressed`, statuses always show their name, and the `Admin` badge has text.
 
 ---
@@ -460,7 +465,9 @@ Not confirmed (reversible): voting and unvoting, `Mute` / `Unmute`, `Change stat
 | Account | Section h2 / checkbox / helper | `Comment emails` / `Email me about new comments on posts I'm part of` / `At most one email a day per company, grouped by post. Posts you've muted are skipped.` |
 | Account | Toasts | `Comment emails turned on` / `Comment emails turned off` |
 | Account | Danger zone body | `Deleting your account removes your name, avatar, and email. Your posts and comments stay up as "Deleted user".` |
-| Account | Danger zone, blocked | `You own a workspace, so this account can't be deleted yet. Contact the UserHQ team for help.` |
+| Account | Danger zone, platform owner | `This is the platform owner account. It's set in server configuration and can't be deleted here.` |
+| Account | Delete dialog, workspaces step | Title `Your workspaces`, body `You own these workspaces. Choose what happens to each one before your account is deleted.`, actions `Keep my account` / `Continue` |
+| Account | Delete dialog, summary lines | `{workspace}: ownership goes to {name}` / `{workspace}: deleted with all its products and content` |
 | Page titles | `<title>` | `Feedback · {product}`, `{post title} · {product}`, `Board · {product}`, `Categories · {product}`, `Account · UserHQ`, `Email preferences · UserHQ` |
 
 ### Unsubscribe pages (D-25)
@@ -507,7 +514,10 @@ Not confirmed (reversible): voting and unvoting, `Mute` / `Unmute`, `Change stat
 | `comment_not_found` | `Alert` | `This comment was removed. Refresh the page.` |
 | `merge_target_invalid` | `Alert` in the merge dialog | `That post can't be merged into. Choose another.` |
 | `rate_limited` (429) | `Alert`, or the vote toast | `You're doing that too often. Wait a minute and try again.` |
-| `owns_workspace` | `Alert` in the delete-account dialog | the Danger zone blocked copy |
+| `owned_workspaces_unresolved` | `Alert` in the delete-account dialog | `Choose what happens to each of your workspaces first.` |
+| `transfer_target_invalid` | `Alert` in the delete-account dialog | `That person is no longer a member of {workspace}. Choose someone else.` |
+| `platform_owner_account` | `Alert` in the delete-account dialog | the Danger zone platform-owner copy |
+| `edit_conflict` | `Alert` in the edit-post, edit-comment, or change-status dialog (input kept) | `Someone else changed this while you were editing. Reload to see their version, then try again.` with a `Reload` button (`outline` `sm`) |
 | `invalid_token` | Unsubscribe page | the Invalid token state |
 | `not_allowed`, `workspace_suspended`, unknown / 5xx | as in Phase 2 | Phase 2 copy |
 
@@ -515,7 +525,7 @@ Not confirmed (reversible): voting and unvoting, `Mute` / `Unmute`, `Change stat
 
 ## UI Considerations
 
-Applicable state considerations resolved: 41 covered, 6 backstop, 3 unresolved.
+Applicable state considerations resolved: 43 covered, 7 backstop, 0 unresolved.
 
 | Category | Element(s) | Status | Resolution / Reason |
 |----------|------------|--------|---------------------|
@@ -541,7 +551,7 @@ Applicable state considerations resolved: 41 covered, 6 backstop, 3 unresolved.
 | error | Post removed while open (nav) | ✅ covered | A mutation on a post that was deleted or merged in the meantime shows "This post was removed or merged. Go back to the board." |
 | error | Deleted, unknown, or cross-tenant post URL (nav) | ✅ covered | The portal renders the normal not-found page. A merged post's URL returns a 301 to its target, and a stale slug returns a 301 to the canonical URL |
 | error | Unsubscribe token (nav) | ✅ covered | An invalid token shows "This link isn't valid", and a post scope for a deleted or merged post shows "This post is no longer available", both linking to account settings |
-| error | Account deletion blocked (form) | ✅ covered | A workspace owner or platform owner sees a disabled `Delete account` with the blocked copy, and the server rejects the request with `owns_workspace` |
+| error | Account deletion with owned workspaces (form) | ✅ covered | The owner chooses transfer or delete per workspace before confirming; transfer is disabled when there are no other members; the server rejects unresolved choices with `owned_workspaces_unresolved`. The platform owner sees a disabled `Delete account` with its copy |
 | error | Restore a comment on a deleted post (interactive-control) | ✅ covered | `Restore` is disabled on that row and shows "Restore the post first" |
 | populated | Signed-out actions (nav) | ✅ covered | Vote, `New post`, `Reply`, and the comment prompt all send the visitor to `/login?next=…` and return them to the same board view (with `new=1` reopening the dialog) or to the post's composer anchor |
 | populated | Inline admin menu (interactive-control) | ✅ covered | The `Admin` menu renders on portal posts and comments only when the viewer's `me.workspaces` includes the current workspace. Non-members never see it, and the API rejects their admin requests |
@@ -566,9 +576,9 @@ Applicable state considerations resolved: 41 covered, 6 backstop, 3 unresolved.
 | populated | Email escaping and headers (static-content) | 🧪 backstop | A comment containing `<b>&` renders escaped in the HTML part, and every email has `List-Unsubscribe` and `List-Unsubscribe-Post`, verified by an e2e test reading the message from Mailpit |
 | populated | Portal accent on vote box (media) | 🧪 backstop | With accent `#FACC15`, a voted box shows dark text and an unvoted count uses `#171717`; with `#2563EB`, white text and blue count, verified by a rendered-portal e2e check on computed styles |
 | long-text | 320px viewport: board row and post header (nav) | 🧪 backstop | At 320px wide, the vote box, a 120-character title, and the meta row fit without horizontal page scroll, and the post header's `Admin` menu and bell stay reachable, verified by a 320px Playwright screenshot |
-| partial | Comment posted while another user views the page (list-collection) | ⚠ unresolved | No live updates in v1. Other viewers see new comments and votes on their next navigation or refresh. The planner treats this as an accepted assumption |
-| partial | Two admins moderating the same post at once (form) | ⚠ unresolved | Last write wins for edits and status changes. A delete or merge that loses the race surfaces `post_not_found`. The planner treats this as an assumption |
-| error | Account deletion by a workspace owner (form) | ⚠ unresolved | v1 blocks it because there is no ownership transfer (Claude's choice). The planner confirms this rule or proposes another, such as deleting sole-owned workspaces |
+| partial | Comment posted while another user views the page (list-collection) | ✅ covered | User decision: no live updates in v1 (no websockets, no polling). Other viewers see new comments and votes on their next navigation or refresh |
+| partial | Two admins moderating the same post at once (form) | ✅ covered | User decision: edits to posts and comments and status changes carry the version they were loaded with; a stale save returns `edit_conflict` and shows its Alert with `Reload`, keeping the input. A delete or merge that loses the race surfaces `post_not_found` |
+| populated | Ownership transfer on account deletion (form) | 🧪 backstop | Deleting an owner account with one workspace transferred and one deleted leaves the first owned by the chosen member and the second not found, verified by an API integration test |
 
 Real-time and optimistic UI: only votes (new) and Phase 2's status reorder are optimistic. Every other mutation waits for the server.
 
@@ -605,7 +615,7 @@ New npm packages in this phase (web): `nuqs@2.10.1`, named in CLAUDE.md. It goes
 | ROADMAP.md / REQUIREMENTS.md | AUTH-04, WORK-07, PROD-06, POST-01 to POST-11, CMNT-01 to CMNT-04, MOD-01 to MOD-05, NOTF-01 to NOTF-03, OPS-03: seeded Bug and Feature Request, hidden Completed/Closed by default, Top voted / Newest sorts, FTS search, idempotent votes, outbox |
 | CLAUDE.md | Individual Radix packages only, `nuqs` and `lucide-react` pins, no `dangerouslySetInnerHTML`, TanStack mutations instead of Server Actions |
 | Codebase scan (`apps/web`) | 13 `components/ui` primitives, `PortalFrame` (needs a tabs slot), `TabNav` exact-href matching, `UserMenu` structure, `Avatar`'s deleted-user fallback, `flash()` in the toaster, `safeNext` preserving the hash, `formatDate`, `me.workspaces` with roles |
-| Claude's choice | Page size 20 (portal) and 50 (dashboard and voters), title 3–120 and body 5,000 limits, optional post details, required category choice, `Best match` sort while searching, dashboard defaults, vote box dimensions and states, comment text at 14px, category delete leaving posts uncategorized, no category reordering, owner account deletion blocked, confirm-before-unsubscribe landing page, email layout, and all copy strings |
+| Claude's choice | Page size 20 (portal) and 50 (dashboard and voters), title 3–120 and body 5,000 limits, optional post details, required category choice, `Best match` sort while searching, dashboard defaults, vote box dimensions and states, comment text at 14px, category delete leaving posts uncategorized, no category reordering, confirm-before-unsubscribe landing page, email layout, and all copy strings |
 
 ---
 

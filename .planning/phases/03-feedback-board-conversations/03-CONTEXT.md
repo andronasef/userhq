@@ -107,13 +107,21 @@ Already locked by ROADMAP.md (not re-discussed):
 
   The one-click `List-Unsubscribe` / `List-Unsubscribe-Post` header (RFC 8058) turns off **all** comment emails. — **Reversibility:** costly — adds a per-post mute table and signed, tokenized unsubscribe URLs.
 
+### Decisions from UI-SPEC review (2026-10-03)
+- **D-26:** A workspace owner **can delete their account** (WORK-07). The delete flow first lists every workspace they own, and for each one they choose:
+  - **transfer ownership** to another member of that workspace, or
+  - **delete the workspace**, a soft delete of its products, portals, posts, and comments, which extends Phase 2 D-18 to workspaces
+
+  Transfer is not available when they are the only member. The server applies every choice and the account deletion in one transaction, and rejects the request if any owned workspace has no choice. The platform owner's account can't be deleted from the UI. — **Reversibility:** costly — this introduces ownership transfer and workspace soft delete, which later role and owner features build on.
+- **D-27:** Edits to posts and comments, and status changes, use **optimistic concurrency**. Each save carries the version that was loaded, and a stale save returns `edit_conflict` ("Someone else changed this… Reload"), keeping the user's input. A delete or merge that loses the race returns `post_not_found`.
+- **D-28:** There are **no live updates** in v1: no websockets and no polling. Other viewers see new comments and votes after a refresh or navigation.
+
 ### Claude's Discretion
 - The batch outbox mechanics: the scheduler, how the 24h window is implemented, and the retry/backoff policy.
 - The exact page size, how the cursor is encoded, and the slug length rules for permalinks.
 - How the search ranks results (FTS ranking vs Top Voted when search and sort are combined).
 - The design of the dashboard board table and post detail view, and the empty states.
 - The category editor UX for POST-02 (follow the Phase 2 status editor pattern).
-- The account deletion flow and confirmation UX for WORK-07.
 - Rate-limit thresholds for posts, comments, and votes.
 - How the voter list (MOD-04) looks on the dashboard and in the inline menu.
 

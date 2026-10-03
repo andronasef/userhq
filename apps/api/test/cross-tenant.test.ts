@@ -93,6 +93,24 @@ const CROSS_TENANT_ROUTES: Record<
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts/${s.b.postNumber}/status`,
     body: { statusId: s.b.statusId, version: 1 },
   }),
+  "GET /workspaces/:ws/products/:product/posts": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts`,
+  }),
+  "GET /workspaces/:ws/products/:product/posts/:number": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts/${s.b.postNumber}`,
+  }),
+  "GET /workspaces/:ws/products/:product/posts/:number/voters": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts/${s.b.postNumber}/voters`,
+  }),
+  "POST /workspaces/:ws/products/:product/posts/:number/restore": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts/${s.b.postNumber}/restore`,
+  }),
+  "GET /workspaces/:ws/products/:product/comments/deleted": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/comments/deleted`,
+  }),
+  "POST /workspaces/:ws/products/:product/comments/:id/restore": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/comments/${s.b.commentId}/restore`,
+  }),
 };
 
 describe("Cross-tenant 404 isolation (Plan 02-03)", () => {

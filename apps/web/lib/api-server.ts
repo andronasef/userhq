@@ -19,6 +19,8 @@ import {
   type ProductSummary,
   ProductDetailSchema,
   type ProductDetail,
+  StatusSchema,
+  type Status,
   ANONYMOUS_ME,
 } from "@userhq/types";
 
@@ -160,6 +162,15 @@ export const getProduct = cache(
     return apiRead(
       "/api/v1/workspaces/" + encodeURIComponent(ws) + "/products/" + encodeURIComponent(product),
       ProductDetailSchema
+    );
+  }
+);
+
+export const getStatuses = cache(
+  (ws: string, product: string): Promise<ApiReadResult<Status[]>> => {
+    return apiRead(
+      "/api/v1/workspaces/" + encodeURIComponent(ws) + "/products/" + encodeURIComponent(product) + "/statuses",
+      z.array(StatusSchema)
     );
   }
 );

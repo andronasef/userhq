@@ -10,7 +10,7 @@ export interface TenantSeed {
   memberUserId?: string;
   inviteId?: string;
   productSlug?: string;
-  productId?: string;
+  statusId?: string;
 }
 
 export interface Seed {
@@ -62,6 +62,18 @@ export async function seedTenants(
     })
     .returning();
 
+  const [statusA] = await testApp.db
+    .insert(schema.statuses)
+    .values({
+      productId: prodA.id,
+      name: "Under Review",
+      color: "#EA580C",
+      type: "review",
+      position: 0,
+      isDefault: true,
+    })
+    .returning();
+
   const [wsB] = await testApp.db
     .insert(schema.workspaces)
     .values({
@@ -110,6 +122,18 @@ export async function seedTenants(
     })
     .returning();
 
+  const [statusB] = await testApp.db
+    .insert(schema.statuses)
+    .values({
+      productId: prodB.id,
+      name: "Under Review",
+      color: "#EA580C",
+      type: "review",
+      position: 0,
+      isDefault: true,
+    })
+    .returning();
+
   return {
     a: {
       slug: slugA,
@@ -118,6 +142,7 @@ export async function seedTenants(
       userId: userA.userId,
       productSlug: prodSlugA,
       productId: prodA.id,
+      statusId: statusA.id,
     },
     b: {
       slug: slugB,
@@ -128,6 +153,7 @@ export async function seedTenants(
       inviteId: inviteB.id,
       productSlug: prodSlugB,
       productId: prodB.id,
+      statusId: statusB.id,
     },
   };
 }

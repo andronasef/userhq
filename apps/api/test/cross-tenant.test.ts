@@ -50,6 +50,27 @@ const CROSS_TENANT_ROUTES: Record<
   "DELETE /workspaces/:ws/products/:product": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}`,
   }),
+  "GET /workspaces/:ws/products/:product/statuses": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/statuses`,
+  }),
+  "POST /workspaces/:ws/products/:product/statuses": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/statuses`,
+    body: { name: "New Status", type: "review", color: "#6B7280" },
+  }),
+  "PATCH /workspaces/:ws/products/:product/statuses/:statusId": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/statuses/${s.b.statusId}`,
+    body: { name: "Updated Status" },
+  }),
+  "PUT /workspaces/:ws/products/:product/statuses/:statusId/default": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/statuses/${s.b.statusId}/default`,
+  }),
+  "PUT /workspaces/:ws/products/:product/statuses/order": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/statuses/order`,
+    body: { ids: [s.b.statusId!] },
+  }),
+  "DELETE /workspaces/:ws/products/:product/statuses/:statusId": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/statuses/${s.b.statusId}?moveTo=${s.b.statusId}`,
+  }),
 };
 
 describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
@@ -135,6 +156,9 @@ describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
         case "PATCH":
           r = req.patch(url).send(body as any);
           break;
+        case "PUT":
+          r = req.put(url).send(body as any);
+          break;
         case "DELETE":
           r = req.delete(url);
           break;
@@ -160,4 +184,32 @@ describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
     expect(res.status).toBe(404);
     expect(res.body.code).toBe("not_found");
   });
+
+  it("workspace A's own product with workspace B's statusId returns 404 on PATCH, PUT default, and DELETE", async () => {
+    // PATCH
+    const patchRes = await request(testApp.http)
+      .patch(`/api/v1/workspaces/${seed.a.slug}/products/${seed.a.productSlug}/statuses/${seed.b.statusId}`)
+      .set("Cookie", seed.a.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({ name: "Hacked" });
+    expect(patchRes.status).toBe(404);
+    expect(patchRes.body.code).toBe("not_found");
+
+    // PUT default
+    const putRes = await request(testApp.http)
+      .put(`/api/v1/workspaces/${seed.a.slug}/products/${seed.a.productSlug}/statuses/${seed.b.statusId}/default`)
+      .set("Cookie", seed.a.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL);
+    expect(putRes.status).toBe(404);
+    expect(putRes.body.code).toBe("not_found");
+
+    // DELETE
+    const delRes = await request(testApp.http)
+      .delete(`/api/v1/workspaces/${seed.a.slug}/products/${seed.a.productSlug}/statuses/${seed.b.statusId}?moveTo=${seed.a.statusId}`)
+      .set("Cookie", seed.a.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL);
+    expect(delRes.status).toBe(404);
+    expect(delRes.body.code).toBe("not_found");
+  });
 });
+

@@ -9,6 +9,7 @@ import {
   Plus,
   SlidersHorizontal,
   ExternalLink,
+  CircleDot,
 } from "lucide-react";
 import type { ProductSummary } from "@userhq/types";
 import { cn } from "../../lib/utils";
@@ -85,16 +86,18 @@ export function DashboardSidebar({
         ) : (
           <div className="flex flex-col gap-1">
             {products.map((product) => {
+              const statusesHref = `/dashboard/${ws}/${product.slug}/statuses`;
               const settingsHref = `/dashboard/${ws}/${product.slug}/settings`;
               const isProductActive = pathname.startsWith(
                 `/dashboard/${ws}/${product.slug}`
               );
+              const isStatusesActive = pathname === statusesHref;
               const isSettingsActive = pathname === settingsHref;
 
               return (
                 <div key={product.slug} className="flex flex-col gap-0.5">
                   <Link
-                    href={settingsHref}
+                    href={statusesHref}
                     className={cn(
                       "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-background",
                       isProductActive && "bg-background font-semibold"
@@ -116,6 +119,21 @@ export function DashboardSidebar({
 
                   {isProductActive && (
                     <div className="flex flex-col gap-0.5 pl-7">
+                      <Link
+                        href={statusesHref}
+                        className={cn(
+                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-background/50",
+                          isStatusesActive && "text-foreground font-semibold bg-background/50"
+                        )}
+                        aria-current={isStatusesActive ? "page" : undefined}
+                      >
+                        <CircleDot
+                          className="size-3.5 shrink-0"
+                          aria-hidden="true"
+                        />
+                        <span className="truncate">Statuses</span>
+                      </Link>
+
                       <Link
                         href={settingsHref}
                         className={cn(

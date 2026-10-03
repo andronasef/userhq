@@ -84,7 +84,7 @@ export default async function DashboardPage({
                 />
                 <div className="flex flex-col min-w-0">
                   <Link
-                    href={`/dashboard/${ws}/${product.slug}/settings`}
+                    href={`/dashboard/${ws}/${product.slug}/statuses`}
                     className="text-sm font-semibold text-foreground hover:underline truncate"
                   >
                     {product.name}

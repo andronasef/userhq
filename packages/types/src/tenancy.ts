@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { workspaceSlugSchema, productSlugSchema } from "./slugs.js";
 import { PublicUserSchema } from "./user.js";
-import { HEX_COLOR_RE } from "./palette.js";
+import { HEX_COLOR_RE, STATUS_TYPES } from "./palette.js";
 
 export const PublicPortalProductSchema = z.object({
   workspace: z.object({
@@ -213,3 +213,37 @@ export const HealthResponseSchema = z.object({
   db: z.literal("up"),
 });
 export type HealthResponse = z.infer<typeof HealthResponseSchema>;
+
+export const StatusNameSchema = z
+  .string()
+  .trim()
+  .min(1, { message: "name_required" })
+  .max(30, { message: "name_too_long" });
+export type StatusName = z.infer<typeof StatusNameSchema>;
+
+export const StatusTypeSchema = z.enum(STATUS_TYPES);
+
+export const StatusSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  color: z.string(),
+  type: StatusTypeSchema,
+  position: z.number().int(),
+  isDefault: z.boolean(),
+});
+export type Status = z.infer<typeof StatusSchema>;
+
+export const CreateStatusInputSchema = z.object({
+  name: StatusNameSchema,
+  type: StatusTypeSchema,
+  color: HexColorSchema,
+});
+export type CreateStatusInput = z.infer<typeof CreateStatusInputSchema>;
+
+export const UpdateStatusInputSchema = CreateStatusInputSchema.partial();
+export type UpdateStatusInput = z.infer<typeof UpdateStatusInputSchema>;
+
+export const ReorderStatusesInputSchema = z.object({
+  ids: z.array(z.uuid()).min(1),
+});
+export type ReorderStatusesInput = z.infer<typeof ReorderStatusesInputSchema>;

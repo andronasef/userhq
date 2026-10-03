@@ -116,6 +116,9 @@ Already locked by ROADMAP.md (not re-discussed):
 - **D-27:** Edits to posts and comments, and status changes, use **optimistic concurrency**. Each save carries the version that was loaded, and a stale save returns `edit_conflict` ("Someone else changed this… Reload"), keeping the user's input. A delete or merge that loses the race returns `post_not_found`.
 - **D-28:** There are **no live updates** in v1: no websockets and no polling. Other viewers see new comments and votes after a refresh or navigation.
 
+- **D-29:** Search does **prefix matching on the last term** ("dar" finds "dark"). It still runs through Postgres FTS (`to_tsquery` with `:*` on the last lexeme), on the board and in the merge dialog's type-ahead.
+- **D-30:** The platform owner console (`/platform`) **still lists soft-deleted workspaces**, marked with a "Deleted" badge, for oversight. Portals and `/{ws}` still return 404 for them.
+
 ### Claude's Discretion
 - The batch outbox mechanics: the scheduler, how the 24h window is implemented, and the retry/backoff policy.
 - The exact page size, how the cursor is encoded, and the slug length rules for permalinks.

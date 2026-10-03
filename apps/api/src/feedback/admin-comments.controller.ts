@@ -28,7 +28,7 @@ export class AdminCommentsController {
   constructor(private readonly moderationService: ModerationService) {}
 
   @Get("deleted")
-  @SerializeOptions({ schema: z.array(DeletedCommentRowSchema) })
+  @SerializeOptions({ schema: DeletedCommentRowSchema })
   async listDeletedComments(
     @CurrentTenant() tenant: Tenant
   ): Promise<DeletedCommentRow[]> {

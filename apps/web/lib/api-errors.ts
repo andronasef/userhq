@@ -20,6 +20,30 @@ export const API_ERROR_COPY: Record<string, string> = {
     "This workspace is suspended, so changes can't be saved.",
   delete_default_status: "The default status can't be deleted.",
   delete_last_status: "A product needs at least one status.",
+  title_required: "Enter a title.",
+  title_too_short: "Titles need to be at least 3 characters.",
+  title_too_long: "Keep titles under 120 characters.",
+  description_too_long: "Keep details under 5,000 characters.",
+  category_required: "Choose a category.",
+  category_invalid: "Choose a category from the list.",
+  category_name_taken: "This product already has a category with that name.",
+  category_name_too_long: "Keep it under 30 characters.",
+  comment_required: "Write a comment.",
+  comment_too_long: "Keep comments under 5,000 characters.",
+  note_too_long: "Keep status notes under 1,000 characters.",
+  post_locked:
+    "This post is locked because someone else voted or commented on it.",
+  edit_conflict:
+    "Someone edited this while you were looking at it. Refresh to see the latest version.",
+  rate_limited:
+    "You're doing that a bit too fast. Wait a moment and try again.",
+  comment_parent_mismatch: "You can only reply to a comment on this post.",
+  comment_deleted: "That comment was deleted.",
+  post_deleted: "That post was deleted.",
+  post_merged: "That post was merged into another.",
+  target_post_invalid: "Choose another post to merge into.",
+  post_not_found: "That post couldn't be found.",
+  cannot_vote_closed: "You can't vote on closed or completed posts.",
 };
 
 export const FIELD_FOR_CODE: Record<string, string> = {
@@ -35,6 +59,17 @@ export const FIELD_FOR_CODE: Record<string, string> = {
   invalid_email: "email",
   already_member: "email",
   invite_pending: "email",
+  title_required: "title",
+  title_too_short: "title",
+  title_too_long: "title",
+  description_too_long: "description",
+  category_required: "categoryId",
+  category_invalid: "categoryId",
+  comment_required: "body",
+  comment_too_long: "body",
+  note_too_long: "note",
+  category_name_taken: "name",
+  category_name_too_long: "name",
 };
 
 export const NETWORK_ERROR_COPY =

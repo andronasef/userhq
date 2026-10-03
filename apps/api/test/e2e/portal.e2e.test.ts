@@ -132,7 +132,7 @@ describe("Portal E2E (Plan 02-02)", () => {
     expect(res.status).toBe(200);
     const html = await res.text();
     expect(html).toContain(pName);
-    expect(html).toContain("is getting set up");
+    expect(html).toContain("Feedback");
     expect(html).toMatch(/Powered by.*UserHQ/);
     expect(countOccurrences(html, 'data-shell="portal"')).toBe(1);
     expect(countOccurrences(html, 'data-shell="app"')).toBe(0);

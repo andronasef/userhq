@@ -29,6 +29,10 @@ import {
   type PlatformWorkspaceDetail,
   PlatformUserPageSchema,
   type PlatformUserPage,
+  PublicBoardPageSchema,
+  type PublicBoardPage,
+  PublicPostPageSchema,
+  type PublicPostPage,
   ANONYMOUS_ME,
 } from "@userhq/types";
 
@@ -121,6 +125,43 @@ export const getPortalProduct = cache(
     return apiRead(
       "/api/v1/portal/" + encodeURIComponent(ws) + "/" + encodeURIComponent(product),
       PublicPortalProductSchema
+    );
+  }
+);
+
+export const getBoard = cache(
+  (
+    ws: string,
+    product: string,
+    search: string
+  ): Promise<ApiReadResult<PublicBoardPage>> => {
+    const qs = search ? `?${search}` : "";
+    return apiRead(
+      "/api/v1/portal/" +
+        encodeURIComponent(ws) +
+        "/" +
+        encodeURIComponent(product) +
+        "/posts" +
+        qs,
+      PublicBoardPageSchema
+    );
+  }
+);
+
+export const getPost = cache(
+  (
+    ws: string,
+    product: string,
+    number: number
+  ): Promise<ApiReadResult<PublicPostPage>> => {
+    return apiRead(
+      "/api/v1/portal/" +
+        encodeURIComponent(ws) +
+        "/" +
+        encodeURIComponent(product) +
+        "/posts/" +
+        encodeURIComponent(String(number)),
+      PublicPostPageSchema
     );
   }
 );

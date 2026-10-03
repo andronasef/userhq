@@ -14,6 +14,7 @@ export interface PortalFrameProps {
   websiteUrl?: string | null;
   companyName?: string;
   right?: React.ReactNode;
+  tabs?: React.ReactNode;
 }
 
 export function PortalFrame({
@@ -27,6 +28,7 @@ export function PortalFrame({
   websiteUrl,
   companyName,
   right,
+  tabs,
 }: PortalFrameProps): React.JSX.Element {
   const combinedStyle = style ?? accentStyle;
 
@@ -75,6 +77,11 @@ export function PortalFrame({
             {right}
           </div>
         </div>
+        {tabs && (
+          <div className="mx-auto w-full max-w-5xl px-4 sm:px-6">
+            {tabs}
+          </div>
+        )}
       </header>
 
       <main className="flex-1">

@@ -12,6 +12,8 @@ import { StatePage } from "../../../components/state-page";
 import { Button } from "../../../components/ui/button";
 import { UserMenu, SignInButton } from "../../../components/user-menu";
 import { SessionKeepAlive } from "../../../components/session-keepalive";
+import { TabNav } from "../../../components/tab-nav";
+import { AppToaster } from "../../../components/ui/toaster";
 
 interface PortalLayoutProps {
   children: React.ReactNode;
@@ -124,7 +126,14 @@ export default async function PortalLayout({
       companyName={workspace.name}
       accentStyle={accentStyle}
       right={right}
+      tabs={
+        <TabNav
+          tabs={[{ label: "Feedback", href: portalHref(ws, product) }]}
+          activeHref={portalHref(ws, product)}
+        />
+      }
     >
+      <AppToaster />
       {children}
     </PortalFrame>
   );

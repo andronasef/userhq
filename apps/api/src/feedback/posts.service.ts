@@ -26,6 +26,7 @@ import {
 import { ApiException } from "../common/api-error.filter.js";
 import { isWorkspaceAdmin } from "./membership.js";
 import { prefixTsQuery } from "./search.js";
+import { encodeBoardCursor, decodeBoardCursor } from "./cursor.js";
 
 export function engagedSql(postsTable: typeof posts = posts) {
   return sql<boolean>`(
@@ -182,6 +183,8 @@ export class PostsService {
             ]
           : [desc(posts.voteCount), desc(posts.createdAt), desc(posts.id)];
 
+    const offset = query?.cursor ? decodeBoardCursor(query.cursor) : 0;
+
     const rows = await this.db
       .select({
         number: posts.number,
@@ -214,10 +217,17 @@ export class PostsService {
         )
       )
       .orderBy(...orderClauses)
-      .limit(BOARD_PAGE_SIZE);
+      .offset(offset)
+      .limit(BOARD_PAGE_SIZE + 1);
+
+    const hasMore = rows.length > BOARD_PAGE_SIZE;
+    const pageRows = hasMore ? rows.slice(0, BOARD_PAGE_SIZE) : rows;
+    const nextCursor = hasMore
+      ? encodeBoardCursor(offset + BOARD_PAGE_SIZE)
+      : null;
 
     return {
-      posts: rows.map((r) => ({
+      posts: pageRows.map((r) => ({
         number: r.number,
         slug: postSlug(r.title),
         title: r.title,
@@ -237,7 +247,7 @@ export class PostsService {
             ? { id: r.categoryId, name: r.categoryName }
             : null,
       })),
-      nextCursor: null,
+      nextCursor,
     };
   }
 

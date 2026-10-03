@@ -4,6 +4,7 @@ import { schema } from "@userhq/db";
 import { SEEDED_STATUSES } from "@userhq/types";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
 import { prefixTsQuery } from "../src/feedback/search.js";
+import { encodeBoardCursor } from "../src/feedback/cursor.js";
 
 describe("Board Search, Filters, and Ranking (Plan 03-07)", () => {
   describe("prefixTsQuery unit tests", () => {
@@ -321,6 +322,202 @@ describe("Board Search, Filters, and Ranking (Plan 03-07)", () => {
         expect(s).toHaveProperty("type");
       }
       expect(res.body.statuses[0].name).toBe("Under Review");
+    });
+
+    it("asserts empty board returns { posts: [], nextCursor: null }", async () => {
+      const emptyProdSlug = `empty-prod-${Date.now()}`;
+      await testApp.db.insert(schema.products).values({
+        workspaceId: wsId,
+        slug: emptyProdSlug,
+        name: "Empty Board Product",
+        accentColor: "#2563EB",
+      });
+
+      const res = await request(testApp.http)
+        .get(`/api/v1/portal/${wsSlug}/${emptyProdSlug}/posts`)
+        .set("Origin", testApp.env.PUBLIC_URL);
+
+      expect(res.status).toBe(200);
+      expect(res.body.posts).toEqual([]);
+      expect(res.body.nextCursor).toBeNull();
+    });
+
+    it("asserts invalid or out-of-range cursors return 400 validation_failed", async () => {
+      const cases = [
+        "garbage",
+        encodeBoardCursor(-1),
+        encodeBoardCursor(1.5),
+        encodeBoardCursor(10001),
+      ];
+
+      for (const badCursor of cases) {
+        const res = await request(testApp.http)
+          .get(`/api/v1/portal/${wsSlug}/${prodSlug}/posts?cursor=${encodeURIComponent(badCursor)}`)
+          .set("Origin", testApp.env.PUBLIC_URL);
+
+        expect(res.status).toBe(400);
+        expect(res.body.code).toBe("validation_failed");
+      }
+    });
+
+    it("handles pagination across 45 posts with opaque cursor and no duplicates", async () => {
+      const pagedSlug = `paged-prod-${Date.now()}`;
+      const [pagedProd] = await testApp.db
+        .insert(schema.products)
+        .values({
+          workspaceId: wsId,
+          slug: pagedSlug,
+          name: "Paged Product",
+          accentColor: "#2563EB",
+        })
+        .returning();
+
+      const [pagedCat] = await testApp.db
+        .insert(schema.categories)
+        .values({
+          productId: pagedProd.id,
+          name: "General",
+        })
+        .returning();
+
+      const [pagedStatus] = await testApp.db
+        .insert(schema.statuses)
+        .values({
+          productId: pagedProd.id,
+          name: "Open",
+          type: "review",
+          color: "#2563EB",
+          position: 0,
+        })
+        .returning();
+
+      // Insert 45 posts with numbers 1..45
+      const now = Date.now();
+      const postValues = Array.from({ length: 45 }, (_, i) => ({
+        productId: pagedProd.id,
+        number: i + 1,
+        title: `Feature Item ${i + 1}`,
+        description: `Description for feature ${i + 1}`,
+        categoryId: pagedCat.id,
+        statusId: pagedStatus.id,
+        authorId: authorUser.userId,
+        voteCount: (i * 3) % 40,
+        createdAt: new Date(now - (45 - i) * 60_000),
+      }));
+
+      await testApp.db.insert(schema.posts).values(postValues);
+
+      // Page 1
+      const res1 = await request(testApp.http)
+        .get(`/api/v1/portal/${wsSlug}/${pagedSlug}/posts?sort=top`)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      expect(res1.status).toBe(200);
+      expect(res1.body.posts).toHaveLength(20);
+      expect(res1.body.nextCursor).toBeTruthy();
+
+      // Page 2
+      const res2 = await request(testApp.http)
+        .get(`/api/v1/portal/${wsSlug}/${pagedSlug}/posts?sort=top&cursor=${encodeURIComponent(res1.body.nextCursor)}`)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      expect(res2.status).toBe(200);
+      expect(res2.body.posts).toHaveLength(20);
+      expect(res2.body.nextCursor).toBeTruthy();
+
+      // Page 3
+      const res3 = await request(testApp.http)
+        .get(`/api/v1/portal/${wsSlug}/${pagedSlug}/posts?sort=top&cursor=${encodeURIComponent(res2.body.nextCursor)}`)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      expect(res3.status).toBe(200);
+      expect(res3.body.posts).toHaveLength(5);
+      expect(res3.body.nextCursor).toBeNull();
+
+      // All 45 posts returned exactly once without duplicates
+      const allNumbers = [
+        ...res1.body.posts.map((p: any) => p.number),
+        ...res2.body.posts.map((p: any) => p.number),
+        ...res3.body.posts.map((p: any) => p.number),
+      ];
+      expect(allNumbers).toHaveLength(45);
+      expect(new Set(allNumbers).size).toBe(45);
+
+      // Test sort=new across 3 pages
+      const new1 = await request(testApp.http)
+        .get(`/api/v1/portal/${wsSlug}/${pagedSlug}/posts?sort=new`)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      const new2 = await request(testApp.http)
+        .get(`/api/v1/portal/${wsSlug}/${pagedSlug}/posts?sort=new&cursor=${encodeURIComponent(new1.body.nextCursor)}`)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      const new3 = await request(testApp.http)
+        .get(`/api/v1/portal/${wsSlug}/${pagedSlug}/posts?sort=new&cursor=${encodeURIComponent(new2.body.nextCursor)}`)
+        .set("Origin", testApp.env.PUBLIC_URL);
+
+      const allNewNumbers = [
+        ...new1.body.posts.map((p: any) => p.number),
+        ...new2.body.posts.map((p: any) => p.number),
+        ...new3.body.posts.map((p: any) => p.number),
+      ];
+      expect(allNewNumbers).toHaveLength(45);
+      expect(new Set(allNewNumbers).size).toBe(45);
+      // Newest should be Feature Item 45 first
+      expect(new1.body.posts[0].number).toBe(45);
+    });
+
+    it("asserts two posts with equal vote_count and equal created_at resolve in id DESC order", async () => {
+      const tieSlug = `tie-prod-${Date.now()}`;
+      const [tieProd] = await testApp.db
+        .insert(schema.products)
+        .values({
+          workspaceId: wsId,
+          slug: tieSlug,
+          name: "Tie Product",
+          accentColor: "#2563EB",
+        })
+        .returning();
+
+      const [tieStatus] = await testApp.db
+        .insert(schema.statuses)
+        .values({
+          productId: tieProd.id,
+          name: "Open",
+          type: "review",
+          color: "#2563EB",
+          position: 0,
+        })
+        .returning();
+
+      const fixedDate = new Date("2026-01-01T00:00:00Z");
+      const [postA, postB] = await testApp.db
+        .insert(schema.posts)
+        .values([
+          {
+            productId: tieProd.id,
+            number: 1,
+            title: "Post First",
+            statusId: tieStatus.id,
+            authorId: authorUser.userId,
+            voteCount: 10,
+            createdAt: fixedDate,
+          },
+          {
+            productId: tieProd.id,
+            number: 2,
+            title: "Post Second",
+            statusId: tieStatus.id,
+            authorId: authorUser.userId,
+            voteCount: 10,
+            createdAt: fixedDate,
+          },
+        ])
+        .returning();
+
+      const res = await request(testApp.http)
+        .get(`/api/v1/portal/${wsSlug}/${tieSlug}/posts?sort=top`)
+        .set("Origin", testApp.env.PUBLIC_URL);
+
+      expect(res.status).toBe(200);
+      expect(res.body.posts).toHaveLength(2);
+      const expectedFirstTitle = postA.id > postB.id ? "Post First" : "Post Second";
+      expect(res.body.posts[0].title).toBe(expectedFirstTitle);
     });
   });
 });

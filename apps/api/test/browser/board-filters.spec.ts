@@ -16,6 +16,7 @@ test.describe("Board Filters & Sort Browser Specs (Plan 03-07)", () => {
   let workspaceId: string;
   let wsSlug: string;
   const prodSlug = "browser-prod";
+  const pagedSlug = "paged-prod";
   let prodId: string;
   let post1Id: string;
   let post2Id: string;
@@ -123,15 +124,58 @@ test.describe("Board Filters & Sort Browser Specs (Plan 03-07)", () => {
         createdAt: new Date(now - 100_000),
       })
       .where(eq(schema.posts.id, post3Id));
+
+    // Seed 25 posts under pagedSlug for Load more tests
+    await createProductViaApi(userA.cookie, wsSlug, {
+      name: "Paged Product",
+      slug: pagedSlug,
+    });
+
+    const [pagedProdRow] = await stack.db
+      .select({ id: schema.products.id })
+      .from(schema.products)
+      .where(eq(schema.products.slug, pagedSlug));
+    const pagedProdId = pagedProdRow.id;
+
+    const [pagedCat] = await stack.db
+      .select({ id: schema.categories.id })
+      .from(schema.categories)
+      .where(eq(schema.categories.productId, pagedProdId))
+      .limit(1);
+
+    const [pagedStatus] = await stack.db
+      .select({ id: schema.statuses.id })
+      .from(schema.statuses)
+      .where(eq(schema.statuses.productId, pagedProdId))
+      .limit(1);
+
+    const pagedPostsValues = Array.from({ length: 25 }, (_, i) => ({
+      productId: pagedProdId,
+      number: i + 1,
+      title: `Paged Post Item ${i + 1}`,
+      description: `Description ${i + 1}`,
+      categoryId: pagedCat.id,
+      statusId: pagedStatus.id,
+      authorId: userA.userId,
+      voteCount: 25 - i,
+      createdAt: new Date(now - i * 60_000),
+    }));
+    await stack.db.insert(schema.posts).values(pagedPostsValues);
   });
 
   test.afterAll(async () => {
     if (workspaceId) {
-      if (prodId) {
+      const prods = await stack.db
+        .select({ id: schema.products.id })
+        .from(schema.products)
+        .where(eq(schema.products.workspaceId, workspaceId));
+
+      if (prods.length > 0) {
+        const prodIds = prods.map((p) => p.id);
         const postRows = await stack.db
           .select({ id: schema.posts.id })
           .from(schema.posts)
-          .where(eq(schema.posts.productId, prodId));
+          .where(inArray(schema.posts.productId, prodIds));
         const postIds = postRows.map((p) => p.id);
 
         if (postIds.length > 0) {
@@ -145,13 +189,13 @@ test.describe("Board Filters & Sort Browser Specs (Plan 03-07)", () => {
 
         await stack.db
           .delete(schema.categories)
-          .where(eq(schema.categories.productId, prodId));
+          .where(inArray(schema.categories.productId, prodIds));
         await stack.db
           .delete(schema.statuses)
-          .where(eq(schema.statuses.productId, prodId));
+          .where(inArray(schema.statuses.productId, prodIds));
         await stack.db
           .delete(schema.products)
-          .where(eq(schema.products.id, prodId));
+          .where(inArray(schema.products.id, prodIds));
       }
 
       await cleanupWorkspaces(stack, [workspaceId]);
@@ -192,5 +236,32 @@ test.describe("Board Filters & Sort Browser Specs (Plan 03-07)", () => {
 
     // 7. Assert original first row (Alpha Feature) returns
     await expect(firstRowLink).toContainText("Alpha Feature");
+  });
+
+  test("Load more fetches next page without duplicates and disappears when nextCursor is null", async ({
+    page,
+  }) => {
+    await page.goto(`/${wsSlug}/${pagedSlug}`);
+
+    // Wait for initial page (20 rows)
+    const rows = page.locator("li");
+    await expect(rows).toHaveCount(20);
+
+    // Load more button should be visible
+    const loadMoreButton = page.getByRole("button", { name: "Load more" });
+    await expect(loadMoreButton).toBeVisible();
+
+    // Click Load more
+    await loadMoreButton.click();
+
+    // Rows count should become 25
+    await expect(rows).toHaveCount(25);
+
+    // Load more button should disappear
+    await expect(loadMoreButton).not.toBeVisible();
+
+    // aria-live announcement
+    const liveRegion = page.getByRole("status");
+    await expect(liveRegion).toContainText("Loaded 5 more posts");
   });
 });

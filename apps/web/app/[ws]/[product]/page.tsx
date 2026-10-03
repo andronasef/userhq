@@ -2,9 +2,9 @@ import * as React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPortalProduct, getBoard, getMe } from "@/lib/api-server";
-import { PostRow } from "@/components/board/post-row";
 import { NewPostButton } from "@/components/board/post-form-dialog";
 import { BoardToolbar } from "@/components/board/board-toolbar";
+import { PostList } from "@/components/board/post-list";
 import { EmptyState } from "@/components/empty-state";
 
 import Link from "next/link";
@@ -55,7 +55,10 @@ export default async function PortalBoardPage({
   const productName = productResult.data.product.name;
   const categories = productResult.data.categories;
   const statuses = productResult.data.statuses;
-  const posts = boardResult.ok ? boardResult.data.posts : [];
+  const initialBoard = boardResult.ok
+    ? boardResult.data
+    : { posts: [], nextCursor: null };
+  const posts = initialBoard.posts;
   const signedIn = !!me.user;
   const defaultOpen = sp?.new === "1";
 
@@ -113,17 +116,14 @@ export default async function PortalBoardPage({
           />
         )
       ) : (
-        <ul className="rounded-lg border border-border divide-y divide-border">
-          {posts.map((post) => (
-            <PostRow
-              key={post.number}
-              ws={ws}
-              product={product}
-              post={post}
-              signedIn={signedIn}
-            />
-          ))}
-        </ul>
+        <PostList
+          key={search}
+          ws={ws}
+          product={product}
+          search={search}
+          initial={initialBoard}
+          signedIn={signedIn}
+        />
       )}
     </div>
   );

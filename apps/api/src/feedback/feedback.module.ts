@@ -4,6 +4,7 @@ import { PortalPostsController } from "./portal-posts.controller.js";
 import { PortalVotesController } from "./portal-votes.controller.js";
 import { PostsService } from "./posts.service.js";
 import { VotesService } from "./votes.service.js";
+import { UserThrottlerGuard } from "./throttle.js";
 import { PortalGuard } from "../portal/portal.guard.js";
 import { TenantGuard } from "../tenancy/tenant.guard.js";
 
@@ -13,8 +14,14 @@ import { TenantGuard } from "../tenancy/tenant.guard.js";
     PortalVotesController,
     CategoriesController,
   ],
-  providers: [PostsService, VotesService, PortalGuard, TenantGuard],
-  exports: [PostsService, VotesService],
+  providers: [
+    PostsService,
+    VotesService,
+    UserThrottlerGuard,
+    PortalGuard,
+    TenantGuard,
+  ],
+  exports: [PostsService, VotesService, UserThrottlerGuard],
 })
 export class FeedbackModule {}
 

@@ -9,6 +9,7 @@ import { APP_GUARD, APP_FILTER, APP_PIPE } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import helmet from "helmet";
 import type pg from "pg";
+import { ThrottlerModule } from "@nestjs/throttler";
 import { AuthModule } from "@thallesp/nestjs-better-auth";
 import { DB, type Db } from "@userhq/db";
 import { ENV, type Env } from "./env.js";
@@ -57,6 +58,7 @@ export class AppModule {
             json: { limit: "100kb" },
           },
         }),
+        ThrottlerModule.forRoot([{ name: "default", ttl: 60_000, limit: 60 }]),
         UploadsModule,
         PortalModule,
         WorkspacesModule,

@@ -67,6 +67,10 @@ export class ApiErrorFilter implements ExceptionFilter {
           code = "unsupported_type";
           message = defaultMessage || "Unsupported media type";
           break;
+        case HttpStatus.TOO_MANY_REQUESTS:
+          code = "rate_limited";
+          message = defaultMessage || "Too many requests";
+          break;
         default:
           if (status >= 400 && status < 500) {
             code = "internal_error";
@@ -105,6 +109,10 @@ export class ApiErrorFilter implements ExceptionFilter {
         case HttpStatus.UNSUPPORTED_MEDIA_TYPE:
           code = "unsupported_type";
           message = defaultMessage || "Unsupported media type";
+          break;
+        case HttpStatus.TOO_MANY_REQUESTS:
+          code = "rate_limited";
+          message = defaultMessage || "Too many requests";
           break;
         default:
           if (status >= 400 && status < 500) {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "@fontsource-variable/inter";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-dvh flex flex-col bg-background text-foreground font-sans antialiased">
-        {children}
+        <NuqsAdapter>{children}</NuqsAdapter>
       </body>
     </html>
   );

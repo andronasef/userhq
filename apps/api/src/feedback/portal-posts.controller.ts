@@ -19,6 +19,8 @@ import {
   PublicPostPageSchema,
   PostCreatedSchema,
   CreatePostInputSchema,
+  BoardQuerySchema,
+  type BoardQuery,
   type CreatePostInput,
   type PublicBoardPage,
   type PublicPostPage,
@@ -42,7 +44,7 @@ export class PortalPostsController {
   @SerializeOptions({ schema: PublicBoardPageSchema })
   async listBoard(
     @Req() req: any,
-    @Query() query: any
+    @Query({ schema: BoardQuerySchema }) query: BoardQuery
   ): Promise<PublicBoardPage> {
     const portal = req.portal;
     const viewerId = req.user?.id ?? null;

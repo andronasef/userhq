@@ -194,7 +194,11 @@ export class PostsService {
           categoryWhere
         )
       )
-      .orderBy(desc(posts.voteCount), desc(posts.createdAt), desc(posts.id))
+      .orderBy(
+        ...(query?.sort === "new"
+          ? [desc(posts.createdAt), desc(posts.id)]
+          : [desc(posts.voteCount), desc(posts.createdAt), desc(posts.id)])
+      )
       .limit(BOARD_PAGE_SIZE);
 
     return {

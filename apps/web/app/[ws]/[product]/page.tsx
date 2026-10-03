@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getPortalProduct, getBoard, getMe } from "@/lib/api-server";
 import { PostRow } from "@/components/board/post-row";
 import { NewPostButton } from "@/components/board/post-form-dialog";
+import { BoardToolbar } from "@/components/board/board-toolbar";
 import { EmptyState } from "@/components/empty-state";
 
 interface PortalBoardPageProps {
@@ -28,9 +29,19 @@ export default async function PortalBoardPage({
 }: PortalBoardPageProps): Promise<React.JSX.Element> {
   const { ws, product } = await params;
   const sp = await searchParams;
+
+  const searchParamsObj = new URLSearchParams();
+  for (const key of ["q", "sort", "category", "status"]) {
+    const val = sp?.[key];
+    if (typeof val === "string" && val.trim() !== "") {
+      searchParamsObj.set(key, val);
+    }
+  }
+  const search = searchParamsObj.toString();
+
   const [productResult, boardResult, me] = await Promise.all([
     getPortalProduct(ws, product),
-    getBoard(ws, product, ""),
+    getBoard(ws, product, search),
     getMe(),
   ]);
 
@@ -61,6 +72,8 @@ export default async function PortalBoardPage({
           defaultOpen={defaultOpen}
         />
       </div>
+
+      <BoardToolbar />
 
       {posts.length === 0 ? (
         <EmptyState

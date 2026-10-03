@@ -38,7 +38,10 @@ export default async function AccountPage(): Promise<React.JSX.Element> {
           <EmailPreferences initialCommentEmails={account.commentEmails} />
         </section>
 
-        <DeleteAccount isPlatformOwner={account.isPlatformOwner} />
+        <DeleteAccount
+          isPlatformOwner={account.isPlatformOwner}
+          ownedWorkspaces={account.ownedWorkspaces}
+        />
       </div>
     </div>
   );

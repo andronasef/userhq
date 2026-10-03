@@ -27,7 +27,7 @@ export class PortalGuard implements CanActivate {
         suspendedAt: workspaces.suspendedAt,
       })
       .from(workspaces)
-      .where(eq(workspaces.slug, wsSlug))
+      .where(and(eq(workspaces.slug, wsSlug), isNull(workspaces.deletedAt)))
       .limit(1);
 
     if (!ws) {

@@ -251,13 +251,14 @@ export class InvitesService {
         workspaceName: workspaces.name,
         workspaceSlug: workspaces.slug,
         workspaceSuspendedAt: workspaces.suspendedAt,
+        workspaceDeletedAt: workspaces.deletedAt,
       })
       .from(invites)
       .leftJoin(workspaces, eq(invites.workspaceId, workspaces.id))
       .where(eq(invites.tokenHash, tokenHash))
       .limit(1);
 
-    if (!row) {
+    if (!row || row.workspaceDeletedAt) {
       throw new ApiException("not_found", 404, "This invite link isn't valid.");
     }
 
@@ -393,6 +394,7 @@ export class InvitesService {
           revokedAt: invites.revokedAt,
           workspaceSlug: workspaces.slug,
           workspaceSuspendedAt: workspaces.suspendedAt,
+          workspaceDeletedAt: workspaces.deletedAt,
         })
         .from(invites)
         .leftJoin(workspaces, eq(invites.workspaceId, workspaces.id))
@@ -401,6 +403,7 @@ export class InvitesService {
 
       if (
         !inviteRow ||
+        inviteRow.workspaceDeletedAt ||
         inviteRow.kind !== "workspace" ||
         !inviteRow.workspaceId ||
         !inviteRow.workspaceSlug

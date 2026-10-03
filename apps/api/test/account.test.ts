@@ -14,10 +14,12 @@ import {
   posts,
   workspaceMembers,
   commentEmailBatches,
+  invites,
 } from "@userhq/db";
 import { SEEDED_STATUSES } from "@userhq/types";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
 import { EmailWorker } from "../src/email/worker.js";
+import { hashInviteToken } from "../src/invites/invites.service.js";
 
 describe("Account Settings & Preferences (Plan 03-14)", () => {
   let testApp: Awaited<ReturnType<typeof createTestApp>>;
@@ -261,6 +263,13 @@ describe("Account deletion (Plan 03-15)", () => {
       name,
     };
   };
+  let platformOwner: Awaited<ReturnType<typeof signedInCookie>> | undefined;
+  const getPlatformOwner = async () =>
+    (platformOwner ??= await signedInCookie(testApp.test, {
+      name: "Platform Owner",
+      email: testApp.env.PLATFORM_OWNER_EMAIL,
+      emailVerified: true,
+    }));
   const mkPost = async (authorId: string, number: number, title: string) => {
     const [p] = await testApp.db
       .insert(posts)
@@ -381,12 +390,204 @@ describe("Account deletion (Plan 03-15)", () => {
     expect(p1.id && p2.id && p3.id).toBeTruthy();
   });
 
-  it("refuses the platform owner account", async () => {
-    const owner = await signedInCookie(testApp.test, {
-      name: "Platform Owner",
-      email: testApp.env.PLATFORM_OWNER_EMAIL,
-      emailVerified: true,
+  it("owner transfers one workspace and deletes the other; deleted workspace disappears", async () => {
+    const o = await mkUser("Owner Otto");
+    const m = await mkUser("Member Mia");
+    const stranger = await mkUser("Stranger Sid");
+    const w1 = await mkWorkspace(`tr-${rand}-a`, o.userId, [m.userId]);
+    const w2 = await mkWorkspace(`dl-${rand}-a`, o.userId);
+
+    // W1 has a product and a post so the counts are non-zero
+    const [p1] = await testApp.db
+      .insert(products)
+      .values({ workspaceId: w1.id, name: "W1 Product", slug: "w1-prod" })
+      .returning();
+    const [st] = await testApp.db
+      .insert(statuses)
+      .values({ productId: p1.id, name: "Review", type: SEEDED_STATUSES[0].type, color: "#888888", position: 0, isDefault: true })
+      .returning();
+    await testApp.db
+      .insert(posts)
+      .values({ productId: p1.id, number: 1, title: "W1 post", statusId: st.id, authorId: m.userId });
+
+    const acct = await request(testApp.http).get("/api/v1/account").set("Cookie", o.cookie);
+    expect(acct.status).toBe(200);
+    const byslug = Object.fromEntries(acct.body.ownedWorkspaces.map((w: any) => [w.slug, w]));
+    expect(byslug[w1.slug]).toMatchObject({
+      productCount: 1,
+      postCount: 1,
+      members: [{ userId: m.userId, name: "Member Mia" }],
     });
+    expect(byslug[w2.slug]).toMatchObject({ productCount: 0, postCount: 0, members: [] });
+
+    // A pending invite and a pending email batch for W2
+    const inv = await request(testApp.http)
+      .post(`/api/v1/workspaces/${w2.slug}/invites`)
+      .set("Cookie", o.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({ email: stranger.email });
+    expect(inv.status).toBe(201);
+    const token = inv.body.link.split("/invite/")[1];
+    expect(await testApp.db.select().from(invites).where(eq(invites.tokenHash, hashInviteToken(token)))).toHaveLength(1);
+    const [batch] = await testApp.db
+      .insert(commentEmailBatches)
+      .values({ userId: m.userId, workspaceId: w2.id, sendAfter: new Date(Date.now() - 1000) })
+      .returning();
+
+    const res = await del(o.cookie, [
+      { slug: w1.slug, action: "transfer", toUserId: m.userId },
+      { slug: w2.slug, action: "delete" },
+    ]);
+    expect(res.status).toBe(204);
+
+    const w1Members = await testApp.db.select().from(workspaceMembers).where(eq(workspaceMembers.workspaceId, w1.id));
+    expect(w1Members).toHaveLength(1);
+    expect(w1Members[0]).toMatchObject({ userId: m.userId, role: "owner" });
+    expect(await testApp.db.select().from(workspaceMembers).where(eq(workspaceMembers.userId, o.userId))).toHaveLength(0);
+    const [w2Row] = await testApp.db.select().from(workspaces).where(eq(workspaces.id, w2.id));
+    expect(w2Row.deletedAt).not.toBeNull();
+    const [w1Row] = await testApp.db.select().from(workspaces).where(eq(workspaces.id, w1.id));
+    expect(w1Row.deletedAt).toBeNull();
+
+    expect((await request(testApp.http).get(`/api/v1/portal/${w2.slug}`)).status).toBe(404);
+    expect((await request(testApp.http).get(`/api/v1/portal/${w2.slug}/any`)).status).toBe(404);
+    expect((await request(testApp.http).get(`/api/v1/workspaces/${w2.slug}`).set("Cookie", m.cookie)).status).toBe(404);
+    const me = await request(testApp.http).get("/api/v1/me").set("Cookie", m.cookie);
+    expect(me.body.workspaces.map((w: any) => w.slug)).toEqual([w1.slug]);
+    expect((await request(testApp.http).get(`/api/v1/workspaces/${w1.slug}`).set("Cookie", m.cookie)).status).toBe(200);
+
+    // Invite to a deleted workspace answers like an unknown token
+    expect((await request(testApp.http).get(`/api/v1/invites/${token}`).set("Cookie", stranger.cookie)).status).toBe(404);
+    expect(
+      (await request(testApp.http).post(`/api/v1/invites/${token}/accept`).set("Cookie", stranger.cookie).set("Origin", testApp.env.PUBLIC_URL)).status
+    ).toBe(404);
+
+    // The slug stays taken
+    const create = await request(testApp.http)
+      .post("/api/v1/workspaces")
+      .set("Cookie", (await getPlatformOwner()).cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({ name: "Reuse", slug: w2.slug });
+    expect(create.status).toBe(409);
+    expect(create.body.code).toBe("slug_taken");
+
+    // The worker cancels the pending batch for the deleted workspace
+    const worker = testApp.app.get(EmailWorker);
+    const run = await worker.runOnce(new Date(Date.now() + 25 * 3600_000));
+    expect(run.sent).toBe(0);
+    const [b] = await testApp.db.select().from(commentEmailBatches).where(eq(commentEmailBatches.id, batch.id));
+    expect(b.status).toBe("cancelled");
+  });
+
+  it("all-or-nothing: unresolved or invalid choices leave everything untouched", async () => {
+    const o = await mkUser("Owner Opal");
+    const m = await mkUser("Member Max");
+    const outsider = await mkUser("Outsider Oz");
+    const solo = await mkWorkspace(`solo-${rand}`, o.userId);
+    const team = await mkWorkspace(`team-${rand}`, o.userId, [m.userId]);
+
+    const untouched = async () => {
+      const [u] = await testApp.db.select().from(user).where(eq(user.id, o.userId));
+      expect(u.deletedAt).toBeNull();
+      expect(u.email).toBe(o.email);
+      const mem = await testApp.db.select().from(workspaceMembers).where(eq(workspaceMembers.userId, o.userId));
+      expect(mem.map((r) => r.role)).toEqual(["owner", "owner"]);
+      const ws = await testApp.db.select().from(workspaces).where(eq(workspaces.id, team.id));
+      expect(ws[0].deletedAt).toBeNull();
+      const [solo2] = await testApp.db.select().from(workspaces).where(eq(workspaces.id, solo.id));
+      expect(solo2.deletedAt).toBeNull();
+      expect(await testApp.db.select().from(session).where(eq(session.userId, o.userId))).not.toHaveLength(0);
+      const owners = await testApp.db
+        .select()
+        .from(workspaceMembers)
+        .where(and(eq(workspaceMembers.workspaceId, team.id), eq(workspaceMembers.role, "owner")));
+      expect(owners).toHaveLength(1);
+    };
+
+    const cases: Array<[unknown[], string]> = [
+      [[], "owned_workspaces_unresolved"],
+      [[{ slug: solo.slug, action: "delete" }], "owned_workspaces_unresolved"],
+      [
+        [
+          { slug: solo.slug, action: "delete" },
+          { slug: team.slug, action: "delete" },
+          { slug: "not-mine", action: "delete" },
+        ],
+        "owned_workspaces_unresolved",
+      ],
+      [
+        [
+          { slug: solo.slug, action: "delete" },
+          { slug: team.slug, action: "transfer", toUserId: outsider.userId },
+        ],
+        "transfer_target_invalid",
+      ],
+      [
+        [
+          { slug: solo.slug, action: "delete" },
+          { slug: team.slug, action: "transfer", toUserId: o.userId },
+        ],
+        "transfer_target_invalid",
+      ],
+      [
+        [
+          { slug: solo.slug, action: "delete" },
+          { slug: team.slug, action: "transfer" },
+        ],
+        "transfer_target_invalid",
+      ],
+      [
+        [
+          { slug: solo.slug, action: "transfer", toUserId: m.userId },
+          { slug: team.slug, action: "delete" },
+        ],
+        "transfer_target_invalid",
+      ],
+    ];
+    for (const [input, code] of cases) {
+      const res = await del(o.cookie, input);
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe(code);
+      await untouched();
+    }
+  });
+
+  it("concurrent deletions by owners of different workspaces leave one owner or a deleted workspace", async () => {
+    const o3 = await mkUser("Owner Three");
+    const o4 = await mkUser("Owner Four");
+    const m3 = await mkUser("Member Three");
+    const m4 = await mkUser("Member Four");
+    const w3 = await mkWorkspace(`cc3-${rand}`, o3.userId, [m3.userId]);
+    const w4 = await mkWorkspace(`cc4-${rand}`, o4.userId, [m4.userId]);
+    const [r3, r4] = await Promise.all([
+      del(o3.cookie, [{ slug: w3.slug, action: "delete" }]),
+      del(o4.cookie, [{ slug: w4.slug, action: "transfer", toUserId: m4.userId }]),
+    ]);
+    expect(r3.status).toBe(204);
+    expect(r4.status).toBe(204);
+    const [w3Row] = await testApp.db.select().from(workspaces).where(eq(workspaces.id, w3.id));
+    expect(w3Row.deletedAt).not.toBeNull();
+    const owners = await testApp.db
+      .select()
+      .from(workspaceMembers)
+      .where(and(eq(workspaceMembers.workspaceId, w4.id), eq(workspaceMembers.role, "owner")));
+    expect(owners.map((r) => r.userId)).toEqual([m4.userId]);
+  });
+
+  it("a soft-deleted workspace with live members answers like an unknown workspace", async () => {
+    const o = await mkUser("Owner Dee");
+    const m = await mkUser("Member Dan");
+    const w = await mkWorkspace(`soft-${rand}`, o.userId, [m.userId]);
+    expect((await request(testApp.http).get(`/api/v1/workspaces/${w.slug}`).set("Cookie", m.cookie)).status).toBe(200);
+    await testApp.db.update(workspaces).set({ deletedAt: new Date() }).where(eq(workspaces.id, w.id));
+    expect((await request(testApp.http).get(`/api/v1/workspaces/${w.slug}`).set("Cookie", m.cookie)).status).toBe(404);
+    expect((await request(testApp.http).get(`/api/v1/portal/${w.slug}`)).status).toBe(404);
+    const me = await request(testApp.http).get("/api/v1/me").set("Cookie", m.cookie);
+    expect(me.body.workspaces).toEqual([]);
+  });
+
+  it("refuses the platform owner account", async () => {
+    const owner = await getPlatformOwner();
     const res = await del(owner.cookie);
     expect(res.status).toBe(403);
     expect(res.body.code).toBe("platform_owner_account");

@@ -6,7 +6,7 @@ import {
   SerializeOptions,
 } from "@nestjs/common";
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { DB, type Db, workspaces, workspaceMembers, uploads } from "@userhq/db";
 import {
   MeResponseSchema,
@@ -50,7 +50,9 @@ export class MeController {
       .from(workspaceMembers)
       .innerJoin(workspaces, eq(workspaceMembers.workspaceId, workspaces.id))
       .leftJoin(uploads, eq(workspaces.logoUploadId, uploads.id))
-      .where(eq(workspaceMembers.userId, user.id))
+      .where(
+        and(eq(workspaceMembers.userId, user.id), isNull(workspaces.deletedAt))
+      )
       .orderBy(workspaces.name, workspaces.slug);
 
     const userWorkspaces = rows.map((r) => ({

@@ -184,7 +184,7 @@ export class AccountController {
   @Post("delete")
   @HttpCode(204)
   @UseGuards(UserThrottlerGuard)
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   async deleteAccount(
     @CurrentUser() user: any,
     @Body({ schema: DeleteAccountInputSchema }) input: DeleteAccountInput

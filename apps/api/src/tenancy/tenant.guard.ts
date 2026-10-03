@@ -51,7 +51,7 @@ export class TenantGuard implements CanActivate {
           eq(workspaceMembers.userId, req.user.id)
         )
       )
-      .where(eq(workspaces.slug, ws))
+      .where(and(eq(workspaces.slug, ws), isNull(workspaces.deletedAt)))
       .limit(1);
 
     if (!row) {

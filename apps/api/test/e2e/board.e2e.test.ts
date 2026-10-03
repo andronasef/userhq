@@ -430,4 +430,55 @@ describe("Board E2E (Plan 03-04)", () => {
     expect(html).toContain("Nothing here yet");
     expect(html).toContain(`Share an idea for ${emptyName}, and others can vote on it.`);
   });
+
+  it("merged duplicate permalink redirects to target canonical URL with 308", async () => {
+    const author = await mintSession(stack, {
+      name: "Merge Author",
+      email: `merge-${randomBytes(3).toString("hex")}@example.com`,
+      emailVerified: true,
+    });
+    userIds.push(author.userId);
+
+    // Create target post
+    const targetTitle = `Target Idea ${randomBytes(3).toString("hex")}`;
+    const targetRes = await apiCall(`/api/v1/portal/${wsSlug}/${pSlug}/posts`, {
+      method: "POST",
+      cookie: author.cookie,
+      body: { title: targetTitle, description: "Keep this post" },
+    });
+    expect(targetRes.status).toBe(201);
+    const target = await targetRes.json();
+
+    // Create duplicate post
+    const dupTitle = `Duplicate Idea ${randomBytes(3).toString("hex")}`;
+    const dupRes = await apiCall(`/api/v1/portal/${wsSlug}/${pSlug}/posts`, {
+      method: "POST",
+      cookie: author.cookie,
+      body: { title: dupTitle, description: "Merge this into target" },
+    });
+    expect(dupRes.status).toBe(201);
+    const dup = await dupRes.json();
+
+    // Admin merges dup into target
+    const mergeRes = await apiCall(
+      `/api/v1/workspaces/${wsSlug}/products/${pSlug}/posts/${dup.number}/merge`,
+      {
+        method: "POST",
+        cookie: userCookie,
+        body: { targetNumber: target.number },
+      }
+    );
+    expect(mergeRes.status).toBe(200);
+
+    // Fetch duplicate permalink with redirect: manual
+    const dupUrl = `${baseUrl}/${wsSlug}/${pSlug}/p/${dup.number}-${dup.slug}`;
+    const redirectRes = await fetch(dupUrl, { redirect: "manual" });
+    expect(redirectRes.status).toBe(301);
+    const location = redirectRes.headers.get("location");
+    expect(new URL(location!, baseUrl).pathname).toBe(
+      `/${wsSlug}/${pSlug}/p/${target.number}-${target.slug}`
+    );
+  });
 });
+
+

@@ -4,6 +4,7 @@ import {
   eq,
   isNull,
   isNotNull,
+  inArray,
   notInArray,
   desc,
   asc,
@@ -32,6 +33,7 @@ import {
   type DeletedCommentRow,
   type PublicAuthor,
   type PostViewer,
+  type MergeResult,
   ADMIN_PAGE_SIZE,
   postSlug,
 } from "@userhq/types";
@@ -642,4 +644,147 @@ export class ModerationService {
         .where(eq(comments.id, row.commentId));
     });
   }
+
+  async mergePosts(
+    tenant: { workspaceId: string; productId: string },
+    keepNumber: number,
+    mergeNumbers: number[]
+  ): Promise<MergeResult> {
+    if (mergeNumbers.includes(keepNumber)) {
+      throw new ApiException(
+        "merge_target_invalid",
+        400,
+        "Cannot merge a post into itself."
+      );
+    }
+
+    const uniqueMergeNumbers = Array.from(new Set(mergeNumbers));
+    if (uniqueMergeNumbers.length === 0) {
+      throw new ApiException(
+        "merge_target_invalid",
+        400,
+        "No duplicate posts specified."
+      );
+    }
+
+    const allNumbers = [keepNumber, ...uniqueMergeNumbers];
+
+    return this.db.transaction(async (tx) => {
+      // Lock all involved rows in id ASC order to prevent deadlocks under concurrent merges
+      const rows = await tx
+        .select({
+          id: posts.id,
+          number: posts.number,
+          title: posts.title,
+          deletedAt: posts.deletedAt,
+          mergedIntoId: posts.mergedIntoId,
+        })
+        .from(posts)
+        .where(
+          and(
+            eq(posts.productId, tenant.productId),
+            inArray(posts.number, allNumbers)
+          )
+        )
+        .orderBy(asc(posts.id))
+        .for("update");
+
+      const keepRow = rows.find((r) => r.number === keepNumber);
+      if (!keepRow) {
+        throw new ApiException(
+          "merge_target_invalid",
+          400,
+          "Target post not found."
+        );
+      }
+
+      if (keepRow.deletedAt !== null || keepRow.mergedIntoId !== null) {
+        throw new ApiException(
+          "merge_target_invalid",
+          400,
+          "Cannot merge into a deleted or merged post."
+        );
+      }
+
+      const dupRows: typeof rows = [];
+      for (const dupNumber of uniqueMergeNumbers) {
+        const dupRow = rows.find((r) => r.number === dupNumber);
+        if (!dupRow) {
+          throw new ApiException(
+            "merge_target_invalid",
+            400,
+            `Duplicate post ${dupNumber} not found.`
+          );
+        }
+        if (dupRow.deletedAt !== null || dupRow.mergedIntoId !== null) {
+          throw new ApiException("post_not_found", 404, "Post not found.");
+        }
+        dupRows.push(dupRow);
+      }
+
+      for (const dupRow of dupRows) {
+        // Copy votes to target with ON CONFLICT DO NOTHING (keeping created_at)
+        await tx.execute(sql`
+          INSERT INTO votes (post_id, user_id, created_at)
+          SELECT ${keepRow.id}, user_id, created_at
+          FROM votes
+          WHERE post_id = ${dupRow.id}
+          ON CONFLICT DO NOTHING
+        `);
+
+        // Delete duplicate's votes
+        await tx.delete(votes).where(eq(votes.postId, dupRow.id));
+
+        // Move ALL its comments with one UPDATE (preserves parent-child FK integrity)
+        await tx
+          .update(comments)
+          .set({ postId: keepRow.id })
+          .where(eq(comments.postId, dupRow.id));
+
+        // Copy mutes with ON CONFLICT DO NOTHING
+        await tx.execute(sql`
+          INSERT INTO post_mutes (user_id, post_id, created_at)
+          SELECT user_id, ${keepRow.id}, created_at
+          FROM post_mutes
+          WHERE post_id = ${dupRow.id}
+          ON CONFLICT DO NOTHING
+        `);
+
+        // Repoint posts previously merged into the duplicate to the target (flatten chains)
+        await tx
+          .update(posts)
+          .set({ mergedIntoId: keepRow.id })
+          .where(eq(posts.mergedIntoId, dupRow.id));
+
+        // Set the duplicate's merged_into_id = target, vote_count = 0
+        await tx
+          .update(posts)
+          .set({
+            mergedIntoId: keepRow.id,
+            voteCount: 0,
+          })
+          .where(eq(posts.id, dupRow.id));
+      }
+
+      // Phase 4: a post links to at most one roadmap item — resolve links before merging (ROAD-06)
+      const [updatedKeep] = await tx
+        .update(posts)
+        .set({
+          voteCount: sql`(SELECT count(*)::int FROM votes WHERE post_id = ${keepRow.id})`,
+        })
+        .where(eq(posts.id, keepRow.id))
+        .returning({
+          number: posts.number,
+          title: posts.title,
+          voteCount: posts.voteCount,
+        });
+
+      return {
+        number: updatedKeep.number,
+        slug: postSlug(updatedKeep.title),
+        voteCount: updatedKeep.voteCount,
+      };
+    });
+  }
 }
+

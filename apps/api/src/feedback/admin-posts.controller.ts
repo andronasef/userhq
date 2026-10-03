@@ -20,12 +20,18 @@ import {
   AdminBoardListResponseSchema,
   AdminPostDetailSchema,
   VoterPageSchema,
+  MergeInputSchema,
+  BulkMergeInputSchema,
+  MergeResultSchema,
   type StatusChangeInput,
   type StatusChangeResult,
   type AdminBoardQuery,
   type AdminBoardListResponse,
   type AdminPostDetail,
   type VoterPage,
+  type MergeInput,
+  type BulkMergeInput,
+  type MergeResult,
 } from "@userhq/types";
 import { TenantGuard, type Tenant } from "../tenancy/tenant.guard.js";
 import { CurrentTenant } from "../tenancy/current-tenant.decorator.js";
@@ -56,6 +62,40 @@ export class AdminPostsController {
     return this.moderationService.listAdminPosts(
       { workspaceId: tenant.workspaceId, productId: tenant.productId! },
       query
+    );
+  }
+
+  @Post("merge")
+  @HttpCode(200)
+  @SerializeOptions({ schema: MergeResultSchema })
+  async bulkMerge(
+    @CurrentTenant() tenant: Tenant,
+    @Body({ schema: BulkMergeInputSchema }) body: BulkMergeInput
+  ): Promise<MergeResult> {
+    return this.moderationService.mergePosts(
+      { workspaceId: tenant.workspaceId, productId: tenant.productId! },
+      body.keepNumber,
+      body.mergeNumbers
+    );
+  }
+
+  @Post(":number/merge")
+  @HttpCode(200)
+  @SerializeOptions({ schema: MergeResultSchema })
+  async mergePost(
+    @CurrentTenant() tenant: Tenant,
+    @Param("number") number: string,
+    @Body({ schema: MergeInputSchema }) body: MergeInput
+  ): Promise<MergeResult> {
+    const parsedNumber = postNumberParamSchema.safeParse(number);
+    if (!parsedNumber.success) {
+      throw new ApiException("post_not_found", 404, "Post not found.");
+    }
+
+    return this.moderationService.mergePosts(
+      { workspaceId: tenant.workspaceId, productId: tenant.productId! },
+      body.targetNumber,
+      [parsedNumber.data]
     );
   }
 

@@ -372,4 +372,22 @@ export const AdminPostDetailSchema = z.discriminatedUnion("kind", [
 ]);
 export type AdminPostDetail = z.infer<typeof AdminPostDetailSchema>;
 
+export const MergeInputSchema = z.object({
+  targetNumber: z.number().int().positive(),
+});
+export type MergeInput = z.infer<typeof MergeInputSchema>;
+
+export const BulkMergeInputSchema = z.object({
+  keepNumber: z.number().int().positive(),
+  mergeNumbers: z.array(z.number().int().positive()).min(1).max(50),
+});
+export type BulkMergeInput = z.infer<typeof BulkMergeInputSchema>;
+
+export const MergeResultSchema = z.object({
+  number: z.number().int().positive(),
+  slug: z.string(),
+  voteCount: z.number().int().nonnegative(),
+});
+export type MergeResult = z.infer<typeof MergeResultSchema>;
+
 

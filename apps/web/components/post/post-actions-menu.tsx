@@ -17,6 +17,7 @@ import { StatusChangeDialog } from "@/components/post/status-change-dialog";
 import { PostFormDialog } from "@/components/board/post-form-dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { VotersDialog } from "@/components/post/voters-dialog";
+import { MergeDialog } from "@/components/post/merge-dialog";
 import { apiFetch } from "@/lib/api-client";
 import { portalHref } from "@/lib/tenant";
 
@@ -48,6 +49,7 @@ export function PostActionsMenu({
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [votersDialogOpen, setVotersDialogOpen] = React.useState(false);
+  const [mergeDialogOpen, setMergeDialogOpen] = React.useState(false);
 
   const handleDelete = async () => {
     await apiFetch(
@@ -98,6 +100,9 @@ export function PostActionsMenu({
             )}
             <DropdownMenuItem onSelect={() => setVotersDialogOpen(true)}>
               View voters
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setMergeDialogOpen(true)}>
+              Merge into…
             </DropdownMenuItem>
             {variant === "dashboard" && (
               <DropdownMenuItem asChild>
@@ -215,6 +220,21 @@ export function PostActionsMenu({
         postNumber={post.number}
         voteCount={post.voteCount}
       />
+
+      <MergeDialog
+        open={mergeDialogOpen}
+        onOpenChange={setMergeDialogOpen}
+        ws={ws}
+        product={product}
+        post={{
+          number: post.number,
+          title: post.title,
+          voteCount: post.voteCount,
+          slug: post.slug,
+        }}
+        variant={variant}
+      />
     </>
   );
 }
+

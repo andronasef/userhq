@@ -45,6 +45,8 @@ import {
   type AdminPostDetail,
   UnsubscribeStateSchema,
   type UnsubscribeState,
+  AccountSchema,
+  type Account,
   ANONYMOUS_ME,
 } from "@userhq/types";
 
@@ -377,6 +379,11 @@ export const getUnsubscribe = cache(
     );
   }
 );
+
+export const getAccount = cache((): Promise<ApiReadResult<Account>> => {
+  return apiRead("/api/v1/account", AccountSchema);
+});
+
 
 
 

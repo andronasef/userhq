@@ -28,6 +28,7 @@ import { PlatformModule } from "./platform/platform.module.js";
 import { ProductsModule } from "./products/products.module.js";
 import { FeedbackModule } from "./feedback/feedback.module.js";
 import { EmailModule } from "./email/email.module.js";
+import { AccountModule } from "./account/account.module.js";
 
 const DB_POOL = Symbol.for("@userhq/api/db-pool");
 
@@ -68,6 +69,7 @@ export class AppModule {
         ProductsModule,
         FeedbackModule,
         EmailModule,
+        AccountModule,
       ],
       controllers: [HealthController, MeController],
       providers: [

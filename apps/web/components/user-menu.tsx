@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ImageUp, LogOut, LoaderCircle, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { ImageUp, LogOut, LoaderCircle, LayoutDashboard, ShieldCheck, UserCog } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar } from "./ui/avatar";
 import {
@@ -105,6 +105,14 @@ export function UserMenu({
             <DropdownMenuSeparator />
           </>
         )}
+
+        <DropdownMenuItem asChild>
+          <Link href="/account" className="flex items-center gap-2 w-full">
+            <UserCog className="size-4 shrink-0" aria-hidden="true" />
+            <span>Account settings</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
 
         <DropdownMenuItem
           disabled={isPending}

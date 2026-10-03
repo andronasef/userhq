@@ -73,5 +73,6 @@ export const config = {
     "/dashboard/:path*",
     "/invite/:path*",
     "/:ws/:product/p/:ref*",
+    "/account",
   ],
 };

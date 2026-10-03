@@ -199,6 +199,53 @@ export const PublicCommentSchema = z.object({
 });
 export type PublicComment = z.infer<typeof PublicCommentSchema>;
 
+export const UpdatePostInputSchema = z.object({
+  title: PostTitleSchema,
+  description: PostDescriptionSchema.optional().default(null),
+  categoryId: z
+    .union([z.string().uuid(), z.null(), z.undefined(), z.literal("")])
+    .transform((val) => (val === "" || val === undefined ? null : val))
+    .nullable()
+    .optional(),
+  version: z.number().int(),
+});
+export type UpdatePostInput = z.infer<typeof UpdatePostInputSchema>;
+
+export const StatusNoteSchema = z
+  .union([z.string(), z.null(), z.undefined()])
+  .transform((val) => {
+    if (val === null || val === undefined) return null;
+    const trimmed = val.trim();
+    return trimmed === "" ? null : trimmed;
+  })
+  .pipe(
+    z.string().max(STATUS_NOTE_MAX, { message: "note_too_long" }).nullable()
+  );
+
+export const StatusChangeInputSchema = z.object({
+  statusId: z.string().uuid(),
+  note: StatusNoteSchema.optional(),
+  version: z.number().int(),
+});
+export type StatusChangeInput = z.infer<typeof StatusChangeInputSchema>;
+
+export const ActivityEntrySchema = z.object({
+  id: z.string().uuid(),
+  actor: PublicAuthorSchema,
+  statusName: z.string(),
+  statusColor: z.string(),
+  note: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type ActivityEntry = z.infer<typeof ActivityEntrySchema>;
+
+export const StatusChangeResultSchema = z.object({
+  status: PostStatusSchema,
+  version: z.number().int(),
+  activity: ActivityEntrySchema.nullable(),
+});
+export type StatusChangeResult = z.infer<typeof StatusChangeResultSchema>;
+
 export const TimelineItemSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("comment"),
@@ -209,6 +256,10 @@ export const TimelineItemSchema = z.discriminatedUnion("kind", [
     kind: z.literal("stub"),
     id: z.string().uuid(),
     replies: z.array(PublicCommentSchema),
+  }),
+  z.object({
+    kind: z.literal("activity"),
+    activity: ActivityEntrySchema,
   }),
 ]);
 export type TimelineItem = z.infer<typeof TimelineItemSchema>;

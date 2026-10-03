@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { getPortalProduct, getPost, publicOrigin } from "@/lib/api-server";
+import { getPortalProduct, getPost, getMe, publicOrigin } from "@/lib/api-server";
 import { parsePostRef, portalHref, postHref } from "@/lib/tenant";
 import { Button } from "@/components/ui/button";
 import { VoteButton } from "@/components/board/vote-button";
@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { AuthorLine } from "@/components/post/author-line";
 import { PlainText } from "@/components/plain-text";
 import { PostTimeline } from "@/components/post/post-timeline";
+import { PostActionsMenu } from "@/components/post/post-actions-menu";
 
 interface PostPageProps {
   params: Promise<{ ws: string; product: string; ref: string }>;
@@ -75,9 +76,10 @@ export default async function PostPage({
     notFound();
   }
 
-  const [productResult, postResult] = await Promise.all([
+  const [productResult, postResult, me] = await Promise.all([
     getPortalProduct(ws, product),
     getPost(ws, product, postNumber),
+    getMe(),
   ]);
 
   if (!productResult.ok || !postResult.ok) {
@@ -96,6 +98,8 @@ export default async function PostPage({
   if (currentPath !== canonicalPath) {
     permanentRedirect(canonicalPath);
   }
+
+  const adminView = me.workspaces.some((w) => w.slug === ws);
 
   return (
     <div className="mx-auto max-w-3xl flex flex-col gap-8">
@@ -128,6 +132,14 @@ export default async function PostPage({
             <h1 className="text-2xl font-semibold break-words flex-1 text-foreground">
               {post.title}
             </h1>
+            <PostActionsMenu
+              ws={ws}
+              product={product}
+              post={post}
+              statuses={productResult.data.statuses}
+              adminView={adminView}
+              viewer={viewer}
+            />
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge name={post.status.name} color={post.status.color} />

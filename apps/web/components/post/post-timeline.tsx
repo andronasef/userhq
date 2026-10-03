@@ -6,6 +6,7 @@ import type { TimelineItem, PublicComment } from "@userhq/types";
 import { CommentItem } from "@/components/post/comment-item";
 import { CommentComposer } from "@/components/post/comment-composer";
 import { SignInPrompt } from "@/components/post/sign-in-prompt";
+import { ActivityItem } from "@/components/post/activity-item";
 
 export interface PostTimelineProps {
   ws: string;
@@ -72,8 +73,13 @@ export function PostTimeline({
 
     setTimeline((prev) =>
       prev.map((item) => {
-        const itemId = item.kind === "comment" ? item.comment.id : item.id;
-        if (itemId === parentId) {
+        if (item.kind === "comment" && item.comment.id === parentId) {
+          return {
+            ...item,
+            replies: [...item.replies, newReply],
+          };
+        }
+        if (item.kind === "stub" && item.id === parentId) {
           return {
             ...item,
             replies: [...item.replies, newReply],
@@ -146,6 +152,8 @@ export function PostTimeline({
           if (filteredReplies.length > 0) {
             next.push({ ...item, replies: filteredReplies });
           }
+        } else if (item.kind === "activity") {
+          next.push(item);
         }
       }
 
@@ -162,6 +170,10 @@ export function PostTimeline({
       ) : (
         <ol className="flex flex-col gap-6">
           {timeline.map((item) => {
+            if (item.kind === "activity") {
+              return <ActivityItem key={`activity-${item.activity.id}`} activity={item.activity} />;
+            }
+
             const isStub = item.kind === "stub";
             const topLevelId = isStub ? item.id : item.comment.id;
             const isReplyOpen = activeReplyParentId === topLevelId;

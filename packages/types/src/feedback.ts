@@ -126,10 +126,82 @@ export const BoardQuerySchema = z.object({
     }),
   sort: z.enum(["top", "new", "match"]).optional(),
   category: z.string().uuid().optional(),
-  status: z.union([z.literal("all"), z.string().uuid()]).optional(),
+  status: z.union([z.literal("all"), z.literal("open"), z.string().uuid()]).optional(),
   cursor: z.string().max(200).optional(),
 });
 export type BoardQuery = z.infer<typeof BoardQuerySchema>;
+
+export const AdminBoardQuerySchema = BoardQuerySchema.extend({
+  view: z.literal("deleted").optional(),
+});
+export type AdminBoardQuery = z.infer<typeof AdminBoardQuerySchema>;
+
+export const AdminPostRowSchema = z.object({
+  number: z.number().int().positive(),
+  slug: z.string(),
+  title: z.string(),
+  status: PostStatusSchema,
+  category: PostCategorySchema.nullable(),
+  voteCount: z.number().int(),
+  commentCount: z.number().int(),
+  createdAt: z.string(),
+});
+export type AdminPostRow = z.infer<typeof AdminPostRowSchema>;
+
+export const AdminPostPageSchema = z.object({
+  posts: z.array(AdminPostRowSchema),
+  nextCursor: z.string().nullable(),
+});
+export type AdminPostPage = z.infer<typeof AdminPostPageSchema>;
+
+export const DeletedPostRowSchema = z.object({
+  number: z.number().int().positive(),
+  title: z.string(),
+  deletedAt: z.string(),
+  deletedBy: z.string().nullable(),
+  deletedByAuthor: z.boolean(),
+});
+export type DeletedPostRow = z.infer<typeof DeletedPostRowSchema>;
+
+export const DeletedPostPageSchema = z.object({
+  posts: z.array(DeletedPostRowSchema),
+  nextCursor: z.string().nullable(),
+});
+export type DeletedPostPage = z.infer<typeof DeletedPostPageSchema>;
+
+export const AdminBoardListResponseSchema = z.union([
+  AdminPostPageSchema,
+  DeletedPostPageSchema,
+]);
+export type AdminBoardListResponse = z.infer<typeof AdminBoardListResponseSchema>;
+
+export const DeletedCommentRowSchema = z.object({
+  id: z.string().uuid(),
+  excerpt: z.string(),
+  post: z.object({
+    number: z.number().int().positive(),
+    title: z.string(),
+    deleted: z.boolean(),
+  }),
+  authorName: z.string().nullable(),
+  deletedAt: z.string(),
+});
+export type DeletedCommentRow = z.infer<typeof DeletedCommentRowSchema>;
+
+export const VoterSchema = z.object({
+  name: z.string().nullable(),
+  image: z.string().nullable(),
+  deleted: z.boolean(),
+  votedAt: z.string(),
+});
+export type Voter = z.infer<typeof VoterSchema>;
+
+export const VoterPageSchema = z.object({
+  total: z.number().int().nonnegative(),
+  voters: z.array(VoterSchema),
+  nextCursor: z.string().nullable(),
+});
+export type VoterPage = z.infer<typeof VoterPageSchema>;
 
 export const PublicBoardPageSchema = z.object({
   posts: z.array(PublicPostRowSchema),
@@ -284,4 +356,20 @@ export const VoteResultSchema = z.object({
   voteCount: z.number().int(),
 });
 export type VoteResult = z.infer<typeof VoteResultSchema>;
+
+export const AdminPostDetailSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("post"),
+    post: PublicPostDetailSchema,
+    deleted: z.boolean(),
+    timeline: z.array(TimelineItemSchema),
+    viewer: PostViewerSchema,
+  }),
+  z.object({
+    kind: z.literal("redirect"),
+    number: z.number().int().positive(),
+  }),
+]);
+export type AdminPostDetail = z.infer<typeof AdminPostDetailSchema>;
+
 

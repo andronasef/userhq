@@ -16,6 +16,7 @@ import {
 import { StatusChangeDialog } from "@/components/post/status-change-dialog";
 import { PostFormDialog } from "@/components/board/post-form-dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { VotersDialog } from "@/components/post/voters-dialog";
 import { apiFetch } from "@/lib/api-client";
 import { portalHref } from "@/lib/tenant";
 
@@ -27,6 +28,8 @@ export interface PostActionsMenuProps {
   categories?: { id: string; name: string }[];
   adminView: boolean;
   viewer: PostViewer;
+  variant?: "portal" | "dashboard";
+  triggerIconOnly?: boolean;
 }
 
 export function PostActionsMenu({
@@ -37,11 +40,14 @@ export function PostActionsMenu({
   categories = [],
   adminView,
   viewer,
+  variant = "portal",
+  triggerIconOnly = false,
 }: PostActionsMenuProps): React.JSX.Element | null {
   const router = useRouter();
   const [statusDialogOpen, setStatusDialogOpen] = React.useState(false);
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [votersDialogOpen, setVotersDialogOpen] = React.useState(false);
 
   const handleDelete = async () => {
     await apiFetch(
@@ -49,7 +55,11 @@ export function PostActionsMenu({
       { method: "DELETE" }
     );
     toast.success("Post deleted");
-    router.push(portalHref(ws, product));
+    if (variant === "dashboard") {
+      router.push(`/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/board`);
+    } else {
+      router.push(portalHref(ws, product));
+    }
   };
 
   if (!adminView && !viewer.isAuthor) {
@@ -65,20 +75,41 @@ export function PostActionsMenu({
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-foreground h-8 px-2 flex items-center gap-1.5"
+              size={triggerIconOnly ? "icon" : "sm"}
+              className={
+                triggerIconOnly
+                  ? "size-8 text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground h-8 px-2 flex items-center gap-1.5"
+              }
+              aria-label={triggerIconOnly ? "Admin actions" : undefined}
             >
               <Ellipsis className="size-4" aria-hidden="true" />
-              <span>Admin</span>
+              {!triggerIconOnly && <span>Admin</span>}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onSelect={() => setEditDialogOpen(true)}>
               Edit post
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => setStatusDialogOpen(true)}>
-              Change status
+            {variant !== "dashboard" && (
+              <DropdownMenuItem onSelect={() => setStatusDialogOpen(true)}>
+                Change status
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onSelect={() => setVotersDialogOpen(true)}>
+              View voters
             </DropdownMenuItem>
+            {variant === "dashboard" && (
+              <DropdownMenuItem asChild>
+                <a
+                  href={`${portalHref(ws, product)}/p/${post.number}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View on portal
+                </a>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onSelect={() => setDeleteDialogOpen(true)}
@@ -174,6 +205,15 @@ export function PostActionsMenu({
         confirmLabel="Delete post"
         pendingLabel="Deleting…"
         onConfirm={handleDelete}
+      />
+
+      <VotersDialog
+        open={votersDialogOpen}
+        onOpenChange={setVotersDialogOpen}
+        ws={ws}
+        product={product}
+        postNumber={post.number}
+        voteCount={post.voteCount}
       />
     </>
   );

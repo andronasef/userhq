@@ -607,95 +607,12 @@ export class PostsService {
       };
     }
 
-    const commentRows = await this.db
-      .select({
-        id: comments.id,
-        postId: comments.postId,
-        parentId: comments.parentId,
-        authorId: comments.authorId,
-        isAdmin: comments.isAdmin,
-        body: comments.body,
-        version: comments.version,
-        editedAt: comments.editedAt,
-        deletedAt: comments.deletedAt,
-        createdAt: comments.createdAt,
-        authorName: user.name,
-        authorImage: user.image,
-        authorDeletedAt: user.deletedAt,
-      })
-      .from(comments)
-      .leftJoin(user, eq(comments.authorId, user.id))
-      .where(eq(comments.postId, row.id))
-      .orderBy(asc(comments.createdAt), asc(comments.id));
-
-    const commentTimeline = this.commentsService.shapeTimeline(commentRows, {
-      userId: viewerId,
-      isAdmin: viewer.isAdmin,
-    });
-
-    const activityRows = await this.db
-      .select({
-        id: postActivity.id,
-        statusName: postActivity.statusName,
-        statusColor: postActivity.statusColor,
-        note: postActivity.note,
-        createdAt: postActivity.createdAt,
-        actorName: user.name,
-        actorImage: user.image,
-        actorDeletedAt: user.deletedAt,
-      })
-      .from(postActivity)
-      .leftJoin(user, eq(postActivity.actorId, user.id))
-      .where(eq(postActivity.postId, row.id))
-      .orderBy(asc(postActivity.createdAt), asc(postActivity.id));
-
-    const activityItems: { item: TimelineItem; createdAt: Date; id: string }[] =
-      activityRows.map((r) => ({
-        item: {
-          kind: "activity",
-          activity: {
-            id: r.id,
-            actor: r.actorDeletedAt
-              ? { name: null, image: null, isAdmin: false, deleted: true }
-              : {
-                  name: r.actorName ?? null,
-                  image: r.actorImage ?? null,
-                  isAdmin: true,
-                  deleted: false,
-                },
-            statusName: r.statusName,
-            statusColor: r.statusColor,
-            note: r.note,
-            createdAt: r.createdAt.toISOString(),
-          },
-        },
-        createdAt: r.createdAt,
-        id: r.id,
-      }));
-
-    const commentItems: { item: TimelineItem; createdAt: Date; id: string }[] =
-      commentTimeline.map((item) => {
-        const id =
-          item.kind === "comment"
-            ? item.comment.id
-            : item.kind === "stub"
-              ? item.id
-              : item.activity.id;
-        const matchingRow = commentRows.find((r) => r.id === id);
-        return {
-          item,
-          createdAt: matchingRow ? matchingRow.createdAt : new Date(0),
-          id,
-        };
-      });
-
-    const combinedTimeline = [...commentItems, ...activityItems].sort((a, b) => {
-      const timeDiff = a.createdAt.getTime() - b.createdAt.getTime();
-      if (timeDiff !== 0) return timeDiff;
-      return a.id.localeCompare(b.id);
-    });
-
-    const timeline = combinedTimeline.map((c) => c.item);
+    const timeline = await loadTimeline(
+      this.db,
+      row.id,
+      { userId: viewerId, isAdmin: viewer.isAdmin },
+      this.commentsService
+    );
 
     return {
       kind: "post",
@@ -725,3 +642,102 @@ export class PostsService {
     };
   }
 }
+
+export async function loadTimeline(
+  db: Db,
+  postId: string,
+  viewer: { userId: string | null; isAdmin: boolean },
+  commentsService?: CommentsService
+): Promise<TimelineItem[]> {
+  const service = commentsService ?? new CommentsService(db);
+  const commentRows = await db
+    .select({
+      id: comments.id,
+      postId: comments.postId,
+      parentId: comments.parentId,
+      authorId: comments.authorId,
+      isAdmin: comments.isAdmin,
+      body: comments.body,
+      version: comments.version,
+      editedAt: comments.editedAt,
+      deletedAt: comments.deletedAt,
+      createdAt: comments.createdAt,
+      authorName: user.name,
+      authorImage: user.image,
+      authorDeletedAt: user.deletedAt,
+    })
+    .from(comments)
+    .leftJoin(user, eq(comments.authorId, user.id))
+    .where(eq(comments.postId, postId))
+    .orderBy(asc(comments.createdAt), asc(comments.id));
+
+  const commentTimeline = service.shapeTimeline(commentRows, {
+    userId: viewer.userId,
+    isAdmin: viewer.isAdmin,
+  });
+
+  const activityRows = await db
+    .select({
+      id: postActivity.id,
+      statusName: postActivity.statusName,
+      statusColor: postActivity.statusColor,
+      note: postActivity.note,
+      createdAt: postActivity.createdAt,
+      actorName: user.name,
+      actorImage: user.image,
+      actorDeletedAt: user.deletedAt,
+    })
+    .from(postActivity)
+    .leftJoin(user, eq(postActivity.actorId, user.id))
+    .where(eq(postActivity.postId, postId))
+    .orderBy(asc(postActivity.createdAt), asc(postActivity.id));
+
+  const activityItems: { item: TimelineItem; createdAt: Date; id: string }[] =
+    activityRows.map((r) => ({
+      item: {
+        kind: "activity",
+        activity: {
+          id: r.id,
+          actor: r.actorDeletedAt
+            ? { name: null, image: null, isAdmin: false, deleted: true }
+            : {
+                name: r.actorName ?? null,
+                image: r.actorImage ?? null,
+                isAdmin: true,
+                deleted: false,
+              },
+          statusName: r.statusName,
+          statusColor: r.statusColor,
+          note: r.note,
+          createdAt: r.createdAt.toISOString(),
+        },
+      },
+      createdAt: r.createdAt,
+      id: r.id,
+    }));
+
+  const commentItems: { item: TimelineItem; createdAt: Date; id: string }[] =
+    commentTimeline.map((item) => {
+      const id =
+        item.kind === "comment"
+          ? item.comment.id
+          : item.kind === "stub"
+            ? item.id
+            : item.activity.id;
+      const matchingRow = commentRows.find((r) => r.id === id);
+      return {
+        item,
+        createdAt: matchingRow ? matchingRow.createdAt : new Date(0),
+        id,
+      };
+    });
+
+  const combinedTimeline = [...commentItems, ...activityItems].sort((a, b) => {
+    const timeDiff = a.createdAt.getTime() - b.createdAt.getTime();
+    if (timeDiff !== 0) return timeDiff;
+    return a.id.localeCompare(b.id);
+  });
+
+  return combinedTimeline.map((c) => c.item);
+}
+

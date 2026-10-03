@@ -12,6 +12,7 @@ import {
   CircleDot,
   Tags,
   Settings,
+  MessagesSquare,
 } from "lucide-react";
 import type { ProductSummary } from "@userhq/types";
 import { cn } from "../../lib/utils";
@@ -100,12 +101,15 @@ export function DashboardSidebar({
         ) : (
           <div className="flex flex-col gap-1">
             {products.map((product) => {
+              const boardHref = `/dashboard/${ws}/${product.slug}/board`;
               const categoriesHref = `/dashboard/${ws}/${product.slug}/categories`;
               const statusesHref = `/dashboard/${ws}/${product.slug}/statuses`;
               const settingsHref = `/dashboard/${ws}/${product.slug}/settings`;
               const isProductActive = pathname.startsWith(
                 `/dashboard/${ws}/${product.slug}`
               );
+              const isBoardActive =
+                pathname === boardHref || pathname.startsWith(`${boardHref}/`);
               const isCategoriesActive = pathname === categoriesHref;
               const isStatusesActive = pathname === statusesHref;
               const isSettingsActive = pathname === settingsHref;
@@ -113,7 +117,7 @@ export function DashboardSidebar({
               return (
                 <div key={product.slug} className="flex flex-col gap-0.5">
                   <Link
-                    href={statusesHref}
+                    href={boardHref}
                     className={cn(
                       "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-background",
                       isProductActive && "bg-background font-semibold"
@@ -135,6 +139,21 @@ export function DashboardSidebar({
 
                   {isProductActive && (
                     <div className="flex flex-col gap-0.5 pl-7">
+                      <Link
+                        href={boardHref}
+                        className={cn(
+                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-background/50",
+                          isBoardActive && "text-foreground font-semibold bg-background/50"
+                        )}
+                        aria-current={isBoardActive ? "page" : undefined}
+                      >
+                        <MessagesSquare
+                          className="size-3.5 shrink-0"
+                          aria-hidden="true"
+                        />
+                        <span className="truncate">Board</span>
+                      </Link>
+
                       <Link
                         href={categoriesHref}
                         className={cn(

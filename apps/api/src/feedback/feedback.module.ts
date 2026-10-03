@@ -4,6 +4,7 @@ import { PortalPostsController } from "./portal-posts.controller.js";
 import { PortalVotesController } from "./portal-votes.controller.js";
 import { PortalCommentsController } from "./portal-comments.controller.js";
 import { AdminPostsController } from "./admin-posts.controller.js";
+import { AdminCommentsController } from "./admin-comments.controller.js";
 import { PostsService } from "./posts.service.js";
 import { VotesService } from "./votes.service.js";
 import { CommentsService } from "./comments.service.js";
@@ -18,6 +19,7 @@ import { TenantGuard } from "../tenancy/tenant.guard.js";
     PortalVotesController,
     PortalCommentsController,
     AdminPostsController,
+    AdminCommentsController,
     CategoriesController,
   ],
   providers: [

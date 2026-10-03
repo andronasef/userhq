@@ -3,14 +3,14 @@ import { CircleAlert, CircleCheck } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 export interface AlertProps {
-  variant: "destructive" | "success";
+  variant?: "destructive" | "success" | "neutral";
   title?: string;
   className?: string;
   children: React.ReactNode;
 }
 
 export function Alert({
-  variant,
+  variant = "neutral",
   title,
   className,
   children,

@@ -8,5 +8,5 @@ export default async function ProductIndexPage({
   params,
 }: ProductIndexPageProps): Promise<never> {
   const { ws, product } = await params;
-  redirect(`/dashboard/${ws}/${product}/statuses`);
+  redirect(`/dashboard/${ws}/${product}/board`);
 }

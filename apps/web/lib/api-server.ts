@@ -35,6 +35,14 @@ import {
   type PublicBoardPage,
   PublicPostPageSchema,
   type PublicPostPage,
+  AdminPostPageSchema,
+  type AdminPostPage,
+  DeletedPostPageSchema,
+  type DeletedPostPage,
+  DeletedCommentRowSchema,
+  type DeletedCommentRow,
+  AdminPostDetailSchema,
+  type AdminPostDetail,
   ANONYMOUS_ME,
 } from "@userhq/types";
 
@@ -292,4 +300,71 @@ export async function publicOrigin(): Promise<string> {
   const host = await publicHost();
   return `${proto}://${host}`;
 }
+
+export const getAdminPosts = cache(
+  (
+    ws: string,
+    product: string,
+    search?: {
+      q?: string;
+      sort?: string;
+      category?: string;
+      status?: string;
+      cursor?: string;
+    }
+  ): Promise<ApiReadResult<AdminPostPage>> => {
+    const params = new URLSearchParams();
+    if (search?.q) params.set("q", search.q);
+    if (search?.sort) params.set("sort", search.sort);
+    if (search?.category) params.set("category", search.category);
+    if (search?.status) params.set("status", search.status);
+    if (search?.cursor) params.set("cursor", search.cursor);
+    const qs = params.toString() ? `?${params.toString()}` : "";
+    return apiRead(
+      `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/posts${qs}`,
+      AdminPostPageSchema
+    );
+  }
+);
+
+export const getDeletedPosts = cache(
+  (
+    ws: string,
+    product: string,
+    cursor?: string
+  ): Promise<ApiReadResult<DeletedPostPage>> => {
+    const params = new URLSearchParams({ view: "deleted" });
+    if (cursor) params.set("cursor", cursor);
+    return apiRead(
+      `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/posts?${params.toString()}`,
+      DeletedPostPageSchema
+    );
+  }
+);
+
+export const getDeletedComments = cache(
+  (
+    ws: string,
+    product: string
+  ): Promise<ApiReadResult<DeletedCommentRow[]>> => {
+    return apiRead(
+      `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/comments/deleted`,
+      z.array(DeletedCommentRowSchema)
+    );
+  }
+);
+
+export const getAdminPost = cache(
+  (
+    ws: string,
+    product: string,
+    number: number | string
+  ): Promise<ApiReadResult<AdminPostDetail>> => {
+    return apiRead(
+      `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/posts/${encodeURIComponent(String(number))}`,
+      AdminPostDetailSchema
+    );
+  }
+);
+
 

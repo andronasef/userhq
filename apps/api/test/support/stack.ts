@@ -2,6 +2,7 @@ import { testUtils, type TestHelpers } from "better-auth/plugins";
 import { createDb, type Db, schema } from "@userhq/db";
 import { eq, inArray } from "drizzle-orm";
 import type pg from "pg";
+import { randomBytes, createHash } from "node:crypto";
 import { createAuth, type Auth } from "../../src/auth/auth.js";
 import type { Env } from "../../src/env.js";
 import { signedInCookie } from "./auth-helpers.js";
@@ -107,6 +108,7 @@ export async function apiCall(
     cookie?: string;
     body?: unknown;
     headers?: Record<string, string>;
+    redirect?: RequestRedirect;
   }
 ): Promise<Response> {
   const url = `${baseUrl}${path}`;
@@ -131,6 +133,7 @@ export async function apiCall(
     method: opts?.method ?? (opts?.body ? "POST" : "GET"),
     headers,
     body,
+    redirect: opts?.redirect,
   });
 }
 
@@ -165,4 +168,23 @@ export async function cleanupWorkspaces(
   await stack.db
     .delete(schema.workspaces)
     .where(inArray(schema.workspaces.id, ids));
+}
+
+export async function grantPlatformInvite(
+  stack: StackContext,
+  email: string
+): Promise<{ id: string; token: string }> {
+  const token = randomBytes(32).toString("base64url");
+  const tokenHash = createHash("sha256").update(token).digest("hex");
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const [row] = await stack.db
+    .insert(schema.invites)
+    .values({
+      kind: "platform",
+      email: email.trim().toLowerCase(),
+      tokenHash,
+      expiresAt,
+    })
+    .returning({ id: schema.invites.id });
+  return { id: row.id, token };
 }

@@ -17,13 +17,16 @@ import { ENV, type Env } from "../env.js";
 import { Public, CurrentUser } from "./decorators.js";
 import { isPlatformOwner } from "./platform-owner.js";
 
+import { InvitesService } from "../invites/invites.service.js";
+
 @Controller("me")
 @Public()
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class MeController {
   constructor(
     @Inject(ENV) private readonly env: Env,
-    @Inject(DB) private readonly db: Db
+    @Inject(DB) private readonly db: Db,
+    private readonly invitesService: InvitesService
   ) {}
 
   @Get()
@@ -34,6 +37,8 @@ export class MeController {
     }
 
     const owner = isPlatformOwner(user, this.env.PLATFORM_OWNER_EMAIL);
+    const hasInvite = await this.invitesService.hasPendingPlatformInvite(user);
+    const canCreate = owner || hasInvite;
 
     const rows = await this.db
       .select({
@@ -62,7 +67,7 @@ export class MeController {
         image: user.image ?? null,
       },
       isPlatformOwner: owner,
-      canCreateWorkspace: owner,
+      canCreateWorkspace: canCreate,
       workspaces: userWorkspaces,
     });
   }

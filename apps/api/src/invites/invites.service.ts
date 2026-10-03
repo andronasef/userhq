@@ -1,5 +1,5 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { DB, type Db, invites, user, workspaces } from "@userhq/db";
+import { DB, type Db, invites, user, workspaces, workspaceMembers } from "@userhq/db";
 import { ENV, type Env } from "../env.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { randomBytes, createHash } from "node:crypto";
@@ -9,8 +9,20 @@ import {
   type InviteRow,
   type InviteCreated,
   type InviteState,
+  type InviteLookup,
+  InviteLookupSchema,
 } from "@userhq/types";
 import { z } from "zod";
+
+export function maskEmail(email: string): string {
+  const atIdx = email.indexOf("@");
+  if (atIdx <= 0) {
+    return "•••@unknown";
+  }
+  const local = email.slice(0, atIdx);
+  const domain = email.slice(atIdx + 1);
+  return `${local[0]}•••@${domain}`;
+}
 
 export function hashInviteToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
@@ -188,5 +200,151 @@ export class InvitesService {
     if (res.length === 0) {
       throw new ApiException("not_found", 404, "Not found.");
     }
+  }
+
+  maskEmail(email: string): string {
+    return maskEmail(email);
+  }
+
+  async lookup(
+    token: string,
+    user: { id: string; email: string; emailVerified: boolean }
+  ): Promise<InviteLookup> {
+    if (!/^[A-Za-z0-9_-]{43}$/.test(token)) {
+      throw new ApiException("not_found", 404, "This invite link isn't valid.");
+    }
+
+    const tokenHash = hashInviteToken(token);
+
+    const [row] = await this.db
+      .select({
+        id: invites.id,
+        kind: invites.kind,
+        workspaceId: invites.workspaceId,
+        email: invites.email,
+        createdAt: invites.createdAt,
+        expiresAt: invites.expiresAt,
+        usedAt: invites.usedAt,
+        revokedAt: invites.revokedAt,
+        workspaceName: workspaces.name,
+        workspaceSlug: workspaces.slug,
+        workspaceSuspendedAt: workspaces.suspendedAt,
+      })
+      .from(invites)
+      .leftJoin(workspaces, eq(invites.workspaceId, workspaces.id))
+      .where(eq(invites.tokenHash, tokenHash))
+      .limit(1);
+
+    if (!row) {
+      throw new ApiException("not_found", 404, "This invite link isn't valid.");
+    }
+
+    const state = inviteState(row);
+    const emailMatches =
+      user.emailVerified === true &&
+      user.email.trim().toLowerCase() === row.email.toLowerCase();
+
+    const masked = emailMatches ? null : maskEmail(row.email);
+
+    let workspaceName: string | null = null;
+    let workspaceSlug: string | null = null;
+    let workspaceSuspended = false;
+    let alreadyMember = false;
+
+    if (emailMatches && row.kind === "workspace") {
+      workspaceName = row.workspaceName ?? null;
+      workspaceSlug = row.workspaceSlug ?? null;
+      workspaceSuspended = row.workspaceSuspendedAt !== null;
+      if (row.workspaceId) {
+        const [member] = await this.db
+          .select({ userId: workspaceMembers.userId })
+          .from(workspaceMembers)
+          .where(
+            and(
+              eq(workspaceMembers.workspaceId, row.workspaceId),
+              eq(workspaceMembers.userId, user.id)
+            )
+          )
+          .limit(1);
+        alreadyMember = !!member;
+      }
+    }
+
+    return InviteLookupSchema.parse({
+      kind: row.kind,
+      state,
+      emailMatches,
+      maskedEmail: masked,
+      workspaceName,
+      workspaceSlug,
+      alreadyMember,
+      workspaceSuspended,
+    });
+  }
+
+  async hasPendingPlatformInvite(
+    user: { email: string; emailVerified: boolean } | null | undefined
+  ): Promise<boolean> {
+    if (!user || user.emailVerified !== true) {
+      return false;
+    }
+    const email = user.email.trim().toLowerCase();
+    const [row] = await this.db
+      .select({ id: invites.id })
+      .from(invites)
+      .where(
+        and(
+          eq(invites.kind, "platform"),
+          eq(invites.email, email),
+          isNull(invites.usedAt),
+          isNull(invites.revokedAt),
+          sql`${invites.expiresAt} > now()`
+        )
+      )
+      .limit(1);
+    return !!row;
+  }
+
+  async claimPlatformInvite(
+    tx: any,
+    user: { id: string; email: string; emailVerified: boolean },
+    workspaceId: string
+  ): Promise<string> {
+    if (user.emailVerified !== true) {
+      throw new ApiException(
+        "not_allowed",
+        403,
+        "Workspace creation is invite-only."
+      );
+    }
+
+    const email = user.email.trim().toLowerCase();
+    const res = await tx.execute(sql`
+      UPDATE invites
+      SET used_at = now(), used_by_id = ${user.id}, workspace_id = ${workspaceId}
+      WHERE id = (
+        SELECT id FROM invites
+        WHERE kind = 'platform'
+          AND email = ${email}
+          AND used_at IS NULL
+          AND revoked_at IS NULL
+          AND expires_at > now()
+        ORDER BY created_at
+        LIMIT 1
+        FOR UPDATE SKIP LOCKED
+      )
+      RETURNING id
+    `);
+
+    const rows = (res as any).rows ?? res;
+    if (!rows || rows.length === 0) {
+      throw new ApiException(
+        "not_allowed",
+        403,
+        "Workspace creation is invite-only."
+      );
+    }
+
+    return rows[0].id;
   }
 }

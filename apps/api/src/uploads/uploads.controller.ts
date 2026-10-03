@@ -98,20 +98,26 @@ export class UploadsController {
       new Date()
     );
 
+    let uploadId: string;
     try {
-      await this.db.insert(uploads).values({
-        storageKey: key,
-        uploaderId: user.id,
-        bytes,
-        width,
-        height,
-      });
+      const [inserted] = await this.db
+        .insert(uploads)
+        .values({
+          storageKey: key,
+          uploaderId: user.id,
+          bytes,
+          width,
+          height,
+        })
+        .returning({ id: uploads.id });
+      uploadId = inserted.id;
     } catch (err) {
       await removeUpload(absPath);
       throw err;
     }
 
     return UploadResponseSchema.parse({
+      id: uploadId,
       url,
       width,
       height,

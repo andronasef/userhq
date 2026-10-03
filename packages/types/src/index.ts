@@ -47,6 +47,7 @@ export const UPLOAD_MAX_INPUT_PIXELS = 40_000_000; // D-07 decompression-bomb gu
 export const UPLOAD_URL_PATTERN = /^\/uploads\/[a-z0-9/-]+\.webp$/;
 
 export const UploadResponseSchema = z.object({
+  id: z.uuid(),
   url: z.string().regex(UPLOAD_URL_PATTERN),
   width: z.number().int().positive(),
   height: z.number().int().positive(),

@@ -11,6 +11,8 @@ import {
   type Workspace,
   InviteRowSchema,
   type InviteRow,
+  InviteLookupSchema,
+  type InviteLookup,
   ANONYMOUS_ME,
 } from "@userhq/types";
 
@@ -118,6 +120,10 @@ export const getWorkspace = cache(
 
 export const getPlatformInvites = cache((): Promise<ApiReadResult<InviteRow[]>> => {
   return apiRead("/api/v1/platform/invites", z.array(InviteRowSchema));
+});
+
+export const getInvite = cache((token: string): Promise<ApiReadResult<InviteLookup>> => {
+  return apiRead("/api/v1/invites/" + encodeURIComponent(token), InviteLookupSchema);
 });
 
 export async function publicHost(): Promise<string> {

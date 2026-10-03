@@ -11,7 +11,7 @@ import {
   SerializeOptions,
 } from "@nestjs/common";
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import {
   DB,
   type Db,
@@ -33,13 +33,15 @@ import { isPlatformOwner } from "../auth/platform-owner.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { TenantGuard, type Tenant } from "../tenancy/tenant.guard.js";
 import { CurrentTenant } from "../tenancy/current-tenant.decorator.js";
+import { InvitesService } from "../invites/invites.service.js";
 
 @Controller("workspaces")
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class WorkspacesController {
   constructor(
     @Inject(ENV) private readonly env: Env,
-    @Inject(DB) private readonly db: Db
+    @Inject(DB) private readonly db: Db,
+    private readonly invitesService: InvitesService
   ) {}
 
   @Post()
@@ -49,12 +51,34 @@ export class WorkspacesController {
     @Body({ schema: CreateWorkspaceInputSchema }) input: CreateWorkspaceInput,
     @CurrentUser() user: any
   ): Promise<WorkspaceCreated> {
-    if (!isPlatformOwner(user, this.env.PLATFORM_OWNER_EMAIL)) {
+    const owner = isPlatformOwner(user, this.env.PLATFORM_OWNER_EMAIL);
+    if (!owner && user.emailVerified !== true) {
       throw new ApiException(
         "not_allowed",
         403,
         "Workspace creation is invite-only."
       );
+    }
+
+    if (input.logoUploadId) {
+      const [upload] = await this.db
+        .select({ id: uploads.id })
+        .from(uploads)
+        .where(
+          and(
+            eq(uploads.id, input.logoUploadId),
+            eq(uploads.uploaderId, user.id)
+          )
+        )
+        .limit(1);
+
+      if (!upload) {
+        throw new ApiException(
+          "validation_failed",
+          400,
+          "That logo can't be used."
+        );
+      }
     }
 
     await this.db.transaction(async (tx) => {
@@ -63,6 +87,7 @@ export class WorkspacesController {
         .values({
           slug: input.slug,
           name: input.name,
+          logoUploadId: input.logoUploadId ?? null,
         })
         .onConflictDoNothing({ target: workspaces.slug })
         .returning({ id: workspaces.id });
@@ -76,6 +101,10 @@ export class WorkspacesController {
         userId: user.id,
         role: "owner",
       });
+
+      if (!owner) {
+        await this.invitesService.claimPlatformInvite(tx, user, inserted.id);
+      }
     });
 
     return WorkspaceCreatedSchema.parse({ slug: input.slug });

@@ -14,6 +14,7 @@ import {
 import { Field } from "../../../components/ui/field";
 import { Input } from "../../../components/ui/input";
 import { SlugInput } from "../../../components/slug-input";
+import { LogoField, type LogoValue } from "../../../components/logo-field";
 import { Button } from "../../../components/ui/button";
 import { Alert } from "../../../components/ui/alert";
 import { apiFetch, ApiClientError } from "../../../lib/api-client";
@@ -28,6 +29,8 @@ export interface CreateWorkspaceFormProps {
 function CreateWorkspaceFormInner({ host }: CreateWorkspaceFormProps): React.JSX.Element {
   const [slugTouched, setSlugTouched] = React.useState(false);
   const [alertError, setAlertError] = React.useState<string | null>(null);
+  const [logoValue, setLogoValue] = React.useState<LogoValue | null>(null);
+  const [logoUploading, setLogoUploading] = React.useState(false);
 
   const {
     register,
@@ -42,6 +45,7 @@ function CreateWorkspaceFormInner({ host }: CreateWorkspaceFormProps): React.JSX
     defaultValues: {
       name: "",
       slug: "",
+      logoUploadId: null,
     },
   });
 
@@ -121,6 +125,21 @@ function CreateWorkspaceFormInner({ host }: CreateWorkspaceFormProps): React.JSX
           />
         </Field>
 
+        <div className="space-y-2">
+          <label className="text-sm font-semibold leading-none text-foreground">
+            Logo
+          </label>
+          <LogoField
+            value={logoValue}
+            onChange={(v) => {
+              setLogoValue(v);
+              setValue("logoUploadId", v?.id ?? null, { shouldValidate: true });
+            }}
+            onPendingChange={setLogoUploading}
+            name={nameValue || "Workspace"}
+          />
+        </div>
+
         {alertError && (
           <Alert variant="destructive">
             {alertError}
@@ -128,7 +147,10 @@ function CreateWorkspaceFormInner({ host }: CreateWorkspaceFormProps): React.JSX
         )}
 
         <div>
-          <Button type="submit" disabled={mutation.isPending}>
+          <Button
+            type="submit"
+            disabled={mutation.isPending || logoUploading}
+          >
             {mutation.isPending ? (
               <>
                 <LoaderCircle className="size-4 animate-spin" />

@@ -27,6 +27,7 @@ export const NameSchema = z
 export const CreateWorkspaceInputSchema = z.object({
   name: NameSchema,
   slug: workspaceSlugSchema,
+  logoUploadId: z.uuid().nullable().optional(),
 });
 export type CreateWorkspaceInput = z.infer<typeof CreateWorkspaceInputSchema>;
 
@@ -102,6 +103,18 @@ export const InviteRowSchema = z.object({
   workspaceName: z.string().nullable(),
 });
 export type InviteRow = z.infer<typeof InviteRowSchema>;
+
+export const InviteLookupSchema = z.object({
+  kind: z.enum(["platform", "workspace"]),
+  state: InviteStateSchema,
+  emailMatches: z.boolean(),
+  maskedEmail: z.string().nullable(),
+  workspaceName: z.string().nullable(),
+  workspaceSlug: z.string().nullable(),
+  alreadyMember: z.boolean(),
+  workspaceSuspended: z.boolean(),
+});
+export type InviteLookup = z.infer<typeof InviteLookupSchema>;
 
 export const HealthResponseSchema = z.object({
   status: z.literal("ok"),

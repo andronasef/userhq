@@ -75,6 +75,20 @@ const CROSS_TENANT_ROUTES: Record<
   "DELETE /workspaces/:ws/products/:product/statuses/:statusId": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/statuses/${s.b.statusId}?moveTo=${s.b.statusId}`,
   }),
+  "GET /workspaces/:ws/products/:product/categories": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/categories`,
+  }),
+  "POST /workspaces/:ws/products/:product/categories": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/categories`,
+    body: { name: "New Category" },
+  }),
+  "PATCH /workspaces/:ws/products/:product/categories/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/categories/${s.b.categoryId}`,
+    body: { name: "Renamed Category" },
+  }),
+  "DELETE /workspaces/:ws/products/:product/categories/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/categories/${s.b.categoryId}`,
+  }),
 };
 
 describe("Cross-tenant 404 isolation (Plan 02-03)", () => {

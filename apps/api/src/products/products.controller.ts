@@ -17,6 +17,7 @@ import { and, eq, isNull, asc } from "drizzle-orm";
 import {
   DB,
   type Db,
+  categories,
   products,
   statuses,
   uploads,
@@ -102,6 +103,21 @@ export class ProductsController {
           isDefault: s.isDefault,
         }))
       );
+
+      // ponytail: creation order via created_at offset; add a position column if reordering ever ships
+      const now = new Date();
+      await tx.insert(categories).values([
+        {
+          productId: inserted.id,
+          name: "Feature Request",
+          createdAt: now,
+        },
+        {
+          productId: inserted.id,
+          name: "Bug",
+          createdAt: new Date(now.getTime() + 1),
+        },
+      ]);
     });
 
     return ProductCreatedSchema.parse({ slug: input.slug });

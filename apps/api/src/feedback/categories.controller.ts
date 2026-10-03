@@ -103,11 +103,11 @@ export class CategoriesController {
     }
   }
 
-  @Patch(":categoryId")
+  @Patch(":id")
   @SerializeOptions({ schema: CategorySchema })
   async updateCategory(
     @CurrentTenant() tenant: Tenant,
-    @Param("categoryId") categoryIdRaw: string,
+    @Param("id") categoryIdRaw: string,
     @Body({ schema: CategoryInputSchema }) input: CategoryInput
   ): Promise<Category> {
     const parsedId = UuidParamSchema.safeParse(categoryIdRaw);
@@ -166,11 +166,11 @@ export class CategoriesController {
     }
   }
 
-  @Delete(":categoryId")
+  @Delete(":id")
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteCategory(
     @CurrentTenant() tenant: Tenant,
-    @Param("categoryId") categoryIdRaw: string
+    @Param("id") categoryIdRaw: string
   ): Promise<void> {
     const parsedId = UuidParamSchema.safeParse(categoryIdRaw);
     if (!parsedId.success) {

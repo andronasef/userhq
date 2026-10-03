@@ -12,6 +12,7 @@ export interface TenantSeed {
   inviteId?: string;
   productSlug?: string;
   statusId?: string;
+  categoryId?: string;
   postNumber?: number;
 }
 
@@ -159,6 +160,14 @@ export async function seedTenants(
     .set({ nextPostNumber: 2 })
     .where(eq(schema.products.id, prodB.id));
 
+  const [catB] = await testApp.db
+    .insert(schema.categories)
+    .values({
+      productId: prodB.id,
+      name: "Bug",
+    })
+    .returning();
+
   return {
     a: {
       slug: slugA,
@@ -179,6 +188,7 @@ export async function seedTenants(
       productSlug: prodSlugB,
       productId: prodB.id,
       statusId: statusB.id,
+      categoryId: catB.id,
       postNumber: 1,
     },
   };

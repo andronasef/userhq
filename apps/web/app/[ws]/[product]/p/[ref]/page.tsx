@@ -1,9 +1,10 @@
 import * as React from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { getPortalProduct, getPost } from "@/lib/api-server";
-import { parsePostRef, portalHref } from "@/lib/tenant";
+import { getPortalProduct, getPost, publicOrigin } from "@/lib/api-server";
+import { parsePostRef, portalHref, postHref } from "@/lib/tenant";
 import { Button } from "@/components/ui/button";
 import { VoteButton } from "@/components/board/vote-button";
 import { StatusBadge } from "@/components/status-badge";
@@ -13,6 +14,55 @@ import { PlainText } from "@/components/plain-text";
 
 interface PostPageProps {
   params: Promise<{ ws: string; product: string; ref: string }>;
+}
+
+function excerpt(text: string | null | undefined, fallback: string): string {
+  if (!text) return fallback;
+  const trimmed = text.trim();
+  if (trimmed.length <= 160) return trimmed;
+  const cut = trimmed.slice(0, 160);
+  const lastSpace = cut.lastIndexOf(" ");
+  if (lastSpace > 0) {
+    return cut.slice(0, lastSpace);
+  }
+  return cut;
+}
+
+export async function generateMetadata({
+  params,
+}: PostPageProps): Promise<Metadata> {
+  const { ws, product, ref } = await params;
+  const postNumber = parsePostRef(ref);
+  if (!postNumber) return {};
+
+  const [productResult, postResult] = await Promise.all([
+    getPortalProduct(ws, product),
+    getPost(ws, product, postNumber),
+  ]);
+
+  if (!productResult.ok || !postResult.ok) return {};
+  if (postResult.data.kind === "redirect") return {};
+
+  const p = productResult.data.product;
+  const post = postResult.data.post;
+  const origin = await publicOrigin();
+  const canonicalPath = postHref(ws, product, post.number, post.slug);
+  const fallbackDesc =
+    p.tagline ?? `Share ideas for ${p.name} and vote on the ones you want most.`;
+
+  const metaDesc = excerpt(post.description, fallbackDesc);
+
+  return {
+    title: `${post.title} · ${p.name}`,
+    description: metaDesc,
+    openGraph: {
+      title: post.title,
+      description: metaDesc,
+    },
+    alternates: {
+      canonical: `${origin}${canonicalPath}`,
+    },
+  };
 }
 
 export default async function PostPage({
@@ -34,10 +84,17 @@ export default async function PostPage({
   }
 
   if (postResult.data.kind === "redirect") {
-    notFound();
+    permanentRedirect(
+      postHref(ws, product, postResult.data.number, postResult.data.slug)
+    );
   }
 
   const { post, viewer } = postResult.data;
+  const canonicalPath = postHref(ws, product, post.number, post.slug);
+  const currentPath = `/${ws}/${product}/p/${ref}`;
+  if (currentPath !== canonicalPath) {
+    permanentRedirect(canonicalPath);
+  }
 
   return (
     <div className="mx-auto max-w-3xl flex flex-col gap-8">

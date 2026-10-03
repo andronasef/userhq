@@ -2,7 +2,7 @@ import { eq, and, isNull } from "drizzle-orm";
 import { type Db, workspaceMembers, workspaces } from "@userhq/db";
 
 export async function isWorkspaceAdmin(
-  db: Db,
+  db: Db | any,
   userId: string,
   workspaceId: string
 ): Promise<boolean> {

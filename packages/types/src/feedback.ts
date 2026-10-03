@@ -165,11 +165,60 @@ export const PublicPostDetailSchema = z.object({
 });
 export type PublicPostDetail = z.infer<typeof PublicPostDetailSchema>;
 
+export const CommentBodySchema = z
+  .string({ message: "comment_required" })
+  .transform((val) => val.trim())
+  .pipe(
+    z
+      .string()
+      .min(1, { message: "comment_required" })
+      .max(COMMENT_BODY_MAX, { message: "comment_too_long" })
+  );
+
+export const CreateCommentInputSchema = z.object({
+  body: CommentBodySchema,
+  parentId: z.string().uuid().optional(),
+});
+export type CreateCommentInput = z.infer<typeof CreateCommentInputSchema>;
+
+export const UpdateCommentInputSchema = z.object({
+  body: CommentBodySchema,
+  version: z.number().int(),
+});
+export type UpdateCommentInput = z.infer<typeof UpdateCommentInputSchema>;
+
+export const PublicCommentSchema = z.object({
+  id: z.string().uuid(),
+  author: PublicAuthorSchema,
+  body: z.string(),
+  createdAt: z.string(),
+  editedAt: z.string().nullable(),
+  version: z.number().int(),
+  canEdit: z.boolean(),
+  canDelete: z.boolean(),
+});
+export type PublicComment = z.infer<typeof PublicCommentSchema>;
+
+export const TimelineItemSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("comment"),
+    comment: PublicCommentSchema,
+    replies: z.array(PublicCommentSchema),
+  }),
+  z.object({
+    kind: z.literal("stub"),
+    id: z.string().uuid(),
+    replies: z.array(PublicCommentSchema),
+  }),
+]);
+export type TimelineItem = z.infer<typeof TimelineItemSchema>;
+
 export const PublicPostPageSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("post"),
     post: PublicPostDetailSchema,
     viewer: PostViewerSchema,
+    timeline: z.array(TimelineItemSchema),
   }),
   z.object({
     kind: z.literal("redirect"),
@@ -184,3 +233,4 @@ export const VoteResultSchema = z.object({
   voteCount: z.number().int(),
 });
 export type VoteResult = z.infer<typeof VoteResultSchema>;
+

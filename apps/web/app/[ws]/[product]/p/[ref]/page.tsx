@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { AuthorLine } from "@/components/post/author-line";
 import { PlainText } from "@/components/plain-text";
+import { PostTimeline } from "@/components/post/post-timeline";
 
 interface PostPageProps {
   params: Promise<{ ws: string; product: string; ref: string }>;
@@ -89,7 +90,7 @@ export default async function PostPage({
     );
   }
 
-  const { post, viewer } = postResult.data;
+  const { post, viewer, timeline } = postResult.data;
   const canonicalPath = postHref(ws, product, post.number, post.slug);
   const currentPath = `/${ws}/${product}/p/${ref}`;
   if (currentPath !== canonicalPath) {
@@ -149,6 +150,23 @@ export default async function PostPage({
           <PlainText text={post.description} />
         </div>
       )}
+
+      <section
+        aria-labelledby="comments-heading"
+        className="border-t border-border pt-8 flex flex-col gap-6"
+      >
+        <h2 id="comments-heading" className="text-xl font-semibold text-foreground">
+          Comments
+        </h2>
+        <PostTimeline
+          ws={ws}
+          product={product}
+          postNumber={post.number}
+          postSlug={post.slug}
+          initialTimeline={timeline}
+          signedIn={viewer.signedIn}
+        />
+      </section>
     </div>
   );
 }

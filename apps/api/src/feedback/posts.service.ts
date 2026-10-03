@@ -1,5 +1,5 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { eq, and, isNull, sql, notInArray, desc } from "drizzle-orm";
+import { eq, and, isNull, sql, notInArray, desc, asc } from "drizzle-orm";
 import {
   DB,
   type Db,
@@ -27,6 +27,7 @@ import { ApiException } from "../common/api-error.filter.js";
 import { isWorkspaceAdmin } from "./membership.js";
 import { prefixTsQuery } from "./search.js";
 import { encodeBoardCursor, decodeBoardCursor } from "./cursor.js";
+import { CommentsService } from "./comments.service.js";
 
 export function engagedSql(postsTable: typeof posts = posts) {
   return sql<boolean>`(
@@ -73,7 +74,10 @@ export async function assertCategory(
 
 @Injectable()
 export class PostsService {
-  constructor(@Inject(DB) private readonly db: Db) {}
+  constructor(
+    @Inject(DB) private readonly db: Db,
+    private readonly commentsService: CommentsService
+  ) {}
 
   async createPost(
     portal: { workspaceId: string; productId: string },
@@ -404,6 +408,32 @@ export class PostsService {
       };
     }
 
+    const commentRows = await this.db
+      .select({
+        id: comments.id,
+        postId: comments.postId,
+        parentId: comments.parentId,
+        authorId: comments.authorId,
+        isAdmin: comments.isAdmin,
+        body: comments.body,
+        version: comments.version,
+        editedAt: comments.editedAt,
+        deletedAt: comments.deletedAt,
+        createdAt: comments.createdAt,
+        authorName: user.name,
+        authorImage: user.image,
+        authorDeletedAt: user.deletedAt,
+      })
+      .from(comments)
+      .leftJoin(user, eq(comments.authorId, user.id))
+      .where(eq(comments.postId, row.id))
+      .orderBy(asc(comments.createdAt), asc(comments.id));
+
+    const timeline = this.commentsService.shapeTimeline(commentRows, {
+      userId: viewerId,
+      isAdmin: viewer.isAdmin,
+    });
+
     return {
       kind: "post",
       post: {
@@ -428,6 +458,7 @@ export class PostsService {
         author,
       },
       viewer,
+      timeline,
     };
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { eq, and, isNull, sql, notInArray, desc, asc } from "drizzle-orm";
+import { eq, and, isNull, sql, notInArray, desc, asc, getTableName } from "drizzle-orm";
 import {
   DB,
   type Db,
@@ -15,6 +15,7 @@ import {
 } from "@userhq/db";
 import {
   type CreatePostInput,
+  type UpdatePostInput,
   type PostCreated,
   type BoardQuery,
   type PublicBoardPage,
@@ -32,9 +33,10 @@ import { encodeBoardCursor, decodeBoardCursor } from "./cursor.js";
 import { CommentsService } from "./comments.service.js";
 
 export function engagedSql(postsTable: typeof posts = posts) {
+  const tableName = getTableName(postsTable);
   return sql<boolean>`(
-    EXISTS (SELECT 1 FROM ${votes} v WHERE v.post_id = ${postsTable.id} AND v.user_id <> ${postsTable.authorId})
-    OR EXISTS (SELECT 1 FROM ${comments} c WHERE c.post_id = ${postsTable.id} AND c.author_id <> ${postsTable.authorId} AND c.deleted_at IS NULL)
+    EXISTS (SELECT 1 FROM ${votes} v WHERE v.post_id = ${sql.raw(`"${tableName}"."id"`)} AND v.user_id <> ${sql.raw(`"${tableName}"."author_id"`)})
+    OR EXISTS (SELECT 1 FROM ${comments} c WHERE c.post_id = ${sql.raw(`"${tableName}"."id"`)} AND c.author_id <> ${sql.raw(`"${tableName}"."author_id"`)} AND c.deleted_at IS NULL)
   )`;
 }
 
@@ -154,6 +156,201 @@ export class PostsService {
       number: post.number,
       slug: postSlug(post.title),
     };
+  }
+
+  async updatePost(
+    portal: { workspaceId: string; productId: string },
+    currentUser: { id: string },
+    postNumber: number,
+    input: UpdatePostInput
+  ): Promise<PostCreated> {
+    const isAdmin = await isWorkspaceAdmin(
+      this.db,
+      currentUser.id,
+      portal.workspaceId
+    );
+
+    return this.db.transaction(async (tx) => {
+      const [post] = await tx
+        .select({
+          id: posts.id,
+          number: posts.number,
+          authorId: posts.authorId,
+          version: posts.version,
+        })
+        .from(posts)
+        .where(
+          and(
+            eq(posts.productId, portal.productId),
+            eq(posts.number, postNumber),
+            isNull(posts.deletedAt),
+            isNull(posts.mergedIntoId)
+          )
+        )
+        .for("update");
+
+      if (!post) {
+        throw new ApiException(
+          "post_not_found",
+          404,
+          "This post was removed or merged. Go back to the board."
+        );
+      }
+
+      const isAuthor = post.authorId === currentUser.id;
+      if (!isAuthor && !isAdmin) {
+        throw new ApiException("not_allowed", 403, "Not allowed.");
+      }
+
+      if (!isAdmin) {
+        const [engagedResult] = await tx
+          .select({ engaged: engagedSql() })
+          .from(posts)
+          .where(eq(posts.id, post.id))
+          .limit(1);
+
+        if (engagedResult?.engaged) {
+          throw new ApiException(
+            "post_locked",
+            403,
+            "Locked after someone else voted or commented."
+          );
+        }
+      }
+
+      const verifiedCategoryId = await assertCategory(
+        tx,
+        portal.productId,
+        input.categoryId
+      );
+
+      const [updated] = await tx
+        .update(posts)
+        .set({
+          title: input.title,
+          description: input.description ?? null,
+          categoryId: verifiedCategoryId,
+          version: sql`${posts.version} + 1`,
+          editedAt: sql`now()`,
+        })
+        .where(
+          and(
+            eq(posts.id, post.id),
+            eq(posts.version, input.version),
+            isNull(posts.deletedAt)
+          )
+        )
+        .returning({
+          number: posts.number,
+          title: posts.title,
+        });
+
+      if (!updated) {
+        const [still] = await tx
+          .select({ id: posts.id })
+          .from(posts)
+          .where(
+            and(
+              eq(posts.id, post.id),
+              isNull(posts.deletedAt),
+              isNull(posts.mergedIntoId)
+            )
+          );
+        if (!still) {
+          throw new ApiException(
+            "post_not_found",
+            404,
+            "This post was removed or merged. Go back to the board."
+          );
+        }
+        throw new ApiException(
+          "edit_conflict",
+          409,
+          "Someone else changed this while you were editing. Reload to see their version, then try again."
+        );
+      }
+
+      return {
+        number: updated.number,
+        slug: postSlug(updated.title),
+      };
+    });
+  }
+
+  async deletePost(
+    portal: { workspaceId: string; productId: string },
+    currentUser: { id: string },
+    postNumber: number
+  ): Promise<void> {
+    const isAdmin = await isWorkspaceAdmin(
+      this.db,
+      currentUser.id,
+      portal.workspaceId
+    );
+
+    return this.db.transaction(async (tx) => {
+      const [post] = await tx
+        .select({
+          id: posts.id,
+          authorId: posts.authorId,
+        })
+        .from(posts)
+        .where(
+          and(
+            eq(posts.productId, portal.productId),
+            eq(posts.number, postNumber),
+            isNull(posts.deletedAt),
+            isNull(posts.mergedIntoId)
+          )
+        )
+        .for("update");
+
+      if (!post) {
+        throw new ApiException(
+          "post_not_found",
+          404,
+          "This post was removed or merged. Go back to the board."
+        );
+      }
+
+      const isAuthor = post.authorId === currentUser.id;
+      if (!isAuthor && !isAdmin) {
+        throw new ApiException("not_allowed", 403, "Not allowed.");
+      }
+
+      if (!isAdmin) {
+        const [engagedResult] = await tx
+          .select({ engaged: engagedSql() })
+          .from(posts)
+          .where(eq(posts.id, post.id))
+          .limit(1);
+
+        if (engagedResult?.engaged) {
+          throw new ApiException(
+            "post_locked",
+            403,
+            "Locked after someone else voted or commented."
+          );
+        }
+      }
+
+      const [deleted] = await tx
+        .update(posts)
+        .set({
+          deletedAt: sql`now()`,
+          deletedById: currentUser.id,
+        })
+        .where(and(eq(posts.id, post.id), isNull(posts.deletedAt)))
+        .returning({ id: posts.id });
+
+      if (!deleted) {
+        throw new ApiException(
+          "post_not_found",
+          404,
+          "This post was removed or merged. Go back to the board."
+        );
+      }
+    });
   }
 
   async listBoard(

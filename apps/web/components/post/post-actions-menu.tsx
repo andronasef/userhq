@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Ellipsis } from "lucide-react";
+import { toast } from "sonner";
 import type { PostStatus, PublicPostDetail, PostViewer } from "@userhq/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,16 +14,19 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { StatusChangeDialog } from "@/components/post/status-change-dialog";
+import { PostFormDialog } from "@/components/board/post-form-dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { apiFetch } from "@/lib/api-client";
+import { portalHref } from "@/lib/tenant";
 
 export interface PostActionsMenuProps {
   ws: string;
   product: string;
   post: PublicPostDetail;
   statuses: PostStatus[];
+  categories?: { id: string; name: string }[];
   adminView: boolean;
   viewer: PostViewer;
-  onStartEdit?: () => void;
-  onDelete?: () => void;
 }
 
 export function PostActionsMenu({
@@ -29,20 +34,33 @@ export function PostActionsMenu({
   product,
   post,
   statuses,
+  categories = [],
   adminView,
   viewer,
-  onStartEdit,
-  onDelete,
 }: PostActionsMenuProps): React.JSX.Element | null {
+  const router = useRouter();
   const [statusDialogOpen, setStatusDialogOpen] = React.useState(false);
+  const [editDialogOpen, setEditDialogOpen] = React.useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+
+  const handleDelete = async () => {
+    await apiFetch(
+      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/posts/${post.number}`,
+      { method: "DELETE" }
+    );
+    toast.success("Post deleted");
+    router.push(portalHref(ws, product));
+  };
 
   if (!adminView && !viewer.isAuthor) {
     return null;
   }
 
-  if (adminView) {
-    return (
-      <>
+  const isLocked = !viewer.canEdit;
+
+  return (
+    <>
+      {adminView ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -55,7 +73,7 @@ export function PostActionsMenu({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={onStartEdit}>
+            <DropdownMenuItem onSelect={() => setEditDialogOpen(true)}>
               Edit post
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setStatusDialogOpen(true)}>
@@ -63,14 +81,57 @@ export function PostActionsMenu({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onSelect={onDelete}
+              onSelect={() => setDeleteDialogOpen(true)}
               className="text-destructive focus:text-destructive data-[highlighted]:text-destructive"
             >
               Delete post
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+      ) : (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 text-muted-foreground hover:text-foreground"
+              aria-label="Post actions"
+            >
+              <Ellipsis className="size-4" aria-hidden="true" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              disabled={isLocked}
+              onSelect={() => setEditDialogOpen(true)}
+              className={isLocked ? "flex flex-col items-start h-auto py-2" : undefined}
+            >
+              <span>Edit post</span>
+              {isLocked && (
+                <span className="text-xs text-muted-foreground font-normal">
+                  Locked after someone else voted or commented
+                </span>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={isLocked}
+              onSelect={() => setDeleteDialogOpen(true)}
+              className={`text-destructive focus:text-destructive data-[highlighted]:text-destructive ${
+                isLocked ? "flex flex-col items-start h-auto py-2" : ""
+              }`}
+            >
+              <span>Delete post</span>
+              {isLocked && (
+                <span className="text-xs text-muted-foreground font-normal">
+                  Locked after someone else voted or commented
+                </span>
+              )}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
+      {adminView && (
         <StatusChangeDialog
           open={statusDialogOpen}
           onOpenChange={setStatusDialogOpen}
@@ -81,65 +142,38 @@ export function PostActionsMenu({
           version={post.version}
           statuses={statuses}
         />
-      </>
-    );
-  }
+      )}
 
-  // Author (not admin) view
-  const isLocked = !viewer.canEdit;
-
-  return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8 text-muted-foreground hover:text-foreground"
-            aria-label="Post actions"
-          >
-            <Ellipsis className="size-4" aria-hidden="true" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            disabled={isLocked}
-            onSelect={onStartEdit}
-            className={isLocked ? "flex flex-col items-start h-auto py-2" : undefined}
-          >
-            <span>Edit post</span>
-            {isLocked && (
-              <span className="text-xs text-muted-foreground font-normal">
-                Locked after someone else voted or commented
-              </span>
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            disabled={isLocked}
-            onSelect={onDelete}
-            className={`text-destructive focus:text-destructive data-[highlighted]:text-destructive ${
-              isLocked ? "flex flex-col items-start h-auto py-2" : ""
-            }`}
-          >
-            <span>Delete post</span>
-            {isLocked && (
-              <span className="text-xs text-muted-foreground font-normal">
-                Locked after someone else voted or commented
-              </span>
-            )}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <StatusChangeDialog
-        open={statusDialogOpen}
-        onOpenChange={setStatusDialogOpen}
+      <PostFormDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
         ws={ws}
         product={product}
-        postNumber={post.number}
-        currentStatusId={post.status.id}
-        version={post.version}
-        statuses={statuses}
+        categories={categories}
+        mode="edit"
+        initial={{
+          number: post.number,
+          title: post.title,
+          description: post.description,
+          categoryId: post.category?.id ?? null,
+          version: post.version,
+          slug: post.slug,
+        }}
+      />
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title={adminView ? `Delete "${post.title}"?` : "Delete this post?"}
+        description={
+          adminView
+            ? "It disappears from the portal. You can restore it from the Deleted tab on the dashboard board."
+            : "It'll be removed from the board, along with its votes. This can't be undone."
+        }
+        dismissLabel="Keep post"
+        confirmLabel="Delete post"
+        pendingLabel="Deleting…"
+        onConfirm={handleDelete}
       />
     </>
   );

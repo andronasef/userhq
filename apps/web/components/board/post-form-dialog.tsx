@@ -40,6 +40,15 @@ export interface PostFormDialogProps {
   categories?: { id: string; name: string }[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  mode?: "create" | "edit";
+  initial?: {
+    number: number;
+    title: string;
+    description: string | null;
+    categoryId: string | null;
+    version: number;
+    slug?: string;
+  };
 }
 
 function PostFormDialogInner({
@@ -48,39 +57,66 @@ function PostFormDialogInner({
   categories = [],
   open,
   onOpenChange,
+  mode = "create",
+  initial,
 }: PostFormDialogProps): React.JSX.Element {
   const router = useRouter();
   const [alertError, setAlertError] = React.useState<string | null>(null);
+  const [isConflict, setIsConflict] = React.useState(false);
 
   const {
     register,
     handleSubmit,
     reset,
     setError,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<z.input<typeof CreatePostInputSchema>, any, CreatePostInput>({
     resolver: zodResolver(CreatePostInputSchema),
     mode: "onTouched",
     defaultValues: {
-      title: "",
-      description: null,
-      categoryId: "",
+      title: initial?.title ?? "",
+      description: initial?.description ?? null,
+      categoryId: initial?.categoryId ?? "",
     },
   });
 
   React.useEffect(() => {
     if (open) {
       setAlertError(null);
-      reset({
-        title: "",
-        description: null,
-        categoryId: "",
-      });
+      setIsConflict(false);
+      if (mode === "edit" && initial) {
+        reset({
+          title: initial.title,
+          description: initial.description ?? null,
+          categoryId: initial.categoryId ?? "",
+        });
+      } else {
+        reset({
+          title: "",
+          description: null,
+          categoryId: "",
+        });
+      }
     }
-  }, [open, reset]);
+  }, [open, mode, initial, reset]);
 
   const mutation = useMutation<PostCreated, unknown, CreatePostInput>({
     mutationFn: async (data: CreatePostInput) => {
+      if (mode === "edit" && initial) {
+        return apiFetch(
+          `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/posts/${initial.number}`,
+          {
+            method: "PATCH",
+            body: {
+              title: data.title,
+              description: data.description,
+              categoryId: data.categoryId || null,
+              version: initial.version,
+            },
+            schema: PostCreatedSchema,
+          }
+        );
+      }
       return apiFetch(
         `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/posts`,
         {
@@ -92,11 +128,25 @@ function PostFormDialogInner({
     },
     onSuccess: (result) => {
       onOpenChange(false);
-      router.push(postHref(ws, product, result.number, result.slug));
-      toast.success("Post submitted");
+      if (mode === "edit") {
+        toast.success("Post updated");
+        if (initial?.slug && result.slug !== initial.slug) {
+          router.replace(postHref(ws, product, result.number, result.slug));
+        } else {
+          router.refresh();
+        }
+      } else {
+        router.push(postHref(ws, product, result.number, result.slug));
+        toast.success("Post submitted");
+      }
     },
     onError: (err: unknown) => {
       if (err instanceof ApiClientError && err.code) {
+        if (err.code === "edit_conflict") {
+          setIsConflict(true);
+          setAlertError(errorCopy(err));
+          return;
+        }
         const field = FIELD_FOR_CODE[err.code];
         if (field && ["title", "description", "categoryId"].includes(field)) {
           setError(field as "title" | "description" | "categoryId", {
@@ -105,12 +155,14 @@ function PostFormDialogInner({
           return;
         }
       }
+      setIsConflict(false);
       setAlertError(errorCopy(err as any));
     },
   });
 
   const onSubmit = (data: CreatePostInput) => {
     setAlertError(null);
+    setIsConflict(false);
     if (categories.length > 0 && (!data.categoryId || data.categoryId === "")) {
       setError("categoryId", { message: "Choose a category." });
       return;
@@ -122,10 +174,11 @@ function PostFormDialogInner({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New post</DialogTitle>
+          <DialogTitle>{mode === "edit" ? "Edit post" : "New post"}</DialogTitle>
           <DialogDescription>
-            Describe the problem or idea. Others can vote on it and join the
-            conversation.
+            {mode === "edit"
+              ? "Update the title, category, or details for this post."
+              : "Describe the problem or idea. Others can vote on it and join the conversation."}
           </DialogDescription>
         </DialogHeader>
 
@@ -172,7 +225,24 @@ function PostFormDialogInner({
               />
             </Field>
 
-            {alertError && <Alert variant="destructive">{alertError}</Alert>}
+            {alertError && (
+              <Alert variant="destructive" className="flex flex-col gap-2">
+                <div>{alertError}</div>
+                {isConflict && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-fit mt-1"
+                    onClick={() => {
+                      router.refresh();
+                    }}
+                  >
+                    Reload
+                  </Button>
+                )}
+              </Alert>
+            )}
 
             <DialogFooter className="pt-2">
               <Button
@@ -181,14 +251,19 @@ function PostFormDialogInner({
                 onClick={() => onOpenChange(false)}
                 disabled={mutation.isPending}
               >
-                Discard post
+                {mode === "edit" ? "Discard changes" : "Discard post"}
               </Button>
-              <Button type="submit" disabled={mutation.isPending}>
+              <Button
+                type="submit"
+                disabled={mutation.isPending || (mode === "edit" && !isDirty)}
+              >
                 {mutation.isPending ? (
                   <>
                     <LoaderCircle className="size-4 animate-spin" />
-                    <span>Submitting…</span>
+                    <span>{mode === "edit" ? "Saving…" : "Submitting…"}</span>
                   </>
+                ) : mode === "edit" ? (
+                  "Save post"
                 ) : (
                   "Submit post"
                 )}

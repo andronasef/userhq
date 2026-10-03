@@ -137,6 +137,7 @@ export default async function PostPage({
               product={product}
               post={post}
               statuses={productResult.data.statuses}
+              categories={productResult.data.categories}
               adminView={adminView}
               viewer={viewer}
             />

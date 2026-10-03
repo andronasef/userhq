@@ -106,6 +106,7 @@ export async function createTestApp(
 
   const close = async () => {
     await app.close();
+    await pool.end().catch(() => {});
     await testDb.drop();
   };
 

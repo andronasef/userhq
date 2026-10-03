@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Delete,
   UseGuards,
   UseInterceptors,
   SerializeOptions,
@@ -19,9 +21,11 @@ import {
   PublicPostPageSchema,
   PostCreatedSchema,
   CreatePostInputSchema,
+  UpdatePostInputSchema,
   BoardQuerySchema,
   type BoardQuery,
   type CreatePostInput,
+  type UpdatePostInput,
   type PublicBoardPage,
   type PublicPostPage,
   type PostCreated,
@@ -86,5 +90,42 @@ export class PortalPostsController {
     }
     const portal = req.portal;
     return this.postsService.createPost(portal, user, input);
+  }
+
+  @Patch("posts/:number")
+  @SerializeOptions({ schema: PostCreatedSchema })
+  async updatePost(
+    @Req() req: any,
+    @CurrentUser() user: any,
+    @Param("number") rawNumber: string,
+    @Body({ schema: UpdatePostInputSchema }) input: UpdatePostInput
+  ): Promise<PostCreated> {
+    if (!user) {
+      throw new ApiException("unauthorized", 401, "Sign in required.");
+    }
+    const parseResult = postNumberParamSchema.safeParse(rawNumber);
+    if (!parseResult.success) {
+      throw new ApiException("post_not_found", 404, "Post not found.");
+    }
+    const portal = req.portal;
+    return this.postsService.updatePost(portal, user, parseResult.data, input);
+  }
+
+  @Delete("posts/:number")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deletePost(
+    @Req() req: any,
+    @CurrentUser() user: any,
+    @Param("number") rawNumber: string
+  ): Promise<void> {
+    if (!user) {
+      throw new ApiException("unauthorized", 401, "Sign in required.");
+    }
+    const parseResult = postNumberParamSchema.safeParse(rawNumber);
+    if (!parseResult.success) {
+      throw new ApiException("post_not_found", 404, "Post not found.");
+    }
+    const portal = req.portal;
+    return this.postsService.deletePost(portal, user, parseResult.data);
   }
 }

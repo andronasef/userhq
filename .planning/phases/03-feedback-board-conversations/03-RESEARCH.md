@@ -978,16 +978,16 @@ This escapes text into HTML only. Never pass user HTML through. The UI-SPEC back
 | A7 | Gmail and Yahoo enforce one-click unsubscribe for bulk senders | State of the Art | Low at 300 mails/day. Mostly a deliverability nicety |
 | A8 | `'english'` text-search config is acceptable for v1 portals | Pattern 4 | Weak stemming on non-English boards. Switching to `'simple'` is a one-migration change |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Which Brevo port works from the prod VPS? (blocks real email, not the build)**
+1. **Which Brevo port works from the prod VPS? (blocks real email, not the build)** — RESOLVED: handled by plan 03-03's `checkpoint:human-action` (probe run in the prod API container, port recorded in `docs/deploy.md`, `SMTP_*` pass-through added to `compose.yaml`).
    - What we know: the probe tool exists (`node apps/api/dist/scripts/smtp-check.js`, defaults `587,2525,465`). The deploy doc lists `SMTP_HOST/USER/PASS` as prod env, but no port was ever recorded.
    - Recommendation: a `checkpoint:human-action` early in the phase. Run the probe through the Dokploy container terminal, then record `smtp-relay.brevo.com:<port>` in `docs/deploy.md` and `SMTP_PORT=<port>` in `.env.example`, and set `SMTP_FROM`. In parallel, add the `SMTP_*` pass-through to `compose.yaml`.
-2. **Is the Brevo sender domain authenticated (DKIM/SPF) for `SMTP_FROM`?**
+2. **Is the Brevo sender domain authenticated (DKIM/SPF) for `SMTP_FROM`?** — RESOLVED: confirmed in the Brevo dashboard by the same 03-03 checkpoint; the DKIM status is recorded in `docs/deploy.md`.
    - Recommendation: the same checkpoint confirms it in the Brevo dashboard. RFC 8058 one-click depends on it.
-3. **Should the platform console list soft-deleted workspaces and scrubbed users?**
+3. **Should the platform console list soft-deleted workspaces and scrubbed users?** — RESOLVED: superseded by CONTEXT D-30 — soft-deleted workspaces stay listed with a "Deleted" badge (the recommendation below to exclude them no longer applies); the zero-count placeholders are replaced with real counts in plan 03-16.
    - Recommendation: exclude `deleted_at IS NOT NULL` workspaces from `/platform` lists in v1 (minimal). Show deleted users as-is (their email is already scrubbed). Also replace the four `postCount: 0` / `voteCount: 0` placeholders (`platform.controller.ts:140-143, 210-223, 318-321`, each commented `// ponytail: Phase 3 replaces these zeros with posts/votes counts`) with `count(*)` subqueries over non-deleted, unmerged posts and their votes.
-4. **Prefix matching for the merge dialog type-ahead.**
+4. **Prefix matching for the merge dialog type-ahead.** — RESOLVED: superseded by CONTEXT D-29 — the last search term matches as a prefix (`to_tsquery` with `:*` on the last lexeme) on the board and in the merge dialog (plans 03-07 and 03-12); the ILIKE fallback below is not used.
    - `websearch_to_tsquery` does not match partial words (`dar` ≠ `dark`, probed).
    - Recommendation: accept this in v1 (the dialog shows the top 8 by votes on an empty query). If it's a problem, add `OR posts.title ILIKE '%' || $q || '%'` (escaped with the existing `escapeLike`) for the merge search only.
 

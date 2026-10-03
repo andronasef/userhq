@@ -602,7 +602,8 @@ New npm packages in this phase (web): `nuqs@2.10.1`, named in CLAUDE.md. It goes
 - Rich text, markdown, images, or attachments in posts and comments (D-17: plain text only).
 - AI duplicate detection, a "merged from" trace on the target (D-04), live updates, comment pagination, reactions, @mentions, and a muted-posts list on the account page.
 - Bulk actions other than merge, sortable table columns, and skeleton loaders.
-- Ownership transfer and workspace deletion.
+
+> Note: ownership transfer and workspace deletion were listed here originally. CONTEXT D-26 (UI-SPEC review, 2026-10-03) brings them into scope; they are specified in the Account settings section above and delivered by plan 03-15.
 
 ---
 

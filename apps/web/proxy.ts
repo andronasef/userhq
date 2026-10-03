@@ -2,15 +2,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
 export function proxy(request: NextRequest): Response {
-  if (process.env.DEV_UPLOAD_PAGE !== "true") {
+  const { pathname, search } = request.nextUrl;
+
+  if (pathname.startsWith("/dev") && process.env.DEV_UPLOAD_PAGE !== "true") {
     return NextResponse.next();
   }
 
   const sessionCookie = getSessionCookie(request);
   if (!sessionCookie) {
-    const next = encodeURIComponent(
-      request.nextUrl.pathname + request.nextUrl.search
-    );
+    const next = encodeURIComponent(pathname + search);
     return new Response(null, {
       status: 307,
       headers: {
@@ -23,5 +23,5 @@ export function proxy(request: NextRequest): Response {
 }
 
 export const config = {
-  matcher: ["/dev/:path*"],
+  matcher: ["/dev/:path*", "/dashboard", "/dashboard/:path*"],
 };

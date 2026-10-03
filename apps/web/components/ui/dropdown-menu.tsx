@@ -19,18 +19,16 @@ export const DropdownMenuContent = React.forwardRef<
   ref
 ) {
   return (
-    <DropdownMenuPrimitive.Portal>
-      <DropdownMenuPrimitive.Content
-        ref={ref}
-        align={align}
-        sideOffset={sideOffset}
-        className={cn(
-          "min-w-56 p-1 bg-popover text-popover-foreground border border-border rounded-lg shadow-md z-50 overflow-hidden",
-          className
-        )}
-        {...props}
-      />
-    </DropdownMenuPrimitive.Portal>
+    <DropdownMenuPrimitive.Content
+      ref={ref}
+      align={align}
+      sideOffset={sideOffset}
+      className={cn(
+        "min-w-56 p-1 bg-popover text-popover-foreground border border-border rounded-lg shadow-md z-50 overflow-hidden",
+        className
+      )}
+      {...props}
+    />
   );
 });
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;

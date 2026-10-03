@@ -1,10 +1,10 @@
 import { testUtils, type TestHelpers } from "better-auth/plugins";
 import { createDb, type Db, schema } from "@userhq/db";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import type pg from "pg";
 import { createAuth, type Auth } from "../../src/auth/auth.js";
 import type { Env } from "../../src/env.js";
-import { signedInCookie } from "./test-app.js";
+import { signedInCookie } from "./auth-helpers.js";
 
 export const baseUrl = process.env.E2E_BASE_URL ?? "http://localhost:8080";
 export const databaseUrl = process.env.E2E_DATABASE_URL!;
@@ -132,4 +132,37 @@ export async function apiCall(
     headers,
     body,
   });
+}
+
+export async function seedWorkspaceRows(
+  stack: StackContext,
+  opts: {
+    userId: string;
+    name: string;
+    slug: string;
+    role?: "owner" | "admin";
+  }
+): Promise<{ id: string; slug: string }> {
+  const id = crypto.randomUUID();
+  await stack.db.insert(schema.workspaces).values({
+    id,
+    name: opts.name,
+    slug: opts.slug,
+  });
+  await stack.db.insert(schema.workspaceMembers).values({
+    workspaceId: id,
+    userId: opts.userId,
+    role: opts.role ?? "owner",
+  });
+  return { id, slug: opts.slug };
+}
+
+export async function cleanupWorkspaces(
+  stack: StackContext,
+  ids: string[]
+): Promise<void> {
+  if (ids.length === 0) return;
+  await stack.db
+    .delete(schema.workspaces)
+    .where(inArray(schema.workspaces.id, ids));
 }

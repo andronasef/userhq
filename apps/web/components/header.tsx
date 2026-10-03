@@ -6,7 +6,7 @@ import { UserMenu, SignInButton } from "./user-menu";
 import { SessionKeepAlive } from "./session-keepalive";
 
 export async function Header(): Promise<React.JSX.Element> {
-  const { user } = await getMe();
+  const me = await getMe();
   const devUploadEnabled = isDevUploadEnabled();
 
   return (
@@ -17,9 +17,14 @@ export async function Header(): Promise<React.JSX.Element> {
         </Link>
 
         <div>
-          {user ? (
+          {me.user ? (
             <>
-              <UserMenu user={user} devUploadEnabled={devUploadEnabled} />
+              <UserMenu
+                user={me.user}
+                devUploadEnabled={devUploadEnabled}
+                hasWorkspaces={me.workspaces.length > 0}
+                isPlatformOwner={me.isPlatformOwner}
+              />
               <SessionKeepAlive />
             </>
           ) : (

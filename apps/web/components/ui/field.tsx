@@ -1,5 +1,6 @@
 import * as React from "react";
 import { CircleAlert } from "lucide-react";
+import { API_ERROR_COPY } from "../../lib/api-errors";
 
 export interface FieldProps {
   id: string;
@@ -19,7 +20,9 @@ export function Field({
   const helperId = `${id}-help`;
   const errorId = `${id}-error`;
 
-  const describedBy = error
+  const errorMessage = error ? (API_ERROR_COPY[error] ?? error) : undefined;
+
+  const describedBy = errorMessage
     ? errorId
     : helper
       ? helperId
@@ -29,7 +32,7 @@ export function Field({
     ? React.cloneElement(children, {
         id,
         "aria-describedby": describedBy,
-        "aria-invalid": !!error || undefined,
+        "aria-invalid": !!errorMessage || undefined,
       } as any)
     : children;
 
@@ -39,10 +42,10 @@ export function Field({
         {label}
       </label>
       {child}
-      {error ? (
+      {errorMessage ? (
         <p id={errorId} className="flex items-center gap-1.5 text-sm font-normal text-destructive">
           <CircleAlert className="size-4 shrink-0" />
-          <span>{error}</span>
+          <span>{errorMessage}</span>
         </p>
       ) : helper ? (
         <p id={helperId} className="text-sm font-normal text-muted-foreground">

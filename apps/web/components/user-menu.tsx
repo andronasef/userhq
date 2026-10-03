@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ImageUp, LogOut, LoaderCircle } from "lucide-react";
+import { ImageUp, LogOut, LoaderCircle, LayoutDashboard } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar } from "./ui/avatar";
 import {
@@ -22,11 +22,15 @@ export interface UserMenuProps {
     image: string | null;
   };
   devUploadEnabled: boolean;
+  hasWorkspaces?: boolean;
+  isPlatformOwner?: boolean;
 }
 
 export function UserMenu({
   user,
   devUploadEnabled,
+  hasWorkspaces = false,
+  isPlatformOwner: _isPlatformOwner = false,
 }: UserMenuProps): React.JSX.Element {
   const [isPending, setIsPending] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -62,11 +66,23 @@ export function UserMenu({
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" sideOffset={8}>
+      <DropdownMenuContent align="end" sideOffset={8} forceMount>
         <DropdownMenuLabel className="truncate max-w-48">
           {user.name}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+
+        {hasWorkspaces && (
+          <>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard" className="flex items-center gap-2 w-full">
+                <LayoutDashboard className="size-4 shrink-0" aria-hidden="true" />
+                <span>Dashboard</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
 
         {devUploadEnabled && (
           <>

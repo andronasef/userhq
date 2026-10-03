@@ -1,14 +1,14 @@
 import * as React from "react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getMe } from "../../lib/api-server";
 import { isDevUploadEnabled } from "../../lib/dev-flags";
-import { Avatar } from "../../components/ui/avatar";
 import { Button } from "../../components/ui/button";
 
 export default async function HomePage(): Promise<React.JSX.Element> {
-  const { user } = await getMe();
+  const me = await getMe();
 
-  if (!user) {
+  if (!me.user) {
     return (
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
@@ -29,27 +29,46 @@ export default async function HomePage(): Promise<React.JSX.Element> {
     );
   }
 
-  const displayName = user.name?.trim();
-  const heading = displayName
-    ? `Signed in as ${displayName}`
-    : "You're signed in";
+  if (me.workspaces.length === 1) {
+    redirect(`/dashboard/${me.workspaces[0].slug}`);
+  }
 
+  if (me.workspaces.length >= 2) {
+    redirect("/dashboard");
+  }
+
+  // 0 workspaces:
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-4 flex-wrap">
-        <Avatar size="lg" src={user.image} name={user.name} />
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold leading-tight break-words">
-            {heading}
+      {me.canCreateWorkspace ? (
+        <>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl font-semibold leading-tight">
+              Set up your workspace
+            </h1>
+            <p className="text-base text-muted-foreground">
+              A workspace holds your products, your team, and the portals your customers visit.
+            </p>
+          </div>
+          <div>
+            <Button variant="default" size="lg" asChild>
+              <Link href="/dashboard/new">Create workspace</Link>
+            </Button>
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-semibold leading-tight">
+            Workspace creation is invite-only
           </h1>
           <p className="text-base text-muted-foreground">
-            You&apos;ll stay signed in on this device for 14 days after your last visit.
+            UserHQ is invite-only for now. If someone gave you an invite link, open it while signed in with the email it was created for.
           </p>
         </div>
-      </div>
+      )}
 
       {isDevUploadEnabled() && (
-        <div>
+        <div className="pt-4 border-t border-border">
           <Link
             href="/dev/upload"
             className="text-foreground underline text-sm"

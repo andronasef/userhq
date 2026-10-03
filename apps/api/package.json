@@ -45,6 +45,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
     "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "test:browser": "playwright test",
     "smtp:check": "node dist/scripts/smtp-check.js"
   }
 }

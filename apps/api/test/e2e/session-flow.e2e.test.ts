@@ -58,7 +58,7 @@ describe("Session Flow E2E (Plan 01-06)", () => {
     expect(res1.status).toBe(200);
     const html1 = await res1.text();
     collectedHtml.push(html1);
-    expect(html1).toContain("Signed in as E2E User");
+    expect(html1).toContain("Workspace creation is invite-only");
     expect(html1).toContain('aria-label="Open account menu"');
 
     const res2 = await fetch(`${baseUrl}/`, {
@@ -67,7 +67,7 @@ describe("Session Flow E2E (Plan 01-06)", () => {
     expect(res2.status).toBe(200);
     const html2 = await res2.text();
     collectedHtml.push(html2);
-    expect(html2).toContain("Signed in as E2E User");
+    expect(html2).toContain("Workspace creation is invite-only");
     expect(html2).toContain('aria-label="Open account menu"');
   });
 

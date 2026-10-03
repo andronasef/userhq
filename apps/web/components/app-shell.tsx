@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Header } from "./header";
+import { AppToaster } from "./ui/toaster";
 
 export function AppShell({
   children,
@@ -14,6 +15,7 @@ export function AppShell({
           {children}
         </div>
       </main>
+      <AppToaster />
     </>
   );
 }

@@ -17,6 +17,8 @@ import { SlugInput } from "../../../components/slug-input";
 import { Button } from "../../../components/ui/button";
 import { Alert } from "../../../components/ui/alert";
 import { apiFetch, ApiClientError } from "../../../lib/api-client";
+import { errorCopy, FIELD_FOR_CODE } from "../../../lib/api-errors";
+import { flash } from "../../../components/ui/toaster";
 import { QueryProvider } from "../../../lib/query-client";
 
 export interface CreateWorkspaceFormProps {
@@ -25,12 +27,14 @@ export interface CreateWorkspaceFormProps {
 
 function CreateWorkspaceFormInner({ host }: CreateWorkspaceFormProps): React.JSX.Element {
   const [slugTouched, setSlugTouched] = React.useState(false);
+  const [alertError, setAlertError] = React.useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    setError,
     formState: { errors },
   } = useForm<CreateWorkspaceInput>({
     resolver: zodResolver(CreateWorkspaceInputSchema),
@@ -60,22 +64,33 @@ function CreateWorkspaceFormInner({ host }: CreateWorkspaceFormProps): React.JSX
       });
     },
     onSuccess: (res) => {
+      flash("Workspace created");
       window.location.assign(`/dashboard/${res.slug}`);
+    },
+    onError: (err: unknown) => {
+      if (err instanceof ApiClientError && err.code) {
+        const field = FIELD_FOR_CODE[err.code];
+        if (field === "name" || field === "slug") {
+          setError(field, { message: errorCopy(err) });
+          return;
+        }
+      }
+      const message =
+        err instanceof ApiClientError ||
+        (typeof err === "object" && err !== null && "status" in err)
+          ? errorCopy(err as any)
+          : errorCopy({ status: 500, code: "internal_error" });
+      setAlertError(message);
     },
   });
 
   const onSubmit = (data: CreateWorkspaceInput) => {
+    setAlertError(null);
     mutation.mutate(data);
   };
 
   const nameError = errors.name?.message;
   const slugError = errors.slug?.message;
-
-  const serverError = mutation.error instanceof ApiClientError
-    ? mutation.error.message
-    : mutation.error instanceof Error
-      ? mutation.error.message
-      : null;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -106,9 +121,9 @@ function CreateWorkspaceFormInner({ host }: CreateWorkspaceFormProps): React.JSX
           />
         </Field>
 
-        {serverError && (
+        {alertError && (
           <Alert variant="destructive">
-            {serverError}
+            {alertError}
           </Alert>
         )}
 

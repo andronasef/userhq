@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { eq } from "drizzle-orm";
 import { schema } from "@userhq/db";
 import { type createTestApp, signedInCookie } from "./test-app.js";
 
@@ -11,6 +12,7 @@ export interface TenantSeed {
   inviteId?: string;
   productSlug?: string;
   statusId?: string;
+  postNumber?: number;
 }
 
 export interface Seed {
@@ -134,6 +136,29 @@ export async function seedTenants(
     })
     .returning();
 
+  const [postB] = await testApp.db
+    .insert(schema.posts)
+    .values({
+      productId: prodB.id,
+      number: 1,
+      title: "Tenant B Post 1",
+      description: "Tenant B Post 1 Description",
+      statusId: statusB.id,
+      authorId: userB.userId,
+      voteCount: 1,
+    })
+    .returning();
+
+  await testApp.db.insert(schema.votes).values({
+    postId: postB.id,
+    userId: userB.userId,
+  });
+
+  await testApp.db
+    .update(schema.products)
+    .set({ nextPostNumber: 2 })
+    .where(eq(schema.products.id, prodB.id));
+
   return {
     a: {
       slug: slugA,
@@ -154,6 +179,7 @@ export async function seedTenants(
       productSlug: prodSlugB,
       productId: prodB.id,
       statusId: statusB.id,
+      postNumber: 1,
     },
   };
 }

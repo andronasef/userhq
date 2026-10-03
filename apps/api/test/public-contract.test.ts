@@ -71,10 +71,12 @@ describe("Public Contract Seam Test (Plan 02-05)", () => {
       `The following @Public handlers lack @SerializeOptions with a schema: ${missingSchema.join(", ")}`
     ).toEqual([]);
 
-    // Assert discovered routes include the four required routes
+    // Assert discovered routes include the required routes
     expect(publicRoutes).toContain("/me");
     expect(publicRoutes).toContain("/health");
     expect(publicRoutes).toContain("/portal/:ws/:product");
+    expect(publicRoutes).toContain("/portal/:ws/:product/posts");
+    expect(publicRoutes).toContain("/portal/:ws/:product/posts/:number");
     expect(publicRoutes).toContain("/portal/:ws");
     expect(publicRoutes).toContain("/platform/invites");
   });

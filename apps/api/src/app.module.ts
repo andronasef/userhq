@@ -22,6 +22,8 @@ import { validationPipe } from "./common/validation.js";
 import { UploadsModule } from "./uploads/uploads.module.js";
 import { PortalModule } from "./portal/portal.module.js";
 import { WorkspacesModule } from "./workspaces/workspaces.module.js";
+import { InvitesModule } from "./invites/invites.module.js";
+import { PlatformModule } from "./platform/platform.module.js";
 
 const DB_POOL = Symbol.for("@userhq/api/db-pool");
 
@@ -56,6 +58,8 @@ export class AppModule {
         UploadsModule,
         PortalModule,
         WorkspacesModule,
+        InvitesModule,
+        PlatformModule,
       ],
       controllers: [HealthController, MeController],
       providers: [

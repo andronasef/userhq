@@ -9,6 +9,8 @@ import {
   type PublicPortalProduct,
   WorkspaceSchema,
   type Workspace,
+  InviteRowSchema,
+  type InviteRow,
   ANONYMOUS_ME,
 } from "@userhq/types";
 
@@ -113,6 +115,10 @@ export const getWorkspace = cache(
     );
   }
 );
+
+export const getPlatformInvites = cache((): Promise<ApiReadResult<InviteRow[]>> => {
+  return apiRead("/api/v1/platform/invites", z.array(InviteRowSchema));
+});
 
 export async function publicHost(): Promise<string> {
   const incomingHeaders = await headers();

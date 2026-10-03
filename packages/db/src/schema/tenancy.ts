@@ -114,3 +114,51 @@ export const workspaceMembersRelations = relations(workspaceMembers, ({ one }) =
     references: [user.id],
   }),
 }));
+
+export const inviteKind = pgEnum("invite_kind", ["platform", "workspace"]);
+
+export const invites = pgTable(
+  "invites",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    kind: inviteKind("kind").notNull(),
+    workspaceId: uuid("workspace_id").references(() => workspaces.id, {
+      onDelete: "cascade",
+    }),
+    email: text("email").notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    createdById: text("created_by_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    usedById: text("used_by_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    check(
+      "invites_workspace_kind",
+      sql`${table.kind} = 'platform' OR ${table.workspaceId} IS NOT NULL`
+    ),
+    check("invites_email_lower", sql`${table.email} = lower(${table.email})`),
+    index("invites_lookup_idx").on(table.kind, table.workspaceId, table.email),
+  ]
+);
+
+export const invitesRelations = relations(invites, ({ one }) => ({
+  workspace: one(workspaces, {
+    fields: [invites.workspaceId],
+    references: [workspaces.id],
+  }),
+  createdBy: one(user, {
+    fields: [invites.createdById],
+    references: [user.id],
+  }),
+  usedBy: one(user, {
+    fields: [invites.usedById],
+    references: [user.id],
+  }),
+}));

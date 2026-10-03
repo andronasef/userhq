@@ -68,3 +68,43 @@ export const ANONYMOUS_ME: MeResponse = {
   canCreateWorkspace: false,
   workspaces: [],
 };
+
+export const INVITE_TTL_DAYS = 7;
+
+export const InviteStateSchema = z.enum(["pending", "used", "expired", "revoked"]);
+export type InviteState = z.infer<typeof InviteStateSchema>;
+
+export const CreateInviteInputSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .pipe(z.email({ message: "invalid_email" }))
+    .transform((s) => s.toLowerCase()),
+});
+export type CreateInviteInput = z.infer<typeof CreateInviteInputSchema>;
+
+export const InviteCreatedSchema = z.object({
+  link: z.string(),
+  email: z.string(),
+  expiresAt: z.string(),
+});
+export type InviteCreated = z.infer<typeof InviteCreatedSchema>;
+
+export const InviteRowSchema = z.object({
+  id: z.uuid(),
+  email: z.string(),
+  state: InviteStateSchema,
+  createdAt: z.string(),
+  expiresAt: z.string(),
+  usedAt: z.string().nullable(),
+  revokedAt: z.string().nullable(),
+  usedByName: z.string().nullable(),
+  workspaceName: z.string().nullable(),
+});
+export type InviteRow = z.infer<typeof InviteRowSchema>;
+
+export const HealthResponseSchema = z.object({
+  status: z.literal("ok"),
+  db: z.literal("up"),
+});
+export type HealthResponse = z.infer<typeof HealthResponseSchema>;

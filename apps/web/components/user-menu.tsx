@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ImageUp, LogOut, LoaderCircle, LayoutDashboard } from "lucide-react";
+import { ImageUp, LogOut, LoaderCircle, LayoutDashboard, ShieldCheck } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar } from "./ui/avatar";
 import {
@@ -30,7 +30,7 @@ export function UserMenu({
   user,
   devUploadEnabled,
   hasWorkspaces = false,
-  isPlatformOwner: _isPlatformOwner = false,
+  isPlatformOwner = false,
 }: UserMenuProps): React.JSX.Element {
   const [isPending, setIsPending] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -72,14 +72,24 @@ export function UserMenu({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        {hasWorkspaces && (
+        {(hasWorkspaces || isPlatformOwner) && (
           <>
-            <DropdownMenuItem asChild>
-              <Link href="/dashboard" className="flex items-center gap-2 w-full">
-                <LayoutDashboard className="size-4 shrink-0" aria-hidden="true" />
-                <span>Dashboard</span>
-              </Link>
-            </DropdownMenuItem>
+            {hasWorkspaces && (
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard" className="flex items-center gap-2 w-full">
+                  <LayoutDashboard className="size-4 shrink-0" aria-hidden="true" />
+                  <span>Dashboard</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
+            {isPlatformOwner && (
+              <DropdownMenuItem asChild>
+                <Link href="/platform" className="flex items-center gap-2 w-full">
+                  <ShieldCheck className="size-4 shrink-0" aria-hidden="true" />
+                  <span>Platform console</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
           </>
         )}

@@ -9,11 +9,13 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline: "border border-input bg-background hover:bg-muted",
         ghost: "hover:bg-muted",
       },
       size: {
         default: "h-9 px-4",
+        sm: "h-8 px-3",
         lg: "h-10 px-6",
         icon: "size-10 rounded-full",
       },

@@ -64,9 +64,17 @@ Secrets must never be committed to git, printed in CI logs, or shared in chat. C
 | `PLATFORM_OWNER_EMAIL` | `<platform owner's verified email>` | `<platform owner's verified email>` | The platform owner (PLAT-01); compose refuses to deploy without it; set it in Dokploy before pushing Phase 2 to main |
 | `DEV_UPLOAD_PAGE` | `true` | `false` | Enables `/dev/upload` testing interface on staging; disabled on prod |
 | `COMPOSE_PROFILES` | `mail` | *(unset / empty)* | Activates staging Mailpit service. Unset in prod to disable Mailpit container |
-| `SMTP_HOST` | *(unset)* | `smtp-relay.brevo.com` | Brevo SMTP relay host (prod only) |
+| `SMTP_HOST` | `mailpit` | `smtp-relay.brevo.com` | Brevo SMTP relay host (prod) or internal Mailpit service (staging) |
+| `SMTP_PORT` | `1025` | `<confirmed port>` | SMTP port (Mailpit on staging, Brevo submission on prod) |
 | `SMTP_USER` | *(unset)* | `<brevo-smtp-login>` | Brevo SMTP login username (prod only) |
 | `SMTP_PASS` | *(unset)* | `<brevo-smtp-key>` | Brevo SMTP key (not the API key; prod only) |
+| `SMTP_FROM` | `notifications@userhq.test` | `<Brevo-verified sender>` | Sender address on an authenticated domain |
+| `SMTP_REQUIRE_TLS` | `false` | `true` | Enforce TLS (STARTTLS/SSL) for outgoing SMTP connections |
+
+Recorded Brevo port: smtp-relay.brevo.com:<unconfirmed>
+
+> [!NOTE]
+> Rotating `BETTER_AUTH_SECRET` invalidates every unsubscribe and mute link already emailed; recipients then see the "This link isn't valid" page and can use account settings.
 
 ---
 
@@ -175,7 +183,7 @@ ssh userhq-vps "docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
 ssh userhq-vps "docker network ls | grep staging"
 
 # Run SMTP probe inside the running production API container
-ssh userhq-vps "docker exec \$(docker ps -q -f name=userhq-prod-api) node apps/api/dist/scripts/smtp-check.js"
+ssh userhq-vps "docker exec -e SMTP_HOST=smtp-relay.brevo.com -e SMTP_USER=<login> -e SMTP_PASS=<key> \$(docker ps -q -f name=userhq-prod-api) node apps/api/dist/scripts/smtp-check.js"
 
 # Inspect application logs
 ssh userhq-vps "docker logs --tail 100 -f \$(docker ps -q -f name=userhq-staging-api)"

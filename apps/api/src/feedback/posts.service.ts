@@ -25,6 +25,7 @@ import {
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
 import { isWorkspaceAdmin } from "./membership.js";
+import { prefixTsQuery } from "./search.js";
 
 export function engagedSql(postsTable: typeof posts = posts) {
   return sql<boolean>`(
@@ -164,6 +165,23 @@ export class PostsService {
       ? eq(posts.categoryId, query.category)
       : undefined;
 
+    const tsQuery = query?.q ? prefixTsQuery(query.q) : null;
+    const searchWhere = tsQuery
+      ? sql`${posts.search} @@ to_tsquery('english', ${tsQuery})`
+      : undefined;
+
+    const effectiveSort = query?.sort ?? (tsQuery ? "match" : "top");
+    const orderClauses =
+      effectiveSort === "new"
+        ? [desc(posts.createdAt), desc(posts.id)]
+        : effectiveSort === "match" && tsQuery
+          ? [
+              sql`ts_rank(${posts.search}, to_tsquery('english', ${tsQuery})) DESC`,
+              desc(posts.voteCount),
+              desc(posts.id),
+            ]
+          : [desc(posts.voteCount), desc(posts.createdAt), desc(posts.id)];
+
     const rows = await this.db
       .select({
         number: posts.number,
@@ -191,14 +209,11 @@ export class PostsService {
           isNull(posts.deletedAt),
           isNull(posts.mergedIntoId),
           statusWhere,
-          categoryWhere
+          categoryWhere,
+          searchWhere
         )
       )
-      .orderBy(
-        ...(query?.sort === "new"
-          ? [desc(posts.createdAt), desc(posts.id)]
-          : [desc(posts.voteCount), desc(posts.createdAt), desc(posts.id)])
-      )
+      .orderBy(...orderClauses)
       .limit(BOARD_PAGE_SIZE);
 
     return {

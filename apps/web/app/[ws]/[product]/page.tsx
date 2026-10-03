@@ -7,6 +7,9 @@ import { NewPostButton } from "@/components/board/post-form-dialog";
 import { BoardToolbar } from "@/components/board/board-toolbar";
 import { EmptyState } from "@/components/empty-state";
 
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
+
 interface PortalBoardPageProps {
   params: Promise<{ ws: string; product: string }>;
   searchParams: Promise<{ new?: string; [key: string]: string | string[] | undefined }>;
@@ -51,9 +54,14 @@ export default async function PortalBoardPage({
 
   const productName = productResult.data.product.name;
   const categories = productResult.data.categories;
+  const statuses = productResult.data.statuses;
   const posts = boardResult.ok ? boardResult.data.posts : [];
   const signedIn = !!me.user;
   const defaultOpen = sp?.new === "1";
+
+  const isFiltered = Boolean(
+    sp?.q || sp?.category || sp?.status || (sp?.sort && sp?.sort !== "top")
+  );
 
   return (
     <div className="mx-auto max-w-3xl flex flex-col gap-6">
@@ -73,22 +81,37 @@ export default async function PortalBoardPage({
         />
       </div>
 
-      <BoardToolbar />
+      <BoardToolbar categories={categories} statuses={statuses} />
 
       {posts.length === 0 ? (
-        <EmptyState
-          title="Nothing here yet"
-          body={`Share an idea for ${productName}, and others can vote on it.`}
-          action={
-            <NewPostButton
-              ws={ws}
-              product={product}
-              categories={categories}
-              signedIn={signedIn}
-              defaultOpen={defaultOpen}
-            />
-          }
-        />
+        isFiltered ? (
+          <EmptyState
+            title="No posts match"
+            body="Try a different search, or clear the filters to see every open post."
+            action={
+              <Link
+                href={`/${encodeURIComponent(ws)}/${encodeURIComponent(product)}`}
+                className={buttonVariants({ variant: "outline" })}
+              >
+                Clear filters
+              </Link>
+            }
+          />
+        ) : (
+          <EmptyState
+            title="Nothing here yet"
+            body={`Share an idea for ${productName}, and others can vote on it.`}
+            action={
+              <NewPostButton
+                ws={ws}
+                product={product}
+                categories={categories}
+                signedIn={signedIn}
+                defaultOpen={defaultOpen}
+              />
+            }
+          />
+        )
       ) : (
         <ul className="rounded-lg border border-border divide-y divide-border">
           {posts.map((post) => (

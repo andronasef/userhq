@@ -22,6 +22,14 @@ export const PublicPortalProductSchema = z.object({
       name: z.string(),
     })
   ),
+  statuses: z.array(
+    z.object({
+      id: z.string().uuid(),
+      name: z.string(),
+      color: z.string(),
+      type: z.enum(STATUS_TYPES),
+    })
+  ),
 });
 export type PublicPortalProduct = z.infer<typeof PublicPortalProductSchema>;
 

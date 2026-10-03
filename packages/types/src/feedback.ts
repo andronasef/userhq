@@ -117,11 +117,13 @@ export type PublicPostRow = z.infer<typeof PublicPostRowSchema>;
 export const BoardQuerySchema = z.object({
   q: z
     .string()
-    .trim()
-    .min(1)
     .max(SEARCH_QUERY_MAX)
     .optional()
-    .transform((val) => (val === "" ? undefined : val)),
+    .transform((val) => {
+      if (!val) return undefined;
+      const trimmed = val.trim();
+      return trimmed === "" ? undefined : trimmed;
+    }),
   sort: z.enum(["top", "new", "match"]).optional(),
   category: z.string().uuid().optional(),
   status: z.union([z.literal("all"), z.string().uuid()]).optional(),

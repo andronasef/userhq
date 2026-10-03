@@ -43,6 +43,8 @@ import {
   type DeletedCommentRow,
   AdminPostDetailSchema,
   type AdminPostDetail,
+  UnsubscribeStateSchema,
+  type UnsubscribeState,
   ANONYMOUS_ME,
 } from "@userhq/types";
 
@@ -366,5 +368,15 @@ export const getAdminPost = cache(
     );
   }
 );
+
+export const getUnsubscribe = cache(
+  (token: string): Promise<ApiReadResult<UnsubscribeState>> => {
+    return apiRead(
+      "/api/v1/unsubscribe/" + encodeURIComponent(token),
+      UnsubscribeStateSchema
+    );
+  }
+);
+
 
 

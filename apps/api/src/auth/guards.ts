@@ -7,16 +7,27 @@ import {
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { fromNodeHeaders } from "better-auth/node";
-import { IS_PUBLIC } from "./decorators.js";
+import { IS_PUBLIC, SKIP_ORIGIN } from "./decorators.js";
 import { AUTH, type Auth } from "./auth.js";
 import { ENV, type Env } from "../env.js";
 import { ApiException } from "../common/api-error.filter.js";
 
 @Injectable()
 export class OriginGuard implements CanActivate {
-  constructor(@Inject(ENV) private readonly env: Env) {}
+  constructor(
+    private readonly reflector: Reflector,
+    @Inject(ENV) private readonly env: Env
+  ) {}
 
   canActivate(ctx: ExecutionContext): boolean {
+    const skipOrigin = this.reflector.getAllAndOverride<boolean>(SKIP_ORIGIN, [
+      ctx.getHandler(),
+      ctx.getClass(),
+    ]);
+    if (skipOrigin) {
+      return true;
+    }
+
     const req = ctx.switchToHttp().getRequest();
     const url = req.originalUrl || req.url || req.path || "";
     if (url.startsWith("/api/auth")) {
@@ -43,6 +54,7 @@ export class OriginGuard implements CanActivate {
     return true;
   }
 }
+
 
 @Injectable()
 export class SessionGuard implements CanActivate {

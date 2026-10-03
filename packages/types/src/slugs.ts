@@ -18,6 +18,7 @@ export const RESERVED_WORKSPACE_SLUGS = [
   "admin",
   "auth",
   "help",
+  "unsubscribe",
 ] as const;
 
 export const RESERVED_PRODUCT_SLUGS = [

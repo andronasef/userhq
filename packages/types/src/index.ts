@@ -5,6 +5,7 @@ export * from "./slugs.js";
 export * from "./tenancy.js";
 export * from "./palette.js";
 export * from "./feedback.js";
+export * from "./account.js";
 
 export const API_ERROR_CODES = [
   "unauthorized",

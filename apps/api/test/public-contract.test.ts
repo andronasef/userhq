@@ -79,5 +79,6 @@ describe("Public Contract Seam Test (Plan 02-05)", () => {
     expect(publicRoutes).toContain("/portal/:ws/:product/posts/:number");
     expect(publicRoutes).toContain("/portal/:ws");
     expect(publicRoutes).toContain("/platform/invites");
+    expect(publicRoutes).toContain("/unsubscribe/:token");
   });
 });

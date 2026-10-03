@@ -13,3 +13,7 @@ export const CurrentUser = createParamDecorator(
     return req.user ?? null;
   }
 );
+
+export const SKIP_ORIGIN = "skipOrigin";
+export const SkipOriginCheck = () => SetMetadata(SKIP_ORIGIN, true);
+

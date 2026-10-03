@@ -65,13 +65,13 @@ Secrets must never be committed to git, printed in CI logs, or shared in chat. C
 | `DEV_UPLOAD_PAGE` | `true` | `false` | Enables `/dev/upload` testing interface on staging; disabled on prod |
 | `COMPOSE_PROFILES` | `mail` | *(unset / empty)* | Activates staging Mailpit service. Unset in prod to disable Mailpit container |
 | `SMTP_HOST` | `mailpit` | `smtp-relay.brevo.com` | Brevo SMTP relay host (prod) or internal Mailpit service (staging) |
-| `SMTP_PORT` | `1025` | `<confirmed port>` | SMTP port (Mailpit on staging, Brevo submission on prod) |
+| `SMTP_PORT` | `1025` | `587` | SMTP port (Mailpit on staging, Brevo submission on prod; confirmed via probe) |
 | `SMTP_USER` | *(unset)* | `<brevo-smtp-login>` | Brevo SMTP login username (prod only) |
 | `SMTP_PASS` | *(unset)* | `<brevo-smtp-key>` | Brevo SMTP key (not the API key; prod only) |
-| `SMTP_FROM` | `notifications@userhq.test` | `<Brevo-verified sender>` | Sender address on an authenticated domain |
+| `SMTP_FROM` | `notifications@userhq.test` | `notifications@increasinglabs.com` | Sender address on an authenticated domain (DKIM/SPF verified in Brevo) |
 | `SMTP_REQUIRE_TLS` | `false` | `true` | Enforce TLS (STARTTLS/SSL) for outgoing SMTP connections |
 
-Recorded Brevo port: smtp-relay.brevo.com:<unconfirmed>
+Recorded Brevo port: smtp-relay.brevo.com:587 (confirmed 2026-10-03 from the prod API container)
 
 > [!NOTE]
 > Rotating `BETTER_AUTH_SECRET` invalidates every unsubscribe and mute link already emailed; recipients then see the "This link isn't valid" page and can use account settings.

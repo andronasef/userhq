@@ -13,6 +13,7 @@ import { AuthorLine } from "@/components/post/author-line";
 import { PlainText } from "@/components/plain-text";
 import { PostTimeline } from "@/components/post/post-timeline";
 import { PostActionsMenu } from "@/components/post/post-actions-menu";
+import { MuteToggle } from "@/components/post/mute-toggle";
 
 interface PostPageProps {
   params: Promise<{ ws: string; product: string; ref: string }>;
@@ -132,15 +133,25 @@ export default async function PostPage({
             <h1 className="text-2xl font-semibold break-words flex-1 text-foreground">
               {post.title}
             </h1>
-            <PostActionsMenu
-              ws={ws}
-              product={product}
-              post={post}
-              statuses={productResult.data.statuses}
-              categories={productResult.data.categories}
-              adminView={adminView}
-              viewer={viewer}
-            />
+            <div className="flex items-center gap-2">
+              {viewer.signedIn && viewer.inConversation && viewer.commentEmailsOn && (
+                <MuteToggle
+                  ws={ws}
+                  product={product}
+                  postNumber={post.number}
+                  initialMuted={viewer.muted}
+                />
+              )}
+              <PostActionsMenu
+                ws={ws}
+                product={product}
+                post={post}
+                statuses={productResult.data.statuses}
+                categories={productResult.data.categories}
+                adminView={adminView}
+                viewer={viewer}
+              />
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge name={post.status.name} color={post.status.color} />

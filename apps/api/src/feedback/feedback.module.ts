@@ -3,6 +3,7 @@ import { CategoriesController } from "./categories.controller.js";
 import { PortalPostsController } from "./portal-posts.controller.js";
 import { PortalVotesController } from "./portal-votes.controller.js";
 import { PortalCommentsController } from "./portal-comments.controller.js";
+import { PortalMutesController } from "./portal-mutes.controller.js";
 import { AdminPostsController } from "./admin-posts.controller.js";
 import { AdminCommentsController } from "./admin-comments.controller.js";
 import { PostsService } from "./posts.service.js";
@@ -17,6 +18,7 @@ import { TenantGuard } from "../tenancy/tenant.guard.js";
   controllers: [
     PortalPostsController,
     PortalVotesController,
+    PortalMutesController,
     PortalCommentsController,
     AdminPostsController,
     AdminCommentsController,

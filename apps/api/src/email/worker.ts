@@ -68,6 +68,8 @@ export class EmailWorker
     let failedCount = 0;
     let cancelledCount = 0;
 
+    const reclaimThreshold = new Date(now.getTime() - 10 * 60_000);
+
     // Claim due batches with FOR UPDATE SKIP LOCKED
     const claimedBatches = await this.db.transaction(async (tx) => {
       const res = await tx.execute<{
@@ -80,7 +82,7 @@ export class EmailWorker
         WHERE id IN (
           SELECT id FROM comment_email_batches
           WHERE (status IN ('pending', 'retrying') AND send_after <= ${now})
-             OR (status = 'sending' AND claimed_at < ${now}::timestamptz - interval '10 minutes')
+             OR (status = 'sending' AND claimed_at < ${reclaimThreshold})
           ORDER BY send_after LIMIT 20 FOR UPDATE SKIP LOCKED
         )
         RETURNING id, user_id, workspace_id, attempts;

@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid } from "lucide-react";
+import { LayoutGrid, Users } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { EntityLogo } from "../entity-logo";
 
@@ -27,6 +27,7 @@ export function DashboardSidebar({
 }: DashboardSidebarProps) {
   const pathname = usePathname();
   const isProductsActive = pathname === `/dashboard/${ws}`;
+  const isTeamActive = pathname.startsWith(`/dashboard/${ws}/team`);
 
   return (
     <aside className={cn("flex flex-col gap-6", className)}>
@@ -44,6 +45,17 @@ export function DashboardSidebar({
         >
           <LayoutGrid className="size-4 shrink-0" aria-hidden="true" />
           <span className="truncate">Products</span>
+        </Link>
+        <Link
+          href={`/dashboard/${ws}/team`}
+          className={cn(
+            "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-background",
+            isTeamActive && "bg-background font-semibold"
+          )}
+          aria-current={isTeamActive ? "page" : undefined}
+        >
+          <Users className="size-4 shrink-0" aria-hidden="true" />
+          <span className="truncate">Team</span>
         </Link>
       </nav>
 

@@ -14,6 +14,25 @@ const CROSS_TENANT_ROUTES: Record<
   "GET /workspaces/:ws": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}`,
   }),
+  "GET /workspaces/:ws/members": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/members`,
+  }),
+  "DELETE /workspaces/:ws/members/:userId": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/members/${s.b.memberUserId}`,
+  }),
+  "POST /workspaces/:ws/leave": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/leave`,
+  }),
+  "GET /workspaces/:ws/invites": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/invites`,
+  }),
+  "POST /workspaces/:ws/invites": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/invites`,
+    body: { email: "other@example.com" },
+  }),
+  "DELETE /workspaces/:ws/invites/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/invites/${s.b.inviteId}`,
+  }),
 };
 
 describe("Cross-tenant 404 isolation (Plan 02-03)", () => {

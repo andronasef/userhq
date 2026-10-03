@@ -116,6 +116,21 @@ export const InviteLookupSchema = z.object({
 });
 export type InviteLookup = z.infer<typeof InviteLookupSchema>;
 
+export const MemberRowSchema = z.object({
+  userId: z.string(),
+  name: z.string(),
+  email: z.string(),
+  image: z.string().nullable(),
+  role: MemberRoleSchema,
+  joinedAt: z.string(),
+});
+export type MemberRow = z.infer<typeof MemberRowSchema>;
+
+export const AcceptInviteResultSchema = z.object({
+  workspaceSlug: z.string(),
+});
+export type AcceptInviteResult = z.infer<typeof AcceptInviteResultSchema>;
+
 export const HealthResponseSchema = z.object({
   status: z.literal("ok"),
   db: z.literal("up"),

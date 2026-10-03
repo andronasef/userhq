@@ -110,6 +110,28 @@ export class InvitesService {
         );
       }
 
+      if (input.kind === "workspace" && input.workspaceId) {
+        const [existingMember] = await tx
+          .select({ userId: workspaceMembers.userId })
+          .from(workspaceMembers)
+          .innerJoin(user, eq(workspaceMembers.userId, user.id))
+          .where(
+            and(
+              eq(workspaceMembers.workspaceId, input.workspaceId),
+              eq(user.email, email)
+            )
+          )
+          .limit(1);
+
+        if (existingMember) {
+          throw new ApiException(
+            "already_member",
+            409,
+            `${email} is already in this workspace.`
+          );
+        }
+      }
+
       const { token, tokenHash } = generateInviteToken();
       const expiresAt = new Date(Date.now() + INVITE_TTL_DAYS * 24 * 60 * 60 * 1000);
 
@@ -346,5 +368,108 @@ export class InvitesService {
     }
 
     return rows[0].id;
+  }
+
+  async acceptWorkspaceInvite(
+    token: string,
+    currentUser: { id: string; email: string; emailVerified: boolean }
+  ): Promise<{ workspaceSlug: string }> {
+    if (!/^[A-Za-z0-9_-]{43}$/.test(token)) {
+      throw new ApiException("not_found", 404, "This invite link isn't valid.");
+    }
+
+    const tokenHash = hashInviteToken(token);
+
+    return await this.db.transaction(async (tx) => {
+      const [inviteRow] = await tx
+        .select({
+          id: invites.id,
+          kind: invites.kind,
+          workspaceId: invites.workspaceId,
+          email: invites.email,
+          expiresAt: invites.expiresAt,
+          usedAt: invites.usedAt,
+          usedById: invites.usedById,
+          revokedAt: invites.revokedAt,
+          workspaceSlug: workspaces.slug,
+          workspaceSuspendedAt: workspaces.suspendedAt,
+        })
+        .from(invites)
+        .leftJoin(workspaces, eq(invites.workspaceId, workspaces.id))
+        .where(eq(invites.tokenHash, tokenHash))
+        .limit(1);
+
+      if (
+        !inviteRow ||
+        inviteRow.kind !== "workspace" ||
+        !inviteRow.workspaceId ||
+        !inviteRow.workspaceSlug
+      ) {
+        throw new ApiException("not_found", 404, "This invite link isn't valid.");
+      }
+
+      if (
+        currentUser.emailVerified !== true ||
+        currentUser.email.trim().toLowerCase() !== inviteRow.email.toLowerCase()
+      ) {
+        throw new ApiException(
+          "not_allowed",
+          403,
+          "This invite is for another email address."
+        );
+      }
+
+      if (inviteRow.workspaceSuspendedAt !== null) {
+        throw new ApiException(
+          "workspace_suspended",
+          403,
+          "This workspace is suspended."
+        );
+      }
+
+      const [existingMembership] = await tx
+        .select({ role: workspaceMembers.role })
+        .from(workspaceMembers)
+        .where(
+          and(
+            eq(workspaceMembers.workspaceId, inviteRow.workspaceId),
+            eq(workspaceMembers.userId, currentUser.id)
+          )
+        )
+        .limit(1);
+
+      if (existingMembership) {
+        return { workspaceSlug: inviteRow.workspaceSlug };
+      }
+
+      const claimRes = await tx.execute(sql`
+        UPDATE invites
+        SET used_at = now(), used_by_id = ${currentUser.id}
+        WHERE id = ${inviteRow.id}
+          AND used_at IS NULL
+          AND revoked_at IS NULL
+          AND expires_at > now()
+        RETURNING id
+      `);
+      const claimedRows = (claimRes as any).rows ?? claimRes;
+
+      if (!claimedRows || claimedRows.length === 0) {
+        if (inviteRow.usedById === currentUser.id) {
+          return { workspaceSlug: inviteRow.workspaceSlug };
+        }
+        throw new ApiException("not_found", 404, "This invite link isn't valid.");
+      }
+
+      await tx
+        .insert(workspaceMembers)
+        .values({
+          workspaceId: inviteRow.workspaceId,
+          userId: currentUser.id,
+          role: "admin",
+        })
+        .onConflictDoNothing();
+
+      return { workspaceSlug: inviteRow.workspaceSlug };
+    });
   }
 }

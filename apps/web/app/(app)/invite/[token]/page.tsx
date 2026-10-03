@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { getMe, getInvite } from "@/lib/api-server";
 import { Button } from "@/components/ui/button";
 import { SwitchAccountButton } from "./switch-account-button";
+import { AcceptInvite } from "./accept-invite";
 
 export const metadata: Metadata = {
   title: "Invite · UserHQ",
@@ -156,6 +157,19 @@ export default async function InvitePage({ params }: InvitePageProps) {
     redirect("/dashboard/new");
   }
 
-  // Workspace invites will be handled in 02-07
+  if (inv.alreadyMember && inv.workspaceSlug) {
+    redirect(`/dashboard/${inv.workspaceSlug}`);
+  }
+
+  if (inv.state === "pending" && inv.kind === "workspace" && inv.workspaceSlug) {
+    return (
+      <AcceptInvite
+        token={token}
+        workspaceName={inv.workspaceName ?? "the workspace"}
+        workspaceSlug={inv.workspaceSlug}
+      />
+    );
+  }
+
   redirect("/");
 }

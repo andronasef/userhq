@@ -66,7 +66,7 @@ export function UserMenu({
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" sideOffset={8} forceMount>
+      <DropdownMenuContent align="end" sideOffset={8}>
         <DropdownMenuLabel className="truncate max-w-48">
           {user.name}
         </DropdownMenuLabel>

@@ -120,4 +120,57 @@ test.describe("320px Dashboard Header Backstop (Plan 02-04)", () => {
     expect(drawerScrollWidth).toBeLessThanOrEqual(320);
     await page.keyboard.press("Escape");
   });
+
+  test("320px team invite CopyField is usable", async ({
+    page,
+    baseURL,
+  }) => {
+    const cookiePairs = user.cookie.split(";").map((c) => c.trim()).filter(Boolean);
+    const cookiesToAdd = [];
+    for (const pair of cookiePairs) {
+      const eqIdx = pair.indexOf("=");
+      if (eqIdx === -1) continue;
+      const name = pair.slice(0, eqIdx).trim();
+      const value = pair.slice(eqIdx + 1).trim();
+      if (["path", "httponly", "samesite"].includes(name.toLowerCase())) continue;
+      cookiesToAdd.push({
+        name,
+        value,
+        url: baseURL ?? "http://localhost:8080",
+      });
+    }
+    await page.context().addCookies(cookiesToAdd);
+
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto(`/dashboard/${slug}/team`);
+    await page.waitForLoadState("networkidle");
+
+    // Fill email and submit
+    const emailInput = page.locator('input[type="email"]');
+    await emailInput.fill(`team-invite-${Date.now()}@acme.example`);
+
+    const submitBtn = page.getByRole("button", { name: "Create invite link" });
+    await submitBtn.click();
+
+    // Assert CopyField input is visible
+    const copyInput = page.locator('input[readonly]');
+    await expect(copyInput).toBeVisible();
+
+    // Assert "Copy link" button's bounding box lies within 0..320
+    const copyBtn = page.getByRole("button", { name: "Copy link" });
+    await expect(copyBtn).toBeVisible();
+    const copyBox = await copyBtn.boundingBox();
+    expect(copyBox).not.toBeNull();
+    expect(copyBox!.x).toBeGreaterThanOrEqual(0);
+    expect(copyBox!.x + copyBox!.width).toBeLessThanOrEqual(320);
+
+    // Assert documentElement.scrollWidth <= 320
+    const scrollWidth = await page.evaluate(
+      () => document.documentElement.scrollWidth
+    );
+    expect(scrollWidth).toBeLessThanOrEqual(320);
+
+    // Save screenshot
+    await page.screenshot({ path: "test-results/team-copyfield-320.png" });
+  });
 });

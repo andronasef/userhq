@@ -29,7 +29,7 @@ export function InviteList({ kind, rows, workspaceSlug }: InviteListProps) {
         body={
           kind === "platform"
             ? "Create an invite link above to let a company set up a workspace."
-            : "Invite teammates to collaborate on this workspace."
+            : "Create an invite link above to add a teammate."
         }
       />
     );

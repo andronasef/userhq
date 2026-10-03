@@ -55,7 +55,7 @@ export function WorkspaceSwitcher({
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start" sideOffset={8} forceMount>
+      <DropdownMenuContent align="start" sideOffset={8}>
         <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground px-2 py-1.5">
           Workspaces
         </DropdownMenuLabel>

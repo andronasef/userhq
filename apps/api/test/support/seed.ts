@@ -7,6 +7,8 @@ export interface TenantSeed {
   id: string;
   cookie: string;
   userId: string;
+  memberUserId?: string;
+  inviteId?: string;
 }
 
 export interface Seed {
@@ -61,6 +63,29 @@ export async function seedTenants(
     role: "owner",
   });
 
+  const memberB = await signedInCookie(testApp.test, {
+    name: "Tenant B Admin Member",
+    emailVerified: true,
+  });
+
+  await testApp.db.insert(schema.workspaceMembers).values({
+    workspaceId: wsB.id,
+    userId: memberB.userId,
+    role: "admin",
+  });
+
+  const [inviteB] = await testApp.db
+    .insert(schema.invites)
+    .values({
+      kind: "workspace",
+      workspaceId: wsB.id,
+      email: `invite-b-${randB}@example.com`,
+      tokenHash: randomBytes(32).toString("hex"),
+      createdById: userB.userId,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    })
+    .returning();
+
   return {
     a: {
       slug: slugA,
@@ -73,6 +98,8 @@ export async function seedTenants(
       id: wsB.id,
       cookie: userB.cookie,
       userId: userB.userId,
+      memberUserId: memberB.userId,
+      inviteId: inviteB.id,
     },
   };
 }

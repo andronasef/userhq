@@ -1,12 +1,20 @@
 import {
   Controller,
   Get,
+  Post,
+  HttpCode,
+  HttpStatus,
   Param,
   UseInterceptors,
   SerializeOptions,
 } from "@nestjs/common";
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
-import { InviteLookupSchema, type InviteLookup } from "@userhq/types";
+import {
+  InviteLookupSchema,
+  type InviteLookup,
+  AcceptInviteResultSchema,
+  type AcceptInviteResult,
+} from "@userhq/types";
 import { CurrentUser } from "../auth/decorators.js";
 import { InvitesService } from "./invites.service.js";
 
@@ -22,5 +30,15 @@ export class InvitesController {
     @CurrentUser() user: any
   ): Promise<InviteLookup> {
     return await this.invitesService.lookup(token, user);
+  }
+
+  @Post(":token/accept")
+  @HttpCode(HttpStatus.OK)
+  @SerializeOptions({ schema: AcceptInviteResultSchema })
+  async accept(
+    @Param("token") token: string,
+    @CurrentUser() user: any
+  ): Promise<AcceptInviteResult> {
+    return await this.invitesService.acceptWorkspaceInvite(token, user);
   }
 }

@@ -95,7 +95,7 @@ describe("Products API (Plan 02-08)", () => {
     expect(listRes.status).toBe(200);
     expect(listRes.body.some((p: any) => p.slug === slug && p.name === "Tracer Product")).toBe(true);
 
-    // PATCH edits name, tagline, websiteUrl, ignores slug
+    // PATCH edits name, tagline, websiteUrl
     const patchRes = await request(testApp.http)
       .patch(`/api/v1/workspaces/${wsSlug}/products/${slug}`)
       .set("Cookie", ownerUser.cookie)
@@ -104,7 +104,6 @@ describe("Products API (Plan 02-08)", () => {
         name: "Renamed Tracer",
         tagline: "A snappy tagline",
         websiteUrl: "https://acme.example",
-        slug: "other-slug",
       });
 
     expect(patchRes.status).toBe(200);
@@ -528,6 +527,117 @@ describe("Products API (Plan 02-08)", () => {
       // In default Postgres collation (C or en_US/UTF-8), let's see how they sort
       // Ascending sort by name then slug
       expect(names).toEqual(["Alpha", "beta", "gamma"]);
+    });
+  });
+
+  describe("Product Slug Editing (Quick Task)", () => {
+    it("can change product slug when unique and valid, routing to new slug and 404 on old", async () => {
+      const origSlug = "slug-edit-orig";
+      await request(testApp.http)
+        .post(`/api/v1/workspaces/${wsSlug}/products`)
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ name: "Slug Edit Orig", slug: origSlug });
+
+      const newSlug = "slug-edit-renamed";
+      const patchRes = await request(testApp.http)
+        .patch(`/api/v1/workspaces/${wsSlug}/products/${origSlug}`)
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ slug: newSlug });
+
+      expect(patchRes.status).toBe(200);
+      expect(patchRes.body.slug).toBe(newSlug);
+
+      // Old slug 404s
+      const oldGet = await request(testApp.http)
+        .get(`/api/v1/workspaces/${wsSlug}/products/${origSlug}`)
+        .set("Cookie", ownerUser.cookie);
+      expect(oldGet.status).toBe(404);
+
+      // New slug 200s
+      const newGet = await request(testApp.http)
+        .get(`/api/v1/workspaces/${wsSlug}/products/${newSlug}`)
+        .set("Cookie", ownerUser.cookie);
+      expect(newGet.status).toBe(200);
+      expect(newGet.body.name).toBe("Slug Edit Orig");
+
+      // Public portal at new slug returns 200
+      const portalRes = await request(testApp.http)
+        .get(`/api/v1/portal/${wsSlug}/${newSlug}`);
+      expect(portalRes.status).toBe(200);
+    });
+
+    it("rejects slug that is already taken in the same workspace with 409 slug_taken", async () => {
+      const slug1 = "slug-taken-p1";
+      const slug2 = "slug-taken-p2";
+      await request(testApp.http)
+        .post(`/api/v1/workspaces/${wsSlug}/products`)
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ name: "Product One", slug: slug1 });
+
+      await request(testApp.http)
+        .post(`/api/v1/workspaces/${wsSlug}/products`)
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ name: "Product Two", slug: slug2 });
+
+      // Try updating product 2 to product 1 slug
+      const res = await request(testApp.http)
+        .patch(`/api/v1/workspaces/${wsSlug}/products/${slug2}`)
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ slug: slug1 });
+
+      expect(res.status).toBe(409);
+      expect(res.body.code).toBe("slug_taken");
+    });
+
+    it("rejects reserved and invalid product slugs with 400", async () => {
+      const slug = "slug-val-test";
+      await request(testApp.http)
+        .post(`/api/v1/workspaces/${wsSlug}/products`)
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ name: "Val Test", slug });
+
+      // Reserved slug
+      const reservedRes = await request(testApp.http)
+        .patch(`/api/v1/workspaces/${wsSlug}/products/${slug}`)
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ slug: "settings" });
+      expect(reservedRes.status).toBe(400);
+      expect(reservedRes.body.code).toBe("slug_reserved");
+
+      // Invalid slug format
+      const invalidRes = await request(testApp.http)
+        .patch(`/api/v1/workspaces/${wsSlug}/products/${slug}`)
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ slug: "INVALID_SLUG!" });
+      expect(invalidRes.status).toBe(400);
+      expect(invalidRes.body.code).toBe("slug_invalid");
+    });
+
+    it("allows keeping the same slug in PATCH body", async () => {
+      const slug = "same-slug-test";
+      await request(testApp.http)
+        .post(`/api/v1/workspaces/${wsSlug}/products`)
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ name: "Same Slug", slug });
+
+      const res = await request(testApp.http)
+        .patch(`/api/v1/workspaces/${wsSlug}/products/${slug}`)
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ slug, name: "Same Slug Renamed" });
+
+      expect(res.status).toBe(200);
+      expect(res.body.slug).toBe(slug);
+      expect(res.body.name).toBe("Same Slug Renamed");
     });
   });
 });

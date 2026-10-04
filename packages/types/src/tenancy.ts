@@ -245,6 +245,7 @@ export type ProductDetail = z.infer<typeof ProductDetailSchema>;
 
 export const UpdateProductInputSchema = z.object({
   name: NameSchema.optional(),
+  slug: productSlugSchema.optional(),
   logoUploadId: z.uuid().nullable().optional(),
   tagline: TaglineSchema.optional(),
   websiteUrl: WebsiteUrlSchema.optional(),

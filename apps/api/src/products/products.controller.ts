@@ -230,6 +230,31 @@ export class ProductsController {
     }
 
     const updateData: Record<string, any> = {};
+    if (input.slug !== undefined) {
+      const [existing] = await this.db
+        .select({ id: products.id })
+        .from(products)
+        .where(
+          and(
+            eq(products.workspaceId, tenant.workspaceId),
+            eq(products.slug, input.slug)
+          )
+        )
+        .limit(1);
+
+      if (existing) {
+        if (existing.id !== tenant.productId) {
+          throw new ApiException(
+            "slug_taken",
+            409,
+            "That URL is taken. Try another."
+          );
+        }
+      } else {
+        updateData.slug = input.slug;
+      }
+    }
+
     if (input.name !== undefined) updateData.name = input.name;
     if (input.logoUploadId !== undefined) updateData.logoUploadId = input.logoUploadId;
     if (input.tagline !== undefined) updateData.tagline = input.tagline;

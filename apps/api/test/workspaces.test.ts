@@ -451,4 +451,114 @@ describe("Workspaces API (Plan 02-03)", () => {
       expect(res.body.code).toBe("validation_failed");
     });
   });
+
+  describe("DELETE /api/v1/workspaces/:ws (Quick Task)", () => {
+    it("non-owner admin cannot delete workspace (403 forbidden)", async () => {
+      const ownerUser = await signedInCookie(testApp.test, {
+        name: "Workspace Owner",
+        email: "ws-owner-del@example.test",
+        emailVerified: true,
+      });
+
+      // Create admin user
+      const adminUser = await signedInCookie(testApp.test, {
+        name: "Admin User",
+        email: "ws-admin@example.test",
+        emailVerified: true,
+      });
+
+      // Create workspace owned by ownerUser
+      const [ws] = await testApp.db
+        .insert(schema.workspaces)
+        .values({ name: "Delete WS Test", slug: "ws-del-perm" })
+        .returning();
+
+      await testApp.db.insert(schema.workspaceMembers).values([
+        { workspaceId: ws.id, userId: ownerUser.userId, role: "owner" },
+        { workspaceId: ws.id, userId: adminUser.userId, role: "admin" },
+      ]);
+
+      const res = await request(testApp.http)
+        .delete(`/api/v1/workspaces/${ws.slug}`)
+        .set("Cookie", adminUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL);
+
+      expect(res.status).toBe(403);
+    });
+
+    it("owner can delete workspace; marks workspace and all its products deleted and returns 204", async () => {
+      const ownerUser = await signedInCookie(testApp.test, {
+        name: "Workspace Owner 2",
+        email: "ws-owner-del2@example.test",
+        emailVerified: true,
+      });
+
+      // Create workspace with 2 products
+      const [ws] = await testApp.db
+        .insert(schema.workspaces)
+        .values({ name: "To Delete WS", slug: "ws-to-delete" })
+        .returning();
+
+      await testApp.db.insert(schema.workspaceMembers).values({
+        workspaceId: ws.id,
+        userId: ownerUser.userId,
+        role: "owner",
+      });
+
+      const [p1] = await testApp.db
+        .insert(schema.products)
+        .values({
+          workspaceId: ws.id,
+          name: "Prod 1",
+          slug: "prod-1",
+          accentColor: "#2563EB",
+        })
+        .returning();
+
+      const [_p2] = await testApp.db
+        .insert(schema.products)
+        .values({
+          workspaceId: ws.id,
+          name: "Prod 2",
+          slug: "prod-2",
+          accentColor: "#2563EB",
+        })
+        .returning();
+
+      // Delete workspace
+      const delRes = await request(testApp.http)
+        .delete(`/api/v1/workspaces/${ws.slug}`)
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL);
+
+      expect(delRes.status).toBe(204);
+
+      // Subsequent workspace GET 404s
+      const getRes = await request(testApp.http)
+        .get(`/api/v1/workspaces/${ws.slug}`)
+        .set("Cookie", ownerUser.cookie);
+      expect(getRes.status).toBe(404);
+
+      // Workspace row in DB has deletedAt set
+      const [wsRow] = await testApp.db
+        .select()
+        .from(schema.workspaces)
+        .where(eq(schema.workspaces.id, ws.id));
+      expect(wsRow.deletedAt).not.toBeNull();
+
+      // All products in workspace have deletedAt set
+      const prods = await testApp.db
+        .select()
+        .from(schema.products)
+        .where(eq(schema.products.workspaceId, ws.id));
+      expect(prods.length).toBe(2);
+      expect(prods[0].deletedAt).not.toBeNull();
+      expect(prods[1].deletedAt).not.toBeNull();
+
+      // Portal access 404s
+      const portalRes = await request(testApp.http)
+        .get(`/api/v1/portal/${ws.slug}/${p1.slug}`);
+      expect(portalRes.status).toBe(404);
+    });
+  });
 });

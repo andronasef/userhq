@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Body,
   HttpCode,
   HttpStatus,
@@ -12,13 +13,14 @@ import {
   SerializeOptions,
 } from "@nestjs/common";
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import {
   DB,
   type Db,
   workspaces,
   workspaceMembers,
   uploads,
+  products,
 } from "@userhq/db";
 import {
   CreateWorkspaceInputSchema,
@@ -223,6 +225,36 @@ export class WorkspaceController {
       websiteUrl: row.websiteUrl ?? null,
       directoryEnabled: row.directoryEnabled,
       role: tenant.role,
+    });
+  }
+  @Delete()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteWorkspace(
+    @CurrentTenant() tenant: Tenant
+  ): Promise<void> {
+    if (tenant.role !== "owner") {
+      throw new ApiException(
+        "forbidden",
+        403,
+        "Only the workspace owner can delete the workspace."
+      );
+    }
+
+    await this.db.transaction(async (tx) => {
+      await tx
+        .update(workspaces)
+        .set({ deletedAt: sql`now()` })
+        .where(eq(workspaces.id, tenant.workspaceId));
+
+      await tx
+        .update(products)
+        .set({ deletedAt: sql`now()` })
+        .where(
+          and(
+            eq(products.workspaceId, tenant.workspaceId),
+            isNull(products.deletedAt)
+          )
+        );
     });
   }
 }

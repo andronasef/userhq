@@ -18,6 +18,9 @@ const CROSS_TENANT_ROUTES: Record<
     url: `/api/v1/workspaces/${s.b.slug}`,
     body: { name: "Renamed" },
   }),
+  "DELETE /workspaces/:ws": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}`,
+  }),
   "GET /workspaces/:ws/members": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/members`,
   }),

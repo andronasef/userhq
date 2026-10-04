@@ -22,6 +22,8 @@ import { Alert } from "../../../../components/ui/alert";
 import { apiFetch, ApiClientError } from "../../../../lib/api-client";
 import { errorCopy, FIELD_FOR_CODE } from "../../../../lib/api-errors";
 import { QueryProvider } from "../../../../lib/query-client";
+import { ConfirmDialog } from "../../../../components/ui/confirm-dialog";
+import { flash } from "../../../../components/ui/toaster";
 
 export interface WorkspaceSettingsFormsProps {
   ws: string;
@@ -320,6 +322,84 @@ function WorkspaceDirectoryForm({
   );
 }
 
+function WorkspaceDangerZone({
+  ws,
+  workspace,
+}: WorkspaceSettingsFormsProps): React.JSX.Element | null {
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [confirmText, setConfirmText] = React.useState("");
+
+  if (workspace.role !== "owner") {
+    return null;
+  }
+
+  const handleOpenChange = (open: boolean) => {
+    setDialogOpen(open);
+    if (!open) {
+      setConfirmText("");
+    }
+  };
+
+  const handleDelete = async () => {
+    await apiFetch(`/api/v1/workspaces/${ws}`, {
+      method: "DELETE",
+    });
+    flash(`${workspace.name} deleted`);
+    window.location.assign("/dashboard");
+  };
+
+  const isConfirmed = confirmText.trim() === workspace.name;
+
+  return (
+    <div className="border-t border-border pt-8 mt-8 max-w-xl">
+      <div className="rounded-lg border border-destructive/30 p-6 flex flex-col gap-4">
+        <div>
+          <h2 className="text-base font-semibold text-destructive">Danger zone</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Deleting a workspace takes all of its products and portals offline. This cannot be undone.
+          </p>
+        </div>
+
+        <div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setDialogOpen(true)}
+            className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+          >
+            Delete workspace
+          </Button>
+        </div>
+
+        <ConfirmDialog
+          open={dialogOpen}
+          onOpenChange={handleOpenChange}
+          title={`Delete ${workspace.name}?`}
+          description="All products in this workspace will be taken offline immediately, and the workspace URL cannot be used again. This cannot be undone."
+          dismissLabel="Keep workspace"
+          confirmLabel="Delete workspace"
+          pendingLabel="Deleting…"
+          confirmDisabled={!isConfirmed}
+          onConfirm={handleDelete}
+        >
+          <Field
+            id="confirm-delete-workspace"
+            label={`Type ${workspace.name} to confirm`}
+          >
+            <Input
+              id="confirm-delete-workspace"
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              placeholder={workspace.name}
+              autoComplete="off"
+            />
+          </Field>
+        </ConfirmDialog>
+      </div>
+    </div>
+  );
+}
+
 export function WorkspaceSettingsForms(
   props: WorkspaceSettingsFormsProps
 ): React.JSX.Element {
@@ -328,6 +408,7 @@ export function WorkspaceSettingsForms(
       <div className="space-y-4">
         <WorkspaceGeneralForm {...props} />
         <WorkspaceDirectoryForm {...props} />
+        <WorkspaceDangerZone {...props} />
       </div>
     </QueryProvider>
   );

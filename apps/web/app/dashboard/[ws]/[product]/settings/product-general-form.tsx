@@ -48,6 +48,7 @@ function ProductGeneralFormInner({
 
   const defaultValues: UpdateProductInput = {
     name: product.name,
+    slug: product.slug,
     logoUploadId: product.logoUploadId ?? null,
     tagline: product.tagline ?? "",
     websiteUrl: product.websiteUrl ?? "",
@@ -81,8 +82,13 @@ function ProductGeneralFormInner({
     },
     onSuccess: (updated) => {
       toast.success("Changes saved");
+      if (updated.slug !== product.slug) {
+        window.location.assign(`/dashboard/${ws}/${updated.slug}/settings`);
+        return;
+      }
       reset({
         name: updated.name,
+        slug: updated.slug,
         logoUploadId: updated.logoUploadId ?? null,
         tagline: updated.tagline ?? "",
         websiteUrl: updated.websiteUrl ?? "",
@@ -92,7 +98,7 @@ function ProductGeneralFormInner({
     onError: (err: unknown) => {
       if (err instanceof ApiClientError && err.code) {
         const field = FIELD_FOR_CODE[err.code];
-        if (field && ["name", "tagline", "websiteUrl"].includes(field)) {
+        if (field && ["name", "slug", "tagline", "websiteUrl"].includes(field)) {
           setError(field as any, { message: errorCopy(err) });
           return;
         }
@@ -122,6 +128,7 @@ function ProductGeneralFormInner({
   };
 
   const nameError = errors.name?.message;
+  const slugError = errors.slug?.message;
   const taglineError = errors.tagline?.message;
   const websiteError = errors.websiteUrl?.message;
 
@@ -142,14 +149,15 @@ function ProductGeneralFormInner({
         <Field
           id="product-url"
           label="URL"
-          helper="The URL can't be changed, so links to your portal never break."
+          error={slugError}
+          helper="Changing the URL will change your portal address. Old links will stop working unless updated."
         >
           <div className="flex gap-2 items-center">
             <SlugInput
+              id="product-url"
               prefix={`${host}/${ws}/`}
-              value={product.slug}
-              readOnly
-              disabled
+              {...register("slug")}
+              aria-invalid={!!slugError}
             />
             <Button
               type="button"

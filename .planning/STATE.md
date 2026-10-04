@@ -130,6 +130,12 @@ Items acknowledged and deferred at milestone close, most recent first:
 |----------|------|--------|-------------|-----------|
 | *(none)* | | | | |
 
+## Quick Tasks Completed
+
+| Task | Date | Status | Plan | Summary |
+|------|------|--------|------|---------|
+| Product URL change & workspace deletion (with all products) | 2026-10-04 | Completed | [PLAN.md](.planning/quick/20261004-product-url-and-workspace-deletion/PLAN.md) | [SUMMARY.md](.planning/quick/20261004-product-url-and-workspace-deletion/SUMMARY.md) |
+
 ## Session Continuity
 
 Last session: 2026-10-03T22:26:34.137Z

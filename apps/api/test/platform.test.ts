@@ -517,6 +517,50 @@ describe("Platform Owner Console & Invites API (Plan 02-05)", () => {
   });
 
   describe("Workspaces Oversight & Detail (Plan 02-11 Task 1)", () => {
+    it("tracer: a soft-deleted workspace stays listed with deleted true", async () => {
+      const ts = Date.now();
+      const wsSlug = `del-ws-${ts}`;
+      const [ws] = await testApp.db
+        .insert(schema.workspaces)
+        .values({
+          slug: wsSlug,
+          name: `Soft Deleted WS ${ts}`,
+          deletedAt: new Date(),
+        })
+        .returning();
+      createdWorkspaceIds.push(ws.id);
+
+      // Platform owner lists workspaces: includes it with deleted: true
+      const listRes = await request(testApp.http)
+        .get(`/api/v1/platform/workspaces?q=${wsSlug}`)
+        .set("Cookie", ownerCookie);
+
+      expect(listRes.status).toBe(200);
+      expect(listRes.body.rows.length).toBe(1);
+      expect(listRes.body.rows[0].id).toBe(ws.id);
+      expect(listRes.body.rows[0].deleted).toBe(true);
+
+      // Detail loads with deleted: true
+      const detailRes = await request(testApp.http)
+        .get(`/api/v1/platform/workspaces/${ws.id}`)
+        .set("Cookie", ownerCookie);
+
+      expect(detailRes.status).toBe(200);
+      expect(detailRes.body.id).toBe(ws.id);
+      expect(detailRes.body.deleted).toBe(true);
+
+      // GET /portal/{slug} still returns 404
+      const portalRes = await request(testApp.http)
+        .get(`/api/v1/portal/${wsSlug}`);
+      expect(portalRes.status).toBe(404);
+
+      // Non-owner calling GET /platform/workspaces returns 404
+      const nonOwnerRes = await request(testApp.http)
+        .get(`/api/v1/platform/workspaces?q=${wsSlug}`)
+        .set("Cookie", nonOwnerCookie);
+      expect(nonOwnerRes.status).toBe(404);
+    });
+
     it("tracer: owner lists workspaces with counts and opens one", async () => {
       const ts = Date.now();
       const wsSlug1 = `ws-trace1-${ts}`;

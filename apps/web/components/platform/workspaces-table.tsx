@@ -73,6 +73,7 @@ export function WorkspacesTable({ rows }: WorkspacesTableProps) {
                   >
                     <EntityLogo src={row.logoUrl} name={row.name} size={24} />
                     <span>{row.name}</span>
+                    {row.deleted && <Badge variant="danger">Deleted</Badge>}
                   </Link>
                 </TD>
                 <TD>

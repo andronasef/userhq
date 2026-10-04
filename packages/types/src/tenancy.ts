@@ -308,6 +308,7 @@ export const PlatformWorkspaceRowSchema = z.object({
   postCount: z.number().int(),
   voteCount: z.number().int(),
   suspended: z.boolean(),
+  deleted: z.boolean(),
   createdAt: z.string(),
 });
 export type PlatformWorkspaceRow = z.infer<typeof PlatformWorkspaceRowSchema>;
@@ -362,4 +363,3 @@ export type PlatformWorkspacePage = z.infer<typeof PlatformWorkspacePageSchema>;
 
 export const PlatformUserPageSchema = pageOf(PlatformUserRowSchema);
 export type PlatformUserPage = z.infer<typeof PlatformUserPageSchema>;
-

@@ -17,6 +17,7 @@ export interface WorkspaceDetailHeaderProps {
   slug: string;
   logoUrl: string | null;
   suspended: boolean;
+  deleted?: boolean;
 }
 
 export function WorkspaceDetailHeader({
@@ -25,6 +26,7 @@ export function WorkspaceDetailHeader({
   slug,
   logoUrl,
   suspended,
+  deleted,
 }: WorkspaceDetailHeaderProps) {
   const router = useRouter();
   const [confirmOpen, setConfirmOpen] = React.useState(false);
@@ -61,6 +63,7 @@ export function WorkspaceDetailHeader({
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-semibold text-foreground">{name}</h1>
+            {deleted && <Badge variant="danger">Deleted</Badge>}
             {suspended ? (
               <Badge variant="danger">Suspended</Badge>
             ) : (

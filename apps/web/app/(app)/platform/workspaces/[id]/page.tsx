@@ -41,6 +41,7 @@ export default async function PlatformWorkspaceDetailPage({
         slug={ws.slug}
         logoUrl={ws.logoUrl}
         suspended={ws.suspended}
+        deleted={ws.deleted}
       />
 
       <section className="flex flex-col gap-4">
@@ -113,7 +114,11 @@ export default async function PlatformWorkspaceDetailPage({
                       <div className="font-medium text-foreground">{m.name}</div>
                       <div className="text-xs text-muted-foreground">{m.email}</div>
                     </TD>
-                    <TD className="capitalize text-muted-foreground">{m.role}</TD>
+                    <TD>
+                      <Badge variant="outline" className="capitalize">
+                        {m.role}
+                      </Badge>
+                    </TD>
                     <TD className="text-muted-foreground">{formatDate(m.joinedAt)}</TD>
                   </TR>
                 ))}

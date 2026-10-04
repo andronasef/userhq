@@ -115,6 +115,7 @@ export class PlatformController {
         name: workspaces.name,
         logoKey: uploads.storageKey,
         suspended: sql<boolean>`${workspaces.suspendedAt} IS NOT NULL`,
+        deleted: sql<boolean>`${workspaces.deletedAt} IS NOT NULL`,
         createdAt: workspaces.createdAt,
         productCount: sql<number>`(SELECT count(*)::int FROM products WHERE products.workspace_id = ${workspaces.id} AND products.deleted_at IS NULL)`,
         memberCount: sql<number>`(SELECT count(*)::int FROM workspace_members WHERE workspace_members.workspace_id = ${workspaces.id})`,
@@ -142,6 +143,7 @@ export class PlatformController {
         // ponytail: Phase 3 replaces these zeros with posts/votes counts
         voteCount: 0,
         suspended: Boolean(r.suspended),
+        deleted: Boolean(r.deleted),
         createdAt: r.createdAt.toISOString(),
       })),
       page,
@@ -165,6 +167,7 @@ export class PlatformController {
         name: workspaces.name,
         logoKey: uploads.storageKey,
         suspended: sql<boolean>`${workspaces.suspendedAt} IS NOT NULL`,
+        deleted: sql<boolean>`${workspaces.deletedAt} IS NOT NULL`,
         createdAt: workspaces.createdAt,
         productCount: sql<number>`(SELECT count(*)::int FROM products WHERE products.workspace_id = ${workspaces.id} AND products.deleted_at IS NULL)`,
         memberCount: sql<number>`(SELECT count(*)::int FROM workspace_members WHERE workspace_members.workspace_id = ${workspaces.id})`,
@@ -212,6 +215,7 @@ export class PlatformController {
       // ponytail: Phase 3 replaces these zeros with posts/votes counts
       voteCount: 0,
       suspended: Boolean(wsRow.suspended),
+      deleted: Boolean(wsRow.deleted),
       createdAt: wsRow.createdAt.toISOString(),
       products: wsProducts.map((p) => ({
         slug: p.slug,

@@ -14,6 +14,7 @@ describe("Platform Owner Console & Invites API (Plan 02-05)", () => {
   let nonOwnerCookie: string;
   const createdInviteIds: string[] = [];
   const createdWorkspaceIds: string[] = [];
+  const createdUserIds: string[] = [];
 
   beforeAll(async () => {
     testApp = await createTestApp({
@@ -43,17 +44,31 @@ describe("Platform Owner Console & Invites API (Plan 02-05)", () => {
         .where(inArray(schema.invites.id, createdInviteIds));
     }
     if (createdWorkspaceIds.length > 0) {
+      const prodSub = testApp.db
+        .select({ id: schema.products.id })
+        .from(schema.products)
+        .where(inArray(schema.products.workspaceId, createdWorkspaceIds));
+
       await testApp.db
-        .delete(schema.statuses)
+        .delete(schema.votes)
         .where(
           inArray(
-            schema.statuses.productId,
+            schema.votes.postId,
             testApp.db
-              .select({ id: schema.products.id })
-              .from(schema.products)
-              .where(inArray(schema.products.workspaceId, createdWorkspaceIds))
+              .select({ id: schema.posts.id })
+              .from(schema.posts)
+              .where(inArray(schema.posts.productId, prodSub))
           )
         );
+
+      await testApp.db
+        .delete(schema.posts)
+        .where(inArray(schema.posts.productId, prodSub));
+
+      await testApp.db
+        .delete(schema.statuses)
+        .where(inArray(schema.statuses.productId, prodSub));
+
       await testApp.db
         .delete(schema.products)
         .where(inArray(schema.products.workspaceId, createdWorkspaceIds));
@@ -63,6 +78,11 @@ describe("Platform Owner Console & Invites API (Plan 02-05)", () => {
       await testApp.db
         .delete(schema.workspaces)
         .where(inArray(schema.workspaces.id, createdWorkspaceIds));
+    }
+    if (createdUserIds.length > 0) {
+      await testApp.db
+        .delete(schema.user)
+        .where(inArray(schema.user.id, createdUserIds));
     }
     await testApp.close();
   });
@@ -1099,6 +1119,247 @@ describe("Platform Owner Console & Invites API (Plan 02-05)", () => {
         .set("Cookie", ownerCookie)
         .set("Origin", testApp.env.PUBLIC_URL);
       expect(unknownDel.status).toBe(404);
+    });
+  });
+
+  describe("Real Post and Vote Counts (Plan 03-16 Task 2)", () => {
+    it("workspace, product, and user postCount and voteCount reflect live, non-merged posts and votes", async () => {
+      const ts = Date.now();
+
+      // Workspace with 2 products
+      const [wsCounts] = await testApp.db
+        .insert(schema.workspaces)
+        .values({
+          slug: `ws-counts-${ts}`,
+          name: `Counts Workspace ${ts}`,
+        })
+        .returning();
+      createdWorkspaceIds.push(wsCounts.id);
+
+      const [prod1] = await testApp.db
+        .insert(schema.products)
+        .values({
+          workspaceId: wsCounts.id,
+          slug: `prod1-${ts}`,
+          name: `Product 1 ${ts}`,
+        })
+        .returning();
+
+      const [prod2] = await testApp.db
+        .insert(schema.products)
+        .values({
+          workspaceId: wsCounts.id,
+          slug: `prod2-${ts}`,
+          name: `Product 2 ${ts}`,
+        })
+        .returning();
+
+      const [status1] = await testApp.db
+        .insert(schema.statuses)
+        .values({
+          productId: prod1.id,
+          name: "Open",
+          color: "#2563EB",
+          type: "review",
+          position: 0,
+          isDefault: true,
+        })
+        .returning();
+
+      const [status2] = await testApp.db
+        .insert(schema.statuses)
+        .values({
+          productId: prod2.id,
+          name: "Open",
+          color: "#2563EB",
+          type: "review",
+          position: 0,
+          isDefault: true,
+        })
+        .returning();
+
+      // Users
+      const userA = await signedInCookie(testApp.test, {
+        name: `User A ${ts}`,
+        email: `usera-${ts}@example.com`,
+        emailVerified: true,
+      });
+      const userB = await signedInCookie(testApp.test, {
+        name: `User B ${ts}`,
+        email: `userb-${ts}@example.com`,
+        emailVerified: true,
+      });
+      createdUserIds.push(userA.userId, userB.userId);
+
+      // Prod1 posts:
+      // 1 live post (post1) authored by userA
+      const [post1] = await testApp.db
+        .insert(schema.posts)
+        .values({
+          productId: prod1.id,
+          number: 1,
+          title: "Live Post 1",
+          statusId: status1.id,
+          authorId: userA.userId,
+        })
+        .returning();
+
+      // 1 deleted post (postDel) authored by userA
+      const [postDel] = await testApp.db
+        .insert(schema.posts)
+        .values({
+          productId: prod1.id,
+          number: 2,
+          title: "Deleted Post",
+          statusId: status1.id,
+          authorId: userA.userId,
+          deletedAt: new Date(),
+        })
+        .returning();
+
+      // Prod2 posts:
+      // 1 live post (post2) authored by userA
+      const [post2] = await testApp.db
+        .insert(schema.posts)
+        .values({
+          productId: prod2.id,
+          number: 1,
+          title: "Live Post 2",
+          statusId: status2.id,
+          authorId: userA.userId,
+        })
+        .returning();
+
+      // 1 merged post (postMerged) authored by userB, merged into post2
+      const [postMerged] = await testApp.db
+        .insert(schema.posts)
+        .values({
+          productId: prod2.id,
+          number: 2,
+          title: "Merged Post",
+          statusId: status2.id,
+          authorId: userB.userId,
+          mergedIntoId: post2.id,
+        })
+        .returning();
+
+      // Third live post in a separate workspace for userA\'s 3rd vote
+      const [wsOther] = await testApp.db
+        .insert(schema.workspaces)
+        .values({
+          slug: `ws-other-${ts}`,
+          name: `Other Workspace ${ts}`,
+        })
+        .returning();
+      createdWorkspaceIds.push(wsOther.id);
+
+      const [prodOther] = await testApp.db
+        .insert(schema.products)
+        .values({
+          workspaceId: wsOther.id,
+          slug: `prod-other-${ts}`,
+          name: `Other Product ${ts}`,
+        })
+        .returning();
+
+      const [statusOther] = await testApp.db
+        .insert(schema.statuses)
+        .values({
+          productId: prodOther.id,
+          name: "Open",
+          color: "#2563EB",
+          type: "review",
+          position: 0,
+          isDefault: true,
+        })
+        .returning();
+
+      const [postOther] = await testApp.db
+        .insert(schema.posts)
+        .values({
+          productId: prodOther.id,
+          number: 1,
+          title: "Other Live Post",
+          statusId: statusOther.id,
+          authorId: userB.userId,
+        })
+        .returning();
+
+      // Votes:
+      // On post1 (live): userA and userB vote (2 votes)
+      // On post2 (live): userA votes (1 vote)
+      // On postDel (deleted): userA votes (should not count!)
+      // On postMerged (merged): userB votes (should not count!)
+      // On postOther (live): userA votes (userA\'s 3rd vote on live post!)
+      await testApp.db.insert(schema.votes).values([
+        { postId: post1.id, userId: userA.userId },
+        { postId: post1.id, userId: userB.userId },
+        { postId: post2.id, userId: userA.userId },
+        { postId: postDel.id, userId: userA.userId },
+        { postId: postMerged.id, userId: userB.userId },
+        { postId: postOther.id, userId: userA.userId },
+      ]);
+
+      // Workspace list oversight:
+      const listRes = await request(testApp.http)
+        .get(`/api/v1/platform/workspaces?q=${wsCounts.slug}`)
+        .set("Cookie", ownerCookie);
+
+      expect(listRes.status).toBe(200);
+      expect(listRes.body.rows.length).toBe(1);
+      expect(listRes.body.rows[0].postCount).toBe(2);
+      expect(listRes.body.rows[0].voteCount).toBe(3);
+
+      // Workspace detail oversight:
+      const detailRes = await request(testApp.http)
+        .get(`/api/v1/platform/workspaces/${wsCounts.id}`)
+        .set("Cookie", ownerCookie);
+
+      expect(detailRes.status).toBe(200);
+      expect(detailRes.body.postCount).toBe(2);
+      expect(detailRes.body.voteCount).toBe(3);
+
+      // Product rows split counts:
+      const p1 = detailRes.body.products.find((p: any) => p.slug === prod1.slug);
+      expect(p1).toBeDefined();
+      expect(p1.postCount).toBe(1);
+      expect(p1.voteCount).toBe(2);
+
+      const p2 = detailRes.body.products.find((p: any) => p.slug === prod2.slug);
+      expect(p2).toBeDefined();
+      expect(p2.postCount).toBe(1);
+      expect(p2.voteCount).toBe(1);
+
+      // User oversight:
+      // userA authored 2 live posts (post1, post2) and cast 3 votes on live posts (post1, post2, postOther)
+      const usersRes = await request(testApp.http)
+        .get(`/api/v1/platform/users?q=usera-${ts}`)
+        .set("Cookie", ownerCookie);
+
+      expect(usersRes.status).toBe(200);
+      expect(usersRes.body.rows.length).toBe(1);
+      expect(usersRes.body.rows[0].postCount).toBe(2);
+      expect(usersRes.body.rows[0].voteCount).toBe(3);
+
+      // Deleted user: appears in the users list with email deleted-{id}@deleted.invalid
+      const [delUser] = await testApp.db
+        .insert(schema.user)
+        .values({
+          id: `del-user-${ts}`,
+          name: "Deleted User",
+          email: `deleted-del-user-${ts}@deleted.invalid`,
+          emailVerified: false,
+        })
+        .returning();
+      createdUserIds.push(delUser.id);
+
+      const delUserRes = await request(testApp.http)
+        .get(`/api/v1/platform/users?q=deleted-del-user-${ts}`)
+        .set("Cookie", ownerCookie);
+
+      expect(delUserRes.status).toBe(200);
+      expect(delUserRes.body.rows.length).toBe(1);
+      expect(delUserRes.body.rows[0].email).toBe(`deleted-del-user-${ts}@deleted.invalid`);
     });
   });
 });

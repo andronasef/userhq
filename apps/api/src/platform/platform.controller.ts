@@ -117,8 +117,10 @@ export class PlatformController {
         suspended: sql<boolean>`${workspaces.suspendedAt} IS NOT NULL`,
         deleted: sql<boolean>`${workspaces.deletedAt} IS NOT NULL`,
         createdAt: workspaces.createdAt,
-        productCount: sql<number>`(SELECT count(*)::int FROM products WHERE products.workspace_id = ${workspaces.id} AND products.deleted_at IS NULL)`,
-        memberCount: sql<number>`(SELECT count(*)::int FROM workspace_members WHERE workspace_members.workspace_id = ${workspaces.id})`,
+        productCount: sql<number>`(SELECT count(*)::int FROM products WHERE products.workspace_id = workspaces.id AND products.deleted_at IS NULL)`,
+        memberCount: sql<number>`(SELECT count(*)::int FROM workspace_members WHERE workspace_members.workspace_id = workspaces.id)`,
+        postCount: sql<number>`(SELECT count(*)::int FROM posts INNER JOIN products ON posts.product_id = products.id WHERE products.workspace_id = workspaces.id AND posts.deleted_at IS NULL AND posts.merged_into_id IS NULL)`,
+        voteCount: sql<number>`(SELECT count(*)::int FROM votes INNER JOIN posts ON votes.post_id = posts.id INNER JOIN products ON posts.product_id = products.id WHERE products.workspace_id = workspaces.id AND posts.deleted_at IS NULL AND posts.merged_into_id IS NULL)`,
       })
       .from(workspaces)
       .leftJoin(uploads, eq(workspaces.logoUploadId, uploads.id))
@@ -138,10 +140,8 @@ export class PlatformController {
         logoUrl: r.logoKey ? `/uploads/${r.logoKey}` : null,
         productCount: Number(r.productCount),
         memberCount: Number(r.memberCount),
-        // ponytail: Phase 3 replaces these zeros with posts/votes counts
-        postCount: 0,
-        // ponytail: Phase 3 replaces these zeros with posts/votes counts
-        voteCount: 0,
+        postCount: Number(r.postCount),
+        voteCount: Number(r.voteCount),
         suspended: Boolean(r.suspended),
         deleted: Boolean(r.deleted),
         createdAt: r.createdAt.toISOString(),
@@ -169,8 +169,10 @@ export class PlatformController {
         suspended: sql<boolean>`${workspaces.suspendedAt} IS NOT NULL`,
         deleted: sql<boolean>`${workspaces.deletedAt} IS NOT NULL`,
         createdAt: workspaces.createdAt,
-        productCount: sql<number>`(SELECT count(*)::int FROM products WHERE products.workspace_id = ${workspaces.id} AND products.deleted_at IS NULL)`,
-        memberCount: sql<number>`(SELECT count(*)::int FROM workspace_members WHERE workspace_members.workspace_id = ${workspaces.id})`,
+        productCount: sql<number>`(SELECT count(*)::int FROM products WHERE products.workspace_id = workspaces.id AND products.deleted_at IS NULL)`,
+        memberCount: sql<number>`(SELECT count(*)::int FROM workspace_members WHERE workspace_members.workspace_id = workspaces.id)`,
+        postCount: sql<number>`(SELECT count(*)::int FROM posts INNER JOIN products ON posts.product_id = products.id WHERE products.workspace_id = workspaces.id AND posts.deleted_at IS NULL AND posts.merged_into_id IS NULL)`,
+        voteCount: sql<number>`(SELECT count(*)::int FROM votes INNER JOIN posts ON votes.post_id = posts.id INNER JOIN products ON posts.product_id = products.id WHERE products.workspace_id = workspaces.id AND posts.deleted_at IS NULL AND posts.merged_into_id IS NULL)`,
       })
       .from(workspaces)
       .leftJoin(uploads, eq(workspaces.logoUploadId, uploads.id))
@@ -186,6 +188,8 @@ export class PlatformController {
         slug: products.slug,
         name: products.name,
         deletedAt: products.deletedAt,
+        postCount: sql<number>`(SELECT count(*)::int FROM posts WHERE posts.product_id = products.id AND posts.deleted_at IS NULL AND posts.merged_into_id IS NULL)`,
+        voteCount: sql<number>`(SELECT count(*)::int FROM votes INNER JOIN posts ON votes.post_id = posts.id WHERE posts.product_id = products.id AND posts.deleted_at IS NULL AND posts.merged_into_id IS NULL)`,
       })
       .from(products)
       .where(eq(products.workspaceId, id))
@@ -210,10 +214,8 @@ export class PlatformController {
       logoUrl: wsRow.logoKey ? `/uploads/${wsRow.logoKey}` : null,
       productCount: Number(wsRow.productCount),
       memberCount: Number(wsRow.memberCount),
-      // ponytail: Phase 3 replaces these zeros with posts/votes counts
-      postCount: 0,
-      // ponytail: Phase 3 replaces these zeros with posts/votes counts
-      voteCount: 0,
+      postCount: Number(wsRow.postCount),
+      voteCount: Number(wsRow.voteCount),
       suspended: Boolean(wsRow.suspended),
       deleted: Boolean(wsRow.deleted),
       createdAt: wsRow.createdAt.toISOString(),
@@ -221,10 +223,8 @@ export class PlatformController {
         slug: p.slug,
         name: p.name,
         live: p.deletedAt === null,
-        // ponytail: Phase 3 replaces these zeros with posts/votes counts
-        postCount: 0,
-        // ponytail: Phase 3 replaces these zeros with posts/votes counts
-        voteCount: 0,
+        postCount: Number(p.postCount),
+        voteCount: Number(p.voteCount),
       })),
       members: wsMembers.map((m) => ({
         name: m.name,
@@ -301,7 +301,9 @@ export class PlatformController {
         image: user.image,
         banned: sql<boolean>`${user.bannedAt} IS NOT NULL`,
         createdAt: user.createdAt,
-        workspaceCount: sql<number>`(SELECT count(*)::int FROM workspace_members WHERE workspace_members.user_id = ${user.id})`,
+        workspaceCount: sql<number>`(SELECT count(*)::int FROM workspace_members WHERE workspace_members.user_id = "user".id)`,
+        postCount: sql<number>`(SELECT count(*)::int FROM posts WHERE posts.author_id = "user".id AND posts.deleted_at IS NULL AND posts.merged_into_id IS NULL)`,
+        voteCount: sql<number>`(SELECT count(*)::int FROM votes INNER JOIN posts ON votes.post_id = posts.id WHERE votes.user_id = "user".id AND posts.deleted_at IS NULL AND posts.merged_into_id IS NULL)`,
       })
       .from(user)
       .where(whereClause)
@@ -319,10 +321,8 @@ export class PlatformController {
         email: r.email,
         image: r.image ?? null,
         workspaceCount: Number(r.workspaceCount),
-        // ponytail: Phase 3 replaces these zeros with posts/votes counts
-        postCount: 0,
-        // ponytail: Phase 3 replaces these zeros with posts/votes counts
-        voteCount: 0,
+        postCount: Number(r.postCount),
+        voteCount: Number(r.voteCount),
         banned: Boolean(r.banned),
         isPlatformOwner: isPlatformOwner(
           { email: r.email, emailVerified: true },

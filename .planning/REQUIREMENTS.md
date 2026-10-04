@@ -19,7 +19,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **PLAT-01**: The platform owner is identified by a verified email listed in server configuration; the role cannot be granted or claimed from inside the app
 - [ ] **PLAT-02**: Platform owner can create an invite link for a specific email that lets that person create a workspace; the link expires and works only once
 - [ ] **PLAT-03**: Platform owner can see every platform invite with its state (pending, used and by whom, expired, revoked) and revoke unused ones
-- [ ] **PLAT-04**: Platform owner can browse all workspaces, products, and users, with counts of members, posts, and votes
+- [x] **PLAT-04**: Platform owner can browse all workspaces, products, and users, with counts of members, posts, and votes
 - [ ] **PLAT-05**: Platform owner can suspend a workspace, which takes its portals and admin dashboard offline while keeping its data, and can lift the suspension; visitors to a suspended portal see an "unavailable" page
 - [ ] **PLAT-06**: Platform owner can ban a user platform-wide, which stops them signing in or acting anywhere, and can lift the ban; their existing content stays
 - [ ] **PLAT-07**: The platform owner dashboard and its API are reachable only by the platform owner; everyone else gets a not-found response
@@ -32,7 +32,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **WORK-04**: Invitee joins the workspace as an admin by opening the link and signing in with a verified OAuth email that matches the invite
 - [ ] **WORK-05**: Admin can remove a teammate from the workspace; the owner cannot be removed
 - [ ] **WORK-06**: Admin can leave a workspace, except the owner
-- [ ] **WORK-07**: User can delete their own account; their posts and comments remain, shown as "Deleted user"
+- [x] **WORK-07**: User can delete their own account; their posts and comments remain, shown as "Deleted user"
 
 ### Products & Portal
 
@@ -223,7 +223,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PLAT-01 | Phase 2 | Pending |
 | PLAT-02 | Phase 2 | Pending |
 | PLAT-03 | Phase 2 | Pending |
-| PLAT-04 | Phase 2 | Pending |
+| PLAT-04 | Phase 2 | Complete |
 | PLAT-05 | Phase 2 | Pending |
 | PLAT-06 | Phase 2 | Pending |
 | PLAT-07 | Phase 2 | Pending |
@@ -233,7 +233,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WORK-04 | Phase 2 | Pending |
 | WORK-05 | Phase 2 | Pending |
 | WORK-06 | Phase 2 | Pending |
-| WORK-07 | Phase 3 | Pending |
+| WORK-07 | Phase 3 | Complete |
 | PROD-01 | Phase 2 | Pending |
 | PROD-02 | Phase 2 | Pending |
 | PROD-03 | Phase 2 | Pending |

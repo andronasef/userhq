@@ -16,7 +16,7 @@
     {
       "number": "3",
       "name": "Feedback Board & Conversations",
-      "status": "in_progress"
+      "status": "complete"
     },
     {
       "number": "4",
@@ -30,9 +30,9 @@
     }
   ],
   "next": {
-    "command": "/gsd-progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 03 of 5 · 50% · executing"
+    "command": "/gsd-next",
+    "label": "Next action",
+    "reason": "Phase 03 complete. Ready for Phase 04."
   },
-  "updated_at": "2026-10-03T20:04:00.000Z"
+  "updated_at": "2026-10-04T07:44:29.587Z"
 }

@@ -266,7 +266,7 @@ Plans:
 
 **Wave 14** *(blocked on Wave 13 completion)*
 
-- [ ] 03-16-PLAN.md — Platform console: Deleted badge for soft-deleted workspaces (D-30), real post and vote counts
+- [x] 03-16-PLAN.md — Platform console: Deleted badge for soft-deleted workspaces (D-30), real post and vote counts
 
 **UI hint**: yes
 **Notes**:

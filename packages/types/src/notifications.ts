@@ -52,6 +52,7 @@ export const ActivityItemSchema = z.object({
   fromStatus: NotificationPostStatusSchema.nullable(),
   toStatus: NotificationPostStatusSchema.nullable(),
   hasNewStatus: z.boolean(),
+  hasStatusChange: z.boolean().optional(),
   hasNewComments: z.boolean(),
   commentCount: z.number().int().nonnegative(),
   createdAt: z.string(),

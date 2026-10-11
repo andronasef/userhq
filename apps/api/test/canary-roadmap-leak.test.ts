@@ -198,4 +198,18 @@ describe("ROAD-12 Automated Canary Leak Seam Test", () => {
       expect(bodyText).not.toContain(canary);
     }
   });
+
+  it("never leaks any internal roadmap field into GET /portal/:ws/:product/activity", async () => {
+    const res = await request(testApp.http)
+      .get(`/api/v1/portal/${wsSlug}/${prodSlug}/activity`)
+      .set("Cookie", adminUser.cookie)
+      .set("Origin", "http://localhost:3000");
+
+    expect(res.status).toBe(200);
+    const bodyText = res.text;
+
+    for (const canary of allCanaries) {
+      expect(bodyText).not.toContain(canary);
+    }
+  });
 });

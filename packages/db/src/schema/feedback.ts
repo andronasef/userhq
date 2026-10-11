@@ -1,3 +1,4 @@
+import { roadmapItems } from "./roadmap.js";
 import { relations, sql, type SQL } from "drizzle-orm";
 import {
   pgTable,
@@ -58,6 +59,7 @@ export const posts = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
     deletedById: text("deleted_by_id").references(() => user.id, { onDelete: "set null" }),
     mergedIntoId: uuid("merged_into_id"), // self-ref, set on merge (D-04)
+    roadmapItemId: uuid("roadmap_item_id").references(() => roadmapItems.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     search: tsvector("search")
       .notNull()
@@ -91,6 +93,7 @@ export const posts = pgTable(
       .on(t.productId, t.createdAt.desc())
       .where(sql`${t.deletedAt} IS NULL AND ${t.mergedIntoId} IS NULL`),
     index("posts_search_gin").using("gin", t.search),
+    index("posts_product_roadmap_item_idx").on(t.productId, t.roadmapItemId),
     check(
       "posts_no_self_merge",
       sql`${t.mergedIntoId} IS NULL OR ${t.mergedIntoId} <> ${t.id}`
@@ -261,6 +264,10 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   mergedInto: one(posts, {
     fields: [posts.mergedIntoId],
     references: [posts.id],
+  }),
+  roadmapItem: one(roadmapItems, {
+    fields: [posts.roadmapItemId],
+    references: [roadmapItems.id],
   }),
   votes: many(votes),
   comments: many(comments),

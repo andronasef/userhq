@@ -84,6 +84,7 @@ export const statuses = pgTable(
     type: statusType("type").notNull(),
     position: integer("position").notNull(),
     isDefault: boolean("is_default").notNull().default(false),
+    isPublicRoadmap: boolean("is_public_roadmap").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

@@ -6,6 +6,9 @@ export * from "./tenancy.js";
 export * from "./palette.js";
 export * from "./feedback.js";
 export * from "./account.js";
+export * from "./rank.js";
+export * from "./roadmap.js";
+export * from "./notifications.js";
 
 export const API_ERROR_CODES = [
   "unauthorized",
@@ -56,6 +59,14 @@ export const API_ERROR_CODES = [
   "comment_required",
   "comment_too_long",
   "note_too_long",
+  "item_title_required",
+  "item_title_length",
+  "public_title_required",
+  "public_title_length",
+  "notes_too_long",
+  "post_already_linked",
+  "item_not_found",
+  "move_failed",
 ] as const;
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];
 

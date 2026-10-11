@@ -1,3 +1,4 @@
+import { PostRoadmapItemRefSchema, type PostRoadmapItemRef } from "./roadmap.js";
 import { z } from "zod";
 import { slugify } from "./slugs.js";
 import { STATUS_TYPES } from "./palette.js";
@@ -234,6 +235,7 @@ export const PublicPostDetailSchema = z.object({
   status: PostStatusSchema,
   category: PostCategorySchema.nullable(),
   author: PublicAuthorSchema,
+  roadmapItem: PostRoadmapItemRefSchema.nullable().optional(),
 });
 export type PublicPostDetail = z.infer<typeof PublicPostDetailSchema>;
 

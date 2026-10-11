@@ -275,6 +275,7 @@ export const StatusSchema = z.object({
   type: StatusTypeSchema,
   position: z.number().int(),
   isDefault: z.boolean(),
+  isPublicRoadmap: z.boolean().default(false),
 });
 export type Status = z.infer<typeof StatusSchema>;
 
@@ -282,6 +283,7 @@ export const CreateStatusInputSchema = z.object({
   name: StatusNameSchema,
   type: StatusTypeSchema,
   color: HexColorSchema,
+  isPublicRoadmap: z.boolean().optional(),
 });
 export type CreateStatusInput = z.infer<typeof CreateStatusInputSchema>;
 

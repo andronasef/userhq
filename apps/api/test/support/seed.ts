@@ -137,6 +137,7 @@ export async function seedTenants(
       type: "review",
       position: 0,
       isDefault: true,
+      isPublicRoadmap: true,
     })
     .returning();
 

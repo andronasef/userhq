@@ -10,7 +10,26 @@ describe("Portal Isolation (Plan 03-02)", () => {
   beforeAll(async () => {
     testApp = await createTestApp();
     seed = await seedTenants(testApp);
+  
+  it("workspace A's portal never serves workspace B's roadmap items (ROAD-11)", async () => {
+    // List check
+    const listRes = await request(testApp.http)
+      .get(`/api/v1/portal/${seed.a.slug}/${seed.a.productSlug}/roadmap`)
+      .set("Origin", "http://localhost:3000");
+
+    expect(listRes.status).toBe(200);
+    const itemIds = listRes.body.items.map((i: any) => i.id);
+    expect(itemIds).not.toContain(seed.b.roadmapItemId);
+
+    // Detail check
+    const detailRes = await request(testApp.http)
+      .get(`/api/v1/portal/${seed.a.slug}/${seed.a.productSlug}/roadmap/${seed.b.roadmapItemId}`)
+      .set("Origin", "http://localhost:3000");
+
+    expect(detailRes.status).toBe(404);
+    expect(detailRes.body.code).toBe("not_found");
   });
+});
 
   afterAll(async () => {
     await testApp.close();

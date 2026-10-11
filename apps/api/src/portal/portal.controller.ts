@@ -147,6 +147,7 @@ export class PortalController {
         name: statuses.name,
         color: statuses.color,
         type: statuses.type,
+        isPublicRoadmap: statuses.isPublicRoadmap,
       })
       .from(statuses)
       .where(eq(statuses.productId, productId))

@@ -12,7 +12,7 @@ import { StatePage } from "../../../components/state-page";
 import { Button } from "../../../components/ui/button";
 import { UserMenu, SignInButton } from "../../../components/user-menu";
 import { SessionKeepAlive } from "../../../components/session-keepalive";
-import { TabNav } from "../../../components/tab-nav";
+import { PortalTabs } from "../../../components/portal/portal-tabs";
 import { AppToaster } from "../../../components/ui/toaster";
 
 interface PortalLayoutProps {
@@ -126,12 +126,7 @@ export default async function PortalLayout({
       companyName={workspace.name}
       accentStyle={accentStyle}
       right={right}
-      tabs={
-        <TabNav
-          tabs={[{ label: "Feedback", href: portalHref(ws, product) }]}
-          activeHref={portalHref(ws, product)}
-        />
-      }
+      tabs={<PortalTabs ws={ws} product={product} hasUser={Boolean(me.user)} />}
     >
       <AppToaster />
       {children}

@@ -92,6 +92,7 @@ export const PostStatusSchema = z.object({
   name: z.string(),
   color: z.string(),
   type: z.enum(STATUS_TYPES),
+  isPublicRoadmap: z.boolean().default(false).optional(),
 });
 export type PostStatus = z.infer<typeof PostStatusSchema>;
 

@@ -28,6 +28,7 @@ export const PublicPortalProductSchema = z.object({
       name: z.string(),
       color: z.string(),
       type: z.enum(STATUS_TYPES),
+      isPublicRoadmap: z.boolean().default(false).optional(),
     })
   ),
 });

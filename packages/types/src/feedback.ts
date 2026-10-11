@@ -1,4 +1,4 @@
-import { PostRoadmapItemRefSchema, type PostRoadmapItemRef } from "./roadmap.js";
+import { PostRoadmapItemRefSchema } from "./roadmap.js";
 import { z } from "zod";
 import { slugify } from "./slugs.js";
 import { STATUS_TYPES } from "./palette.js";

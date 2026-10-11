@@ -122,6 +122,34 @@ const CROSS_TENANT_ROUTES: Record<
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts/merge`,
     body: { keepNumber: s.b.postNumber, mergeNumbers: [s.b.postNumber] },
   }),
+  "GET /workspaces/:ws/products/:product/roadmap": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/roadmap`,
+  }),
+  "GET /workspaces/:ws/products/:product/roadmap/search-posts": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/roadmap/search-posts`,
+  }),
+  "POST /workspaces/:ws/products/:product/roadmap": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/roadmap`,
+    body: { statusId: s.b.statusId!, internalTitle: "Cross Tenant Test" },
+  }),
+  "PATCH /workspaces/:ws/products/:product/roadmap/:id/move": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/roadmap/${s.b.roadmapItemId}/move`,
+    body: { statusId: s.b.statusId!, targetRank: "a1" },
+  }),
+  "PATCH /workspaces/:ws/products/:product/roadmap/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/roadmap/${s.b.roadmapItemId}`,
+    body: { internalTitle: "Updated Title" },
+  }),
+  "DELETE /workspaces/:ws/products/:product/roadmap/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/roadmap/${s.b.roadmapItemId}`,
+  }),
+  "POST /workspaces/:ws/products/:product/roadmap/:id/link": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/roadmap/${s.b.roadmapItemId}/link`,
+    body: { postId: s.b.postId! },
+  }),
+  "DELETE /workspaces/:ws/products/:product/roadmap/:id/unlink/:postId": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/roadmap/${s.b.roadmapItemId}/unlink/${s.b.postId}`,
+  }),
 };
 
 

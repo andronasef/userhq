@@ -62,6 +62,7 @@ export class ModerationService {
           id: posts.id,
           statusId: posts.statusId,
           version: posts.version,
+          roadmapItemId: posts.roadmapItemId,
         })
         .from(posts)
         .where(
@@ -79,6 +80,14 @@ export class ModerationService {
           "post_not_found",
           404,
           "This post was removed or merged. Go back to the board."
+        );
+      }
+
+      if (post.roadmapItemId !== null) {
+        throw new ApiException(
+          "post_locked",
+          400,
+          "This post's status is managed by a roadmap item."
         );
       }
 
@@ -756,12 +765,13 @@ export class ModerationService {
           .set({ mergedIntoId: keepRow.id })
           .where(eq(posts.mergedIntoId, dupRow.id));
 
-        // Set the duplicate's merged_into_id = target, vote_count = 0
+        // Set the duplicate's merged_into_id = target, vote_count = 0, roadmapItemId = null (ROAD-06)
         await tx
           .update(posts)
           .set({
             mergedIntoId: keepRow.id,
             voteCount: 0,
+            roadmapItemId: null,
           })
           .where(eq(posts.id, dupRow.id));
       }

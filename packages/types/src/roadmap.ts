@@ -154,3 +154,17 @@ export const PostRoadmapItemRefSchema = z.object({
   title: z.string(),
 });
 export type PostRoadmapItemRef = z.infer<typeof PostRoadmapItemRefSchema>;
+
+export const PublicRoadmapPostRefSchema = z.object({
+  number: z.number().int().positive(),
+  slug: z.string(),
+  title: z.string(),
+  voteCount: z.number().int(),
+});
+export type PublicRoadmapPostRef = z.infer<typeof PublicRoadmapPostRefSchema>;
+
+export const PublicRoadmapDetailResponseSchema = z.object({
+  item: PublicRoadmapItemSchema,
+  posts: z.array(PublicRoadmapPostRefSchema),
+});
+export type PublicRoadmapDetailResponse = z.infer<typeof PublicRoadmapDetailResponseSchema>;

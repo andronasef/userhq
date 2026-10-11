@@ -15,6 +15,8 @@ export interface TenantSeed {
   categoryId?: string;
   postNumber?: number;
   commentId?: string;
+  postId?: string;
+  roadmapItemId?: string;
 }
 
 export interface Seed {
@@ -178,6 +180,23 @@ export async function seedTenants(
     })
     .returning();
 
+  const [itemB] = await testApp.db
+    .insert(schema.roadmapItems)
+    .values({
+      productId: prodB.id,
+      statusId: statusB.id,
+      publicTitle: "Tenant B Roadmap Item",
+      isPublic: true,
+      rank: "a0",
+    })
+    .returning();
+
+  await testApp.db.insert(schema.roadmapItemInternals).values({
+    itemId: itemB.id,
+    productId: prodB.id,
+    internalTitle: "Tenant B Roadmap Item",
+  });
+
   return {
     a: {
       slug: slugA,
@@ -199,8 +218,10 @@ export async function seedTenants(
       productId: prodB.id,
       statusId: statusB.id,
       categoryId: catB.id,
+      postId: postB.id,
       postNumber: 1,
       commentId: commentB.id,
+      roadmapItemId: itemB.id,
     },
   };
 }

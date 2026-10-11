@@ -18,7 +18,7 @@ import {
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
 import { and, eq, sql, asc, inArray } from "drizzle-orm";
 import { z } from "zod";
-import { DB, type Db, statuses, posts } from "@userhq/db";
+import { DB, type Db, statuses, posts, roadmapItems } from "@userhq/db";
 import {
   StatusSchema,
   CreateStatusInputSchema,
@@ -55,6 +55,7 @@ export class StatusesController {
         type: statuses.type,
         position: statuses.position,
         isDefault: statuses.isDefault,
+        isPublicRoadmap: statuses.isPublicRoadmap,
       })
       .from(statuses)
       .where(eq(statuses.productId, tenant.productId!))
@@ -90,6 +91,7 @@ export class StatusesController {
             color: input.color,
             position,
             isDefault: false,
+            isPublicRoadmap: input.isPublicRoadmap ?? false,
           })
           .returning({
             id: statuses.id,
@@ -98,6 +100,7 @@ export class StatusesController {
             type: statuses.type,
             position: statuses.position,
             isDefault: statuses.isDefault,
+            isPublicRoadmap: statuses.isPublicRoadmap,
           });
       });
 
@@ -131,6 +134,7 @@ export class StatusesController {
     if (input.name !== undefined) updateData.name = input.name;
     if (input.type !== undefined) updateData.type = input.type;
     if (input.color !== undefined) updateData.color = input.color;
+    if (input.isPublicRoadmap !== undefined) updateData.isPublicRoadmap = input.isPublicRoadmap;
 
     if (Object.keys(updateData).length === 0) {
       const [row] = await this.db
@@ -141,6 +145,7 @@ export class StatusesController {
           type: statuses.type,
           position: statuses.position,
           isDefault: statuses.isDefault,
+          isPublicRoadmap: statuses.isPublicRoadmap,
         })
         .from(statuses)
         .where(
@@ -174,6 +179,7 @@ export class StatusesController {
           type: statuses.type,
           position: statuses.position,
           isDefault: statuses.isDefault,
+          isPublicRoadmap: statuses.isPublicRoadmap,
         });
 
       if (!updated) {
@@ -354,7 +360,15 @@ export class StatusesController {
             eq(posts.productId, tenant.productId!)
           )
         );
-      // Phase 4: UPDATE roadmap_items SET status_id = moveTo WHERE status_id = id AND product_id = tenant.productId
+      await tx
+        .update(roadmapItems)
+        .set({ statusId: moveTo, updatedAt: new Date() })
+        .where(
+          and(
+            eq(roadmapItems.statusId, statusId),
+            eq(roadmapItems.productId, tenant.productId!)
+          )
+        );
 
       await tx
         .delete(statuses)

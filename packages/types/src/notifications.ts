@@ -20,6 +20,7 @@ export const NotificationActivityRefSchema = z.object({
   type: z.string(),
   fromStatus: NotificationPostStatusSchema.nullable(),
   toStatus: NotificationPostStatusSchema.nullable(),
+  note: z.string().nullable().optional(),
   createdAt: z.string(),
 });
 export type NotificationActivityRef = z.infer<typeof NotificationActivityRefSchema>;
@@ -67,3 +68,8 @@ export const MarkReadInputSchema = z.object({
   notificationIds: z.array(z.string().uuid()).optional(),
 });
 export type MarkReadInput = z.infer<typeof MarkReadInputSchema>;
+
+export const MarkReadResponseSchema = z.object({
+  success: z.boolean(),
+});
+export type MarkReadResponse = z.infer<typeof MarkReadResponseSchema>;

@@ -1,4 +1,5 @@
-import { Injectable, Inject } from "@nestjs/common";
+import { Injectable, Inject, Optional } from "@nestjs/common";
+import { NotificationsService } from "../notifications/notifications.service.js";
 import { and, eq, isNull, inArray, desc, asc, sql, or, ilike } from "drizzle-orm";
 import {
   DB,
@@ -24,7 +25,8 @@ import { ApiException } from "../common/api-error.filter.js";
 @Injectable()
 export class RoadmapService {
   constructor(
-    @Inject(DB) private readonly db: Db
+    @Inject(DB) private readonly db: Db,
+    @Optional() private readonly notificationsService?: NotificationsService
   ) {}
 
   async listAdminItems(tenant: {
@@ -442,7 +444,7 @@ export class RoadmapService {
               })
               .where(eq(posts.id, post.id));
 
-            await tx.insert(postActivity).values({
+            const [act] = await tx.insert(postActivity).values({
               postId: post.id,
               actorId: adminUser.id,
               kind: "status_changed",
@@ -450,7 +452,17 @@ export class RoadmapService {
               statusName: targetStatus.name,
               statusColor: targetStatus.color,
               note: null,
-            });
+            }).returning({ id: postActivity.id });
+
+            if (this.notificationsService) {
+              await this.notificationsService.fanOutStatusChange(tx, {
+                workspaceId: tenant.workspaceId,
+                productId: tenant.productId,
+                postId: post.id,
+                postActivityId: act.id,
+                actorId: adminUser.id,
+              });
+            }
           }
         }
       }
@@ -543,7 +555,7 @@ export class RoadmapService {
               })
               .where(eq(posts.id, post.id));
 
-            await tx.insert(postActivity).values({
+            const [act] = await tx.insert(postActivity).values({
               postId: post.id,
               actorId: adminUser.id,
               kind: "status_changed",
@@ -551,7 +563,17 @@ export class RoadmapService {
               statusName: targetStatus.name,
               statusColor: targetStatus.color,
               note: null,
-            });
+            }).returning({ id: postActivity.id });
+
+            if (this.notificationsService) {
+              await this.notificationsService.fanOutStatusChange(tx, {
+                workspaceId: tenant.workspaceId,
+                productId: tenant.productId,
+                postId: post.id,
+                postActivityId: act.id,
+                actorId: adminUser.id,
+              });
+            }
           }
         }
       }

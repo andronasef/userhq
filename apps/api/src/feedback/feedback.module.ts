@@ -13,8 +13,10 @@ import { ModerationService } from "./moderation.service.js";
 import { UserThrottlerGuard } from "./throttle.js";
 import { PortalGuard } from "../portal/portal.guard.js";
 import { TenantGuard } from "../tenancy/tenant.guard.js";
+import { NotificationsModule } from "../notifications/notifications.module.js";
 
 @Module({
+  imports: [NotificationsModule],
   controllers: [
     PortalPostsController,
     PortalVotesController,

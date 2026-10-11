@@ -42,12 +42,14 @@ import { prefixTsQuery } from "./search.js";
 import { encodeBoardCursor, decodeBoardCursor } from "./cursor.js";
 import { loadTimeline } from "./posts.service.js";
 import { CommentsService } from "./comments.service.js";
+import { NotificationsService } from "../notifications/notifications.service.js";
 
 @Injectable()
 export class ModerationService {
   constructor(
     @Inject(DB) private readonly db: Db,
-    @Optional() private readonly commentsService?: CommentsService
+    @Optional() private readonly commentsService?: CommentsService,
+    @Optional() private readonly notificationsService?: NotificationsService
   ) {}
 
   async changeStatus(
@@ -157,6 +159,16 @@ export class ModerationService {
           id: postActivity.id,
           createdAt: postActivity.createdAt,
         });
+
+      if (this.notificationsService) {
+        await this.notificationsService.fanOutStatusChange(tx, {
+          workspaceId: tenant.workspaceId,
+          productId: tenant.productId,
+          postId: post.id,
+          postActivityId: insertedActivity.id,
+          actorId: actor.id,
+        });
+      }
 
       return {
         status: {

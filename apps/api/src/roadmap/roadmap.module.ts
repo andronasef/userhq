@@ -2,8 +2,10 @@ import { Module } from "@nestjs/common";
 import { RoadmapService } from "./roadmap.service.js";
 import { RoadmapController } from "./roadmap.controller.js";
 import { PortalRoadmapController } from "./portal-roadmap.controller.js";
+import { NotificationsModule } from "../notifications/notifications.module.js";
 
 @Module({
+  imports: [NotificationsModule],
   controllers: [RoadmapController, PortalRoadmapController],
   providers: [RoadmapService],
   exports: [RoadmapService],

@@ -47,6 +47,12 @@ import {
   type UnsubscribeState,
   AccountSchema,
   type Account,
+  AdminRoadmapListResponseSchema,
+  type AdminRoadmapListResponse,
+  PublicRoadmapListResponseSchema,
+  type PublicRoadmapListResponse,
+  PublicRoadmapDetailResponseSchema,
+  type PublicRoadmapDetailResponse,
   ANONYMOUS_ME,
 } from "@userhq/types";
 
@@ -387,3 +393,30 @@ export const getAccount = cache((): Promise<ApiReadResult<Account>> => {
 
 
 
+
+export const getAdminRoadmap = cache(
+  (ws: string, product: string): Promise<ApiReadResult<AdminRoadmapListResponse>> => {
+    return apiRead(
+      `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/roadmap`,
+      AdminRoadmapListResponseSchema
+    );
+  }
+);
+
+export const getPublicRoadmap = cache(
+  (ws: string, product: string): Promise<ApiReadResult<PublicRoadmapListResponse>> => {
+    return apiRead(
+      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap`,
+      PublicRoadmapListResponseSchema
+    );
+  }
+);
+
+export const getPublicRoadmapItem = cache(
+  (ws: string, product: string, id: string): Promise<ApiReadResult<PublicRoadmapDetailResponse>> => {
+    return apiRead(
+      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap/${encodeURIComponent(id)}`,
+      PublicRoadmapDetailResponseSchema
+    );
+  }
+);

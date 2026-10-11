@@ -21,6 +21,8 @@ import {
   postMutes,
   postActivity,
   user,
+  roadmapItems,
+  roadmapItemInternals,
 } from "@userhq/db";
 import {
   type StatusChangeInput,
@@ -317,11 +319,15 @@ export class ModerationService {
         authorName: user.name,
         authorImage: user.image,
         authorDeletedAt: user.deletedAt,
+        roadmapItemId: posts.roadmapItemId,
+        roadmapItemTitle: sql<string | null>`coalesce(${roadmapItems.publicTitle}, ${roadmapItemInternals.internalTitle})`,
       })
       .from(posts)
       .innerJoin(statuses, eq(posts.statusId, statuses.id))
       .leftJoin(categories, eq(posts.categoryId, categories.id))
       .innerJoin(user, eq(posts.authorId, user.id))
+      .leftJoin(roadmapItems, eq(posts.roadmapItemId, roadmapItems.id))
+      .leftJoin(roadmapItemInternals, eq(roadmapItems.id, roadmapItemInternals.itemId))
       .where(
         and(
           eq(posts.productId, tenant.productId),
@@ -445,6 +451,12 @@ export class ModerationService {
             ? { id: row.categoryId, name: row.categoryName }
             : null,
         author,
+        roadmapItem: row.roadmapItemId
+          ? {
+              id: row.roadmapItemId,
+              title: row.roadmapItemTitle ?? "Roadmap Item",
+            }
+          : null,
       },
       deleted: row.deletedAt !== null,
       timeline,

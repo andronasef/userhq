@@ -64,6 +64,7 @@ function StatusDialogInner({
     name: status?.name ?? "",
     type: status?.type ?? "review",
     color: status?.color ?? "#6B7280",
+    isPublicRoadmap: status?.isPublicRoadmap ?? false,
   };
 
   const {
@@ -87,6 +88,7 @@ function StatusDialogInner({
         name: status?.name ?? "",
         type: status?.type ?? "review",
         color: status?.color ?? "#6B7280",
+        isPublicRoadmap: status?.isPublicRoadmap ?? false,
       });
     }
   }, [open, status, reset]);
@@ -188,6 +190,27 @@ function StatusDialogInner({
               }
               error={errors.color?.message}
             />
+
+
+            <div className="flex items-start gap-2 pt-1">
+              <input
+                type="checkbox"
+                id="status-is-public-roadmap"
+                {...register("isPublicRoadmap")}
+                className="size-4 rounded border-border text-primary focus:ring-ring mt-0.5"
+              />
+              <div className="flex flex-col">
+                <label
+                  htmlFor="status-is-public-roadmap"
+                  className="text-sm font-medium text-foreground cursor-pointer"
+                >
+                  Show on public roadmap
+                </label>
+                <p className="text-xs text-muted-foreground">
+                  When checked, items in this stage appear as a column on your public product roadmap.
+                </p>
+              </div>
+            </div>
 
             {alertError && (
               <Alert variant="destructive">

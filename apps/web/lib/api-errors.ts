@@ -32,7 +32,15 @@ export const API_ERROR_COPY: Record<string, string> = {
   comment_too_long: "Keep comments under 5,000 characters.",
   note_too_long: "Keep status notes under 1,000 characters.",
   post_locked:
-    "This post is locked because someone else voted or commented on it.",
+    "This post is linked to a roadmap item. Change its status from the roadmap or unlink it first.",
+  item_title_required: "Enter an internal title.",
+  item_title_length: "Internal title must be between 3 and 120 characters.",
+  public_title_required: "Enter a public title.",
+  public_title_length: "Public title must be between 3 and 120 characters.",
+  notes_too_long: "Keep notes under 5,000 characters.",
+  post_already_linked: "This post is already linked to another roadmap item.",
+  item_not_found: "That roadmap item couldn't be found.",
+  move_failed: "Couldn't move item. Check your connection and try again.",
   edit_conflict:
     "Someone edited this while you were looking at it. Refresh to see the latest version.",
   rate_limited:
@@ -76,6 +84,11 @@ export const FIELD_FOR_CODE: Record<string, string> = {
   note_too_long: "note",
   category_name_taken: "name",
   category_name_too_long: "name",
+  item_title_required: "internalTitle",
+  item_title_length: "internalTitle",
+  public_title_required: "publicTitle",
+  public_title_length: "publicTitle",
+  notes_too_long: "internalNotes",
 };
 
 export const NETWORK_ERROR_COPY =

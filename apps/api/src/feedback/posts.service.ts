@@ -12,6 +12,7 @@ import {
   postMutes,
   postActivity,
   user,
+  roadmapItems,
 } from "@userhq/db";
 import {
   type CreatePostInput,
@@ -481,11 +482,20 @@ export class PostsService {
         authorName: user.name,
         authorImage: user.image,
         authorDeletedAt: user.deletedAt,
+        roadmapItemId: posts.roadmapItemId,
+        publicRoadmapTitle: roadmapItems.publicTitle,
       })
       .from(posts)
       .innerJoin(statuses, eq(posts.statusId, statuses.id))
       .leftJoin(categories, eq(posts.categoryId, categories.id))
       .innerJoin(user, eq(posts.authorId, user.id))
+      .leftJoin(
+        roadmapItems,
+        and(
+          eq(posts.roadmapItemId, roadmapItems.id),
+          eq(roadmapItems.isPublic, true)
+        )
+      )
       .where(
         and(
           eq(posts.productId, portal.productId),
@@ -636,6 +646,12 @@ export class PostsService {
             ? { id: row.categoryId, name: row.categoryName }
             : null,
         author,
+        roadmapItem: row.roadmapItemId && row.publicRoadmapTitle
+          ? {
+              id: row.roadmapItemId,
+              title: row.publicRoadmapTitle,
+            }
+          : null,
       },
       viewer,
       timeline,

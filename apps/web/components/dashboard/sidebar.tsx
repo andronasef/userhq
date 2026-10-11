@@ -13,6 +13,7 @@ import {
   Tags,
   Settings,
   MessagesSquare,
+  Kanban,
 } from "lucide-react";
 import type { ProductSummary } from "@userhq/types";
 import { cn } from "../../lib/utils";
@@ -152,6 +153,21 @@ export function DashboardSidebar({
                           aria-hidden="true"
                         />
                         <span className="truncate">Board</span>
+                      </Link>
+
+                      <Link
+                        href={`/dashboard/${ws}/${product.slug}/roadmap`}
+                        className={cn(
+                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-background/50",
+                          pathname === `/dashboard/${ws}/${product.slug}/roadmap` && "text-foreground font-semibold bg-background/50"
+                        )}
+                        aria-current={pathname === `/dashboard/${ws}/${product.slug}/roadmap` ? "page" : undefined}
+                      >
+                        <Kanban
+                          className="size-3.5 shrink-0"
+                          aria-hidden="true"
+                        />
+                        <span className="truncate">Roadmap</span>
                       </Link>
 
                       <Link

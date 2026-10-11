@@ -106,6 +106,12 @@ function StatusRow({
         </Badge>
       )}
 
+      {status.isPublicRoadmap && (
+        <Badge variant="outline" className="shrink-0 text-primary border-primary/30">
+          Public
+        </Badge>
+      )}
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

@@ -11,7 +11,7 @@
     {
       "number": "2",
       "name": "Workspaces, Products & Platform Owner",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "3",
@@ -30,9 +30,9 @@
     }
   ],
   "next": {
-    "command": "/gsd-next",
-    "label": "Next action",
-    "reason": "Phase 03 complete. Ready for Phase 04."
+    "command": "/gsd-progress --next",
+    "label": "Advance to the next step",
+    "reason": "Phase 04 of 5 · 60% · executing"
   },
-  "updated_at": "2026-10-04T07:44:29.587Z"
+  "updated_at": "2026-10-11T18:52:27.142Z"
 }

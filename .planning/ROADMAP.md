@@ -308,7 +308,7 @@ Plans:
 
 - [x] 04-01-PLAN.md — Schema, migrations, fractional rank generator, and contracts
 - [x] 04-02-PLAN.md — Admin Roadmap Service, Controller, and Status Cascade Logic
-- [ ] 04-03-PLAN.md — Notification Engine & Fan-Out Service
+- [x] 04-03-PLAN.md — Notification Engine & Fan-Out Service
 - [ ] 04-04-PLAN.md — Internal Roadmap Kanban UI & Post Detail Linking
 - [ ] 04-05-PLAN.md — Public Roadmap Portal, Notifications UI & Canary Leak Audit
 **UI hint**: yes

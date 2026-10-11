@@ -11,6 +11,7 @@ import { RoadmapView } from "./roadmap-view";
 
 interface RoadmapPageProps {
   params: Promise<{ ws: string; product: string }>;
+  searchParams: Promise<{ item?: string; linkPost?: string }>;
 }
 
 export async function generateMetadata({
@@ -28,8 +29,10 @@ export async function generateMetadata({
 
 export default async function RoadmapPage({
   params,
+  searchParams,
 }: RoadmapPageProps): Promise<React.JSX.Element | null> {
   const { ws, product } = await params;
+  const { item: initialItemId, linkPost: initialLinkPostNumber } = await searchParams;
   const [productRes, statusesRes, membersRes, roadmapRes] = await Promise.all([
     getProduct(ws, product),
     getStatuses(ws, product),
@@ -60,6 +63,8 @@ export default async function RoadmapPage({
       initialStatuses={statuses}
       initialMembers={members}
       initialItems={items}
+      initialItemId={initialItemId}
+      initialLinkPostNumber={initialLinkPostNumber ? Number(initialLinkPostNumber) : undefined}
     />
   );
 }

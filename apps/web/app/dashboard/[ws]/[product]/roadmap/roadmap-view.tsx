@@ -21,6 +21,8 @@ export interface RoadmapViewProps {
   initialStatuses: Status[];
   initialMembers: MemberRow[];
   initialItems: AdminRoadmapItem[];
+  initialItemId?: string;
+  initialLinkPostNumber?: number;
 }
 
 export function RoadmapView({
@@ -29,6 +31,8 @@ export function RoadmapView({
   initialStatuses,
   initialMembers,
   initialItems,
+  initialItemId,
+  initialLinkPostNumber,
 }: RoadmapViewProps) {
   const [statuses, setStatuses] = React.useState<Status[]>(initialStatuses);
   const [items, setItems] = React.useState<AdminRoadmapItem[]>(initialItems);
@@ -37,7 +41,30 @@ export function RoadmapView({
   // Modal states
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
   const [createDefaultStatusId, setCreateDefaultStatusId] = React.useState<string | undefined>(undefined);
-  const [editingItem, setEditingItem] = React.useState<AdminRoadmapItem | null>(null);
+  const [editingItem, setEditingItem] = React.useState<AdminRoadmapItem | null>(() => {
+    if (initialItemId) {
+      return initialItems.find((i) => i.id === initialItemId) ?? null;
+    }
+    return null;
+  });
+  const [prelinkedPost, setPrelinkedPost] = React.useState<any | null>(null);
+
+
+  React.useEffect(() => {
+    if (initialLinkPostNumber && !isCreateOpen) {
+      import("../../../../../lib/api-client").then(({ apiFetch }) => {
+        apiFetch<any>(
+          `/api/v1/workspaces/${ws}/products/${product.slug}/roadmap/search-posts?q=${initialLinkPostNumber}`
+        ).then((res) => {
+          const match = res.posts?.find((p: any) => p.number === initialLinkPostNumber);
+          if (match) {
+            setPrelinkedPost(match);
+            setIsCreateOpen(true);
+          }
+        }).catch(() => {});
+      });
+    }
+  }, [initialLinkPostNumber, ws, product.slug]);
 
   const handleAddItem = (statusId: string) => {
     setCreateDefaultStatusId(statusId);
@@ -128,6 +155,7 @@ export function RoadmapView({
           statuses={statuses}
           members={initialMembers}
           defaultStatusId={createDefaultStatusId}
+          prelinkedPost={prelinkedPost}
           onSaved={handleItemSaved}
         />
       )}

@@ -21,6 +21,7 @@ import { VoterList } from "@/components/post/voter-list";
 import { PostTimeline } from "@/components/post/post-timeline";
 import { PostActionsMenu } from "@/components/post/post-actions-menu";
 import { StatusChangeDialog } from "@/components/post/status-change-dialog";
+import { LinkedRoadmapBanner } from "@/components/post/linked-roadmap-banner";
 import { formatDate } from "@/lib/format";
 import { apiFetch } from "@/lib/api-client";
 
@@ -69,6 +70,8 @@ export function PostDetailView({
     }
   };
 
+  const isStatusLocked = Boolean(post.roadmapItem);
+
   const authorName = post.author.deleted
     ? "Deleted user"
     : (post.author.name ?? "Anonymous");
@@ -110,6 +113,17 @@ export function PostDetailView({
         </Alert>
       )}
 
+      {post.roadmapItem && (
+        <LinkedRoadmapBanner
+          ws={ws}
+          product={product}
+          roadmapItem={post.roadmapItem}
+          statusName={post.status.name}
+          statusColor={post.status.color}
+          variant="admin"
+        />
+      )}
+
       <PageHeader
         title={post.title}
         description={`#${post.number} · Posted by ${authorName} on ${formatDate(post.createdAt)}`}
@@ -118,6 +132,8 @@ export function PostDetailView({
             <Button
               variant="outline"
               onClick={() => setStatusDialogOpen(true)}
+              disabled={isStatusLocked}
+              title={isStatusLocked ? "Status is locked to the linked roadmap item. Move the item on the roadmap to change status." : undefined}
             >
               Change status
             </Button>

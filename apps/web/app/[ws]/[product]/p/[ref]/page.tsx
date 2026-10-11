@@ -14,6 +14,7 @@ import { PlainText } from "@/components/plain-text";
 import { PostTimeline } from "@/components/post/post-timeline";
 import { PostActionsMenu } from "@/components/post/post-actions-menu";
 import { MuteToggle } from "@/components/post/mute-toggle";
+import { LinkedRoadmapBanner } from "@/components/post/linked-roadmap-banner";
 
 interface PostPageProps {
   params: Promise<{ ws: string; product: string; ref: string }>;
@@ -117,6 +118,15 @@ export default async function PostPage({
           </Link>
         </Button>
       </div>
+
+      {post.roadmapItem && (
+        <LinkedRoadmapBanner
+          ws={ws}
+          product={product}
+          roadmapItem={post.roadmapItem}
+          variant="portal"
+        />
+      )}
 
       <div className="flex gap-4">
         <VoteButton

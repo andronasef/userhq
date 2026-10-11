@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Ellipsis } from "lucide-react";
 import { toast } from "sonner";
@@ -104,6 +105,24 @@ export function PostActionsMenu({
             <DropdownMenuItem onSelect={() => setMergeDialogOpen(true)}>
               Merge into…
             </DropdownMenuItem>
+            {post.roadmapItem ? (
+              <DropdownMenuItem asChild>
+                <Link
+                  href={`/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap?item=${encodeURIComponent(post.roadmapItem.id)}`}
+                >
+                  View on roadmap
+                </Link>
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem asChild>
+                <Link
+                  href={`/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap?linkPost=${post.number}`}
+                >
+                  Add to roadmap
+                </Link>
+              </DropdownMenuItem>
+            )}
+
             {variant === "dashboard" && (
               <DropdownMenuItem asChild>
                 <a

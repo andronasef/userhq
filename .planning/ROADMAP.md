@@ -304,7 +304,13 @@ Plans:
      - the bell shows the unread count, groups repeated changes to the same post, and lets the user mark notifications as read
      - "My activity" lists the posts the user created, voted on, or commented on, and marks the ones whose status changed or that got new comments since their last visit
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+- [x] 04-01-PLAN.md — Schema, migrations, fractional rank generator, and contracts
+- [ ] 04-02-PLAN.md — Admin Roadmap Service, Controller, and Status Cascade Logic
+- [ ] 04-03-PLAN.md — Notification Engine & Fan-Out Service
+- [ ] 04-04-PLAN.md — Internal Roadmap Kanban UI & Post Detail Linking
+- [ ] 04-05-PLAN.md — Public Roadmap Portal, Notifications UI & Canary Leak Audit
 **UI hint**: yes
 **Notes**: Research flag (`/gsd-plan-phase --research-phase`):
 

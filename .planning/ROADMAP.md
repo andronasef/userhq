@@ -23,7 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Walking Skeleton** - Users sign in with Google/GitHub on the full Docker stack; uploads become WebP on a persistent volume; migrations run at boot; Brevo SMTP is reachable from the VPS
 - [x] **Phase 2: Workspaces, Products & Platform Owner** - Platform owner admits companies by invite; companies set up their workspace, team, products, and statuses; every product gets a public portal
-- [ ] **Phase 3: Feedback Board & Conversations** - Customers post, vote, search, and comment; admins moderate and merge; commenters get reply emails
+- [x] **Phase 3: Feedback Board & Conversations** - Customers post, vote, search, and comment; admins moderate and merge; commenters get reply emails
 - [ ] **Phase 4: Dual-Layer Roadmap & Closing the Loop** - Private Kanban, a public roadmap that can't leak internal fields, linked-post status sync, in-app notifications, and My activity
 - [ ] **Phase 5: Changelog & FAQ** - Rich-text release notes with WebP images, tags, drafts, and permalinks; a searchable FAQ that links to the feedback board
 
@@ -207,7 +207,7 @@ Suspend and ban checks go in the shared guards, so every later feature inherits 
      - merge a duplicate post into another: votes move without double-counting, comments move, and the duplicate's link redirects
   5. When someone else comments on a post that a user created or commented on, that user gets an email. In development it lands in Mailpit; in production it goes through Brevo, configured only by env settings. Users can turn these emails off in account settings, and every email has a one-click unsubscribe link. If sending fails, the comment still appears and the email is retried automatically.
 
-**Plans:** 15/16 plans executed
+**Plans:** 16/16 plans executed (Complete)
 
 Plans:
 **Wave 1**
@@ -340,7 +340,7 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once P
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Walking Skeleton | 11/11 | Complete | 2026-10-02 |
-| 2. Workspaces, Products & Platform Owner | 0/11 | Planned | - |
-| 3. Feedback Board & Conversations | 15/16 | In Progress|  |
+| 2. Workspaces, Products & Platform Owner | 11/11 | Complete | 2026-10-03 |
+| 3. Feedback Board & Conversations | 16/16 | Complete | 2026-10-11 |
 | 4. Dual-Layer Roadmap & Closing the Loop | 0/TBD | Not started | - |
 | 5. Changelog & FAQ | 0/TBD | Not started | - |

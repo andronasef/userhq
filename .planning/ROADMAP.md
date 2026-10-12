@@ -24,7 +24,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Walking Skeleton** - Users sign in with Google/GitHub on the full Docker stack; uploads become WebP on a persistent volume; migrations run at boot; Brevo SMTP is reachable from the VPS
 - [x] **Phase 2: Workspaces, Products & Platform Owner** - Platform owner admits companies by invite; companies set up their workspace, team, products, and statuses; every product gets a public portal
 - [x] **Phase 3: Feedback Board & Conversations** - Customers post, vote, search, and comment; admins moderate and merge; commenters get reply emails
-- [ ] **Phase 4: Dual-Layer Roadmap & Closing the Loop** - Private Kanban, a public roadmap that can't leak internal fields, linked-post status sync, in-app notifications, and My activity
+- [x] **Phase 4: Dual-Layer Roadmap & Closing the Loop** - Private Kanban, a public roadmap that can't leak internal fields, linked-post status sync, in-app notifications, and My activity
 - [ ] **Phase 5: Changelog & FAQ** - Rich-text release notes with WebP images, tags, drafts, and permalinks; a searchable FAQ that links to the feedback board
 
 ## Phase Details
@@ -310,7 +310,7 @@ Plans:
 - [x] 04-02-PLAN.md — Admin Roadmap Service, Controller, and Status Cascade Logic
 - [x] 04-03-PLAN.md — Notification Engine & Fan-Out Service
 - [x] 04-04-PLAN.md — Internal Roadmap Kanban UI & Post Detail Linking
-- [ ] 04-05-PLAN.md — Public Roadmap Portal, Notifications UI & Canary Leak Audit
+- [x] 04-05-PLAN.md — Public Roadmap Portal, Notifications UI & Canary Leak Audit
 **UI hint**: yes
 **Notes**: Research flag (`/gsd-plan-phase --research-phase`):
 

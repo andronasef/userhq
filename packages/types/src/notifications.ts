@@ -11,6 +11,8 @@ export const NotificationPostRefSchema = z.object({
   id: z.string().uuid(),
   number: z.number().int().positive(),
   title: z.string(),
+  workspaceSlug: z.string().optional(),
+  productSlug: z.string().optional(),
   status: NotificationPostStatusSchema,
 });
 export type NotificationPostRef = z.infer<typeof NotificationPostRefSchema>;

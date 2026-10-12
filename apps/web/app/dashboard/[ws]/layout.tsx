@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getWorkspace, getMe, getProducts } from "../../../lib/api-server";
 import { isDevUploadEnabled } from "../../../lib/dev-flags";
 import { UserMenu } from "../../../components/user-menu";
+import { NotificationBell } from "../../../components/notifications/notification-bell";
 import { WorkspaceSwitcher } from "../../../components/dashboard/workspace-switcher";
 import { DashboardSidebar } from "../../../components/dashboard/sidebar";
 import { MobileNav } from "../../../components/dashboard/mobile-nav";
@@ -83,7 +84,8 @@ export default async function DashboardLayout({
           canCreate={me.canCreateWorkspace}
         />
         {me.user && (
-          <div className="ml-auto shrink-0">
+          <div className="ml-auto shrink-0 flex items-center gap-2">
+            <NotificationBell />
             <UserMenu
               user={me.user}
               devUploadEnabled={devUploadEnabled}

@@ -4,6 +4,7 @@ import { getMe } from "../lib/api-server";
 import { isDevUploadEnabled } from "../lib/dev-flags";
 import { UserMenu, SignInButton } from "./user-menu";
 import { SessionKeepAlive } from "./session-keepalive";
+import { NotificationBell } from "./notifications/notification-bell";
 
 export async function Header(): Promise<React.JSX.Element> {
   const me = await getMe();
@@ -18,7 +19,8 @@ export async function Header(): Promise<React.JSX.Element> {
 
         <div>
           {me.user ? (
-            <>
+            <div className="flex items-center gap-2">
+              <NotificationBell />
               <UserMenu
                 user={me.user}
                 devUploadEnabled={devUploadEnabled}
@@ -26,7 +28,7 @@ export async function Header(): Promise<React.JSX.Element> {
                 isPlatformOwner={me.isPlatformOwner}
               />
               <SessionKeepAlive />
-            </>
+            </div>
           ) : (
             <React.Suspense fallback={null}>
               <SignInButton />

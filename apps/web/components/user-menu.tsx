@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ImageUp, LogOut, LoaderCircle, LayoutDashboard, ShieldCheck, UserCog } from "lucide-react";
+import { ImageUp, LogOut, LoaderCircle, LayoutDashboard, ShieldCheck, UserCog, Activity } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar } from "./ui/avatar";
 import {
@@ -34,6 +34,14 @@ export function UserMenu({
 }: UserMenuProps): React.JSX.Element {
   const [isPending, setIsPending] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const pathname = usePathname();
+  const portalProductMatch = pathname ? pathname.match(/^\/([^/]+)\/([^/]+)(?:\/.*)?$/) : null;
+  const isPortalProduct =
+    portalProductMatch &&
+    !["dashboard", "platform", "account", "login", "dev", "invite", "api"].includes(portalProductMatch[1]);
+  const activityHref = isPortalProduct
+    ? `/${portalProductMatch[1]}/${portalProductMatch[2]}/activity`
+    : null;
 
   const handleSignOut = async () => {
     setIsPending(true);
@@ -106,6 +114,14 @@ export function UserMenu({
           </>
         )}
 
+        {activityHref && (
+          <DropdownMenuItem asChild>
+            <Link href={activityHref} className="flex items-center gap-2 w-full">
+              <Activity className="size-4 shrink-0" aria-hidden="true" />
+              <span>My activity</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild>
           <Link href="/account" className="flex items-center gap-2 w-full">
             <UserCog className="size-4 shrink-0" aria-hidden="true" />

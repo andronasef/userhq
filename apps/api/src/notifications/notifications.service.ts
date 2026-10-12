@@ -7,6 +7,8 @@ import {
   posts,
   postActivity,
   statuses,
+  products,
+  workspaces,
 } from "@userhq/db";
 import {
   type NotificationListResponse,
@@ -100,6 +102,8 @@ export class NotificationsService {
         postStatusId: statuses.id,
         postStatusName: statuses.name,
         postStatusColor: statuses.color,
+        workspaceSlug: workspaces.slug,
+        productSlug: products.slug,
         activityId: postActivity.id,
         activityKind: postActivity.kind,
         activityToStatusId: postActivity.toStatusId,
@@ -110,6 +114,8 @@ export class NotificationsService {
       })
       .from(notifications)
       .innerJoin(posts, eq(notifications.postId, posts.id))
+      .innerJoin(products, eq(posts.productId, products.id))
+      .innerJoin(workspaces, eq(products.workspaceId, workspaces.id))
       .innerJoin(statuses, eq(posts.statusId, statuses.id))
       .innerJoin(postActivity, eq(notifications.postActivityId, postActivity.id))
       .where(eq(notifications.userId, userId))
@@ -127,6 +133,8 @@ export class NotificationsService {
           id: r.postId,
           number: r.postNumber,
           title: r.postTitle,
+          workspaceSlug: r.workspaceSlug,
+          productSlug: r.productSlug,
           status: {
             id: r.postStatusId,
             name: r.postStatusName,

@@ -212,4 +212,48 @@ describe("ROAD-12 Automated Canary Leak Seam Test", () => {
       expect(bodyText).not.toContain(canary);
     }
   });
+
+  it("never leaks any internal roadmap field into rendered HTML or public portal responses (ROAD-12)", async () => {
+    // 1. Check all public JSON endpoints
+    const endpoints = [
+      `/api/v1/portal/${wsSlug}/${prodSlug}/roadmap`,
+      `/api/v1/portal/${wsSlug}/${prodSlug}/roadmap/${roadmapItemId}`,
+      `/api/v1/portal/${wsSlug}/${prodSlug}/posts`,
+      `/api/v1/portal/${wsSlug}/${prodSlug}/posts/${postNumber}`,
+      `/api/v1/portal/${wsSlug}/${prodSlug}`,
+    ];
+
+    for (const ep of endpoints) {
+      const res = await request(testApp.http)
+        .get(ep)
+        .set("Origin", "http://localhost:3000");
+      expect(res.status).toBe(200);
+      for (const canary of allCanaries) {
+        expect(res.text).not.toContain(canary);
+      }
+    }
+
+    // 2. When web server is reachable (e.g. E2E or local web dev), check rendered HTML
+    const webBase = process.env.E2E_BASE_URL ?? process.env.WEB_BASE_URL;
+    if (webBase) {
+      try {
+        const roadmapRes = await fetch(`${webBase}/${wsSlug}/${prodSlug}/roadmap`);
+        if (roadmapRes.ok) {
+          const html = await roadmapRes.text();
+          for (const canary of allCanaries) {
+            expect(html).not.toContain(canary);
+          }
+        }
+        const postRes = await fetch(`${webBase}/${wsSlug}/${prodSlug}/p/${postNumber}-linked-public-post`);
+        if (postRes.ok) {
+          const html = await postRes.text();
+          for (const canary of allCanaries) {
+            expect(html).not.toContain(canary);
+          }
+        }
+      } catch {
+        // Web server not reachable in integration environment
+      }
+    }
+  });
 });

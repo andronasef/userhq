@@ -52,6 +52,8 @@ import {
   PublicRoadmapListResponseSchema,
   type PublicRoadmapListResponse,
   PublicRoadmapDetailResponseSchema,
+  ActivityListResponseSchema,
+  type ActivityListResponse,
   type PublicRoadmapDetailResponse,
   ANONYMOUS_ME,
 } from "@userhq/types";
@@ -417,6 +419,15 @@ export const getPublicRoadmapItem = cache(
     return apiRead(
       `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap/${encodeURIComponent(id)}`,
       PublicRoadmapDetailResponseSchema
+    );
+  }
+);
+
+export const getActivity = cache(
+  (ws: string, product: string): Promise<ApiReadResult<ActivityListResponse>> => {
+    return apiRead(
+      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/activity`,
+      ActivityListResponseSchema
     );
   }
 );

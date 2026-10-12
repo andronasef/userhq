@@ -13,6 +13,7 @@ import { Button } from "../../../components/ui/button";
 import { UserMenu, SignInButton } from "../../../components/user-menu";
 import { SessionKeepAlive } from "../../../components/session-keepalive";
 import { PortalTabs } from "../../../components/portal/portal-tabs";
+import { NotificationBell } from "../../../components/notifications/notification-bell";
 import { AppToaster } from "../../../components/ui/toaster";
 
 interface PortalLayoutProps {
@@ -101,7 +102,8 @@ export default async function PortalLayout({
   } as React.CSSProperties;
 
   const right = me.user ? (
-    <>
+    <div className="flex items-center gap-2">
+      <NotificationBell />
       <UserMenu
         user={me.user}
         devUploadEnabled={devUploadEnabled}
@@ -109,7 +111,7 @@ export default async function PortalLayout({
         isPlatformOwner={me.isPlatformOwner}
       />
       <SessionKeepAlive />
-    </>
+    </div>
   ) : (
     <React.Suspense fallback={null}>
       <SignInButton />

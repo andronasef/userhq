@@ -11,12 +11,17 @@ export interface TenantSeed {
   memberUserId?: string;
   inviteId?: string;
   productSlug?: string;
+  productId?: string;
   statusId?: string;
   categoryId?: string;
   postNumber?: number;
   commentId?: string;
   postId?: string;
   roadmapItemId?: string;
+  changelogEntryId?: string;
+  changelogTagId?: string;
+  faqCategoryId?: string;
+  faqQuestionId?: string;
 }
 
 export interface Seed {
@@ -198,6 +203,54 @@ export async function seedTenants(
     internalTitle: "Tenant B Roadmap Item",
   });
 
+  const [tagB] = await testApp.db
+    .insert(schema.changelogTags)
+    .values({
+      productId: prodB.id,
+      name: "Feature",
+      color: "#10B981",
+    })
+    .returning();
+
+  const [entryB] = await testApp.db
+    .insert(schema.changelogEntries)
+    .values({
+      productId: prodB.id,
+      authorId: userB.userId,
+      title: "Changelog Entry B",
+      slug: "changelog-entry-b",
+      summary: "Summary B",
+      content: {
+        type: "doc",
+        content: [{ type: "paragraph", content: [{ type: "text", text: "Entry content" }] }],
+      },
+      status: "draft",
+    })
+    .returning();
+
+  const [faqCatB] = await testApp.db
+    .insert(schema.faqCategories)
+    .values({
+      productId: prodB.id,
+      name: "Tenant B FAQ Category",
+      rank: "a0",
+    })
+    .returning();
+
+  const [faqQB] = await testApp.db
+    .insert(schema.faqQuestions)
+    .values({
+      productId: prodB.id,
+      categoryId: faqCatB.id,
+      question: "Tenant B FAQ Question?",
+      answer: {
+        type: "doc",
+        content: [{ type: "paragraph", content: [{ type: "text", text: "FAQ Answer" }] }],
+      },
+      rank: "a0",
+    })
+    .returning();
+
   return {
     a: {
       slug: slugA,
@@ -223,6 +276,10 @@ export async function seedTenants(
       postNumber: 1,
       commentId: commentB.id,
       roadmapItemId: itemB.id,
+      changelogEntryId: entryB.id,
+      changelogTagId: tagB.id,
+      faqCategoryId: faqCatB.id,
+      faqQuestionId: faqQB.id,
     },
   };
 }

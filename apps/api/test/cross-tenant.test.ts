@@ -150,8 +150,91 @@ const CROSS_TENANT_ROUTES: Record<
   "DELETE /workspaces/:ws/products/:product/roadmap/:id/unlink/:postId": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/roadmap/${s.b.roadmapItemId}/unlink/${s.b.postId}`,
   }),
+  // Changelog
+  "GET /workspaces/:ws/products/:product/changelog": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/changelog`,
+  }),
+  "POST /workspaces/:ws/products/:product/changelog": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/changelog`,
+    body: {
+      title: "Cross Tenant Changelog",
+      content: {
+        type: "doc",
+        content: [{ type: "paragraph", content: [{ type: "text", text: "Changelog content" }] }],
+      },
+    },
+  }),
+  "GET /workspaces/:ws/products/:product/changelog/tags": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/changelog/tags`,
+  }),
+  "POST /workspaces/:ws/products/:product/changelog/tags": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/changelog/tags`,
+    body: { name: "Cross Tag", color: "#6366F1" },
+  }),
+  "DELETE /workspaces/:ws/products/:product/changelog/tags/:tagId": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/changelog/tags/${s.b.changelogTagId}`,
+  }),
+  "GET /workspaces/:ws/products/:product/changelog/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/changelog/${s.b.changelogEntryId}`,
+  }),
+  "PATCH /workspaces/:ws/products/:product/changelog/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/changelog/${s.b.changelogEntryId}`,
+    body: { title: "Updated Changelog Title" },
+  }),
+  "DELETE /workspaces/:ws/products/:product/changelog/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/changelog/${s.b.changelogEntryId}`,
+  }),
+  "POST /workspaces/:ws/products/:product/changelog/:id/publish": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/changelog/${s.b.changelogEntryId}/publish`,
+  }),
+  "POST /workspaces/:ws/products/:product/changelog/:id/unpublish": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/changelog/${s.b.changelogEntryId}/unpublish`,
+  }),
+  // FAQ
+  "GET /workspaces/:ws/products/:product/faq": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/faq`,
+  }),
+  "GET /workspaces/:ws/products/:product/faq/categories": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/faq/categories`,
+  }),
+  "POST /workspaces/:ws/products/:product/faq/categories": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/faq/categories`,
+    body: { name: "Cross Category" },
+  }),
+  "PATCH /workspaces/:ws/products/:product/faq/categories/:id/reorder": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/faq/categories/${s.b.faqCategoryId}/reorder`,
+    body: { targetRank: "a1" },
+  }),
+  "PATCH /workspaces/:ws/products/:product/faq/categories/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/faq/categories/${s.b.faqCategoryId}`,
+    body: { name: "Renamed Cross Category" },
+  }),
+  "DELETE /workspaces/:ws/products/:product/faq/categories/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/faq/categories/${s.b.faqCategoryId}`,
+  }),
+  "POST /workspaces/:ws/products/:product/faq/questions": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/faq/questions`,
+    body: {
+      categoryId: s.b.faqCategoryId!,
+      question: "Cross Tenant FAQ Question?",
+      answer: {
+        type: "doc",
+        content: [{ type: "paragraph", content: [{ type: "text", text: "Answer content" }] }],
+      },
+    },
+  }),
+  "PATCH /workspaces/:ws/products/:product/faq/questions/:id/reorder": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/faq/questions/${s.b.faqQuestionId}/reorder`,
+    body: { targetRank: "a1" },
+  }),
+  "PATCH /workspaces/:ws/products/:product/faq/questions/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/faq/questions/${s.b.faqQuestionId}`,
+    body: { question: "Updated FAQ question text?" },
+  }),
+  "DELETE /workspaces/:ws/products/:product/faq/questions/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/faq/questions/${s.b.faqQuestionId}`,
+  }),
 };
-
 
 describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
   let testApp: Awaited<ReturnType<typeof createTestApp>>;
@@ -292,4 +375,3 @@ describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
     expect(delRes.body.code).toBe("not_found");
   });
 });
-

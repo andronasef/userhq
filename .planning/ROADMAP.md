@@ -344,7 +344,7 @@ Internal fields live in a separate 1:1 table. Public reads go through explicit `
 - [x] 05-03-PLAN.md — Frontend Core Foundations & Shared Rich Text Viewer/Editor
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 05-04-PLAN.md — Public & Admin Changelog Feed, Article Permalink, and Studio UI
+- [x] 05-04-PLAN.md — Public & Admin Changelog Feed, Article Permalink, and Studio UI
 - [ ] 05-05-PLAN.md — Public FAQ Portal with Instant Search & Admin FAQ Drag-and-Drop Manager UI
 
 **UI hint**: yes

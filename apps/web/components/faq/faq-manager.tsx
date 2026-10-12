@@ -5,6 +5,7 @@ import { DragDropProvider } from "@dnd-kit/react";
 import { Plus, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
+  byRank,
   generateKeyBetween,
   type AdminFaqCategory,
   type AdminFaqQuestion,
@@ -46,12 +47,10 @@ export function FaqManager({
   // Sort categories and questions by rank ascending
   const sortedCategories = React.useMemo(() => {
     return [...categories]
-      .sort((a, b) => a.rank.localeCompare(b.rank))
+      .sort(byRank)
       .map((cat) => ({
         ...cat,
-        questions: [...cat.questions].sort((a, b) =>
-          a.rank.localeCompare(b.rank)
-        ),
+        questions: [...cat.questions].sort(byRank),
       }));
   }, [categories]);
 
@@ -147,7 +146,7 @@ export function FaqManager({
 
     const destQuestions = destCat.questions
       .filter((q) => q.id !== sourceId)
-      .sort((a, b) => a.rank.localeCompare(b.rank));
+      .sort(byRank);
 
     let targetIndex: number;
     if (targetCat) {
@@ -198,7 +197,7 @@ export function FaqManager({
           // Reordering within the same category
           const nextQuestions = cat.questions
             .map((q) => (q.id === sourceId ? updatedQuestion : q))
-            .sort((a, b) => a.rank.localeCompare(b.rank));
+            .sort(byRank);
           return { ...cat, questions: nextQuestions };
         } else if (cat.id === sourceCatId) {
           // Removed from source
@@ -208,9 +207,7 @@ export function FaqManager({
           };
         } else if (cat.id === targetCatId) {
           // Added to target
-          const nextQuestions = [...cat.questions, updatedQuestion].sort((a, b) =>
-            a.rank.localeCompare(b.rank)
-          );
+          const nextQuestions = [...cat.questions, updatedQuestion].sort(byRank);
           return { ...cat, questions: nextQuestions };
         }
         return cat;
@@ -292,9 +289,7 @@ export function FaqManager({
             : [...cat.questions, saved];
           return {
             ...cat,
-            questions: nextQuestions.sort((a, b) =>
-              a.rank.localeCompare(b.rank)
-            ),
+            questions: nextQuestions.sort(byRank),
           };
         }
         return cat;

@@ -75,7 +75,7 @@ export class PortalRoadmapController {
         )
       )
       .groupBy(roadmapItems.id)
-      .orderBy(asc(roadmapItems.rank), asc(roadmapItems.createdAt));
+      .orderBy(asc(sql`${roadmapItems.rank} COLLATE "C"`), asc(roadmapItems.createdAt));
 
     return {
       items: rows.map((r) => ({

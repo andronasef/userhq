@@ -19,12 +19,6 @@ import { Public } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { PortalGuard } from "../portal/portal.guard.js";
 
-function compareRanks(a: { rank: string }, b: { rank: string }): number {
-  if (a.rank < b.rank) return -1;
-  if (a.rank > b.rank) return 1;
-  return 0;
-}
-
 @Controller("portal/:ws/:product/faq")
 @UseGuards(PortalGuard)
 @UseInterceptors(StandardSchemaSerializerInterceptor)
@@ -50,8 +44,6 @@ export class PortalFaqController {
       .where(eq(faqCategories.productId, productId))
       .orderBy(asc(sql`${faqCategories.rank} COLLATE "C"`));
 
-    categories.sort(compareRanks);
-
     const questions = await this.db
       .select({
         id: faqQuestions.id,
@@ -63,8 +55,6 @@ export class PortalFaqController {
       .from(faqQuestions)
       .where(eq(faqQuestions.productId, productId))
       .orderBy(asc(sql`${faqQuestions.rank} COLLATE "C"`));
-
-    questions.sort(compareRanks);
 
     const questionsByCat = new Map<string, PublicFaqQuestion[]>();
     for (const q of questions) {

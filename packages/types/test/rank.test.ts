@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  byRank,
   generateKeyBetween,
   RoadmapInternalTitleSchema,
   RoadmapPublicTitleSchema,
@@ -179,5 +180,16 @@ describe("roadmap item DTO schemas", () => {
     for (const code of requiredCodes) {
       expect(API_ERROR_CODES).toContain(code);
     }
+  });
+});
+
+describe("byRank", () => {
+  it("sorts generated keys in generation order, unlike localeCompare", () => {
+    const a = generateKeyBetween(null, null);
+    const b = generateKeyBetween(a, null);
+    const m1 = generateKeyBetween(a, b);
+    const m2 = generateKeyBetween(m1, b);
+    const keys = [b, m2, a, m1].map((rank) => ({ rank }));
+    expect(keys.sort(byRank).map((k) => k.rank)).toEqual([a, m1, m2, b]);
   });
 });

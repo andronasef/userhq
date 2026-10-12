@@ -18,12 +18,6 @@ import {
 import { ApiException } from "../common/api-error.filter.js";
 import { isUniqueViolation } from "../common/db-errors.js";
 
-function compareRanks(a: { rank: string }, b: { rank: string }): number {
-  if (a.rank < b.rank) return -1;
-  if (a.rank > b.rank) return 1;
-  return 0;
-}
-
 @Injectable()
 export class FaqService {
   constructor(@Inject(DB) private readonly db: Db) {}
@@ -41,8 +35,6 @@ export class FaqService {
       .where(eq(faqCategories.productId, productId))
       .orderBy(asc(sql`${faqCategories.rank} COLLATE "C"`));
 
-    categories.sort(compareRanks);
-
     const questions = await this.db
       .select({
         id: faqQuestions.id,
@@ -56,8 +48,6 @@ export class FaqService {
       .from(faqQuestions)
       .where(eq(faqQuestions.productId, productId))
       .orderBy(asc(sql`${faqQuestions.rank} COLLATE "C"`));
-
-    questions.sort(compareRanks);
 
     const questionsByCat = new Map<string, AdminFaqQuestion[]>();
     for (const q of questions) {
@@ -185,8 +175,6 @@ export class FaqService {
           )
         )
         .orderBy(asc(sql`${faqQuestions.rank} COLLATE "C"`));
-
-      questions.sort(compareRanks);
 
       return {
         id: updated.id,

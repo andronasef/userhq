@@ -157,6 +157,27 @@ describe("Roadmap API & Status Synchronization Engine (Plan 04-02 Task 1)", () =
     expect(inProgressItems[1].internalTitle).toBe("Card 2");
   });
 
+  it("orders ranks by code unit, not by the database's case-folding collation", async () => {
+    const backlog = statusList.find((s) => s.name === SEEDED_STATUSES[0].name)!;
+    // "a0V" < "a0l" in byte order; en_US collation puts "a0l" first.
+    for (const [title, rank] of [["Lower", "a0l"], ["Upper", "a0V"]]) {
+      const res = await request(testApp.http)
+        .post(`/api/v1/workspaces/${wsSlug}/products/${prodSlug}/roadmap`)
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ statusId: backlog.id, internalTitle: title, rank });
+      expect(res.status).toBe(201);
+    }
+
+    const listRes = await request(testApp.http)
+      .get(`/api/v1/workspaces/${wsSlug}/products/${prodSlug}/roadmap`)
+      .set("Cookie", ownerUser.cookie);
+    const titles = listRes.body.items
+      .filter((i: any) => i.statusId === backlog.id)
+      .map((i: any) => i.internalTitle);
+    expect(titles).toEqual(["Upper", "Lower"]);
+  });
+
   it("moves a roadmap item intra-column and inter-column with LexoRank and cascades status to linked posts", async () => {
     const underReviewStatus = statusList.find((s) => s.name === "Under Review")!;
     const plannedStatus = statusList.find((s) => s.name === "Planned")!;

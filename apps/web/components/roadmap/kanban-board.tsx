@@ -4,6 +4,7 @@ import * as React from "react";
 import { DragDropProvider } from "@dnd-kit/react";
 import { toast } from "sonner";
 import {
+  byRank,
   generateKeyBetween,
   type AdminRoadmapItem,
   type Status,
@@ -52,7 +53,7 @@ export function KanbanBoard({
     }
     // Sort each list by rank
     for (const list of map.values()) {
-      list.sort((a, b) => a.rank.localeCompare(b.rank));
+      list.sort(byRank);
     }
     return map;
   }, [statuses, displayedItems]);
@@ -84,7 +85,7 @@ export function KanbanBoard({
     // Get current items in destination column excluding the dragged item
     const destItems = items
       .filter((it) => it.statusId === targetStatusId && it.id !== sourceItemId)
-      .sort((a, b) => a.rank.localeCompare(b.rank));
+      .sort(byRank);
 
     let targetIndex: number;
     if (targetStatus) {

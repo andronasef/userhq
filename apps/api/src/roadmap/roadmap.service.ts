@@ -73,7 +73,7 @@ export class RoadmapService {
         roadmapItemInternals.itemId,
         user.id
       )
-      .orderBy(asc(roadmapItems.rank), asc(roadmapItems.createdAt));
+      .orderBy(asc(sql`${roadmapItems.rank} COLLATE "C"`), asc(roadmapItems.createdAt));
 
     return rows.map((r) => this.mapAdminItem(r));
   }
@@ -193,7 +193,7 @@ export class RoadmapService {
               eq(roadmapItems.statusId, input.statusId)
             )
           )
-          .orderBy(desc(roadmapItems.rank))
+          .orderBy(desc(sql`${roadmapItems.rank} COLLATE "C"`))
           .limit(1);
 
         rank = generateKeyBetween(highestRankRow?.rank ?? null, null);

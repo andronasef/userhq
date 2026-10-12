@@ -6,6 +6,12 @@ export const BASE_62_DIGITS =
 
 export const BASE_52_DIGITS = BASE_62_DIGITS.slice(10); // A-Z + a-z
 
+// Keys are ordered by code unit. localeCompare and the DB's default collation
+// fold case ("a0l" before "a0V"), so sort with this and ORDER BY ... COLLATE "C".
+export function byRank(a: { rank: string }, b: { rank: string }): number {
+  return a.rank < b.rank ? -1 : a.rank > b.rank ? 1 : 0;
+}
+
 const digitIndexCache = new Map<string, Uint8Array>();
 
 function getDigitIndex(digits: string): Uint8Array {

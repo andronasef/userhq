@@ -334,7 +334,19 @@ Internal fields live in a separate 1:1 table. Public reads go through explicit `
   4. A visitor can browse the FAQ by category and search questions and answers by text. Opening a question's own link shows the FAQ with that question expanded.
   5. FAQ search results end with a "Didn't find it?" button that opens the new-post form on that product's feedback board.
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+**Wave 1**
+- [ ] 05-01-PLAN.md — Schema, migrations, Tiptap dependency gate, and shared contracts
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 05-02-PLAN.md — Backend Changelog & FAQ Admin Services, Controllers, and Seeding
+- [ ] 05-03-PLAN.md — Frontend Core Foundations & Shared Rich Text Viewer/Editor
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 05-04-PLAN.md — Public & Admin Changelog Feed, Article Permalink, and Studio UI
+- [ ] 05-05-PLAN.md — Public FAQ Portal with Instant Search & Admin FAQ Drag-and-Drop Manager UI
+
 **UI hint**: yes
 **Notes**: Research flag: the Tiptap static renderer under vinext RSC, and CSP nonces (vinext #3205). Rich text is stored as Tiptap JSON in jsonb, checked against a strict Zod allowlist, and never rendered with `dangerouslySetInnerHTML`. Changelog work needs only Phase 2. FAQ-07 needs Phase 3's new-post form.
 
@@ -349,4 +361,4 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once P
 | 2. Workspaces, Products & Platform Owner | 11/11 | Complete | 2026-10-03 |
 | 3. Feedback Board & Conversations | 16/16 | Complete | 2026-10-11 |
 | 4. Dual-Layer Roadmap & Closing the Loop | 0/TBD | Not started | - |
-| 5. Changelog & FAQ | 0/TBD | Not started | - |
+| 5. Changelog & FAQ | 0/5 | Not started | - |

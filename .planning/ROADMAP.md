@@ -25,7 +25,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Workspaces, Products & Platform Owner** - Platform owner admits companies by invite; companies set up their workspace, team, products, and statuses; every product gets a public portal
 - [x] **Phase 3: Feedback Board & Conversations** - Customers post, vote, search, and comment; admins moderate and merge; commenters get reply emails
 - [x] **Phase 4: Dual-Layer Roadmap & Closing the Loop** - Private Kanban, a public roadmap that can't leak internal fields, linked-post status sync, in-app notifications, and My activity
-- [ ] **Phase 5: Changelog & FAQ** - Rich-text release notes with WebP images, tags, drafts, and permalinks; a searchable FAQ that links to the feedback board
+- [x] **Phase 5: Changelog & FAQ** - Rich-text release notes with WebP images, tags, drafts, and permalinks; a searchable FAQ that links to the feedback board
 
 ## Phase Details
 
@@ -127,7 +127,7 @@ Lint rules land here: no Vite-isms in app code; the web app may not import db, d
      - rename, recolor, and reorder statuses
      - choose which status new posts start in
      - delete a status only by choosing a replacement (the default status and the last remaining status can't be deleted)
-  5. The platform owner can suspend a workspace: its portals show an \"unavailable\" page, its dashboard goes offline, and its data is kept. The owner can also ban a user, who then can't sign in or act anywhere. Lifting a suspension or ban restores access.
+  5. The platform owner can suspend a workspace: its portals show an "unavailable" page, its dashboard goes offline, and its data is kept. The owner can also ban a user, who then can't sign in or act anywhere. Lifting a suspension or ban restores access.
 
 **Plans:** 11/11 plans executed (Complete)
 
@@ -345,7 +345,7 @@ Internal fields live in a separate 1:1 table. Public reads go through explicit `
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [x] 05-04-PLAN.md — Public & Admin Changelog Feed, Article Permalink, and Studio UI
-- [ ] 05-05-PLAN.md — Public FAQ Portal with Instant Search & Admin FAQ Drag-and-Drop Manager UI
+- [x] 05-05-PLAN.md — Public FAQ Portal with Instant Search & Admin FAQ Drag-and-Drop Manager UI
 
 **UI hint**: yes
 **Notes**: Research flag: the Tiptap static renderer under vinext RSC, and CSP nonces (vinext #3205). Rich text is stored as Tiptap JSON in jsonb, checked against a strict Zod allowlist, and never rendered with `dangerouslySetInnerHTML`. Changelog work needs only Phase 2. FAQ-07 needs Phase 3's new-post form.
@@ -361,4 +361,4 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once P
 | 2. Workspaces, Products & Platform Owner | 11/11 | Complete | 2026-10-03 |
 | 3. Feedback Board & Conversations | 16/16 | Complete | 2026-10-11 |
 | 4. Dual-Layer Roadmap & Closing the Loop | 5/5 | Complete | 2026-10-11 |
-| 5. Changelog & FAQ | 3/5 | In progress | - |
+| 5. Changelog & FAQ | 5/5 | Complete | 2026-10-12 |

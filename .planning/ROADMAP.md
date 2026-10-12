@@ -199,7 +199,7 @@ Suspend and ban checks go in the shared guards, so every later feature inherits 
      - sort by Top Voted or Newest
      - filter by category and by status (Completed and Closed posts are hidden by default)
      - search the text of titles and descriptions
-  3. Signed-in users and admins can comment. Admin comments carry an Admin badge that the server decides, so a client can't forge it. Users can edit and delete their own comments. After a user deletes their account, their posts and comments stay up, shown as "Deleted user".
+  3. Signed-in users and admins can comment. Admin comments carry an Admin badge that the server decides, so a client can't forge it. Users can edit and delete their own comments. After a user deletes their account, their posts and comments stay up, shown as \"Deleted user\".
   4. An admin can:
      - edit or delete any post or comment (deleted items vanish from the portal but stay in the database)
      - change an unlinked post's status, with an optional public note shown on the post
@@ -262,7 +262,7 @@ Plans:
 
 **Wave 13** *(blocked on Wave 12 completion)*
 
-- [x] 03-15-PLAN.md — Account deletion: "Deleted user", ownership transfer / workspace soft delete everywhere
+- [x] 03-15-PLAN.md — Account deletion: \"Deleted user\", ownership transfer / workspace soft delete everywhere
 
 **Wave 14** *(blocked on Wave 13 completion)*
 
@@ -291,7 +291,7 @@ Plans:
      - drag items between columns (which changes their status) and within a column (the order survives a reload)
      - set an item's assignee (a workspace member), internal notes, and target deadline
   2. Linking posts to items:
-     - An admin can link an item to one or more posts, or turn a post into a prefilled, already-linked item with "Add to roadmap".
+     - An admin can link an item to one or more posts, or turn a post into a prefilled, already-linked item with \"Add to roadmap\".
      - A post can be linked to at most one item.
      - Linked posts take the item's status and follow every move, even while the item is private. They show only the status, never the item's details, and their status can't be changed directly.
   3. Making items public:
@@ -302,7 +302,7 @@ Plans:
   4. No public page or API response contains an item's internal title, internal description, notes, assignee, or deadline. An automated test plants canary values and checks every public endpoint (JSON and rendered HTML). It fails the build on any leak.
   5. When a post's status changes (set directly by an admin or through a roadmap move), each user who created, voted on, or commented on it gets an in-app notification that includes any public note:
      - the bell shows the unread count, groups repeated changes to the same post, and lets the user mark notifications as read
-     - "My activity" lists the posts the user created, voted on, or commented on, and marks the ones whose status changed or that got new comments since their last visit
+     - \"My activity\" lists the posts the user created, voted on, or commented on, and marks the ones whose status changed or that got new comments since their last visit
 
 **Plans**: 5 plans
 
@@ -332,7 +332,7 @@ Internal fields live in a separate 1:1 table. Public reads go through explicit `
   2. An admin can publish an entry, edit it after publishing, unpublish it back to draft, and delete it. Anyone can read a product's published entries, newest first. Each entry has a permanent link that shows a title and image preview when shared.
   3. An admin can create, rename, and delete FAQ categories, and create, edit, and delete questions with rich-text answers. Categories can be reordered, and so can the questions within a category.
   4. A visitor can browse the FAQ by category and search questions and answers by text. Opening a question's own link shows the FAQ with that question expanded.
-  5. FAQ search results end with a "Didn't find it?" button that opens the new-post form on that product's feedback board.
+  5. FAQ search results end with a \"Didn't find it?\" button that opens the new-post form on that product's feedback board.
 
 **Plans**: 5 plans
 
@@ -341,7 +341,7 @@ Internal fields live in a separate 1:1 table. Public reads go through explicit `
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [x] 05-02-PLAN.md — Backend Changelog & FAQ Admin Services, Controllers, and Seeding
-- [ ] 05-03-PLAN.md — Frontend Core Foundations & Shared Rich Text Viewer/Editor
+- [x] 05-03-PLAN.md — Frontend Core Foundations & Shared Rich Text Viewer/Editor
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 05-04-PLAN.md — Public & Admin Changelog Feed, Article Permalink, and Studio UI
@@ -361,4 +361,4 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once P
 | 2. Workspaces, Products & Platform Owner | 11/11 | Complete | 2026-10-03 |
 | 3. Feedback Board & Conversations | 16/16 | Complete | 2026-10-11 |
 | 4. Dual-Layer Roadmap & Closing the Loop | 5/5 | Complete | 2026-10-11 |
-| 5. Changelog & FAQ | 2/5 | In progress | - |
+| 5. Changelog & FAQ | 3/5 | In progress | - |

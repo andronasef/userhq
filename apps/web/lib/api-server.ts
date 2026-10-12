@@ -55,6 +55,20 @@ import {
   ActivityListResponseSchema,
   type ActivityListResponse,
   type PublicRoadmapDetailResponse,
+  PublicChangelogFeedResponseSchema,
+  type PublicChangelogFeedResponse,
+  PublicChangelogEntrySchema,
+  type PublicChangelogEntry,
+  AdminChangelogListResponseSchema,
+  type AdminChangelogListResponse,
+  AdminChangelogEntrySchema,
+  type AdminChangelogEntry,
+  ChangelogTagSchema,
+  type ChangelogTag,
+  PublicFaqResponseSchema,
+  type PublicFaqResponse,
+  AdminFaqResponseSchema,
+  type AdminFaqResponse,
   ANONYMOUS_ME,
 } from "@userhq/types";
 
@@ -392,10 +406,6 @@ export const getAccount = cache((): Promise<ApiReadResult<Account>> => {
   return apiRead("/api/v1/account", AccountSchema);
 });
 
-
-
-
-
 export const getAdminRoadmap = cache(
   (ws: string, product: string): Promise<ApiReadResult<AdminRoadmapListResponse>> => {
     return apiRead(
@@ -428,6 +438,69 @@ export const getActivity = cache(
     return apiRead(
       `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/activity`,
       ActivityListResponseSchema
+    );
+  }
+);
+
+export const getPublicChangelogFeed = cache(
+  (ws: string, product: string): Promise<ApiReadResult<PublicChangelogFeedResponse>> => {
+    return apiRead(
+      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/changelog`,
+      PublicChangelogFeedResponseSchema
+    );
+  }
+);
+
+export const getPublicChangelogEntry = cache(
+  (ws: string, product: string, slug: string): Promise<ApiReadResult<PublicChangelogEntry>> => {
+    return apiRead(
+      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/changelog/${encodeURIComponent(slug)}`,
+      PublicChangelogEntrySchema
+    );
+  }
+);
+
+export const getAdminChangelogList = cache(
+  (ws: string, product: string): Promise<ApiReadResult<AdminChangelogListResponse>> => {
+    return apiRead(
+      `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/changelog`,
+      AdminChangelogListResponseSchema
+    );
+  }
+);
+
+export const getAdminChangelogEntry = cache(
+  (ws: string, product: string, id: string): Promise<ApiReadResult<AdminChangelogEntry>> => {
+    return apiRead(
+      `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/changelog/${encodeURIComponent(id)}`,
+      AdminChangelogEntrySchema
+    );
+  }
+);
+
+export const getAdminChangelogTags = cache(
+  (ws: string, product: string): Promise<ApiReadResult<ChangelogTag[]>> => {
+    return apiRead(
+      `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/changelog/tags`,
+      z.array(ChangelogTagSchema)
+    );
+  }
+);
+
+export const getPublicFaqTree = cache(
+  (ws: string, product: string): Promise<ApiReadResult<PublicFaqResponse>> => {
+    return apiRead(
+      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/faq`,
+      PublicFaqResponseSchema
+    );
+  }
+);
+
+export const getAdminFaqCategories = cache(
+  (ws: string, product: string): Promise<ApiReadResult<AdminFaqResponse>> => {
+    return apiRead(
+      `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/faq`,
+      AdminFaqResponseSchema
     );
   }
 );

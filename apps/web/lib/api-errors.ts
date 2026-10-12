@@ -58,6 +58,15 @@ export const API_ERROR_COPY: Record<string, string> = {
     "That person is no longer a member of {workspace}. Choose someone else.",
   platform_owner_account:
     "This is the platform owner account. It's set in server configuration and can't be deleted here.",
+  title_length: "Title must be between 3 and 150 characters.",
+  slug_required: "Enter a permalink slug.",
+  slug_format: "Slug may only contain lowercase letters, numbers, and hyphens.",
+  slug_conflict: "That slug is already in use. A unique number was appended.",
+  content_required: "Content cannot be empty.",
+  invalid_image_url: "Please enter a valid http:// or https:// image URL.",
+  category_name_required: "Enter a category name.",
+  category_not_found: "The selected category no longer exists.",
+  reorder_failed: "Couldn't reorder item. Check your connection and try again.",
 };
 
 export const FIELD_FOR_CODE: Record<string, string> = {
@@ -89,6 +98,12 @@ export const FIELD_FOR_CODE: Record<string, string> = {
   public_title_required: "publicTitle",
   public_title_length: "publicTitle",
   notes_too_long: "internalNotes",
+  title_length: "title",
+  slug_required: "slug",
+  slug_format: "slug",
+  slug_conflict: "slug",
+  content_required: "content",
+  category_name_required: "name",
 };
 
 export const NETWORK_ERROR_COPY =

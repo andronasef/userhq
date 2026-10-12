@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   byRank,
+  MoveRoadmapItemInputSchema,
   generateKeyBetween,
   RoadmapInternalTitleSchema,
   RoadmapPublicTitleSchema,
@@ -191,5 +192,15 @@ describe("byRank", () => {
     const m2 = generateKeyBetween(m1, b);
     const keys = [b, m2, a, m1].map((rank) => ({ rank }));
     expect(keys.sort(byRank).map((k) => k.rank)).toEqual([a, m1, m2, b]);
+  });
+});
+
+describe("roadmap rank inputs", () => {
+  it("rejects ranks generateKeyBetween could not build on", () => {
+    const statusId = "00000000-0000-4000-8000-000000000000";
+    expect(MoveRoadmapItemInputSchema.safeParse({ statusId, targetRank: "a0V" }).success).toBe(true);
+    for (const targetRank of ["", "a", "!!"]) {
+      expect(MoveRoadmapItemInputSchema.safeParse({ statusId, targetRank }).success).toBe(false);
+    }
   });
 });

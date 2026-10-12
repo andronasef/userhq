@@ -1,4 +1,8 @@
 import { z } from "zod";
+import { isValidRank } from "./rank.js";
+
+// A malformed stored rank makes generateKeyBetween throw for its whole column.
+const RankInputSchema = z.string().refine((s) => isValidRank(s));
 
 export const ROADMAP_TITLE_MIN = 3;
 export const ROADMAP_TITLE_MAX = 120;
@@ -96,7 +100,7 @@ export const CreateRoadmapItemInputSchema = z.object({
   assigneeId: z.string().nullable().optional(),
   deadlineText: z.string().max(60).nullable().optional(),
   deadlineDate: z.string().nullable().optional(),
-  rank: z.string().optional(),
+  rank: RankInputSchema.optional(),
   postIds: z.array(z.string().uuid()).optional(),
 });
 export type CreateRoadmapItemInput = z.infer<typeof CreateRoadmapItemInputSchema>;
@@ -129,7 +133,7 @@ export type UpdateRoadmapItemInput = z.infer<typeof UpdateRoadmapItemInputSchema
 
 export const MoveRoadmapItemInputSchema = z.object({
   statusId: z.string().uuid(),
-  targetRank: z.string(),
+  targetRank: RankInputSchema,
   previousStatusId: z.string().uuid().optional(),
 });
 export type MoveRoadmapItemInput = z.infer<typeof MoveRoadmapItemInputSchema>;

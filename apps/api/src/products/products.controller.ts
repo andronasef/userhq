@@ -21,6 +21,7 @@ import {
   products,
   statuses,
   uploads,
+  changelogTags,
 } from "@userhq/db";
 import {
   CreateProductInputSchema,
@@ -30,6 +31,7 @@ import {
   UpdateProductInputSchema,
   DEFAULT_ACCENT,
   SEEDED_STATUSES,
+  SEEDED_CHANGELOG_TAGS,
   type CreateProductInput,
   type ProductCreated,
   type ProductSummary,
@@ -118,6 +120,14 @@ export class ProductsController {
           createdAt: new Date(now.getTime() + 1),
         },
       ]);
+
+      await tx.insert(changelogTags).values(
+        SEEDED_CHANGELOG_TAGS.map((t) => ({
+          productId: inserted.id,
+          name: t.name,
+          color: t.color,
+        }))
+      );
     });
 
     return ProductCreatedSchema.parse({ slug: input.slug });

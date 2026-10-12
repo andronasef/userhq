@@ -49,6 +49,7 @@ export const API_ERROR_CODES = [
   "category_invalid",
   "category_name_taken",
   "category_name_too_long",
+  "tag_name_taken",
   "rate_limited",
   "invalid_token",
   "owned_workspaces_unresolved",

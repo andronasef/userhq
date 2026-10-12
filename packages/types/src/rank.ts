@@ -262,6 +262,24 @@ function validateIntDigits(intDigits: string): void {
   validatedIntDigits.add(intDigits);
 }
 
+export function isValidRank(
+  key: string,
+  digits?: string,
+  intDigits?: string
+): boolean {
+  if (typeof key !== "string" || key.length === 0) return false;
+  try {
+    const resolvedIntDigits = intDigits ?? BASE_52_DIGITS;
+    const resolvedDigits = digits ?? BASE_62_DIGITS;
+    const lookup = getDigitIndex(resolvedDigits);
+    const intLookup = getDigitIndex(resolvedIntDigits);
+    validateOrderKey(key, resolvedDigits, resolvedIntDigits, intLookup);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function generateKeyBetween(
   a: string | null | undefined,
   b: string | null | undefined,

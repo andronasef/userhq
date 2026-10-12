@@ -17,9 +17,18 @@ export const FaqCategoryInputSchema = z.object({
 export type FaqCategoryInput = z.infer<typeof FaqCategoryInputSchema>;
 
 export const MoveFaqCategoryInputSchema = z.object({
-  targetRank: z.string(),
+  targetRank: z.string().optional(),
+  rank: z.string().optional(),
 });
 export type MoveFaqCategoryInput = z.infer<typeof MoveFaqCategoryInputSchema>;
+export const ReorderCategoryInputSchema = MoveFaqCategoryInputSchema;
+export type ReorderCategoryInput = MoveFaqCategoryInput;
+
+export const MoveFaqCategoryResponseSchema = z.object({
+  success: z.boolean(),
+  rank: z.string(),
+});
+export type MoveFaqCategoryResponse = z.infer<typeof MoveFaqCategoryResponseSchema>;
 
 export const FaqQuestionInputSchema = z.object({
   categoryId: z.string().uuid({ message: "category_required" }),
@@ -33,6 +42,8 @@ export const FaqQuestionInputSchema = z.object({
   rank: z.string().optional(),
 });
 export type FaqQuestionInput = z.infer<typeof FaqQuestionInputSchema>;
+export const CreateFaqQuestionInputSchema = FaqQuestionInputSchema;
+export type CreateFaqQuestionInput = FaqQuestionInput;
 
 export const UpdateFaqQuestionInputSchema = z.object({
   categoryId: z.string().uuid().optional(),
@@ -48,10 +59,21 @@ export const UpdateFaqQuestionInputSchema = z.object({
 export type UpdateFaqQuestionInput = z.infer<typeof UpdateFaqQuestionInputSchema>;
 
 export const MoveFaqQuestionInputSchema = z.object({
-  targetRank: z.string(),
-  targetCategoryId: z.string().uuid().optional(), // Allows moving across categories
+  targetRank: z.string().optional(),
+  rank: z.string().optional(),
+  targetCategoryId: z.string().uuid().optional(),
+  categoryId: z.string().uuid().optional(),
 });
 export type MoveFaqQuestionInput = z.infer<typeof MoveFaqQuestionInputSchema>;
+export const ReorderQuestionInputSchema = MoveFaqQuestionInputSchema;
+export type ReorderQuestionInput = MoveFaqQuestionInput;
+
+export const MoveFaqQuestionResponseSchema = z.object({
+  success: z.boolean(),
+  rank: z.string(),
+  categoryId: z.string().uuid(),
+});
+export type MoveFaqQuestionResponse = z.infer<typeof MoveFaqQuestionResponseSchema>;
 
 export const AdminFaqQuestionSchema = z.object({
   id: z.string().uuid(),

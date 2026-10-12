@@ -9,6 +9,9 @@ export * from "./account.js";
 export * from "./rank.js";
 export * from "./roadmap.js";
 export * from "./notifications.js";
+export * from "./rich-text.js";
+export * from "./changelog.js";
+export * from "./faq.js";
 
 export const API_ERROR_CODES = [
   "unauthorized",
@@ -67,6 +70,15 @@ export const API_ERROR_CODES = [
   "post_already_linked",
   "item_not_found",
   "move_failed",
+  "title_length",
+  "slug_required",
+  "slug_format",
+  "slug_conflict",
+  "content_required",
+  "invalid_image_url",
+  "category_name_required",
+  "category_not_found",
+  "reorder_failed",
 ] as const;
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];
 

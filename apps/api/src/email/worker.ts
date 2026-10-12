@@ -43,8 +43,11 @@ export class EmailWorker
 
   onApplicationBootstrap(): void {
     if (this.enabled && this.env.NODE_ENV !== "test") {
+      // A rejected tick must not become an unhandled rejection: Node exits on those.
       this.intervalRef = setInterval(() => {
-        void this.runOnce(new Date());
+        this.runOnce(new Date()).catch((err) =>
+          this.logger.error(`Email worker tick failed: ${err?.message ?? err}`)
+        );
       }, 60_000);
       this.intervalRef.unref?.();
       this.logger.log("Email worker started with 60s interval");

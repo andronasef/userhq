@@ -340,7 +340,7 @@ Internal fields live in a separate 1:1 table. Public reads go through explicit `
 - [x] 05-01-PLAN.md — Schema, migrations, Tiptap dependency gate, and shared contracts
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 05-02-PLAN.md — Backend Changelog & FAQ Admin Services, Controllers, and Seeding
+- [x] 05-02-PLAN.md — Backend Changelog & FAQ Admin Services, Controllers, and Seeding
 - [ ] 05-03-PLAN.md — Frontend Core Foundations & Shared Rich Text Viewer/Editor
 
 **Wave 3** *(blocked on Wave 2 completion)*
@@ -361,4 +361,4 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once P
 | 2. Workspaces, Products & Platform Owner | 11/11 | Complete | 2026-10-03 |
 | 3. Feedback Board & Conversations | 16/16 | Complete | 2026-10-11 |
 | 4. Dual-Layer Roadmap & Closing the Loop | 5/5 | Complete | 2026-10-11 |
-| 5. Changelog & FAQ | 1/5 | In progress | - |
+| 5. Changelog & FAQ | 2/5 | In progress | - |

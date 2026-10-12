@@ -2,18 +2,18 @@
 gsd_state_version: "1.0"
 current_phase: 05
 current_phase_name: changelog-faq
-status: executing
-stopped_at: Phase 5 context gathered
-last_updated: "2026-10-12T09:00:47.987Z"
-last_activity: 2026-10-11
-last_activity_desc: Phase 04 execution started
-state_head: e99169637f0999bb19efc4b3505d4ff18d2b7c22
+status: phase_completed
+stopped_at: Phase 5 executed (all 5 plans complete)
+last_updated: "2026-10-12T10:00:00.000Z"
+last_activity: 2026-10-12
+last_activity_desc: Phase 05 execution completed
+state_head: c40be85
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 48
-  completed_plans: 43
-  percent: 60
+  completed_plans: 48
+  percent: 100
 ---
 
 # Project State
@@ -23,24 +23,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-01)
 
 **Core value:** An admin can see what their users actually want, ranked by demand, and close the loop publicly — feedback in, roadmap out, changelog shipped.
-**Current focus:** Phase 04 — Dual-Layer Roadmap & Closing the Loop
+**Current focus:** Phase 05 — Changelog & FAQ (Execution complete)
 
 ## Current Position
 
-Phase: 05 (changelog-faq) — READY TO EXECUTE
-Plan: 5 of 5
-Status: Ready to execute
-Last activity: 2026-10-11 — Phase 04 execution started
+Phase: 05 (changelog-faq) — COMPLETED
+Plan: 5 of 5 complete
+Status: Phase execution complete
+Last activity: 2026-10-12 — Phase 05 execution completed
 
-Progress: [██████░░░░] 60%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 38
+- Total plans completed: 48
 - Average duration: 18 min
-- Total execution time: ~10.1 hours
+- Total execution time: ~12 hours
 
 **By Phase:**
 
@@ -49,11 +49,8 @@ Progress: [██████░░░░] 60%
 | Phase 01 | 11 | 165 min | 15 min |
 | Phase 02 | 11 | 240 min | 22 min |
 | Phase 03 | 16 | 376 min | 23 min |
-
-**Recent Trend:**
-
-- Last 5 plans: 25m, 25m, 25m, 11m, 10m
-- Trend: steady
+| Phase 04 | 5 | 80 min | 16 min |
+| Phase 05 | 5 | 50 min | 10 min |
 
 *Updated after each plan completion*
 **Per-Plan Metrics:**
@@ -98,6 +95,16 @@ Progress: [██████░░░░] 60%
 | Phase 03 P14 | 25 min | 2 tasks | 11 files |
 | Phase 03 P15 | 11 min | 2 tasks | 15 files |
 | Phase 03 P16 | 10 min | 2 tasks | 6 files |
+| Phase 04 P01 | 15 min | 2 tasks | 8 files |
+| Phase 04 P02 | 15 min | 2 tasks | 8 files |
+| Phase 04 P03 | 15 min | 2 tasks | 8 files |
+| Phase 04 P04 | 20 min | 2 tasks | 8 files |
+| Phase 04 P05 | 15 min | 2 tasks | 8 files |
+| Phase 05 P01 | 10 min | 2 tasks | 12 files |
+| Phase 05 P02 | 12 min | 2 tasks | 14 files |
+| Phase 05 P03 | 8 min | 2 tasks | 8 files |
+| Phase 05 P04 | 12 min | 2 tasks | 13 files |
+| Phase 05 P05 | 8 min | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -111,15 +118,14 @@ Recent decisions affecting current work:
 - [Build]: `vinext` standalone in production container; `next build` canary verified in CI.
 - [Auth]: Better Auth inside NestJS with origin check, CSRF defense, and session persistence.
 - [Uploads]: 2 MB max, magic byte validation, WebP conversion, persistent Docker volume.
-- [Phase 03]: 03-15: transfer_target_invalid server message names the workspace; Better Auth deleteUser stays disabled; POST /account/delete throttled 10/min.
+- [Phase 05]: Tiptap rich-text AST persisted in `jsonb` with zero dangerouslySetInnerHTML; protocol allowlisting on links and images; LexoRank fractional ordering for FAQ categories and questions; connected timeline UI with inline "Read more" accordion; instant 0ms client-side search with ReDoS-safe regex highlighting.
 
 ### Pending Todos
 
-Phase 03 UAT verified (25/25 passed). Ready for Phase 04.
+Phase 05 ready for verification and UAT.
 
 ### Blockers/Concerns
 
-- [Phase 2→4]: The transaction that reassigns a deleted status must grow to cover posts (Phase 3) and roadmap items (Phase 4).
 - [Launch]: Volume backups with restore drill and publishing Google OAuth consent screen before general public launch.
 
 ## Deferred Items
@@ -138,6 +144,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-12T08:20:29.641Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-changelog-faq/05-CONTEXT.md
+Last session: 2026-10-12T10:00:00.000Z
+Stopped at: Phase 05 execution completed
+Resume file: .planning/phases/05-changelog-faq/05-05-SUMMARY.md

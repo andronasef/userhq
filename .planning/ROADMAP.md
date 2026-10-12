@@ -127,7 +127,7 @@ Lint rules land here: no Vite-isms in app code; the web app may not import db, d
      - rename, recolor, and reorder statuses
      - choose which status new posts start in
      - delete a status only by choosing a replacement (the default status and the last remaining status can't be deleted)
-  5. The platform owner can suspend a workspace: its portals show an "unavailable" page, its dashboard goes offline, and its data is kept. The owner can also ban a user, who then can't sign in or act anywhere. Lifting a suspension or ban restores access.
+  5. The platform owner can suspend a workspace: its portals show an \"unavailable\" page, its dashboard goes offline, and its data is kept. The owner can also ban a user, who then can't sign in or act anywhere. Lifting a suspension or ban restores access.
 
 **Plans:** 11/11 plans executed (Complete)
 
@@ -337,7 +337,7 @@ Internal fields live in a separate 1:1 table. Public reads go through explicit `
 **Plans**: 5 plans
 
 **Wave 1**
-- [ ] 05-01-PLAN.md — Schema, migrations, Tiptap dependency gate, and shared contracts
+- [x] 05-01-PLAN.md — Schema, migrations, Tiptap dependency gate, and shared contracts
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 05-02-PLAN.md — Backend Changelog & FAQ Admin Services, Controllers, and Seeding
@@ -360,5 +360,5 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once P
 | 1. Walking Skeleton | 11/11 | Complete | 2026-10-02 |
 | 2. Workspaces, Products & Platform Owner | 11/11 | Complete | 2026-10-03 |
 | 3. Feedback Board & Conversations | 16/16 | Complete | 2026-10-11 |
-| 4. Dual-Layer Roadmap & Closing the Loop | 0/TBD | Not started | - |
-| 5. Changelog & FAQ | 0/5 | Not started | - |
+| 4. Dual-Layer Roadmap & Closing the Loop | 5/5 | Complete | 2026-10-11 |
+| 5. Changelog & FAQ | 1/5 | In progress | - |

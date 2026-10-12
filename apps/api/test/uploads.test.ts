@@ -594,4 +594,21 @@ describe("Uploads Pipeline (Plan 01-07)", () => {
       assertWritable(testApp.env.UPLOAD_DIR, failingFs as any)
     ).rejects.toThrow(/UPLOAD_DIR is not writable/);
   });
+
+  it("rate limit: a user's 61st upload in a minute gets 429", async () => {
+    const other = await signedInCookie(testApp.test, {
+      name: "Flood User",
+      email: "flood@uploads.test",
+    });
+    const statuses: number[] = [];
+    for (let i = 0; i < 61; i++) {
+      const res = await request(testApp.http)
+        .post("/api/v1/uploads")
+        .set("Cookie", other.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL);
+      statuses.push(res.status);
+    }
+    expect(statuses.slice(0, 60).every((s) => s === 400)).toBe(true);
+    expect(statuses[60]).toBe(429);
+  });
 });

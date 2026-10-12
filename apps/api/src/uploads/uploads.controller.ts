@@ -7,6 +7,7 @@ import {
   UploadedFile,
   Inject,
   UseFilters,
+  UseGuards,
   ExceptionFilter,
   ArgumentsHost,
   HttpStatus,
@@ -16,6 +17,7 @@ import {
   Catch,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { Throttle } from "@nestjs/throttler";
 import type { Response } from "express";
 import { DB, type Db, uploads } from "@userhq/db";
 import {
@@ -28,6 +30,7 @@ import { CurrentUser } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { toWebp } from "./image-pipeline.js";
 import { writeUpload, removeUpload } from "./storage.js";
+import { UserThrottlerGuard } from "../feedback/throttle.js";
 
 @Catch(PayloadTooLargeException, BadRequestException)
 export class MulterExceptionFilter implements ExceptionFilter {
@@ -70,6 +73,8 @@ export class UploadsController {
 
   @Post()
   @HttpCode(201)
+  @UseGuards(UserThrottlerGuard)
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @UseInterceptors(
     FileInterceptor("file", {
       limits: {

@@ -113,10 +113,9 @@
   background-color: transparent;
   padding: 0;
 }
-.rich-text-content hr, .tiptap hr {
-  border-color: var(--border);
-  margin: 1.5rem 0;
-}
-.tiptap:focus {
-  outline: none;
+
+/* Truncated mask fade for changelog preview */
+.mask-fade-bottom {
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
 }

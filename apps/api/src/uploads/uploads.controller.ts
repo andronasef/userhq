@@ -74,7 +74,7 @@ export class UploadsController {
   @Post()
   @HttpCode(201)
   @UseGuards(UserThrottlerGuard)
-  @Throttle({ default: { limit: 60, ttl: 60_000 } })
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @UseInterceptors(
     FileInterceptor("file", {
       limits: {

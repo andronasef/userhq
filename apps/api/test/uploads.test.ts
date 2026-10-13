@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from "vitest";
 import request from "supertest";
 import sharp from "sharp";
 import * as fs from "node:fs";
@@ -28,6 +28,10 @@ describe("Uploads Pipeline (Plan 01-07)", () => {
 
   beforeAll(async () => {
     testApp = await createTestApp();
+  });
+
+  // Fresh user per test: uploads are throttled at 10/min per user.
+  beforeEach(async () => {
     const authUser = await signedInCookie(testApp.test, {
       name: "Upload User",
     });
@@ -595,20 +599,16 @@ describe("Uploads Pipeline (Plan 01-07)", () => {
     ).rejects.toThrow(/UPLOAD_DIR is not writable/);
   });
 
-  it("rate limit: a user's 61st upload in a minute gets 429", async () => {
-    const other = await signedInCookie(testApp.test, {
-      name: "Flood User",
-      email: "flood@uploads.test",
-    });
+  it("rate limit: a user's 11th upload in a minute gets 429", async () => {
     const statuses: number[] = [];
-    for (let i = 0; i < 61; i++) {
+    for (let i = 0; i < 11; i++) {
       const res = await request(testApp.http)
         .post("/api/v1/uploads")
-        .set("Cookie", other.cookie)
+        .set("Cookie", cookie)
         .set("Origin", testApp.env.PUBLIC_URL);
       statuses.push(res.status);
     }
-    expect(statuses.slice(0, 60).every((s) => s === 400)).toBe(true);
-    expect(statuses[60]).toBe(429);
+    expect(statuses.slice(0, 10).every((s) => s === 400)).toBe(true);
+    expect(statuses[10]).toBe(429);
   });
 });

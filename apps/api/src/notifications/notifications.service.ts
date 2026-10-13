@@ -11,10 +11,12 @@ import {
   workspaces,
 } from "@userhq/db";
 import {
+  NOTIFICATION_PAGE_SIZE,
   type NotificationListResponse,
   type UnreadNotificationCountResponse,
   type MarkReadResponse,
 } from "@userhq/types";
+import { encodeBoardCursor, decodeBoardCursor } from "../feedback/cursor.js";
 
 type DbOrTx = Db | any;
 
@@ -78,19 +80,35 @@ export class NotificationsService {
     }
   }
 
+  // Notifications whose post (or its product/workspace) was deleted lead nowhere:
+  // hide them from both the list and the unread badge.
+  private visible(userId: string) {
+    return and(
+      eq(notifications.userId, userId),
+      isNull(posts.deletedAt),
+      isNull(products.deletedAt),
+      isNull(workspaces.deletedAt)
+    );
+  }
+
   async getUnreadCount(userId: string): Promise<UnreadNotificationCountResponse> {
     const [result] = await this.db
       .select({ count: sql<number>`count(*)::int` })
       .from(notifications)
-      .where(and(eq(notifications.userId, userId), isNull(notifications.readAt)));
+      .innerJoin(posts, eq(notifications.postId, posts.id))
+      .innerJoin(products, eq(posts.productId, products.id))
+      .innerJoin(workspaces, eq(products.workspaceId, workspaces.id))
+      .where(and(this.visible(userId), isNull(notifications.readAt)));
 
     return { unreadCount: Number(result?.count ?? 0) };
   }
 
+  // ponytail: offset cursor; a status change mid-scroll re-sorts a row to the top, the client dedupes by id
   async listNotifications(
     userId: string,
-    limit = 50
+    cursor?: string
   ): Promise<NotificationListResponse> {
+    const offset = cursor ? decodeBoardCursor(cursor) : 0;
     const rows = await this.db
       .select({
         id: notifications.id,
@@ -118,14 +136,17 @@ export class NotificationsService {
       .innerJoin(workspaces, eq(products.workspaceId, workspaces.id))
       .innerJoin(statuses, eq(posts.statusId, statuses.id))
       .innerJoin(postActivity, eq(notifications.postActivityId, postActivity.id))
-      .where(eq(notifications.userId, userId))
-      .orderBy(desc(notifications.createdAt))
-      .limit(limit);
+      .where(this.visible(userId))
+      .orderBy(desc(notifications.createdAt), desc(notifications.id))
+      .offset(offset)
+      .limit(NOTIFICATION_PAGE_SIZE + 1);
 
+    const hasMore = rows.length > NOTIFICATION_PAGE_SIZE;
     const unread = await this.getUnreadCount(userId);
 
     return {
-      notifications: rows.map((r) => ({
+      nextCursor: hasMore ? encodeBoardCursor(offset + NOTIFICATION_PAGE_SIZE) : null,
+      notifications: rows.slice(0, NOTIFICATION_PAGE_SIZE).map((r) => ({
         id: r.id,
         readAt: r.readAt ? r.readAt.toISOString() : null,
         createdAt: r.createdAt.toISOString(),

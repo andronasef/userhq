@@ -21,6 +21,8 @@ export function NotificationBell(): React.JSX.Element {
   const [unreadCount, setUnreadCount] = React.useState<number>(0);
   const [notifications, setNotifications] = React.useState<NotificationItemType[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [nextCursor, setNextCursor] = React.useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = React.useState(false);
 
   // Fetch unread count on mount
   React.useEffect(() => {
@@ -51,6 +53,7 @@ export function NotificationBell(): React.JSX.Element {
         if (mounted) {
           setNotifications(res.notifications ?? []);
           setUnreadCount(res.unreadCount);
+          setNextCursor(res.nextCursor);
         }
       })
       .catch(() => {
@@ -68,6 +71,27 @@ export function NotificationBell(): React.JSX.Element {
       mounted = false;
     };
   }, [open]);
+
+  const handleLoadMore = async () => {
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await apiFetch<NotificationListResponse>(
+        `/api/v1/notifications?cursor=${encodeURIComponent(nextCursor)}`
+      );
+      // A status change while scrolling moves a row to the top; skip ids we already have.
+      setNotifications((prev) => {
+        const seen = new Set(prev.map((n) => n.id));
+        return [...prev, ...res.notifications.filter((n) => !seen.has(n.id))];
+      });
+      setUnreadCount(res.unreadCount);
+      setNextCursor(res.nextCursor);
+    } catch {
+      // Keep the button so the user can retry
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const handleMarkAllAsRead = async () => {
     try {
@@ -92,7 +116,8 @@ export function NotificationBell(): React.JSX.Element {
         )
       );
       try {
-        await apiFetch<{ success: boolean }>(`/api/v1/notifications/${item.id}/read`, {
+        // The read endpoint is keyed by post: one notification row per (user, post).
+        await apiFetch<{ success: boolean }>(`/api/v1/notifications/${item.post.id}/read`, {
           method: "POST",
         });
       } catch {
@@ -167,13 +192,27 @@ export function NotificationBell(): React.JSX.Element {
               </p>
             </div>
           ) : (
-            notifications.map((item) => (
-              <NotificationItem
-                key={item.id}
-                notification={item}
-                onRead={handleItemRead}
-              />
-            ))
+            <>
+              {notifications.map((item) => (
+                <NotificationItem
+                  key={item.id}
+                  notification={item}
+                  onRead={handleItemRead}
+                />
+              ))}
+              {nextCursor && (
+                <div className="p-2 text-center">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                  >
+                    {loadingMore ? "Loading…" : "Load more"}
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </DropdownMenuContent>

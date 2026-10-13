@@ -36,9 +36,12 @@ export const NotificationItemSchema = z.object({
 });
 export type NotificationItem = z.infer<typeof NotificationItemSchema>;
 
+export const NOTIFICATION_PAGE_SIZE = 20;
+
 export const NotificationListResponseSchema = z.object({
   notifications: z.array(NotificationItemSchema),
   unreadCount: z.number().int().nonnegative(),
+  nextCursor: z.string().nullable(),
 });
 export type NotificationListResponse = z.infer<typeof NotificationListResponseSchema>;
 

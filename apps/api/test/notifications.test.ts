@@ -354,4 +354,68 @@ describe("Notifications API & Stakeholder Fan-Out Engine (Plan 04-03 Task 1)", (
     expect(countAfterRes.status).toBe(200);
     expect(countAfterRes.body.unreadCount).toBe(0);
   });
+
+  it("pages notifications 20 at a time and hides ones whose post was deleted", async () => {
+    const pager = await signedInCookie(testApp.test, {
+      name: "Notif Pager",
+      email: "pager@notif.test",
+      emailVerified: true,
+    });
+    const created = await testApp.db
+      .insert(schema.posts)
+      .values(
+        Array.from({ length: 21 }, (_, i) => ({
+          productId: prodId,
+          number: 100 + i,
+          title: `Paged post ${i}`,
+          statusId: inProgressStatus.id,
+          authorId: authorUser.userId,
+        }))
+      )
+      .returning({ id: schema.posts.id });
+    const acts = await testApp.db
+      .insert(schema.postActivity)
+      .values(
+        created.map((p) => ({
+          postId: p.id,
+          kind: "status_changed" as const,
+          toStatusId: inProgressStatus.id,
+          statusName: inProgressStatus.name,
+          statusColor: "#000000",
+        }))
+      )
+      .returning({ id: schema.postActivity.id, postId: schema.postActivity.postId });
+    await testApp.db.insert(schema.notifications).values(
+      acts.map((a) => ({
+        userId: pager.userId,
+        workspaceId: wsId,
+        productId: prodId,
+        postId: a.postId,
+        postActivityId: a.id,
+      }))
+    );
+
+    const get = (path: string) =>
+      request(testApp.http).get(`/api/v1/notifications${path}`).set("Cookie", pager.cookie);
+
+    const page1 = await get("");
+    expect(page1.status).toBe(200);
+    expect(page1.body.notifications).toHaveLength(20);
+    expect(page1.body.unreadCount).toBe(21);
+    expect(page1.body.nextCursor).not.toBeNull();
+    const page2 = await get(`?cursor=${encodeURIComponent(page1.body.nextCursor)}`);
+    expect(page2.body.notifications).toHaveLength(1);
+    expect(page2.body.nextCursor).toBeNull();
+
+    await testApp.db
+      .update(schema.posts)
+      .set({ deletedAt: new Date() })
+      .where(eq(schema.posts.id, created[0].id));
+
+    const afterDelete = await get("");
+    expect(afterDelete.body.notifications).toHaveLength(20);
+    expect(afterDelete.body.nextCursor).toBeNull();
+    expect(afterDelete.body.notifications.map((n: any) => n.post.id)).not.toContain(created[0].id);
+    expect((await get("/unread-count")).body.unreadCount).toBe(20);
+  });
 });

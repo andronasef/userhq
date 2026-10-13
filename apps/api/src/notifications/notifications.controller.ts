@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Param,
+  Query,
   UseInterceptors,
   SerializeOptions,
 } from "@nestjs/common";
@@ -41,9 +42,10 @@ export class NotificationsController {
   @Get()
   @SerializeOptions({ schema: NotificationListResponseSchema })
   async listNotifications(
-    @CurrentUser() user: { id: string }
+    @CurrentUser() user: { id: string },
+    @Query("cursor") cursor?: string
   ): Promise<NotificationListResponse> {
-    return this.notificationsService.listNotifications(user.id);
+    return this.notificationsService.listNotifications(user.id, cursor);
   }
 
   @Post("mark-read")

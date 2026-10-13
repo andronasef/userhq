@@ -82,8 +82,10 @@ export function KanbanBoard({
       targetStatusId = draggedItem.statusId;
     }
 
-    // Get current items in destination column excluding the dragged item
-    const destItems = items
+    // Neighbors come from the rendered (possibly assignee-filtered) cards, since
+    // target.index is an index into them. A rank between two visible neighbors
+    // still sorts correctly among the hidden ones.
+    const destItems = displayedItems
       .filter((it) => it.statusId === targetStatusId && it.id !== sourceItemId)
       .sort(byRank);
 

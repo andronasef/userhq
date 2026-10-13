@@ -201,32 +201,9 @@ export class WorkspaceController {
         .where(eq(workspaces.id, tenant.workspaceId));
     }
 
-    const [row] = await this.db
-      .select({
-        slug: workspaces.slug,
-        name: workspaces.name,
-        websiteUrl: workspaces.websiteUrl,
-        directoryEnabled: workspaces.directoryEnabled,
-        logoKey: uploads.storageKey,
-      })
-      .from(workspaces)
-      .leftJoin(uploads, eq(workspaces.logoUploadId, uploads.id))
-      .where(eq(workspaces.id, tenant.workspaceId))
-      .limit(1);
-
-    if (!row) {
-      throw new ApiException("not_found", 404, "Not found.");
-    }
-
-    return WorkspaceSchema.parse({
-      slug: row.slug,
-      name: row.name,
-      logoUrl: row.logoKey ? `/uploads/${row.logoKey}` : null,
-      websiteUrl: row.websiteUrl ?? null,
-      directoryEnabled: row.directoryEnabled,
-      role: tenant.role,
-    });
+    return this.getWorkspace(tenant);
   }
+
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteWorkspace(

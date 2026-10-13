@@ -157,28 +157,7 @@ export class AccountController {
       .set({ commentEmails: input.commentEmails })
       .where(eq(userTable.id, user.id));
 
-    const [row] = await this.db
-      .select({
-        name: userTable.name,
-        image: userTable.image,
-        commentEmails: userTable.commentEmails,
-      })
-      .from(userTable)
-      .where(eq(userTable.id, user.id))
-      .limit(1);
-
-    if (!row) {
-      throw new ApiException("unauthorized", 401, "Sign in to continue.");
-    }
-
-    const owner = isPlatformOwner(user, this.env.PLATFORM_OWNER_EMAIL);
-    return {
-      name: row.name,
-      image: row.image ?? null,
-      commentEmails: row.commentEmails,
-      isPlatformOwner: owner,
-      ownedWorkspaces: await this.ownedWorkspaces(user.id),
-    };
+    return this.getAccount(user);
   }
 
   @Post("delete")

@@ -434,11 +434,18 @@ describe("Account deletion (Plan 03-15)", () => {
       .values({ userId: m.userId, workspaceId: w2.id, sendAfter: new Date(Date.now() - 1000) })
       .returning();
 
+    const [w2Product] = await testApp.db
+      .insert(products)
+      .values({ workspaceId: w2.id, slug: "w2-prod", name: "W2 Product" })
+      .returning();
+
     const res = await del(o.cookie, [
       { slug: w1.slug, action: "transfer", toUserId: m.userId },
       { slug: w2.slug, action: "delete" },
     ]);
     expect(res.status).toBe(204);
+    const [w2ProductRow] = await testApp.db.select().from(products).where(eq(products.id, w2Product.id));
+    expect(w2ProductRow.deletedAt).not.toBeNull();
 
     const w1Members = await testApp.db.select().from(workspaceMembers).where(eq(workspaceMembers.workspaceId, w1.id));
     expect(w1Members).toHaveLength(1);

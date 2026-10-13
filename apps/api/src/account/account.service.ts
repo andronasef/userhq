@@ -5,6 +5,7 @@ import {
   type Db,
   workspaces,
   workspaceMembers,
+  products,
   postMutes,
   commentEmailBatches,
   user as userTable,
@@ -112,10 +113,15 @@ export class AccountService {
               )
             );
         } else if (item.action === "delete") {
+          // Same as WorkspaceController.deleteWorkspace
           await tx
             .update(workspaces)
             .set({ deletedAt: sql`now()` })
             .where(eq(workspaces.id, ws.id));
+          await tx
+            .update(products)
+            .set({ deletedAt: sql`now()` })
+            .where(and(eq(products.workspaceId, ws.id), isNull(products.deletedAt)));
         }
       }
 

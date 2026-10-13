@@ -42,6 +42,7 @@ import { TenantGuard, type Tenant } from "../tenancy/tenant.guard.js";
 import { CurrentTenant } from "../tenancy/current-tenant.decorator.js";
 import { CurrentUser } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
+import { isUniqueViolation } from "../common/db-errors.js";
 
 @Controller("workspaces/:ws/products")
 @UseGuards(TenantGuard)
@@ -272,15 +273,23 @@ export class ProductsController {
     if (input.accentColor !== undefined) updateData.accentColor = input.accentColor;
 
     if (Object.keys(updateData).length > 0) {
-      await this.db
-        .update(products)
-        .set(updateData)
-        .where(
-          and(
-            eq(products.id, tenant.productId!),
-            isNull(products.deletedAt)
-          )
-        );
+      try {
+        await this.db
+          .update(products)
+          .set(updateData)
+          .where(
+            and(
+              eq(products.id, tenant.productId!),
+              isNull(products.deletedAt)
+            )
+          );
+      } catch (e) {
+        // The pre-check above can lose a race with a concurrent rename.
+        if (isUniqueViolation(e, "products_workspace_slug_unique")) {
+          throw new ApiException("slug_taken", 409, "That URL is taken. Try another.");
+        }
+        throw e;
+      }
     }
 
     return await this.getProduct(tenant);

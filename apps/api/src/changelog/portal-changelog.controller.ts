@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Param,
+  Query,
   Req,
   UseGuards,
   UseInterceptors,
@@ -9,7 +10,7 @@ import {
   Inject,
 } from "@nestjs/common";
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
-import { and, eq, isNotNull, desc } from "drizzle-orm";
+import { and, eq, isNotNull, desc, inArray } from "drizzle-orm";
 import {
   DB,
   type Db,
@@ -18,6 +19,7 @@ import {
   changelogEntryTags,
 } from "@userhq/db";
 import {
+  CHANGELOG_PAGE_SIZE,
   PublicChangelogFeedResponseSchema,
   PublicChangelogEntrySchema,
   type PublicChangelogFeedResponse,
@@ -26,6 +28,7 @@ import {
 import { Public } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { PortalGuard } from "../portal/portal.guard.js";
+import { encodeBoardCursor, decodeBoardCursor } from "../feedback/cursor.js";
 
 @Controller("portal/:ws/:product/changelog")
 @UseGuards(PortalGuard)
@@ -36,12 +39,16 @@ export class PortalChangelogController {
   @Get()
   @Public()
   @SerializeOptions({ schema: PublicChangelogFeedResponseSchema })
-  async getPublicChangelogFeed(@Req() req: any): Promise<PublicChangelogFeedResponse> {
+  async getPublicChangelogFeed(
+    @Req() req: any,
+    @Query("cursor") cursor?: string
+  ): Promise<PublicChangelogFeedResponse> {
     const { productId } = req.portal ?? {};
     if (!productId) {
       throw new ApiException("not_found", 404, "Not found.");
     }
 
+    const offset = cursor ? decodeBoardCursor(cursor) : 0;
     const rows = await this.db
       .select({
         id: changelogEntries.id,
@@ -59,10 +66,15 @@ export class PortalChangelogController {
           isNotNull(changelogEntries.publishedAt)
         )
       )
-      .orderBy(desc(changelogEntries.publishedAt));
+      .orderBy(desc(changelogEntries.publishedAt), desc(changelogEntries.id))
+      .offset(offset)
+      .limit(CHANGELOG_PAGE_SIZE + 1);
 
-    if (rows.length === 0) {
-      return { entries: [] };
+    const hasMore = rows.length > CHANGELOG_PAGE_SIZE;
+    const page = rows.slice(0, CHANGELOG_PAGE_SIZE);
+    const nextCursor = hasMore ? encodeBoardCursor(offset + CHANGELOG_PAGE_SIZE) : null;
+    if (page.length === 0) {
+      return { entries: [], nextCursor };
     }
 
     const tagRows = await this.db
@@ -74,7 +86,12 @@ export class PortalChangelogController {
       })
       .from(changelogEntryTags)
       .innerJoin(changelogTags, eq(changelogEntryTags.tagId, changelogTags.id))
-      .where(eq(changelogEntryTags.productId, productId));
+      .where(
+        and(
+          eq(changelogEntryTags.productId, productId),
+          inArray(changelogEntryTags.entryId, page.map((r) => r.id))
+        )
+      );
 
     const tagsByEntry = new Map<string, { id: string; name: string; color: string }[]>();
     for (const tag of tagRows) {
@@ -84,7 +101,7 @@ export class PortalChangelogController {
     }
 
     return {
-      entries: rows.map((r) => ({
+      entries: page.map((r) => ({
         id: r.id,
         title: r.title,
         slug: r.slug,
@@ -94,6 +111,7 @@ export class PortalChangelogController {
         tags: tagsByEntry.get(r.id) ?? [],
         createdAt: new Date(r.createdAt).toISOString(),
       })),
+      nextCursor,
     };
   }
 

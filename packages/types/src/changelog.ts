@@ -80,8 +80,11 @@ export const PublicChangelogEntrySchema = z.object({
 });
 export type PublicChangelogEntry = z.infer<typeof PublicChangelogEntrySchema>;
 
+export const CHANGELOG_PAGE_SIZE = 10;
+
 export const PublicChangelogFeedResponseSchema = z.object({
   entries: z.array(PublicChangelogEntrySchema),
+  nextCursor: z.string().nullable(),
 });
 export type PublicChangelogFeedResponse = z.infer<typeof PublicChangelogFeedResponseSchema>;
 

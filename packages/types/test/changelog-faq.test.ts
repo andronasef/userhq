@@ -352,6 +352,7 @@ describe("Changelog validation schemas", () => {
           createdAt: "2026-10-12T12:00:00.000Z",
         },
       ],
+      nextCursor: null,
     };
 
     const res = PublicChangelogFeedResponseSchema.safeParse(feed);

@@ -38,6 +38,7 @@ export default async function PublicChangelogPage({
 
   const { product: p } = productRes.data;
   const entries = feedRes.ok ? feedRes.data.entries : [];
+  const nextCursor = feedRes.ok ? feedRes.data.nextCursor : null;
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6">
@@ -51,6 +52,7 @@ export default async function PublicChangelogPage({
         productName={p.name}
         productLogoUrl={p.logoUrl}
         entries={entries}
+        nextCursor={nextCursor}
       />
     </div>
   );

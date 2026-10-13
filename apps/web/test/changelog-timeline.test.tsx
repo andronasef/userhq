@@ -85,6 +85,21 @@ describe("Changelog Timeline & Article Components", () => {
     expect(html).toContain('href="/acme-ws/roadmaps/changelog/version-2-0-release"');
   });
 
+  it("offers older updates only when the feed has another page", () => {
+    const render = (nextCursor: string | null) =>
+      renderToStaticMarkup(
+        <ChangelogFeed
+          ws="acme-ws"
+          product="roadmaps"
+          productName="Roadmaps"
+          entries={[mockEntry]}
+          nextCursor={nextCursor}
+        />
+      );
+    expect(render("eyJvIjoxMH0")).toContain("Load older updates");
+    expect(render(null)).not.toContain("Load older updates");
+  });
+
   it("renders timeline item with circular connector node and formatted date", () => {
     const html = renderToStaticMarkup(
       <ChangelogTimelineItem

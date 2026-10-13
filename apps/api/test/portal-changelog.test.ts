@@ -192,4 +192,29 @@ describe("Public Portal Changelog Feed & Permalink API (Plan 05-02 Task 1)", () 
       .set({ suspendedAt: null })
       .where(eq(schema.workspaces.id, wsId));
   });
+
+  it("pages the public feed 10 entries at a time, newest first", async () => {
+    await testApp.db.insert(schema.changelogEntries).values(
+      Array.from({ length: 10 }, (_, i) => ({
+        productId: prodId,
+        title: `Archive ${i}`,
+        slug: `archive-${i}`,
+        content: validDoc,
+        publishedAt: new Date(Date.UTC(2025, 0, i + 1)),
+      }))
+    );
+
+    const page1 = await request(testApp.http).get(`/api/v1/portal/${wsSlug}/${prodSlug}/changelog`);
+    expect(page1.status).toBe(200);
+    expect(page1.body.entries).toHaveLength(10);
+    expect(page1.body.entries[0].slug).toBe(publishedSlugNewer);
+    expect(page1.body.nextCursor).not.toBeNull();
+
+    const page2 = await request(testApp.http).get(
+      `/api/v1/portal/${wsSlug}/${prodSlug}/changelog?cursor=${encodeURIComponent(page1.body.nextCursor)}`
+    );
+    expect(page2.status).toBe(200);
+    expect(page2.body.entries.map((e: any) => e.slug)).toEqual(["archive-1", "archive-0"]);
+    expect(page2.body.nextCursor).toBeNull();
+  });
 });

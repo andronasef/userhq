@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
-import { eq } from "drizzle-orm";
 import { schema } from "@userhq/db";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
 
@@ -12,7 +11,6 @@ describe("Changelog Admin API & Tag Seeding (Plan 05-02 Task 1)", () => {
   let wsId: string;
   let otherWsSlug: string;
   let prodSlug: string;
-  let prodId: string;
 
   const validDoc = {
     type: "doc",
@@ -89,12 +87,6 @@ describe("Changelog Admin API & Tag Seeding (Plan 05-02 Task 1)", () => {
       });
 
     expect(createRes.status).toBe(201);
-
-    const [prod] = await testApp.db
-      .select({ id: schema.products.id })
-      .from(schema.products)
-      .where(eq(schema.products.slug, prodSlug));
-    prodId = prod.id;
 
     // Verify seeded tags
     const tagsRes = await request(testApp.http)

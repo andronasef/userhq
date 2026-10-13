@@ -12,7 +12,6 @@ describe("FAQ Admin API & LexoRank Reordering (Plan 05-02 Task 2)", () => {
   let wsSlug: string;
   let wsId: string;
   let prodSlug: string;
-  let prodId: string;
 
   const validAnswer = {
     type: "doc",
@@ -58,15 +57,11 @@ describe("FAQ Admin API & LexoRank Reordering (Plan 05-02 Task 2)", () => {
     });
 
     prodSlug = "faq-product";
-    const [prod] = await testApp.db
-      .insert(schema.products)
-      .values({
-        workspaceId: wsId,
-        slug: prodSlug,
-        name: "FAQ Product",
-      })
-      .returning();
-    prodId = prod.id;
+    await testApp.db.insert(schema.products).values({
+      workspaceId: wsId,
+      slug: prodSlug,
+      name: "FAQ Product",
+    });
 
     const [otherWs] = await testApp.db
       .insert(schema.workspaces)

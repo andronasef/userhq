@@ -277,7 +277,6 @@ export function isValidRank(
   try {
     const resolvedIntDigits = intDigits ?? BASE_52_DIGITS;
     const resolvedDigits = digits ?? BASE_62_DIGITS;
-    const lookup = getDigitIndex(resolvedDigits);
     const intLookup = getDigitIndex(resolvedIntDigits);
     validateOrderKey(key, resolvedDigits, resolvedIntDigits, intLookup);
     return true;

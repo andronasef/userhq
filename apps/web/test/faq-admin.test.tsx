@@ -23,7 +23,7 @@ vi.mock("@radix-ui/react-dialog", () => ({
 // Mock @radix-ui/react-dropdown-menu
 vi.mock("@radix-ui/react-dropdown-menu", () => ({
   Root: ({ children }: any) => <div>{children}</div>,
-  Trigger: ({ children, asChild }: any) => <div>{children}</div>,
+  Trigger: ({ children }: any) => <div>{children}</div>,
   Content: ({ children }: any) => <div>{children}</div>,
   Item: ({ children, onClick }: any) => <button type="button" onClick={onClick}>{children}</button>,
   Separator: () => <hr />,

@@ -5,7 +5,6 @@ import { HighlightText, escapeRegex } from "../components/faq/faq-highlight";
 import { FaqSearchBar } from "../components/faq/faq-search-bar";
 import { FaqNotFoundPrompt } from "../components/faq/faq-not-found-prompt";
 import { FaqAccordionItem } from "../components/faq/faq-accordion-item";
-import { FaqSection } from "../components/faq/faq-section";
 import { FaqPortal, extractTextFromRichText } from "../components/faq/faq-portal";
 import type { PublicFaqCategory, RichTextDoc } from "@userhq/types";
 

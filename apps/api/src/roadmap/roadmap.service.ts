@@ -21,6 +21,7 @@ import {
   type RoadmapPostLinkSearchResult,
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
+import { escapeLike } from "../platform/platform.controller.js";
 
 @Injectable()
 export class RoadmapService {
@@ -626,10 +627,10 @@ export class RoadmapService {
       const asNum = parseInt(trimmed, 10);
       if (!isNaN(asNum) && asNum > 0) {
         whereConditions.push(
-          or(eq(posts.number, asNum), ilike(posts.title, `%${trimmed}%`))!
+          or(eq(posts.number, asNum), ilike(posts.title, `%${escapeLike(trimmed)}%`))!
         );
       } else {
-        whereConditions.push(ilike(posts.title, `%${trimmed}%`));
+        whereConditions.push(ilike(posts.title, `%${escapeLike(trimmed)}%`));
       }
     }
 

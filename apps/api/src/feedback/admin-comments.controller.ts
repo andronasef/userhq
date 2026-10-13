@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Param,
+  Query,
   HttpCode,
   UseGuards,
   UseInterceptors,
@@ -11,8 +12,8 @@ import {
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
 import { z } from "zod";
 import {
-  DeletedCommentRowSchema,
-  type DeletedCommentRow,
+  DeletedCommentPageSchema,
+  type DeletedCommentPage,
 } from "@userhq/types";
 import { TenantGuard, type Tenant } from "../tenancy/tenant.guard.js";
 import { CurrentTenant } from "../tenancy/current-tenant.decorator.js";
@@ -28,14 +29,15 @@ export class AdminCommentsController {
   constructor(private readonly moderationService: ModerationService) {}
 
   @Get("deleted")
-  @SerializeOptions({ schema: DeletedCommentRowSchema })
+  @SerializeOptions({ schema: DeletedCommentPageSchema })
   async listDeletedComments(
-    @CurrentTenant() tenant: Tenant
-  ): Promise<DeletedCommentRow[]> {
-    return this.moderationService.listDeletedComments({
-      workspaceId: tenant.workspaceId,
-      productId: tenant.productId!,
-    });
+    @CurrentTenant() tenant: Tenant,
+    @Query("cursor") cursor?: string
+  ): Promise<DeletedCommentPage> {
+    return this.moderationService.listDeletedComments(
+      { workspaceId: tenant.workspaceId, productId: tenant.productId! },
+      cursor
+    );
   }
 
   @Post(":id/restore")

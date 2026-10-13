@@ -3,7 +3,12 @@
 import * as React from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import type { DeletedPostRow, DeletedCommentRow } from "@userhq/types";
+import type {
+  DeletedPostRow,
+  DeletedCommentRow,
+  DeletedPostPage,
+  DeletedCommentPage,
+} from "@userhq/types";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
@@ -14,14 +19,18 @@ export interface DeletedItemsProps {
   ws: string;
   product: string;
   initialPosts: DeletedPostRow[];
+  initialPostsCursor: string | null;
   initialComments: DeletedCommentRow[];
+  initialCommentsCursor: string | null;
 }
 
 export function DeletedItems({
   ws,
   product,
   initialPosts,
+  initialPostsCursor,
   initialComments,
+  initialCommentsCursor,
 }: DeletedItemsProps): React.JSX.Element {
   const [deletedPosts, setDeletedPosts] =
     React.useState<DeletedPostRow[]>(initialPosts);
@@ -33,6 +42,56 @@ export function DeletedItems({
   const [restoringCommentId, setRestoringCommentId] = React.useState<
     string | null
   >(null);
+
+  const [postsCursor, setPostsCursor] = React.useState(initialPostsCursor);
+  const [commentsCursor, setCommentsCursor] = React.useState(
+    initialCommentsCursor
+  );
+  const [loadingMore, setLoadingMore] = React.useState<
+    "posts" | "comments" | null
+  >(null);
+  const base = `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}`;
+
+  // ponytail: offset cursor; restoring rows before loading more can skip a few, a reload shows them
+  const loadMorePosts = async () => {
+    if (!postsCursor) return;
+    setLoadingMore("posts");
+    try {
+      const res = await apiFetch<DeletedPostPage>(
+        `${base}/posts?view=deleted&cursor=${encodeURIComponent(postsCursor)}`
+      );
+      setDeletedPosts((prev) => [...prev, ...res.posts]);
+      setPostsCursor(res.nextCursor);
+    } catch {
+      toast.error("Couldn't load more posts. Try again.");
+    } finally {
+      setLoadingMore(null);
+    }
+  };
+
+  const loadMoreComments = async () => {
+    if (!commentsCursor) return;
+    setLoadingMore("comments");
+    try {
+      const res = await apiFetch<DeletedCommentPage>(
+        `${base}/comments/deleted?cursor=${encodeURIComponent(commentsCursor)}`
+      );
+      setDeletedComments((prev) => [...prev, ...res.comments]);
+      setCommentsCursor(res.nextCursor);
+    } catch {
+      toast.error("Couldn't load more comments. Try again.");
+    } finally {
+      setLoadingMore(null);
+    }
+  };
+
+  const loadMoreButton = (onClick: () => void, busy: boolean) => (
+    <div className="text-center">
+      <Button variant="outline" size="sm" onClick={onClick} disabled={busy}>
+        {busy ? "Loading…" : "Load more"}
+      </Button>
+    </div>
+  );
 
   const handleRestorePost = async (post: DeletedPostRow) => {
     setRestoringPostId(post.number);
@@ -154,6 +213,7 @@ export function DeletedItems({
             </TBody>
           </Table>
         )}
+        {postsCursor && loadMoreButton(loadMorePosts, loadingMore === "posts")}
       </section>
 
       {/* Deleted comments */}
@@ -239,6 +299,8 @@ export function DeletedItems({
             </TBody>
           </Table>
         )}
+        {commentsCursor &&
+          loadMoreButton(loadMoreComments, loadingMore === "comments")}
       </section>
     </div>
   );

@@ -39,8 +39,8 @@ import {
   type AdminPostPage,
   DeletedPostPageSchema,
   type DeletedPostPage,
-  DeletedCommentRowSchema,
-  type DeletedCommentRow,
+  DeletedCommentPageSchema,
+  type DeletedCommentPage,
   AdminPostDetailSchema,
   type AdminPostDetail,
   UnsubscribeStateSchema,
@@ -372,10 +372,10 @@ export const getDeletedComments = cache(
   (
     ws: string,
     product: string
-  ): Promise<ApiReadResult<DeletedCommentRow[]>> => {
+  ): Promise<ApiReadResult<DeletedCommentPage>> => {
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/comments/deleted`,
-      z.array(DeletedCommentRowSchema)
+      DeletedCommentPageSchema
     );
   }
 );

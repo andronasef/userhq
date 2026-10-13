@@ -32,7 +32,7 @@ import {
   type AdminPostDetail,
   type VoterPage,
   type DeletedPostPage,
-  type DeletedCommentRow,
+  type DeletedCommentPage,
   type PublicAuthor,
   type PostViewer,
   type MergeResult,
@@ -601,8 +601,10 @@ export class ModerationService {
   }
 
   async listDeletedComments(
-    tenant: { workspaceId: string; productId: string }
-  ): Promise<DeletedCommentRow[]> {
+    tenant: { workspaceId: string; productId: string },
+    cursor?: string
+  ): Promise<DeletedCommentPage> {
+    const offset = cursor ? decodeBoardCursor(cursor) : 0;
     const rows = await this.db
       .select({
         id: comments.id,
@@ -623,19 +625,25 @@ export class ModerationService {
           isNotNull(comments.deletedAt)
         )
       )
-      .orderBy(desc(comments.deletedAt), desc(comments.id));
+      .orderBy(desc(comments.deletedAt), desc(comments.id))
+      .offset(offset)
+      .limit(ADMIN_PAGE_SIZE + 1);
 
-    return rows.map((r) => ({
-      id: r.id,
-      excerpt: r.body.slice(0, 80),
-      post: {
-        number: r.postNumber,
-        title: r.postTitle,
-        deleted: r.postDeletedAt !== null,
-      },
-      authorName: r.authorDeletedAt ? null : (r.authorName ?? null),
-      deletedAt: r.deletedAt!.toISOString(),
-    }));
+    const hasMore = rows.length > ADMIN_PAGE_SIZE;
+    return {
+      nextCursor: hasMore ? encodeBoardCursor(offset + ADMIN_PAGE_SIZE) : null,
+      comments: rows.slice(0, ADMIN_PAGE_SIZE).map((r) => ({
+        id: r.id,
+        excerpt: r.body.slice(0, 80),
+        post: {
+          number: r.postNumber,
+          title: r.postTitle,
+          deleted: r.postDeletedAt !== null,
+        },
+        authorName: r.authorDeletedAt ? null : (r.authorName ?? null),
+        deletedAt: r.deletedAt!.toISOString(),
+      })),
+    };
   }
 
   async restoreComment(

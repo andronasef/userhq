@@ -127,7 +127,9 @@ async function DeletedViewLoader({
       ws={ws}
       product={product}
       initialPosts={deletedPostsRes.data.posts}
-      initialComments={deletedCommentsRes.data}
+      initialPostsCursor={deletedPostsRes.data.nextCursor}
+      initialComments={deletedCommentsRes.data.comments}
+      initialCommentsCursor={deletedCommentsRes.data.nextCursor}
     />
   );
 }

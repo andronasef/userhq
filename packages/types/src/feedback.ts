@@ -190,6 +190,12 @@ export const DeletedCommentRowSchema = z.object({
 });
 export type DeletedCommentRow = z.infer<typeof DeletedCommentRowSchema>;
 
+export const DeletedCommentPageSchema = z.object({
+  comments: z.array(DeletedCommentRowSchema),
+  nextCursor: z.string().nullable(),
+});
+export type DeletedCommentPage = z.infer<typeof DeletedCommentPageSchema>;
+
 export const VoterSchema = z.object({
   name: z.string().nullable(),
   image: z.string().nullable(),

@@ -313,7 +313,8 @@ describe("Dashboard Board API (Plan 03-11)", () => {
         .get(`/api/v1/workspaces/${wsSlug}/products/${prodSlug}/comments/deleted`)
         .set("Cookie", ownerUser.cookie);
       expect(deletedCommentsRes.status).toBe(200);
-      const row = deletedCommentsRes.body.find((c: any) => c.id === commentId);
+      expect(deletedCommentsRes.body.nextCursor).toBeNull();
+      const row = deletedCommentsRes.body.comments.find((c: any) => c.id === commentId);
       expect(row).toBeDefined();
       expect(row.excerpt).toBe(longCommentText.slice(0, 80));
       expect(row.post.number).toBe(postRNumber);
@@ -378,7 +379,7 @@ describe("Dashboard Board API (Plan 03-11)", () => {
       const deletedCommentsRes = await request(testApp.http)
         .get(`/api/v1/workspaces/${wsSlug}/products/${prodSlug}/comments/deleted`)
         .set("Cookie", ownerUser.cookie);
-      const row = deletedCommentsRes.body.find((c: any) => c.id === commentId);
+      const row = deletedCommentsRes.body.comments.find((c: any) => c.id === commentId);
       expect(row).toBeDefined();
       expect(row.post.deleted).toBe(true);
 

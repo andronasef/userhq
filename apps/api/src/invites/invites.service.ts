@@ -57,21 +57,6 @@ export class InvitesService {
     @Inject(DB) private readonly db: Db
   ) {}
 
-  generateInviteToken(): { token: string; tokenHash: string } {
-    return generateInviteToken();
-  }
-
-  hashInviteToken(token: string): string {
-    return hashInviteToken(token);
-  }
-
-  inviteState(
-    row: { usedAt: Date | null; revokedAt: Date | null; expiresAt: Date },
-    now: Date = new Date()
-  ): InviteState {
-    return inviteState(row, now);
-  }
-
   async create(input: {
     kind: "platform" | "workspace";
     workspaceId: string | null;
@@ -222,10 +207,6 @@ export class InvitesService {
     if (res.length === 0) {
       throw new ApiException("not_found", 404, "Not found.");
     }
-  }
-
-  maskEmail(email: string): string {
-    return maskEmail(email);
   }
 
   async lookup(

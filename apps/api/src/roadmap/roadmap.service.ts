@@ -652,31 +652,6 @@ export class RoadmapService {
   }
 
 
-  async getLinkedPosts(
-    tenant: { workspaceId: string; productId: string },
-    itemId: string
-  ): Promise<RoadmapPostLinkSearchResult[]> {
-    return this.db
-      .select({
-        id: posts.id,
-        number: posts.number,
-        title: posts.title,
-        statusId: posts.statusId,
-        roadmapItemId: posts.roadmapItemId,
-        voteCount: posts.voteCount,
-      })
-      .from(posts)
-      .where(
-        and(
-          eq(posts.productId, tenant.productId),
-          eq(posts.roadmapItemId, itemId),
-          isNull(posts.deletedAt),
-          isNull(posts.mergedIntoId)
-        )
-      )
-      .orderBy(desc(posts.number));
-  }
-
   private lockLinkedPosts(tx: any, productId: string, itemId: string) {
     return tx
       .select({ id: posts.id, statusId: posts.statusId, version: posts.version })

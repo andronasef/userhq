@@ -39,10 +39,10 @@ describe("Changelog Admin Studio & Authoring Components", () => {
     title: "Version 2.4 - Faster Exports & Analytics",
     slug: "version-2-4-faster-exports-analytics",
     summary: "A fast release note with analytics updates.",
-    publishedAt: "2026-10-15T12:00:00.000Z",
+    publishedAt: "2026-01-15T12:00:00.000Z",
     tags: sampleTags,
-    createdAt: "2026-10-15T11:00:00.000Z",
-    updatedAt: "2026-10-15T11:00:00.000Z",
+    createdAt: "2026-01-15T11:00:00.000Z",
+    updatedAt: "2026-01-15T11:00:00.000Z",
     content: {
       type: "doc",
       content: [
@@ -63,6 +63,22 @@ describe("Changelog Admin Studio & Authoring Components", () => {
     slug: "upcoming-beta-features",
     publishedAt: null, // Draft
   };
+
+  it("labels future-dated entries Scheduled, not Published", () => {
+    const future = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const html = renderToStaticMarkup(
+      <ChangelogStudio
+        ws="acme"
+        product="core"
+        productName="Acme Core"
+        entries={[{ ...sampleEntry, publishedAt: future }]}
+        tags={sampleTags}
+      />
+    );
+
+    expect(html).toContain("Scheduled");
+    expect(html).not.toContain(">Published<");
+  });
 
   it("renders EmptyState in ChangelogStudio when no entries exist", () => {
     const html = renderToStaticMarkup(

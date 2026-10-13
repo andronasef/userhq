@@ -10,7 +10,7 @@ import {
   Inject,
 } from "@nestjs/common";
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
-import { and, eq, isNotNull, desc, inArray } from "drizzle-orm";
+import { and, eq, lte, desc, inArray, sql } from "drizzle-orm";
 import {
   DB,
   type Db,
@@ -29,6 +29,10 @@ import { Public } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { PortalGuard } from "../portal/portal.guard.js";
 import { encodeBoardCursor, decodeBoardCursor } from "../feedback/cursor.js";
+
+// Published and not future-dated: an entry dated ahead goes live when its date
+// arrives. lte() also excludes drafts (NULL).
+const isLive = lte(changelogEntries.publishedAt, sql`now()`);
 
 @Controller("portal/:ws/:product/changelog")
 @UseGuards(PortalGuard)
@@ -63,7 +67,7 @@ export class PortalChangelogController {
       .where(
         and(
           eq(changelogEntries.productId, productId),
-          isNotNull(changelogEntries.publishedAt)
+          isLive
         )
       )
       .orderBy(desc(changelogEntries.publishedAt), desc(changelogEntries.id))
@@ -142,7 +146,7 @@ export class PortalChangelogController {
         and(
           eq(changelogEntries.productId, productId),
           eq(changelogEntries.slug, slug.toLowerCase()),
-          isNotNull(changelogEntries.publishedAt)
+          isLive
         )
       )
       .limit(1);

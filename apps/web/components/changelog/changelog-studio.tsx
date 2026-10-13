@@ -28,6 +28,7 @@ import { ChangelogTagDialog } from "./changelog-tag-dialog";
 import { getChangelogTagClasses } from "./changelog-timeline-item";
 import { apiFetch } from "../../lib/api-client";
 import { cn } from "../../lib/utils";
+import { isScheduled } from "../../lib/format";
 
 export interface ChangelogStudioProps {
   ws: string;
@@ -161,6 +162,7 @@ export function ChangelogStudio({
           <TBody>
             {entriesList.map((entry) => {
               const isPublished = Boolean(entry.publishedAt);
+              const scheduled = isScheduled(entry.publishedAt);
 
               return (
                 <TR key={entry.id}>
@@ -180,12 +182,15 @@ export function ChangelogStudio({
                     <span
                       className={cn(
                         "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border",
-                        isPublished
-                          ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
-                          : "bg-muted text-muted-foreground border-border"
+                        scheduled
+                          ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                          : isPublished
+                            ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
+                            : "bg-muted text-muted-foreground border-border"
                       )}
+                      title={scheduled ? "Goes live on the portal on its release date" : undefined}
                     >
-                      {isPublished ? "Published" : "Draft"}
+                      {scheduled ? "Scheduled" : isPublished ? "Published" : "Draft"}
                     </span>
                   </TD>
 
@@ -235,7 +240,7 @@ export function ChangelogStudio({
                           </Link>
                         </DropdownMenuItem>
 
-                        {isPublished && (
+                        {isPublished && !scheduled && (
                           <DropdownMenuItem asChild>
                             <Link
                               href={`/${ws}/${product}/changelog/${entry.slug}`}

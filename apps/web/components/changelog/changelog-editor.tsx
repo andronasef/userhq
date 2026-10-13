@@ -29,6 +29,7 @@ import { ChangelogPreviewModal } from "./changelog-preview-modal";
 import { getChangelogTagClasses } from "./changelog-timeline-item";
 import { apiFetch } from "../../lib/api-client";
 import { cn } from "../../lib/utils";
+import { formatDate, isScheduled } from "../../lib/format";
 
 export interface ChangelogEditorProps {
   ws: string;
@@ -59,6 +60,13 @@ function toDatetimeLocal(isoString?: string | null): string {
   } catch {
     return "";
   }
+}
+
+function publishedToast(publishedAt: string, wasPublished: boolean): string {
+  if (isScheduled(publishedAt)) {
+    return `Scheduled: goes live on ${formatDate(publishedAt)}`;
+  }
+  return wasPublished ? "Changelog entry updated" : "Changelog entry published";
 }
 
 export function ChangelogEditor({
@@ -94,6 +102,10 @@ export function ChangelogEditor({
   const [isPublished, setIsPublished] = React.useState(
     Boolean(initialEntry?.publishedAt)
   );
+  const [savedPublishedAt, setSavedPublishedAt] = React.useState(
+    initialEntry?.publishedAt ?? null
+  );
+  const scheduled = isPublished && isScheduled(savedPublishedAt);
 
   const [isDirty, setIsDirty] = React.useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = React.useState<string>("Saved");
@@ -266,8 +278,9 @@ export function ChangelogEditor({
         setEntryId(created.id);
         setSlug(created.slug);
         setIsPublished(true);
+        setSavedPublishedAt(pubDate);
         setIsDirty(false);
-        toast.success("Changelog entry published");
+        toast.success(publishedToast(pubDate, false));
         router.push(`/dashboard/${ws}/${product}/changelog`);
         return;
       }
@@ -298,9 +311,10 @@ export function ChangelogEditor({
       );
 
       setIsPublished(true);
+      setSavedPublishedAt(pubDate);
       setIsDirty(false);
       setAutoSaveStatus("Saved");
-      toast.success(isPublished ? "Changelog entry updated" : "Changelog entry published");
+      toast.success(publishedToast(pubDate, isPublished));
       router.push(`/dashboard/${ws}/${product}/changelog`);
     } catch (err: any) {
       toast.error(err.message || "Failed to publish");
@@ -318,6 +332,7 @@ export function ChangelogEditor({
         `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/changelog/${encodeURIComponent(entryId)}/unpublish`, { method: "POST" }
       );
       setIsPublished(false);
+      setSavedPublishedAt(null);
       setReleaseDate("");
       toast.success("Entry reverted to draft");
     } catch (err: any) {
@@ -377,12 +392,14 @@ export function ChangelogEditor({
           <span
             className={cn(
               "text-xs font-medium px-2 py-0.5 rounded-full border",
-              isPublished
-                ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
-                : "bg-muted text-muted-foreground border-border"
+              scheduled
+                ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                : isPublished
+                  ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
+                  : "bg-muted text-muted-foreground border-border"
             )}
           >
-            {isPublished ? "Published" : "Draft"}
+            {scheduled ? "Scheduled" : isPublished ? "Published" : "Draft"}
           </span>
 
           <span className="text-xs text-muted-foreground hidden md:inline-block">

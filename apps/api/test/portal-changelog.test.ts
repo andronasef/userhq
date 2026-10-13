@@ -217,4 +217,34 @@ describe("Public Portal Changelog Feed & Permalink API (Plan 05-02 Task 1)", () 
     expect(page2.body.entries.map((e: any) => e.slug)).toEqual(["archive-1", "archive-0"]);
     expect(page2.body.nextCursor).toBeNull();
   });
+
+  it("keeps future-dated entries off the portal until their date arrives", async () => {
+    const [scheduled] = await testApp.db
+      .insert(schema.changelogEntries)
+      .values({
+        productId: prodId,
+        title: "Coming Soon",
+        slug: "coming-soon",
+        content: validDoc,
+        publishedAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      })
+      .returning();
+
+    const feedSlugs = async () => {
+      const res = await request(testApp.http).get(`/api/v1/portal/${wsSlug}/${prodSlug}/changelog`);
+      return res.body.entries.map((e: any) => e.slug);
+    };
+    expect(await feedSlugs()).not.toContain("coming-soon");
+    const permalink = await request(testApp.http).get(
+      `/api/v1/portal/${wsSlug}/${prodSlug}/changelog/coming-soon`
+    );
+    expect(permalink.status).toBe(404);
+
+    // Once the date passes it is live, without anyone touching it
+    await testApp.db
+      .update(schema.changelogEntries)
+      .set({ publishedAt: new Date(Date.now() - 1000) })
+      .where(eq(schema.changelogEntries.id, scheduled.id));
+    expect((await feedSlugs())[0]).toBe("coming-soon");
+  });
 });

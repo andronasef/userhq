@@ -28,8 +28,12 @@ export function verifyToken(
   const key = Buffer.from(
     hkdfSync("sha256", secret, "", "userhq-unsubscribe-v1", 32)
   );
-  const expected = createHmac("sha256", key).update(payload).digest();
-  const given = Buffer.from(mac, "base64url");
+  // Compare encoded strings: decoding would ignore the last char's padding bits,
+  // so "…a" and "…b" could both verify.
+  const expected = Buffer.from(
+    createHmac("sha256", key).update(payload).digest("base64url")
+  );
+  const given = Buffer.from(mac);
   if (given.length !== expected.length || !timingSafeEqual(given, expected)) {
     return null;
   }

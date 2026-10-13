@@ -92,6 +92,15 @@ describe("Email Render and Tokens (Plan 03-10 Task 3)", () => {
       const otherSecret = "b".repeat(32);
       expect(verifyToken(otherSecret, token)).toBeNull();
     });
+
+    it("rejects every one-char change to the MAC, including padding-bit-only changes", () => {
+      // The final base64url char carries 2 ignored bits: "…a" and "…b" decode alike.
+      for (let i = 0; i < 300; i++) {
+        const token = signToken(secret, `user-${i}`, "all");
+        const tampered = token.slice(0, -1) + (token.endsWith("a") ? "b" : "a");
+        expect(verifyToken(secret, tampered)).toBeNull();
+      }
+    });
   });
 
   describe("renderCommentEmail", () => {

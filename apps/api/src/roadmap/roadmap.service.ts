@@ -253,43 +253,23 @@ export class RoadmapService {
           )
           .for("update");
 
-        if (postsToLink.length !== input.postIds.length) {
+        if (postsToLink.length !== new Set(input.postIds).size) {
           throw new ApiException("post_not_found", 404, "One or more posts not found.");
         }
 
-        for (const p of postsToLink) {
-          if (p.roadmapItemId !== null) {
-            throw new ApiException(
-              "post_already_linked",
-              400,
-              "A post is already linked to another roadmap item."
-            );
-          }
+        if (postsToLink.some((p) => p.roadmapItemId !== null)) {
+          throw new ApiException(
+            "post_already_linked",
+            400,
+            "A post is already linked to another roadmap item."
+          );
         }
 
-        for (const p of postsToLink) {
-          const statusChanged = p.statusId !== input.statusId;
-          await tx
-            .update(posts)
-            .set({
-              roadmapItemId: newItem.id,
-              statusId: input.statusId,
-              version: statusChanged ? p.version + 1 : p.version,
-            })
-            .where(eq(posts.id, p.id));
-
-          if (statusChanged) {
-            await tx.insert(postActivity).values({
-              postId: p.id,
-              actorId: adminUser.id,
-              kind: "status_changed",
-              toStatusId: statusRow.id,
-              statusName: statusRow.name,
-              statusColor: statusRow.color,
-              note: null,
-            });
-          }
-        }
+        await tx
+          .update(posts)
+          .set({ roadmapItemId: newItem.id })
+          .where(inArray(posts.id, input.postIds));
+        await this.followItemStatus(tx, tenant, adminUser.id, statusRow, postsToLink);
       }
 
       return this.getItemById(tenant, newItem.id, tx);
@@ -416,55 +396,14 @@ export class RoadmapService {
       }
 
       // 7. Cascade status changes to linked posts
-      if (targetStatus && input.statusId !== existing.statusId) {
-        const linkedPosts = await tx
-          .select({
-            id: posts.id,
-            statusId: posts.statusId,
-            version: posts.version,
-          })
-          .from(posts)
-          .where(
-            and(
-              eq(posts.productId, tenant.productId),
-              eq(posts.roadmapItemId, itemId),
-              isNull(posts.deletedAt),
-              isNull(posts.mergedIntoId)
-            )
-          )
-          .for("update");
-
-        for (const post of linkedPosts) {
-          if (post.statusId !== targetStatus.id) {
-            await tx
-              .update(posts)
-              .set({
-                statusId: targetStatus.id,
-                version: post.version + 1,
-              })
-              .where(eq(posts.id, post.id));
-
-            const [act] = await tx.insert(postActivity).values({
-              postId: post.id,
-              actorId: adminUser.id,
-              kind: "status_changed",
-              toStatusId: targetStatus.id,
-              statusName: targetStatus.name,
-              statusColor: targetStatus.color,
-              note: null,
-            }).returning({ id: postActivity.id });
-
-            if (this.notificationsService) {
-              await this.notificationsService.fanOutStatusChange(tx, {
-                workspaceId: tenant.workspaceId,
-                productId: tenant.productId,
-                postId: post.id,
-                postActivityId: act.id,
-                actorId: adminUser.id,
-              });
-            }
-          }
-        }
+      if (targetStatus) {
+        await this.followItemStatus(
+          tx,
+          tenant,
+          adminUser.id,
+          targetStatus,
+          await this.lockLinkedPosts(tx, tenant.productId, itemId)
+        );
       }
 
       return this.getItemById(tenant, itemId, tx);
@@ -528,54 +467,13 @@ export class RoadmapService {
 
       // 4. Cascade to linked posts if column changed
       if (statusChanged) {
-        const linkedPosts = await tx
-          .select({
-            id: posts.id,
-            statusId: posts.statusId,
-            version: posts.version,
-          })
-          .from(posts)
-          .where(
-            and(
-              eq(posts.productId, tenant.productId),
-              eq(posts.roadmapItemId, itemId),
-              isNull(posts.deletedAt),
-              isNull(posts.mergedIntoId)
-            )
-          )
-          .for("update");
-
-        for (const post of linkedPosts) {
-          if (post.statusId !== targetStatus.id) {
-            await tx
-              .update(posts)
-              .set({
-                statusId: targetStatus.id,
-                version: post.version + 1,
-              })
-              .where(eq(posts.id, post.id));
-
-            const [act] = await tx.insert(postActivity).values({
-              postId: post.id,
-              actorId: adminUser.id,
-              kind: "status_changed",
-              toStatusId: targetStatus.id,
-              statusName: targetStatus.name,
-              statusColor: targetStatus.color,
-              note: null,
-            }).returning({ id: postActivity.id });
-
-            if (this.notificationsService) {
-              await this.notificationsService.fanOutStatusChange(tx, {
-                workspaceId: tenant.workspaceId,
-                productId: tenant.productId,
-                postId: post.id,
-                postActivityId: act.id,
-                actorId: adminUser.id,
-              });
-            }
-          }
-        }
+        await this.followItemStatus(
+          tx,
+          tenant,
+          adminUser.id,
+          targetStatus,
+          await this.lockLinkedPosts(tx, tenant.productId, itemId)
+        );
       }
 
       return this.getItemById(tenant, itemId, tx);
@@ -609,15 +507,19 @@ export class RoadmapService {
   ): Promise<{ success: true; linkedPostCount: number }> {
     return this.db.transaction(async (tx) => {
       const [item] = await tx
-        .select({ id: roadmapItems.id, statusId: roadmapItems.statusId })
+        .select({
+          id: roadmapItems.id,
+          status: { id: statuses.id, name: statuses.name, color: statuses.color },
+        })
         .from(roadmapItems)
+        .innerJoin(statuses, eq(roadmapItems.statusId, statuses.id))
         .where(
           and(
             eq(roadmapItems.id, itemId),
             eq(roadmapItems.productId, tenant.productId)
           )
         )
-        .for("update");
+        .for("update", { of: roadmapItems });
 
       if (!item) {
         throw new ApiException("item_not_found", 404, "Roadmap item not found.");
@@ -653,40 +555,11 @@ export class RoadmapService {
         );
       }
 
-      const statusChanged = post.statusId !== item.statusId;
       await tx
         .update(posts)
-        .set({
-          roadmapItemId: item.id,
-          statusId: item.statusId,
-          version: statusChanged ? post.version + 1 : post.version,
-        })
+        .set({ roadmapItemId: item.id })
         .where(eq(posts.id, post.id));
-
-      if (statusChanged) {
-        const [statusRow] = await tx
-          .select({ id: statuses.id, name: statuses.name, color: statuses.color })
-          .from(statuses)
-          .where(
-            and(
-              eq(statuses.id, item.statusId),
-              eq(statuses.productId, tenant.productId)
-            )
-          )
-          .limit(1);
-
-        if (statusRow) {
-          await tx.insert(postActivity).values({
-            postId: post.id,
-            actorId: adminUser.id,
-            kind: "status_changed",
-            toStatusId: statusRow.id,
-            statusName: statusRow.name,
-            statusColor: statusRow.color,
-            note: null,
-          });
-        }
-      }
+      await this.followItemStatus(tx, tenant, adminUser.id, item.status, [post]);
 
       const [countRow] = await tx
         .select({ count: sql<number>`count(*)::int` })
@@ -801,6 +674,61 @@ export class RoadmapService {
         )
       )
       .orderBy(desc(posts.number));
+  }
+
+  private lockLinkedPosts(tx: any, productId: string, itemId: string) {
+    return tx
+      .select({ id: posts.id, statusId: posts.statusId, version: posts.version })
+      .from(posts)
+      .where(
+        and(
+          eq(posts.productId, productId),
+          eq(posts.roadmapItemId, itemId),
+          isNull(posts.deletedAt),
+          isNull(posts.mergedIntoId)
+        )
+      )
+      .for("update");
+  }
+
+  // Linked posts take the item's status (ROAD-07); every change is logged and
+  // notifies the post's stakeholders (LOOP-03), however the post got linked.
+  private async followItemStatus(
+    tx: any,
+    tenant: { workspaceId: string; productId: string },
+    actorId: string,
+    status: { id: string; name: string; color: string },
+    linked: { id: string; statusId: string; version: number }[]
+  ): Promise<void> {
+    for (const post of linked) {
+      if (post.statusId === status.id) continue;
+
+      await tx
+        .update(posts)
+        .set({ statusId: status.id, version: post.version + 1 })
+        .where(eq(posts.id, post.id));
+
+      const [act] = await tx
+        .insert(postActivity)
+        .values({
+          postId: post.id,
+          actorId,
+          kind: "status_changed",
+          toStatusId: status.id,
+          statusName: status.name,
+          statusColor: status.color,
+          note: null,
+        })
+        .returning({ id: postActivity.id });
+
+      await this.notificationsService?.fanOutStatusChange(tx, {
+        workspaceId: tenant.workspaceId,
+        productId: tenant.productId,
+        postId: post.id,
+        postActivityId: act.id,
+        actorId,
+      });
+    }
   }
 
   private mapAdminItem(row: any): AdminRoadmapItem {

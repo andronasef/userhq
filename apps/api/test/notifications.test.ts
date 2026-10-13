@@ -273,6 +273,45 @@ describe("Notifications API & Stakeholder Fan-Out Engine (Plan 04-03 Task 1)", (
     expect(authorNotifs[0].readAt).toBeNull();
   });
 
+  it("notifies stakeholders when linking moves a post to the item's status (LOOP-03)", async () => {
+    const [viaCreate, viaLink] = await testApp.db
+      .insert(schema.posts)
+      .values([
+        { productId: prodId, number: 4, title: "Linked on create", statusId: plannedStatus.id, authorId: authorUser.userId },
+        { productId: prodId, number: 5, title: "Linked later", statusId: plannedStatus.id, authorId: authorUser.userId },
+      ])
+      .returning();
+    await testApp.db.insert(schema.votes).values([
+      { postId: viaCreate.id, userId: voterUser.userId },
+      { postId: viaLink.id, userId: voterUser.userId },
+    ]);
+
+    const createRes = await request(testApp.http)
+      .post(`/api/v1/workspaces/${wsSlug}/products/${prodSlug}/roadmap`)
+      .set("Cookie", adminUser.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({ statusId: inProgressStatus.id, internalTitle: "Link Fanout", postIds: [viaCreate.id] });
+    expect(createRes.status).toBe(201);
+
+    const linkRes = await request(testApp.http)
+      .post(`/api/v1/workspaces/${wsSlug}/products/${prodSlug}/roadmap/${createRes.body.id}/link`)
+      .set("Cookie", adminUser.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({ postId: viaLink.id });
+    expect(linkRes.status).toBe(201);
+    expect(linkRes.body.linkedPostCount).toBe(2);
+
+    for (const post of [viaCreate, viaLink]) {
+      const notified = await testApp.db
+        .select({ userId: schema.notifications.userId })
+        .from(schema.notifications)
+        .where(eq(schema.notifications.postId, post.id));
+      expect(notified.map((n) => n.userId).sort()).toEqual(
+        [authorUser.userId, voterUser.userId].sort()
+      );
+    }
+  });
+
   it("retrieves unread count, lists notifications, and marks as read", async () => {
     // Check unread count for author
     const countRes = await request(testApp.http)

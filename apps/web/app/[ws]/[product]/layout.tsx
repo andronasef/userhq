@@ -157,6 +157,8 @@ export default async function PortalLayout({
     >
       <ProjectContextTracker
         name={p.name}
+        logoUrl={p.logoUrl}
+        accentColor={p.accentColor}
         wsName={workspace.name}
         href={portalHref(ws, product)}
       />

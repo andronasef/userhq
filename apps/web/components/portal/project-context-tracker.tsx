@@ -4,26 +4,28 @@ import * as React from "react";
 
 export interface ProjectContextTrackerProps {
   name: string;
+  logoUrl?: string | null;
+  accentColor?: string | null;
   wsName?: string;
   href: string;
 }
 
 export function ProjectContextTracker({
   name,
+  logoUrl,
+  accentColor,
   wsName,
   href,
 }: ProjectContextTrackerProps): null {
   React.useEffect(() => {
     try {
-      sessionStorage.setItem(
-        "userhq_active_project",
-        JSON.stringify({ name, wsName, href })
-      );
+      const data = { name, logoUrl, accentColor, wsName, href };
+      sessionStorage.setItem("userhq_active_project", JSON.stringify(data));
       sessionStorage.setItem("userhq_last_return", href);
     } catch {
       // Ignore storage errors
     }
-  }, [name, wsName, href]);
+  }, [name, logoUrl, accentColor, wsName, href]);
 
   return null;
 }

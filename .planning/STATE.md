@@ -142,6 +142,7 @@ Items acknowledged and deferred at milestone close, most recent first:
 | --- | ------------- | ------ | -------- | -------- | ----------- |
 | 1 | Product URL change & workspace deletion (with all products) · Plan: [PLAN.md](.planning/quick/20261004-product-url-and-workspace-deletion/PLAN.md) · [SUMMARY.md](.planning/quick/20261004-product-url-and-workspace-deletion/SUMMARY.md) | 2026-10-04 | — | Completed | — |
 | 2 | Highlight 'You can\\'t change this later.' in workspace and product creation slug helper text | 2026-10-20 | 4a0f1e9 | — | — |
+| 261020-hwa | Adapt supplied UserHQ branding across the web app | 2026-10-20 | 0078f0a | Completed | .planning/quick/261020-hwa-apply-supplied-userhq-brand-spirit-to-we |
 
 ## Session Continuity
 

@@ -6,10 +6,12 @@ import type {
   UpdateCommentInput,
   PublicComment,
   TimelineItem,
+  DeviceInfo,
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
 import { isWorkspaceAdmin } from "./membership.js";
 import { enqueueCommentEmail } from "../email/outbox.js";
+import { parseUserAgent } from "./device-info.js";
 
 export interface CommentRowWithAuthor {
   id: string;
@@ -22,6 +24,7 @@ export interface CommentRowWithAuthor {
   editedAt: Date | null;
   deletedAt: Date | null;
   createdAt: Date;
+  deviceInfo?: DeviceInfo | null;
   authorName: string | null;
   authorImage: string | null;
   authorDeletedAt: Date | null;
@@ -35,8 +38,11 @@ export class CommentsService {
     portal: { workspaceId: string; productId: string },
     currentUser: { id: string; name: string | null; image: string | null },
     number: number,
-    input: CreateCommentInput
+    input: CreateCommentInput,
+    userAgent?: string | null
   ): Promise<PublicComment> {
+    const deviceInfo = parseUserAgent(userAgent);
+
     return this.db.transaction(async (tx) => {
       const [p] = await tx
         .select({ id: posts.id })
@@ -86,6 +92,7 @@ export class CommentsService {
           authorId: currentUser.id,
           isAdmin,
           body: input.body,
+          deviceInfo,
         })
         .returning();
 
@@ -110,6 +117,7 @@ export class CommentsService {
         version: newComment.version,
         canEdit: true,
         canDelete: true,
+        deviceInfo: isAdmin ? (newComment.deviceInfo ?? null) : null,
       };
     });
   }
@@ -211,6 +219,7 @@ export class CommentsService {
       version: updated.version,
       canEdit: true,
       canDelete: true,
+      deviceInfo: isAdmin ? (updated.deviceInfo ?? null) : null,
     };
   }
 
@@ -304,6 +313,7 @@ export class CommentsService {
         version: row.version,
         canEdit: canManage && !row.deletedAt,
         canDelete: canManage && !row.deletedAt,
+        deviceInfo: viewer.isAdmin ? (row.deviceInfo ?? null) : null,
       };
     };
 

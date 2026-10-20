@@ -174,6 +174,7 @@ export default async function PostPage({
               author={post.author}
               createdAt={post.createdAt}
               editedAt={post.editedAt}
+              deviceInfo={post.deviceInfo}
             />
           </div>
         </div>

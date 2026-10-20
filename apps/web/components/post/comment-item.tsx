@@ -132,6 +132,7 @@ export function CommentItem({
         author={comment.author}
         createdAt={comment.createdAt}
         editedAt={comment.editedAt}
+        deviceInfo={comment.deviceInfo}
       />
 
       {isEditing ? (

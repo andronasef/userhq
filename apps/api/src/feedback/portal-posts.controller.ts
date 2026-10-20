@@ -89,7 +89,8 @@ export class PortalPostsController {
       throw new ApiException("unauthorized", 401, "Sign in required.");
     }
     const portal = req.portal;
-    return this.postsService.createPost(portal, user, input);
+    const userAgent = req.headers?.["user-agent"];
+    return this.postsService.createPost(portal, user, input, userAgent);
   }
 
   @Patch("posts/:number")

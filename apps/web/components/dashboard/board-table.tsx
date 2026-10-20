@@ -8,6 +8,7 @@ import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
 import { PostActionsMenu } from "@/components/post/post-actions-menu";
+import { DeviceBadge } from "@/components/post/device-badge";
 import { BulkMergeDialog } from "@/components/dashboard/bulk-merge-dialog";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -159,13 +160,18 @@ export function BoardTable({
                     />
                   </TD>
                   <TD>
-                    <Link
-                      href={`/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/board/${post.number}`}
-                      className="text-sm font-semibold text-foreground hover:underline truncate max-w-80 block"
-                      title={post.title}
-                    >
-                      {post.title}
-                    </Link>
+                    <div className="flex items-center gap-2 max-w-md">
+                      <Link
+                        href={`/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/board/${post.number}`}
+                        className="text-sm font-semibold text-foreground hover:underline truncate"
+                        title={post.title}
+                      >
+                        {post.title}
+                      </Link>
+                      {post.deviceInfo && (
+                        <DeviceBadge deviceInfo={post.deviceInfo} />
+                      )}
+                    </div>
                   </TD>
                   <TD className="text-sm text-muted-foreground">
                     {post.category?.name ?? "—"}

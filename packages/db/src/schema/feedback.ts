@@ -15,6 +15,7 @@ import {
   primaryKey,
   foreignKey,
   check,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth.js";
 import { products, statuses, workspaces } from "./tenancy.js";
@@ -60,6 +61,11 @@ export const posts = pgTable(
     deletedById: text("deleted_by_id").references(() => user.id, { onDelete: "set null" }),
     mergedIntoId: uuid("merged_into_id"), // self-ref, set on merge (D-04)
     roadmapItemId: uuid("roadmap_item_id").references(() => roadmapItems.id, { onDelete: "set null" }),
+    deviceInfo: jsonb("device_info").$type<{
+      browser?: string | null;
+      os?: string | null;
+      device?: string | null;
+    } | null>(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     search: tsvector("search")
       .notNull()
@@ -135,6 +141,11 @@ export const comments = pgTable(
     editedAt: timestamp("edited_at", { withTimezone: true }),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
     deletedById: text("deleted_by_id").references(() => user.id, { onDelete: "set null" }),
+    deviceInfo: jsonb("device_info").$type<{
+      browser?: string | null;
+      os?: string | null;
+      device?: string | null;
+    } | null>(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [

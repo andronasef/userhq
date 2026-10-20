@@ -58,7 +58,8 @@ export class PortalCommentsController {
     }
 
     const portal = req.portal;
-    return this.commentsService.createComment(portal, user, parseResult.data, input);
+    const userAgent = req.headers?.["user-agent"];
+    return this.commentsService.createComment(portal, user, parseResult.data, input, userAgent);
   }
 
   @Patch("comments/:id")

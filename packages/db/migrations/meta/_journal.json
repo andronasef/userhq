@@ -78,6 +78,13 @@
       "when": 1791795861859,
       "tag": "0010_changelog_faq",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792440000000,
+      "tag": "0011_device_info",
+      "breakpoints": true
     }
   ]
 }

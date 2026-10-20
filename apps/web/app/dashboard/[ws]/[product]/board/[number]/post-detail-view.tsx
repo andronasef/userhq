@@ -22,6 +22,7 @@ import { PostTimeline } from "@/components/post/post-timeline";
 import { PostActionsMenu } from "@/components/post/post-actions-menu";
 import { StatusChangeDialog } from "@/components/post/status-change-dialog";
 import { LinkedRoadmapBanner } from "@/components/post/linked-roadmap-banner";
+import { DeviceBadge } from "@/components/post/device-badge";
 import { formatDate } from "@/lib/format";
 import { apiFetch } from "@/lib/api-client";
 
@@ -158,6 +159,9 @@ export function PostDetailView({
         )}
         {post.editedAt && (
           <span className="text-sm text-muted-foreground">· edited</span>
+        )}
+        {post.deviceInfo && (
+          <DeviceBadge deviceInfo={post.deviceInfo} />
         )}
       </div>
 

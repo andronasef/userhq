@@ -243,6 +243,7 @@ export class ModerationService {
         statusType: statuses.type,
         categoryId: categories.id,
         categoryName: categories.name,
+        deviceInfo: posts.deviceInfo,
         commentCount: sql<number>`(SELECT count(*)::int FROM ${comments} c WHERE c.post_id = ${posts.id} AND c.deleted_at IS NULL)`,
       })
       .from(posts)
@@ -286,6 +287,7 @@ export class ModerationService {
         voteCount: r.voteCount,
         commentCount: Number(r.commentCount),
         createdAt: r.createdAt.toISOString(),
+        deviceInfo: r.deviceInfo ?? null,
       })),
       nextCursor,
     };
@@ -310,6 +312,7 @@ export class ModerationService {
         authorIsAdmin: posts.authorIsAdmin,
         deletedAt: posts.deletedAt,
         mergedIntoId: posts.mergedIntoId,
+        deviceInfo: posts.deviceInfo,
         statusId: statuses.id,
         statusName: statuses.name,
         statusColor: statuses.color,
@@ -373,12 +376,7 @@ export class ModerationService {
 
     const isAuthor = row.authorId === viewer.id;
 
-    const [
-      [voteRow],
-      [ownComment],
-      [muteRow],
-      [viewerUser],
-    ] = await Promise.all([
+    const [voteRow, ownComment, muteRow, viewerUser] = await Promise.all([
       this.db
         .select({ postId: votes.postId })
         .from(votes)
@@ -411,22 +409,21 @@ export class ModerationService {
 
     const postViewer: PostViewer = {
       signedIn: true,
-      voted: Boolean(voteRow),
+      voted: Boolean(voteRow[0]),
       isAuthor,
       isAdmin: true,
-      inConversation: isAuthor || Boolean(ownComment),
-      muted: Boolean(muteRow),
-      commentEmailsOn: viewerUser?.commentEmails ?? true,
+      inConversation: isAuthor || Boolean(ownComment[0]),
+      muted: Boolean(muteRow[0]),
+      commentEmailsOn: viewerUser[0]?.commentEmails ?? true,
       canEdit: true,
       canDelete: true,
     };
 
-    const commentsService = this.commentsService ?? new CommentsService(this.db);
     const timeline = await loadTimeline(
       this.db,
       row.id,
       { userId: viewer.id, isAdmin: true },
-      commentsService
+      this.commentsService
     );
 
     return {
@@ -457,6 +454,7 @@ export class ModerationService {
               title: row.roadmapItemTitle ?? "Roadmap Item",
             }
           : null,
+        deviceInfo: row.deviceInfo ?? null,
       },
       deleted: row.deletedAt !== null,
       timeline,
@@ -829,4 +827,3 @@ export class ModerationService {
     });
   }
 }
-

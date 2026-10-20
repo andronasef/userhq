@@ -32,6 +32,7 @@ import { isWorkspaceAdmin } from "./membership.js";
 import { prefixTsQuery } from "./search.js";
 import { encodeBoardCursor, decodeBoardCursor } from "./cursor.js";
 import { CommentsService } from "./comments.service.js";
+import { parseUserAgent } from "./device-info.js";
 
 export function engagedSql(postsTable: typeof posts = posts) {
   const tableName = getTableName(postsTable);
@@ -87,13 +88,15 @@ export class PostsService {
   async createPost(
     portal: { workspaceId: string; productId: string },
     currentUser: { id: string },
-    input: CreatePostInput
+    input: CreatePostInput,
+    userAgent?: string | null
   ): Promise<PostCreated> {
     const isAdmin = await isWorkspaceAdmin(
       this.db,
       currentUser.id,
       portal.workspaceId
     );
+    const deviceInfo = parseUserAgent(userAgent);
 
     const post = await this.db.transaction(async (tx) => {
       const [{ n }] = await tx
@@ -139,6 +142,7 @@ export class PostsService {
           authorId: currentUser.id,
           authorIsAdmin: isAdmin,
           voteCount: 1,
+          deviceInfo,
         })
         .returning({
           id: posts.id,
@@ -473,6 +477,7 @@ export class PostsService {
         authorId: posts.authorId,
         authorIsAdmin: posts.authorIsAdmin,
         mergedIntoId: posts.mergedIntoId,
+        deviceInfo: posts.deviceInfo,
         statusId: statuses.id,
         statusName: statuses.name,
         statusColor: statuses.color,
@@ -652,6 +657,7 @@ export class PostsService {
               title: row.publicRoadmapTitle,
             }
           : null,
+        deviceInfo: viewer.isAdmin ? (row.deviceInfo ?? null) : null,
       },
       viewer,
       timeline,
@@ -678,6 +684,7 @@ export async function loadTimeline(
       editedAt: comments.editedAt,
       deletedAt: comments.deletedAt,
       createdAt: comments.createdAt,
+      deviceInfo: comments.deviceInfo,
       authorName: user.name,
       authorImage: user.image,
       authorDeletedAt: user.deletedAt,
@@ -756,4 +763,3 @@ export async function loadTimeline(
 
   return combinedTimeline.map((c) => c.item);
 }
-

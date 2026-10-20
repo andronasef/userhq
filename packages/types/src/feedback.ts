@@ -18,6 +18,13 @@ export function postSlug(title: string): string {
   return slugify(title, POST_SLUG_MAX);
 }
 
+export const DeviceInfoSchema = z.object({
+  browser: z.string().nullable().optional(),
+  os: z.string().nullable().optional(),
+  device: z.string().nullable().optional(),
+});
+export type DeviceInfo = z.infer<typeof DeviceInfoSchema>;
+
 export const PostTitleSchema = z
   .string({ message: "title_required" })
   .transform((val) => val.trim())
@@ -147,6 +154,7 @@ export const AdminPostRowSchema = z.object({
   voteCount: z.number().int(),
   commentCount: z.number().int(),
   createdAt: z.string(),
+  deviceInfo: DeviceInfoSchema.nullable().optional(),
 });
 export type AdminPostRow = z.infer<typeof AdminPostRowSchema>;
 
@@ -243,6 +251,7 @@ export const PublicPostDetailSchema = z.object({
   category: PostCategorySchema.nullable(),
   author: PublicAuthorSchema,
   roadmapItem: PostRoadmapItemRefSchema.nullable().optional(),
+  deviceInfo: DeviceInfoSchema.nullable().optional(),
 });
 export type PublicPostDetail = z.infer<typeof PublicPostDetailSchema>;
 
@@ -277,6 +286,7 @@ export const PublicCommentSchema = z.object({
   version: z.number().int(),
   canEdit: z.boolean(),
   canDelete: z.boolean(),
+  deviceInfo: DeviceInfoSchema.nullable().optional(),
 });
 export type PublicComment = z.infer<typeof PublicCommentSchema>;
 
@@ -398,5 +408,3 @@ export const MergeResultSchema = z.object({
   voteCount: z.number().int().nonnegative(),
 });
 export type MergeResult = z.infer<typeof MergeResultSchema>;
-
-

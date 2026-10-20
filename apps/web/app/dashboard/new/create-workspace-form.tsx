@@ -113,7 +113,14 @@ function CreateWorkspaceFormInner({ host }: CreateWorkspaceFormProps): React.JSX
         <Field
           id="workspace-slug"
           label="URL"
-          helper="Lowercase letters, numbers, and hyphens, 2–32 characters. You can't change this later."
+          helper={
+            <>
+              Lowercase letters, numbers, and hyphens, 2–32 characters.{" "}
+              <strong className="font-semibold text-foreground">
+                You can&apos;t change this later.
+              </strong>
+            </>
+          }
           error={slugError}
         >
           <SlugInput

@@ -5,7 +5,7 @@ import { API_ERROR_COPY } from "../../lib/api-errors";
 export interface FieldProps {
   id: string;
   label: string;
-  helper?: string;
+  helper?: React.ReactNode;
   error?: string;
   children: React.ReactElement<any>;
 }

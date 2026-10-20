@@ -11,7 +11,7 @@ export async function Header(): Promise<React.JSX.Element> {
   const devUploadEnabled = isDevUploadEnabled();
 
   return (
-    <header data-shell="app" className="h-14 border-b border-border bg-background">
+    <header data-shell="app" className="h-16 border-b border-border bg-card">
       <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 flex items-center justify-between h-full">
         <HeaderBrand />
 

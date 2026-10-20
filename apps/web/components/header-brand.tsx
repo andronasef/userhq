@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { EntityLogo } from "./entity-logo";
+import { UserHQBrand } from "./userhq-brand";
 import { safeNext } from "../lib/safe-next";
 import { accentTokens } from "../lib/accent";
 
@@ -39,7 +40,8 @@ export function HeaderBrand(): React.JSX.Element {
       }
 
       // 3. Fallback: derive project name and href from backPath or last return path
-      const candidatePath = backPath || sessionStorage.getItem("userhq_last_return");
+      const candidatePath =
+        backPath || sessionStorage.getItem("userhq_last_return");
       if (candidatePath) {
         const sanitized = safeNext(candidatePath, "");
         if (
@@ -64,9 +66,15 @@ export function HeaderBrand(): React.JSX.Element {
           // If portal: /[ws]/[product]/...
           if (
             parts.length >= 2 &&
-            !["dashboard", "platform", "account", "login", "dev", "invite", "api"].includes(
-              parts[0]
-            )
+            ![
+              "dashboard",
+              "platform",
+              "account",
+              "login",
+              "dev",
+              "invite",
+              "api",
+            ].includes(parts[0])
           ) {
             const prodSlug = parts[1];
             const name =
@@ -85,7 +93,13 @@ export function HeaderBrand(): React.JSX.Element {
     }
   }, [pathname]);
 
-  if (project) {
+  const hasProjectContext =
+    pathname === "/account" ||
+    pathname.startsWith("/account/") ||
+    pathname === "/login" ||
+    pathname.startsWith("/invite/");
+
+  if (project && hasProjectContext) {
     const accentStyle = project.accentColor
       ? ({
           "--entity-accent": accentTokens(project.accentColor).primary,
@@ -116,7 +130,7 @@ export function HeaderBrand(): React.JSX.Element {
       href="/"
       className="text-base font-semibold text-foreground shrink-0 hover:opacity-80 transition-opacity"
     >
-      UserHQ
+      <UserHQBrand />
     </Link>
   );
 }

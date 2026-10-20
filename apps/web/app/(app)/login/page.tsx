@@ -34,7 +34,7 @@ export default async function LoginPage({
     typeof params.error === "string"
       ? params.error
       : Array.isArray(params.error)
-        ? params.error[0] ?? null
+        ? (params.error[0] ?? null)
         : null;
 
   const errorCopy = rawError ? loginErrorCopy(rawError) : null;
@@ -43,8 +43,15 @@ export default async function LoginPage({
 
   return (
     <div className="flex flex-1 justify-center items-start">
-      <div className="mt-8 sm:mt-16 w-full max-w-sm bg-card border border-border rounded-lg p-6 sm:p-8 flex flex-col gap-6">
+      <div className="welcome-entry mt-6 sm:mt-12 w-full max-w-md bg-card border border-border rounded-lg p-6 sm:p-10 flex flex-col gap-7">
         <div className="flex flex-col gap-2 text-center">
+          <img
+            src="/brand/userhq-mark.svg"
+            alt=""
+            width={64}
+            height={64}
+            className="size-16 mx-auto mb-4"
+          />
           <h1 className="text-2xl font-semibold leading-tight">
             Sign in to UserHQ
           </h1>
@@ -65,6 +72,9 @@ export default async function LoginPage({
         )}
 
         <LoginButtons next={safe} rawErrorCode={null} />
+        <p className="text-center text-sm text-muted-foreground">
+          Your feedback. Your next great idea.
+        </p>
       </div>
     </div>
   );

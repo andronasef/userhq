@@ -4,26 +4,65 @@ import { redirect } from "next/navigation";
 import { getMe } from "../../lib/api-server";
 import { isDevUploadEnabled } from "../../lib/dev-flags";
 import { Button } from "../../components/ui/button";
+import { ArrowRight, MessagesSquare, Kanban, Megaphone } from "lucide-react";
 
 export default async function HomePage(): Promise<React.JSX.Element> {
   const me = await getMe();
 
   if (!me.user) {
     return (
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold leading-tight">
-            You&apos;re not signed in
-          </h1>
-          <p className="text-base text-muted-foreground">
-            Sign in with Google or GitHub to continue.
+      <div className="welcome-entry mx-auto max-w-3xl py-8 sm:py-16">
+        <div className="mb-8 flex items-center gap-3" aria-hidden="true">
+          <img
+            src="/brand/userhq-mark.svg"
+            alt=""
+            width={64}
+            height={64}
+            className="size-16"
+          />
+          <span className="h-2 w-2 rounded-full bg-[var(--brand-coral)]" />
+        </div>
+        <h1 className="max-w-xl text-4xl sm:text-5xl font-semibold leading-[1.12]">
+          Good products start
+          <br className="hidden sm:block" /> with listening.
+        </h1>
+        <p className="mt-5 max-w-lg text-base sm:text-lg leading-relaxed text-muted-foreground">
+          Give customer feedback a home. See what matters, plan what&apos;s
+          next, and share what you ship.
+        </p>
+        <div className="mt-8 flex flex-col items-start gap-3">
+          <Button size="lg" asChild>
+            <Link href="/login">
+              Sign in to UserHQ{" "}
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </Button>
+          <p className="text-sm text-muted-foreground">
+            Continue with Google or GitHub.
           </p>
         </div>
-
-        <div>
-          <Button variant="outline" size="lg" asChild>
-            <Link href="/login">Sign in</Link>
-          </Button>
+        <div className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border pt-6 text-sm font-medium text-muted-foreground">
+          <span className="inline-flex items-center gap-2">
+            <MessagesSquare
+              className="size-4 text-[var(--brand-indigo)]"
+              aria-hidden="true"
+            />
+            Feedback
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <Kanban
+              className="size-4 text-[var(--brand-indigo)]"
+              aria-hidden="true"
+            />
+            Roadmap
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <Megaphone
+              className="size-4 text-[var(--brand-indigo)]"
+              aria-hidden="true"
+            />
+            Changelog
+          </span>
         </div>
       </div>
     );
@@ -47,7 +86,8 @@ export default async function HomePage(): Promise<React.JSX.Element> {
               Set up your workspace
             </h1>
             <p className="text-base text-muted-foreground">
-              A workspace holds your products, your team, and the portals your customers visit.
+              A workspace holds your products, your team, and the portals your
+              customers visit.
             </p>
           </div>
           <div>
@@ -62,7 +102,8 @@ export default async function HomePage(): Promise<React.JSX.Element> {
             Workspace creation is invite-only
           </h1>
           <p className="text-base text-muted-foreground">
-            UserHQ is invite-only for now. If someone gave you an invite link, open it while signed in with the email it was created for.
+            UserHQ is invite-only for now. If someone gave you an invite link,
+            open it while signed in with the email it was created for.
           </p>
         </div>
       )}

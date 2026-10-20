@@ -2,6 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { EntityLogo } from "../entity-logo";
+import { UserHQBrand } from "../userhq-brand";
 
 export interface PortalFrameProps {
   homeHref: string;
@@ -38,7 +39,7 @@ export function PortalFrame({
       className="min-h-dvh flex flex-col bg-background"
       style={combinedStyle}
     >
-      <header className="border-b border-border">
+      <header className="border-b border-border bg-card">
         <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 min-h-16 py-2 flex items-center gap-4">
           <Link
             href={homeHref}
@@ -78,9 +79,7 @@ export function PortalFrame({
           </div>
         </div>
         {tabs && (
-          <div className="mx-auto w-full max-w-5xl px-4 sm:px-6">
-            {tabs}
-          </div>
+          <div className="mx-auto w-full max-w-5xl px-4 sm:px-6">{tabs}</div>
         )}
       </header>
 
@@ -91,10 +90,13 @@ export function PortalFrame({
       </main>
 
       <footer className="border-t border-border py-6">
-        <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 text-center text-xs text-muted-foreground">
+        <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
           Powered by{" "}
-          <Link href="/" className="hover:underline font-medium text-foreground">
-            UserHQ
+          <Link
+            href="/"
+            className="hover:underline font-medium text-foreground"
+          >
+            <UserHQBrand compact className="text-sm" />
           </Link>
         </div>
       </footer>

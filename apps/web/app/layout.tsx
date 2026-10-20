@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import "@fontsource-variable/inter";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "UserHQ",
   description: "UserHQ feedback, roadmap, and changelog platform",
+  icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
 };
 
 export default function RootLayout({

@@ -5,7 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PanelLeft, X } from "lucide-react";
 import { Button } from "../ui/button";
-import { Drawer, DrawerTrigger, DrawerContent, DrawerClose } from "../ui/drawer";
+import { UserHQBrand } from "../userhq-brand";
+import {
+  Drawer,
+  DrawerTrigger,
+  DrawerContent,
+  DrawerClose,
+} from "../ui/drawer";
 
 interface MobileNavProps {
   children: React.ReactNode;
@@ -38,7 +44,7 @@ export function MobileNav({ children }: MobileNavProps) {
             className="text-base font-semibold text-foreground"
             onClick={() => setOpen(false)}
           >
-            UserHQ
+            <UserHQBrand />
           </Link>
           <DrawerClose asChild>
             <Button

@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-20T09:59:45Z",
+  "title": "Design System: UserHQ",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Electric Indigo",
+        "canonical": "#5B5CF6",
+        "tonalRamp": [
+          "#18194b",
+          "#292b73",
+          "#3e3f9d",
+          "#5051cd",
+          "#5b5cf6",
+          "#9091ff",
+          "#c4c4ff",
+          "#eeedff"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#10172A",
+        "tonalRamp": [
+          "#10172a",
+          "#283249",
+          "#414e64",
+          "#59647a",
+          "#828ca2",
+          "#b0b8ca",
+          "#dce1ed",
+          "#f6f7fb"
+        ]
+      },
+      "coral": {
+        "role": "secondary",
+        "displayName": "Warm Coral",
+        "canonical": "#FF6B4A",
+        "tonalRamp": [
+          "#441a11",
+          "#702c1e",
+          "#a5412b",
+          "#d55337",
+          "#ff6b4a",
+          "#ff9a82",
+          "#ffccbe",
+          "#fff0eb"
+        ]
+      },
+      "aqua": {
+        "role": "tertiary",
+        "displayName": "Progress Aqua",
+        "canonical": "#24C8B4",
+        "tonalRamp": [
+          "#082f2a",
+          "#0e4c44",
+          "#147267",
+          "#1a9a8a",
+          "#24c8b4",
+          "#69ddce",
+          "#a5eee4",
+          "#e6faf6"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Space Grotesk",
+        "purpose": "Headings and the UserHQ wordmark."
+      },
+      "body": {
+        "displayName": "Manrope",
+        "purpose": "Product content, forms, navigation, and control labels."
+      },
+      "working-title": {
+        "displayName": "Working title",
+        "purpose": "Compact working-screen headings."
+      },
+      "welcome": {
+        "displayName": "Welcome",
+        "purpose": "Welcome heading below the small breakpoint."
+      },
+      "welcome-wide": {
+        "displayName": "Wide welcome",
+        "purpose": "Welcome heading from the small breakpoint."
+      },
+      "richtext-h1": {
+        "displayName": "Rich-text heading 1",
+        "purpose": "Top-level headings in rendered rich text and the editor."
+      },
+      "richtext-h2": {
+        "displayName": "Rich-text heading 2",
+        "purpose": "Second-level headings in rendered rich text and the editor."
+      },
+      "richtext-h3": {
+        "displayName": "Rich-text heading 3",
+        "purpose": "Third-level headings in rendered rich text and the editor."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "welcome-settle",
+        "value": "500ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "One visible entrance on welcome and sign-in; disabled under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main task action, with tenant semantic overrides.",
+      "html": "<button class=\"ds-primary\">Save changes</button>",
+      "css": ".ds-primary{background:var(--primary,#5b5cf6);color:var(--primary-foreground,#fff);border:0;border-radius:12px;padding:0 16px;height:36px;font:600 14px Manrope,sans-serif;cursor:pointer}.ds-primary:hover{filter:brightness(.95)}.ds-primary:focus-visible{outline:2px solid var(--ring,#5b5cf6);outline-offset:2px}.ds-primary:active{filter:brightness(.9)}"
+    },
+    {
+      "name": "Outline button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary actions and OAuth providers.",
+      "html": "<button class=\"ds-outline\">Continue with GitHub</button>",
+      "css": ".ds-outline{background:var(--card,#fff);color:var(--foreground,#10172a);border:1px solid var(--input,#c7cfdf);border-radius:12px;height:40px;padding:0 24px;font:600 14px Manrope,sans-serif;cursor:pointer}.ds-outline:hover{background:var(--muted,#e9ecf5)}.ds-outline:focus-visible{outline:2px solid var(--ring,#5b5cf6);outline-offset:2px}"
+    },
+    {
+      "name": "Ghost button",
+      "kind": "button",
+      "description": "Quiet secondary controls.",
+      "html": "<button class=\"ds-ghost\">Cancel</button>",
+      "css": ".ds-ghost{background:transparent;color:var(--foreground,#10172a);border:0;border-radius:12px;height:36px;padding:0 16px;font:600 14px Manrope,sans-serif;cursor:pointer}.ds-ghost:hover{background:var(--muted,#e9ecf5)}.ds-ghost:focus-visible{outline:2px solid var(--ring,#5b5cf6);outline-offset:2px}"
+    },
+    {
+      "name": "Text field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "White field with a visible neutral boundary.",
+      "html": "<input class=\"ds-input\" aria-label=\"Workspace name\" placeholder=\"Workspace name\" />",
+      "css": ".ds-input{background:var(--card,#fff);color:var(--foreground,#10172a);border:1px solid var(--input,#c7cfdf);border-radius:12px;height:36px;padding:0 12px;font:400 14px Manrope,sans-serif;caret-color:var(--primary,#5b5cf6)}.ds-input::placeholder{color:var(--muted-foreground,#59647a)}.ds-input:focus-visible{outline:2px solid var(--ring,#5b5cf6);outline-offset:2px}"
+    },
+    {
+      "name": "Selected navigation",
+      "kind": "nav",
+      "refersTo": "navigation-selected",
+      "description": "Lavender selection for workspace navigation.",
+      "html": "<nav><a class=\"ds-nav\" href=\"#overview\" aria-current=\"page\">Overview</a></nav>",
+      "css": ".ds-nav{display:block;background:var(--brand-lavender,#eeedff);color:var(--primary-text,#4d4ed8);border-radius:12px;padding:8px 12px;text-decoration:none;font:600 14px Manrope,sans-serif}.ds-nav:hover{filter:brightness(.98)}.ds-nav:focus-visible{outline:2px solid var(--ring,#5b5cf6);outline-offset:4px}"
+    },
+    {
+      "name": "Quiet surface",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "A single boundary for grouped working content.",
+      "html": "<div class=\"ds-card\">Your workspace</div>",
+      "css": ".ds-card{background:var(--card,#fff);color:var(--foreground,#10172a);border:1px solid var(--border,#dce1ed);border-radius:14px;padding:24px;font:400 16px Manrope,sans-serif}"
+    },
+    {
+      "name": "Neutral badge",
+      "kind": "chip",
+      "refersTo": "badge-neutral",
+      "description": "A compact non-interactive label for metadata.",
+      "html": "<span class=\"ds-badge\">Feedback</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;background:var(--muted,#e9ecf5);color:var(--foreground,#10172a);height:24px;padding:0 8px;border-radius:9999px;font:600 12px Manrope,sans-serif}"
+    }
+  ],
+  "narrative": {
+    "northStar": "A good listener, with a clear plan.",
+    "overview": "UserHQ feels human, attentive, and capable. The supplied face mark introduces warmth; precise type, quiet paper surfaces, and clear indigo actions keep attention on customers and the work ahead. This adapts the supplied brand identity to a working application rather than reproducing its brand book.",
+    "keyCharacteristics": [
+      "Warm identity, calm working surfaces.",
+      "Clear hierarchy and compact, readable controls.",
+      "Customer identity has priority inside tenant portals."
+    ],
+    "rules": [
+      {
+        "name": "The Tenant Identity Rule",
+        "body": "Product accent overrides continue to own primary actions, foreground contrast, focus rings, and entity avatars. UserHQ brand colors belong to the UserHQ mark and attribution, not a replacement for a customer's logo or name.",
+        "section": "colors"
+      },
+      {
+        "name": "The Readable Color Rule",
+        "body": "Body and placeholder text meet 4.5:1 contrast; large text and essential graphical affordances meet 3:1. Never use coral or aqua as small text on white.",
+        "section": "colors"
+      },
+      {
+        "name": "The Quiet Surface Rule",
+        "body": "Paper grounds the application. White surfaces and thin neutral boundaries organize content; do not add a shadow to a bordered card. Existing dialogs and popovers retain their functional elevation. Keep decoration out of task surfaces.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep the supplied face and the two-color wordmark consistent.",
+      "Do preserve tenant logos, names, accents, and existing behavior.",
+      "Do use white working surfaces against the paper background.",
+      "Do verify real content, narrow widths, focus, loading, error, and reduced-motion states."
+    ],
+    "donts": [
+      "Don't use coral or aqua for low-contrast body text.",
+      "Don't turn working screens into decorative marketing compositions.",
+      "Don't add fake customer activity, metrics, or product claims."
+    ]
+  }
+}

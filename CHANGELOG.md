@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Apply the UserHQ brand identity across the web app with the supplied logo, local Manrope and Space Grotesk fonts, indigo and paper surfaces, and refreshed welcome and sign-in screens while preserving tenant branding.
+
 ### Fixed
 
 - Apply committed database migrations before native dev startup to prevent OAuth callback failures against an outdated schema.

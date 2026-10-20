@@ -51,8 +51,9 @@ export function DashboardSidebar({
         <Link
           href={`/dashboard/${ws}`}
           className={cn(
-            "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-background",
-            isOverviewActive && "bg-background font-semibold"
+            "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-muted/60",
+            isOverviewActive &&
+              "bg-[var(--brand-lavender)] text-[var(--primary-text)] font-semibold",
           )}
           aria-current={isOverviewActive ? "page" : undefined}
         >
@@ -63,8 +64,9 @@ export function DashboardSidebar({
         <Link
           href={`/dashboard/${ws}/team`}
           className={cn(
-            "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-background",
-            isTeamActive && "bg-background font-semibold"
+            "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-muted/60",
+            isTeamActive &&
+              "bg-[var(--brand-lavender)] text-[var(--primary-text)] font-semibold",
           )}
           aria-current={isTeamActive ? "page" : undefined}
         >
@@ -75,8 +77,9 @@ export function DashboardSidebar({
         <Link
           href={`/dashboard/${ws}/settings`}
           className={cn(
-            "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-background",
-            isWorkspaceSettingsActive && "bg-background font-semibold"
+            "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-muted/60",
+            isWorkspaceSettingsActive &&
+              "bg-[var(--brand-lavender)] text-[var(--primary-text)] font-semibold",
           )}
           aria-current={isWorkspaceSettingsActive ? "page" : undefined}
         >
@@ -117,7 +120,7 @@ export function DashboardSidebar({
               const settingsHref = `/dashboard/${ws}/${product.slug}/settings`;
 
               const isProductActive = pathname.startsWith(
-                `/dashboard/${ws}/${product.slug}`
+                `/dashboard/${ws}/${product.slug}`,
               );
               const isBoardActive =
                 pathname === boardHref ||
@@ -130,7 +133,8 @@ export function DashboardSidebar({
                 pathname === statusesHref ||
                 pathname.startsWith(`${statusesHref}/`);
               const isChangelogActive =
-                pathname === changelogHref || pathname.startsWith(`${changelogHref}/`);
+                pathname === changelogHref ||
+                pathname.startsWith(`${changelogHref}/`);
               const isFaqActive =
                 pathname === faqHref || pathname.startsWith(`${faqHref}/`);
               const isSettingsActive = pathname === settingsHref;
@@ -140,8 +144,9 @@ export function DashboardSidebar({
                   <Link
                     href={boardHref}
                     className={cn(
-                      "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-background",
-                      isProductActive && "bg-background font-semibold"
+                      "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-muted/60",
+                      isProductActive &&
+                        "bg-[var(--brand-lavender)] text-[var(--primary-text)] font-semibold",
                     )}
                     aria-current={isProductActive ? "page" : undefined}
                   >
@@ -163,8 +168,9 @@ export function DashboardSidebar({
                       <Link
                         href={boardHref}
                         className={cn(
-                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-background/50",
-                          isBoardActive && "text-foreground font-semibold bg-background/50"
+                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
+                          isBoardActive &&
+                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-lavender)]",
                         )}
                         aria-current={isBoardActive ? "page" : undefined}
                       >
@@ -178,8 +184,9 @@ export function DashboardSidebar({
                       <Link
                         href={roadmapHref}
                         className={cn(
-                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-background/50",
-                          isRoadmapActive && "text-foreground font-semibold bg-background/50"
+                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
+                          isRoadmapActive &&
+                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-lavender)]",
                         )}
                         aria-current={isRoadmapActive ? "page" : undefined}
                       >
@@ -193,8 +200,9 @@ export function DashboardSidebar({
                       <Link
                         href={changelogHref}
                         className={cn(
-                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-background/50",
-                          isChangelogActive && "text-foreground font-semibold bg-background/50"
+                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
+                          isChangelogActive &&
+                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-lavender)]",
                         )}
                         aria-current={isChangelogActive ? "page" : undefined}
                       >
@@ -208,8 +216,9 @@ export function DashboardSidebar({
                       <Link
                         href={faqHref}
                         className={cn(
-                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-background/50",
-                          isFaqActive && "text-foreground font-semibold bg-background/50"
+                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
+                          isFaqActive &&
+                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-lavender)]",
                         )}
                         aria-current={isFaqActive ? "page" : undefined}
                       >
@@ -223,8 +232,9 @@ export function DashboardSidebar({
                       <Link
                         href={settingsHref}
                         className={cn(
-                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-background/50",
-                          isSettingsActive && "text-foreground font-semibold bg-background/50"
+                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
+                          isSettingsActive &&
+                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-lavender)]",
                         )}
                         aria-current={isSettingsActive ? "page" : undefined}
                       >
@@ -239,7 +249,7 @@ export function DashboardSidebar({
                         href={portalHref(ws, product.slug)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-background/50"
+                        className="flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60"
                       >
                         <ExternalLink
                           className="size-3.5 shrink-0"

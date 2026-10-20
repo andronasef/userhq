@@ -12,6 +12,7 @@ import { AppToaster } from "../../../components/ui/toaster";
 import { AppShell } from "../../../components/app-shell";
 import { StatePage } from "../../../components/state-page";
 import { Button } from "../../../components/ui/button";
+import { UserHQBrand } from "../../../components/userhq-brand";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -67,7 +68,7 @@ export default async function DashboardLayout({
     <div className="min-h-dvh flex flex-col">
       <header
         data-shell="dashboard"
-        className="h-14 border-b border-border bg-background px-4 flex items-center gap-2 min-w-0"
+        className="h-16 border-b border-border bg-card px-4 flex items-center gap-3 min-w-0"
       >
         <MobileNav>
           <DashboardSidebar ws={ws} products={products} />
@@ -76,7 +77,7 @@ export default async function DashboardLayout({
           href="/dashboard"
           className="text-base font-semibold text-foreground shrink-0 hidden sm:inline"
         >
-          UserHQ
+          <UserHQBrand />
         </Link>
         <span
           className="text-muted-foreground shrink-0 hidden sm:inline"
@@ -103,7 +104,7 @@ export default async function DashboardLayout({
       </header>
 
       <div className="flex flex-1 min-h-0">
-        <aside className="hidden lg:flex flex-col w-60 shrink-0 border-r border-border bg-muted p-4 gap-6 overflow-y-auto">
+        <aside className="hidden lg:flex flex-col w-60 shrink-0 border-r border-border bg-card p-4 pt-6 gap-6 overflow-y-auto">
           <DashboardSidebar ws={ws} products={products} />
         </aside>
         <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-8 sm:py-12">

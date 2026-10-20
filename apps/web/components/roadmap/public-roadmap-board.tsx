@@ -77,7 +77,7 @@ export function PublicRoadmapBoard({
       {/* Mobile view (< 640px) */}
       <div className="sm:hidden flex flex-col gap-4">
         {/* Mobile Status Pills */}
-        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar" role="tablist">
+        <div className="flex gap-2 overflow-x-auto overflow-y-hidden pb-1 no-scrollbar" role="tablist">
           {statuses.map((status) => {
             const count = itemsByStatus.get(status.id)?.length ?? 0;
             const isSelected = status.id === selectedMobileStatusId;

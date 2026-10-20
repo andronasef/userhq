@@ -20,7 +20,7 @@ export function TabNav({ tabs, activeHref, className }: TabNavProps) {
   return (
     <nav
       className={cn(
-        "flex gap-6 border-b border-border overflow-x-auto",
+        "flex gap-6 border-b border-border overflow-x-auto overflow-y-hidden no-scrollbar",
         className
       )}
       aria-label="Tabs"

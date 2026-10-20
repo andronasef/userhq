@@ -144,6 +144,7 @@ Items acknowledged and deferred at milestone close, most recent first:
 | 2 | Highlight 'You can\\'t change this later.' in workspace and product creation slug helper text | 2026-10-20 | 4a0f1e9 | — | — |
 | 261020-hwa | Adapt supplied UserHQ branding across the web app | 2026-10-20 | 0078f0a | Completed | .planning/quick/261020-hwa-apply-supplied-userhq-brand-spirit-to-we |
 | 261020-ies | Apply approved Calm Teal palette and fixed navy face | 2026-10-20 | 2606273 | Completed | .planning/quick/261020-ies-apply-approved-calm-teal-palette-and-fix |
+| 261020-iiu | Add purposeful accessible app motion and portal transitions | 2026-10-20 | f27bd85 | Completed | .planning/quick/261020-iiu-add-purposeful-app-motion-and-assess-pag |
 
 ## Session Continuity
 

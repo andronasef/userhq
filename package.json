@@ -20,10 +20,16 @@
     }
   },
   "scripts": {
+    "dev": "bun run build:packages && bun run --filter '*' --parallel dev",
+    "dev:api": "bun run --filter '@userhq/api' dev",
+    "dev:web": "bun run --filter '@userhq/web' dev",
+    "dev:packages": "bun run --filter '@userhq/types' --filter '@userhq/db' --parallel dev",
+    "dev:services": "docker compose -f compose.dev.yaml up -d",
+    "dev:services:down": "docker compose -f compose.dev.yaml down",
     "lint": "oxlint -c .oxlintrc.json",
     "test:lint-rules": "node --test tools/lint-rules.test.mjs",
-    "build:packages": "bun run --filter '@userhq/types' build && bun run --filter '@userhq/db' build",
-    "build": "bun run build:packages && bun run --filter '@userhq/api' build && bun run --filter '@userhq/web' build",
+    "build:packages": "bun run --filter '@userhq/types' --filter '@userhq/db' --parallel build",
+    "build": "bun run build:packages && bun run --filter '@userhq/api' --filter '@userhq/web' --parallel build",
     "typecheck": "bun run --filter '@userhq/*' typecheck",
     "test": "bun run test:lint-rules && bun run --filter '@userhq/types' test && bun run --filter '@userhq/db' test && bun run --filter '@userhq/api' test && bun run --filter '@userhq/web' test",
     "ci:check": "bun run lint && bun run typecheck && bun run build:packages && bun run --filter '@userhq/api' build && bun run test && bun run --filter '@userhq/web' build && bun run --filter '@userhq/web' build:next && bun run --filter '@userhq/db' db:check",
@@ -37,6 +43,7 @@
     "typescript": "catalog:"
   },
   "trustedDependencies": [
-    "@swc/core"
+    "@swc/core",
+    "@swc/cli"
   ]
 }

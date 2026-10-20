@@ -12,15 +12,15 @@ COPY packages/types/package.json ./packages/types/
 COPY packages/db/package.json ./packages/db/
 COPY apps/api/package.json ./apps/api/
 COPY apps/web/package.json ./apps/web/
-RUN bun install --frozen-lockfile --filter '@userhq/api...'
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    bun install --frozen-lockfile --filter '@userhq/api...'
 
 # Stage 3: Build
 FROM deps AS build
 COPY packages/types ./packages/types
 COPY packages/db ./packages/db
 COPY apps/api ./apps/api
-RUN bun run --filter '@userhq/types' build && \
-    bun run --filter '@userhq/db' build && \
+RUN bun run --filter '@userhq/types' --filter '@userhq/db' --parallel build && \
     bun run --filter '@userhq/api' build
 
 # Stage 4: Prod-deps
@@ -30,7 +30,8 @@ COPY packages/types/package.json ./packages/types/
 COPY packages/db/package.json ./packages/db/
 COPY apps/api/package.json ./apps/api/
 COPY apps/web/package.json ./apps/web/
-RUN bun install --frozen-lockfile --production --filter '@userhq/api...'
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    bun install --frozen-lockfile --production --filter '@userhq/api...'
 
 # Stage 5: Runtime
 FROM node:24-bookworm-slim AS runtime

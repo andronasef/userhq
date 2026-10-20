@@ -12,7 +12,8 @@ COPY packages/types/package.json ./packages/types/
 COPY packages/db/package.json ./packages/db/
 COPY apps/api/package.json ./apps/api/
 COPY apps/web/package.json ./apps/web/
-RUN bun install --frozen-lockfile --filter '@userhq/web...'
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    bun install --frozen-lockfile --filter '@userhq/web...'
 
 # Stage 3: Build
 FROM deps AS build

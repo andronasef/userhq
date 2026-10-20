@@ -4,10 +4,10 @@ current_phase: 05
 current_phase_name: changelog-faq
 status: phase_completed
 stopped_at: Phase 5 executed (all 5 plans complete)
-last_updated: "2026-10-12T10:00:00.000Z"
+last_updated: "2026-10-20T09:09:00.443Z"
 last_activity: 2026-10-12
 last_activity_desc: Phase 05 execution completed
-state_head: c40be85
+state_head: 4a0f1e90f83091401610489810785a38e1ccf068
 progress:
   total_phases: 5
   completed_phases: 5
@@ -138,9 +138,10 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Quick Tasks Completed
 
-| Task | Date | Status | Plan | Summary |
-|------|------|--------|------|---------|
-| Product URL change & workspace deletion (with all products) | 2026-10-04 | Completed | [PLAN.md](.planning/quick/20261004-product-url-and-workspace-deletion/PLAN.md) | [SUMMARY.md](.planning/quick/20261004-product-url-and-workspace-deletion/SUMMARY.md) |
+| # | Description | Date | Commit | Status | Directory |
+| --- | ------------- | ------ | -------- | -------- | ----------- |
+| 1 | Product URL change & workspace deletion (with all products) · Plan: [PLAN.md](.planning/quick/20261004-product-url-and-workspace-deletion/PLAN.md) · [SUMMARY.md](.planning/quick/20261004-product-url-and-workspace-deletion/SUMMARY.md) | 2026-10-04 | — | Completed | — |
+| 2 | Highlight 'You can\\'t change this later.' in workspace and product creation slug helper text | 2026-10-20 | 4a0f1e9 | — | — |
 
 ## Session Continuity
 

@@ -144,7 +144,13 @@ Use close spacing within a control group and generous space between tasks. Welco
 
 **The Quiet Surface Rule.** Paper grounds the application. White surfaces and thin neutral boundaries organize content; do not add a shadow to a bordered card. Existing dialogs and popovers retain their functional elevation. Keep decoration out of task surfaces.
 
-The welcome and sign-in entrance settles once over 500ms with a slight vertical move and resolving blur. Content is visible from the beginning. Reduced-motion preferences remove the animation.
+The welcome and sign-in entrance settles once over 500ms with a slight vertical move and resolving blur. Content is visible from the beginning. Reduced motion substitutes a gentle 60ms opacity change.
+
+**The Motion Serves the Task Rule.** Pointer-opened dialogs use 220ms opacity and 0.97-to-1 scale, with a 140ms exit. Their scrims fade in 160ms and out 120ms. Drawers enter from their own left edge over 240ms and exit over 180ms. Menus grow from the Radix trigger origin over 160ms, exiting in 100ms. Shared buttons and vote controls acknowledge a pointer press with a 0.98 scale over 120ms; surrounding layout stays still.
+
+Use `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)` for feedback and surface arrivals, `--ease-drawer: cubic-bezier(0.32, 0.72, 0, 1)` for drawers, and `--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1)` when a symmetric curve is needed. `--motion-feedback` is 120ms. Keyboard-opened surfaces and navigation resolve immediately. Under reduced motion, spatial travel and scaling give way to 60ms opacity; presses retain color feedback. FAQ expansion retains its functional grid technique for pointer use, resolves immediately for keyboard/reduced motion, and keeps collapsed answers inert.
+
+Public portal tab changes may fade only the committed content region from 0.82 to 1 opacity over 140ms (0.97 to 1 over 60ms with reduced motion). Keep the shell stable. Never delay or intercept the router. Initial loads, keyboard/history navigation, filters/search/query changes, nested articles/posts, and frequent admin navigation do not receive page choreography. Rapid navigation cancels the previous fade. Existing Sonner toasts and drag feedback retain their own behavior.
 
 ## Shapes
 

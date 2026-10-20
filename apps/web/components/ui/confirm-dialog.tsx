@@ -58,13 +58,16 @@ export function ConfirmDialog({
   };
 
   return (
-    <AlertDialogPrimitive.Root open={open} onOpenChange={(next) => {
-      if (!pending) {
-        onOpenChange(next);
-      }
-    }}>
+    <AlertDialogPrimitive.Root
+      open={open}
+      onOpenChange={(next) => {
+        if (!pending) {
+          onOpenChange(next);
+        }
+      }}
+    >
       <AlertDialogPrimitive.Portal>
-        <AlertDialogPrimitive.Overlay className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-xs data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <AlertDialogPrimitive.Overlay className="motion-overlay fixed inset-0 z-50 bg-foreground/40 backdrop-blur-xs" />
         <AlertDialogPrimitive.Content
           onEscapeKeyDown={(e) => {
             if (pending) {
@@ -79,7 +82,7 @@ export function ConfirmDialog({
             "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50",
             "w-[calc(100%-32px)] max-w-md bg-background border border-border rounded-lg p-6 shadow-lg",
             "flex flex-col gap-4",
-            "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+            "motion-dialog",
           )}
         >
           <div className="flex flex-col gap-1.5">

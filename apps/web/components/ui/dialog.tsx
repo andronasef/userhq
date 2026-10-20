@@ -18,8 +18,8 @@ export const DialogOverlay = React.forwardRef<
     ref={ref}
     className={cn(
       "fixed inset-0 z-50 bg-foreground/40 backdrop-blur-xs",
-      "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      className
+      "motion-overlay",
+      className,
     )}
     {...props}
   />
@@ -38,8 +38,8 @@ export const DialogContent = React.forwardRef<
         "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50",
         "w-[calc(100%-32px)] max-w-lg bg-background border border-border rounded-lg p-6 shadow-lg",
         "flex flex-col gap-4",
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-        className
+        "motion-dialog",
+        className,
       )}
       {...props}
     >
@@ -74,7 +74,7 @@ export const DialogFooter = ({
   <div
     className={cn(
       "flex flex-col-reverse sm:flex-row sm:justify-end sm:gap-2 pt-2",
-      className
+      className,
     )}
     {...props}
   />
@@ -89,7 +89,7 @@ export const DialogTitle = React.forwardRef<
     ref={ref}
     className={cn(
       "text-base font-semibold leading-none text-foreground",
-      className
+      className,
     )}
     {...props}
   />

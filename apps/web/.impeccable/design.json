@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-20T10:17:14Z",
+  "generatedAt": "2026-10-20T10:27:01Z",
   "title": "Design System: UserHQ",
   "extensions": {
     "colorMeta": {
@@ -74,7 +74,42 @@
       {
         "name": "welcome-settle",
         "value": "500ms cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "One visible entrance on welcome and sign-in; disabled under reduced motion."
+        "purpose": "One rare welcome entrance; reduced motion uses a60ms opacity fade."
+      },
+      {
+        "name": "surface-arrival",
+        "value": "220ms cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Pointer dialog opacity/scale0.97 to1; exit140ms. Keyboard immediate."
+      },
+      {
+        "name": "drawer",
+        "value": "240ms cubic-bezier(0.32, 0.72, 0, 1)",
+        "purpose": "Pointer left-edge arrival; symmetric180ms exit."
+      },
+      {
+        "name": "menu",
+        "value": "160ms cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Pointer opacity/scale0.97 from trigger origin; exit100ms."
+      },
+      {
+        "name": "overlay",
+        "value": "160ms cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Scrim entry; exit120ms."
+      },
+      {
+        "name": "press",
+        "value": "120ms cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Pointer-only scale0.98 feedback; reduced motion uses color."
+      },
+      {
+        "name": "portal-section",
+        "value": "140ms cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Occasional pointer-led committed public section content only. No initial, admin, query, keyboard or history motion."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "60ms cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Gentle opacity instead of spatial transforms; keyboard state stays immediate."
       }
     ],
     "breakpoints": [

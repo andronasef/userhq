@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Add purposeful dialog, drawer, menu, press, and public portal section motion with immediate keyboard paths and reduced-motion alternatives.
+
 ### Changed
 
 - Apply the UserHQ brand identity across the web app with the supplied logo, local Manrope and Space Grotesk fonts, Calm Teal accents, green-tinted paper surfaces, and a fixed #0F182A face and favicon while preserving tenant branding.

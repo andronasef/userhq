@@ -51,7 +51,7 @@ function VoteButtonInner({
         {
           method,
           schema: VoteResultSchema,
-        }
+        },
       );
     },
     onMutate: async (targetVoted: boolean) => {
@@ -70,7 +70,9 @@ function VoteButtonInner({
         setOptimistic(context.previous);
       }
       if (err instanceof ApiClientError && err.code === "rate_limited") {
-        toast.error("You're doing that too often. Wait a minute and try again.");
+        toast.error(
+          "You're doing that too often. Wait a minute and try again.",
+        );
       } else {
         toast.error("Couldn't save your vote. Try again.");
       }
@@ -113,7 +115,7 @@ function VoteButtonInner({
   const formattedCount =
     optimistic.count >= 1000
       ? new Intl.NumberFormat("en", { notation: "compact" }).format(
-          optimistic.count
+          optimistic.count,
         )
       : String(optimistic.count);
 
@@ -128,11 +130,11 @@ function VoteButtonInner({
       aria-label={ariaLabel}
       onClick={handleClick}
       className={cn(
-        "w-12 h-14 rounded-md border flex flex-col items-center justify-center gap-1 shrink-0 transition-colors select-none",
+        "motion-press w-12 h-14 rounded-md border flex flex-col items-center justify-center gap-1 shrink-0 transition-colors select-none",
         optimistic.voted
           ? "border-primary bg-primary text-primary-foreground"
           : "border-border bg-background text-[var(--primary-text)] hover:bg-muted",
-        className
+        className,
       )}
     >
       <ChevronUp className="size-4 shrink-0" aria-hidden="true" />

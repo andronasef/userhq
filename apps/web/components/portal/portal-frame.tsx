@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { EntityLogo } from "../entity-logo";
 import { UserHQBrand } from "../userhq-brand";
+import { PortalSectionMotion } from "./portal-section-motion";
 
 export interface PortalFrameProps {
   homeHref: string;
@@ -79,14 +80,19 @@ export function PortalFrame({
           </div>
         </div>
         {tabs && (
-          <div className="mx-auto w-full max-w-5xl px-4 sm:px-6">{tabs}</div>
+          <div
+            data-portal-section-tabs={homeHref}
+            className="mx-auto w-full max-w-5xl px-4 sm:px-6"
+          >
+            {tabs}
+          </div>
         )}
       </header>
 
       <main className="flex-1">
-        <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 py-8 sm:py-12">
+        <PortalSectionMotion basePath={homeHref}>
           {children}
-        </div>
+        </PortalSectionMotion>
       </main>
 
       <footer className="border-t border-border py-6">

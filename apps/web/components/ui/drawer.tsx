@@ -16,7 +16,10 @@ export const DrawerOverlay = React.forwardRef<
   return (
     <DialogPrimitive.Overlay
       ref={ref}
-      className={cn("fixed inset-0 bg-foreground/40 z-50", className)}
+      className={cn(
+        "motion-overlay fixed inset-0 bg-foreground/40 z-50",
+        className,
+      )}
       {...props}
     />
   );
@@ -33,8 +36,8 @@ export const DrawerContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          "fixed inset-y-0 left-0 w-72 bg-muted border-r border-border p-4 overflow-y-auto z-50 focus:outline-none",
-          className
+          "motion-drawer fixed inset-y-0 left-0 w-72 bg-muted border-r border-border p-4 overflow-y-auto z-50 focus:outline-none",
+          className,
         )}
         {...props}
       >

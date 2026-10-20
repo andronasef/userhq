@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PanelLeft } from "lucide-react";
+import { PanelLeft, X } from "lucide-react";
 import { Button } from "../ui/button";
-import { Drawer, DrawerTrigger, DrawerContent } from "../ui/drawer";
+import { Drawer, DrawerTrigger, DrawerContent, DrawerClose } from "../ui/drawer";
 
 interface MobileNavProps {
   children: React.ReactNode;
@@ -31,7 +32,34 @@ export function MobileNav({ children }: MobileNavProps) {
         </Button>
       </DrawerTrigger>
       <DrawerContent>
-        {children}
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-border">
+          <Link
+            href="/dashboard"
+            className="text-base font-semibold text-foreground"
+            onClick={() => setOpen(false)}
+          >
+            UserHQ
+          </Link>
+          <DrawerClose asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 rounded-md text-muted-foreground hover:text-foreground"
+              aria-label="Close navigation"
+            >
+              <X className="size-4" aria-hidden="true" />
+            </Button>
+          </DrawerClose>
+        </div>
+        <div
+          onClick={(e) => {
+            if ((e.target as HTMLElement).closest("a")) {
+              setOpen(false);
+            }
+          }}
+        >
+          {children}
+        </div>
       </DrawerContent>
     </Drawer>
   );

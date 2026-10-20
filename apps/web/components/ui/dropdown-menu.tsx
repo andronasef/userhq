@@ -15,20 +15,23 @@ export const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
 >(function DropdownMenuContent(
-  { className, align = "end", sideOffset = 8, ...props },
+  { className, align = "end", sideOffset = 8, collisionPadding = 8, ...props },
   ref
 ) {
   return (
-    <DropdownMenuPrimitive.Content
-      ref={ref}
-      align={align}
-      sideOffset={sideOffset}
-      className={cn(
-        "min-w-56 p-1 bg-popover text-popover-foreground border border-border rounded-lg shadow-md z-50 overflow-hidden",
-        className
-      )}
-      {...props}
-    />
+    <DropdownMenuPrimitive.Portal>
+      <DropdownMenuPrimitive.Content
+        ref={ref}
+        align={align}
+        sideOffset={sideOffset}
+        collisionPadding={collisionPadding}
+        className={cn(
+          "min-w-56 max-w-[calc(100vw-1rem)] p-1 bg-popover text-popover-foreground border border-border rounded-lg shadow-md z-50 overflow-hidden",
+          className
+        )}
+        {...props}
+      />
+    </DropdownMenuPrimitive.Portal>
   );
 });
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;

@@ -72,10 +72,16 @@ export default async function DashboardLayout({
         <MobileNav>
           <DashboardSidebar ws={ws} products={products} />
         </MobileNav>
-        <Link href="/dashboard" className="text-base font-semibold text-foreground shrink-0">
+        <Link
+          href="/dashboard"
+          className="text-base font-semibold text-foreground shrink-0 hidden sm:inline"
+        >
           UserHQ
         </Link>
-        <span className="text-muted-foreground shrink-0" aria-hidden="true">
+        <span
+          className="text-muted-foreground shrink-0 hidden sm:inline"
+          aria-hidden="true"
+        >
           /
         </span>
         <WorkspaceSwitcher

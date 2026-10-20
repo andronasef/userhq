@@ -9,8 +9,6 @@ import {
   Plus,
   SlidersHorizontal,
   ExternalLink,
-  CircleDot,
-  Tags,
   Settings,
   MessagesSquare,
   Kanban,
@@ -33,29 +31,35 @@ export function DashboardSidebar({
   ws,
   products = [],
   className,
-}: DashboardSidebarProps) {
+}: DashboardSidebarProps): React.JSX.Element {
   const pathname = usePathname();
-  const isProductsActive = pathname === `/dashboard/${ws}`;
-  const isTeamActive = pathname.startsWith(`/dashboard/${ws}/team`);
+
+  const isOverviewActive = pathname === `/dashboard/${ws}`;
+  const isTeamActive = pathname === `/dashboard/${ws}/team`;
   const isWorkspaceSettingsActive = pathname === `/dashboard/${ws}/settings`;
 
   return (
-    <aside className={cn("flex flex-col gap-6", className)}>
-      <nav aria-label="Workspace">
-        <div className="text-xs font-semibold text-muted-foreground px-3 mb-1">
+    <aside
+      aria-label="Sidebar navigation"
+      className={cn("flex flex-col gap-6 w-full", className)}
+    >
+      <nav aria-label="Workspace navigation" className="flex flex-col gap-1">
+        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1">
           Workspace
         </div>
+
         <Link
           href={`/dashboard/${ws}`}
           className={cn(
             "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-background",
-            isProductsActive && "bg-background font-semibold"
+            isOverviewActive && "bg-background font-semibold"
           )}
-          aria-current={isProductsActive ? "page" : undefined}
+          aria-current={isOverviewActive ? "page" : undefined}
         >
           <LayoutGrid className="size-4 shrink-0" aria-hidden="true" />
-          <span className="truncate">Products</span>
+          <span className="truncate">Overview</span>
         </Link>
+
         <Link
           href={`/dashboard/${ws}/team`}
           className={cn(
@@ -67,6 +71,7 @@ export function DashboardSidebar({
           <Users className="size-4 shrink-0" aria-hidden="true" />
           <span className="truncate">Team</span>
         </Link>
+
         <Link
           href={`/dashboard/${ws}/settings`}
           className={cn(
@@ -80,18 +85,17 @@ export function DashboardSidebar({
         </Link>
       </nav>
 
-      <nav aria-label="Products">
+      <nav aria-label="Products navigation" className="flex flex-col gap-1">
         <div className="flex items-center justify-between px-3 mb-1">
-          <div className="text-xs font-semibold text-muted-foreground">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             Products
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8 text-muted-foreground hover:text-foreground"
-            asChild
-          >
-            <Link href={`/dashboard/${ws}/new`} aria-label="New product">
+          </span>
+          <Button variant="ghost" size="icon" className="size-5" asChild>
+            <Link
+              href={`/dashboard/${ws}/new`}
+              aria-label="Add new product"
+              title="Add new product"
+            >
               <Plus className="size-4" aria-hidden="true" />
             </Link>
           </Button>
@@ -116,15 +120,19 @@ export function DashboardSidebar({
                 `/dashboard/${ws}/${product.slug}`
               );
               const isBoardActive =
-                pathname === boardHref || pathname.startsWith(`${boardHref}/`);
+                pathname === boardHref ||
+                pathname.startsWith(`${boardHref}/`) ||
+                pathname === categoriesHref ||
+                pathname.startsWith(`${categoriesHref}/`);
               const isRoadmapActive =
-                pathname === roadmapHref || pathname.startsWith(`${roadmapHref}/`);
+                pathname === roadmapHref ||
+                pathname.startsWith(`${roadmapHref}/`) ||
+                pathname === statusesHref ||
+                pathname.startsWith(`${statusesHref}/`);
               const isChangelogActive =
                 pathname === changelogHref || pathname.startsWith(`${changelogHref}/`);
               const isFaqActive =
                 pathname === faqHref || pathname.startsWith(`${faqHref}/`);
-              const isCategoriesActive = pathname === categoriesHref;
-              const isStatusesActive = pathname === statusesHref;
               const isSettingsActive = pathname === settingsHref;
 
               return (
@@ -210,36 +218,6 @@ export function DashboardSidebar({
                           aria-hidden="true"
                         />
                         <span className="truncate">FAQ</span>
-                      </Link>
-
-                      <Link
-                        href={categoriesHref}
-                        className={cn(
-                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-background/50",
-                          isCategoriesActive && "text-foreground font-semibold bg-background/50"
-                        )}
-                        aria-current={isCategoriesActive ? "page" : undefined}
-                      >
-                        <Tags
-                          className="size-3.5 shrink-0"
-                          aria-hidden="true"
-                        />
-                        <span className="truncate">Categories</span>
-                      </Link>
-
-                      <Link
-                        href={statusesHref}
-                        className={cn(
-                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-background/50",
-                          isStatusesActive && "text-foreground font-semibold bg-background/50"
-                        )}
-                        aria-current={isStatusesActive ? "page" : undefined}
-                      >
-                        <CircleDot
-                          className="size-3.5 shrink-0"
-                          aria-hidden="true"
-                        />
-                        <span className="truncate">Statuses</span>
                       </Link>
 
                       <Link

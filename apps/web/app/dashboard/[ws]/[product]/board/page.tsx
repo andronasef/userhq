@@ -13,6 +13,7 @@ import { PageHeader } from "@/components/page-header";
 import { TabNav } from "@/components/tab-nav";
 import { BoardView } from "./board-view";
 import { DeletedItems } from "@/components/dashboard/deleted-items";
+import { CategoriesView } from "../categories/categories-view";
 
 interface BoardPageProps {
   params: Promise<{ ws: string; product: string }>;
@@ -64,9 +65,14 @@ export default async function BoardPage({
   }
 
   const isDeletedView = query.view === "deleted";
+  const isCategoriesView = query.view === "categories";
 
   const tabs = [
     { label: "Posts", href: `/dashboard/${ws}/${product}/board` },
+    {
+      label: "Categories",
+      href: `/dashboard/${ws}/${product}/board?view=categories`,
+    },
     {
       label: "Deleted",
       href: `/dashboard/${ws}/${product}/board?view=deleted`,
@@ -74,6 +80,8 @@ export default async function BoardPage({
   ];
   const activeHref = isDeletedView
     ? `/dashboard/${ws}/${product}/board?view=deleted`
+    : isCategoriesView
+    ? `/dashboard/${ws}/${product}/board?view=categories`
     : `/dashboard/${ws}/${product}/board`;
 
   return (
@@ -90,6 +98,13 @@ export default async function BoardPage({
           ws={ws}
           product={product}
           cursor={query.cursor}
+        />
+      ) : isCategoriesView ? (
+        <CategoriesView
+          ws={ws}
+          product={product}
+          initial={categoriesRes.data}
+          showHeader={false}
         />
       ) : (
         <PostsViewLoader
@@ -154,6 +169,7 @@ async function PostsViewLoader({
   categories: any[];
 }) {
   const postsRes = await getAdminPosts(ws, product, query);
+
   if (!postsRes.ok) {
     notFound();
   }

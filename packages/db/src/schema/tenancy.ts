@@ -48,6 +48,7 @@ export const products = pgTable(
     name: text("name").notNull(),
     logoUploadId: uuid("logo_upload_id").references(() => uploads.id, { onDelete: "set null" }),
     accentColor: text("accent_color").notNull().default("#2563EB"),
+    accentTextColor: text("accent_text_color"),
     tagline: text("tagline"),
     websiteUrl: text("website_url"),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
@@ -61,6 +62,10 @@ export const products = pgTable(
       sql`${table.slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$' AND char_length(${table.slug}) BETWEEN 2 AND 32`
     ),
     check("products_accent_hex", sql`${table.accentColor} ~ '^#[0-9A-F]{6}$'`),
+    check(
+      "products_accent_text_hex",
+      sql`${table.accentTextColor} IS NULL OR ${table.accentTextColor} ~ '^#[0-9A-F]{6}$'`
+    ),
   ]
 );
 

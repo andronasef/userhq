@@ -32,6 +32,22 @@ describe("accentTokens & contrastRatio (Plan 02-08 Task 2)", () => {
     expect(tokens.primary).toBe("#2563EB");
   });
 
+  it("accentTokens with customFgHex overrides primaryForeground when valid", () => {
+    const tokens = accentTokens("#2563EB", "#000000");
+    expect(tokens.primaryForeground).toBe("#000000");
+
+    const tokensLower = accentTokens("#2563EB", "#112233");
+    expect(tokensLower.primaryForeground).toBe("#112233");
+  });
+
+  it("accentTokens with null or invalid customFgHex falls back to automatic contrast", () => {
+    const tokensNull = accentTokens("#2563EB", null);
+    expect(tokensNull.primaryForeground).toBe("#FFFFFF");
+
+    const tokensInvalid = accentTokens("#2563EB", "not-a-hex");
+    expect(tokensInvalid.primaryForeground).toBe("#FFFFFF");
+  });
+
   it("accentStyle('#2563EB') includes --primary, --primary-foreground, --primary-text, --ring, and --entity-accent", () => {
     const style = accentStyle("#2563EB");
     expect(style).toEqual({
@@ -41,6 +57,11 @@ describe("accentTokens & contrastRatio (Plan 02-08 Task 2)", () => {
       "--ring": "#2563EB",
       "--entity-accent": "#2563EB",
     });
+  });
+
+  it("accentStyle supports customFgHex", () => {
+    const style = accentStyle("#2563EB", "#112233");
+    expect(style["--primary-foreground"]).toBe("#112233");
   });
 
   it("for every PALETTE hex, contrast(primaryForeground, primary) >= 4.5 and contrast(primaryText, #FFFFFF) >= 4.5", () => {

@@ -118,7 +118,7 @@ export default async function PortalLayout({
   }
 
   const { workspace, product: p } = result.data;
-  const productAccentStyle = accentStyle(p.accentColor) as React.CSSProperties;
+  const productAccentStyle = accentStyle(p.accentColor, p.accentTextColor) as React.CSSProperties;
 
   const right = me.user ? (
     <div className="flex items-center gap-2">

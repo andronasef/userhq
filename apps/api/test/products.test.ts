@@ -157,6 +157,51 @@ describe("Products API (Plan 02-08)", () => {
       expect(res.body.code).toBe("invalid_color");
     });
 
+    it("PATCH {accentTextColor: '#ffffff'} stores uppercased '#FFFFFF' and roundtrips with null reset", async () => {
+      const slug = "accent-test";
+      const patchRes = await request(testApp.http)
+        .patch(`/api/v1/workspaces/${wsSlug}/products/${slug}`)
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ accentTextColor: "#ffffff" });
+
+      expect(patchRes.status).toBe(200);
+      expect(patchRes.body.accentTextColor).toBe("#FFFFFF");
+
+      const [row] = await testApp.db
+        .select({ textColor: schema.products.accentTextColor })
+        .from(schema.products)
+        .where(and(eq(schema.products.workspaceId, wsId), eq(schema.products.slug, slug)));
+      expect(row.textColor).toBe("#FFFFFF");
+
+      // Verify portal GET returns the updated accentTextColor
+      const portalRes = await request(testApp.http).get(`/api/v1/portal/${wsSlug}/${slug}`);
+      expect(portalRes.status).toBe(200);
+      expect(portalRes.body.product.accentTextColor).toBe("#FFFFFF");
+
+      // Verify reset to null works
+      const resetRes = await request(testApp.http)
+        .patch(`/api/v1/workspaces/${wsSlug}/products/${slug}`)
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ accentTextColor: null });
+
+      expect(resetRes.status).toBe(200);
+      expect(resetRes.body.accentTextColor).toBeNull();
+    });
+
+    it("PATCH {accentTextColor: 'invalid'} returns 400 invalid_color", async () => {
+      const slug = "accent-test";
+      const res = await request(testApp.http)
+        .patch(`/api/v1/workspaces/${wsSlug}/products/${slug}`)
+        .set("Cookie", ownerUser.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ accentTextColor: "invalid" });
+
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe("invalid_color");
+    });
+
     it("DB CHECK rejects direct insert of lowercase '#16a34a'", async () => {
       await expect(
         testApp.db.insert(schema.products).values({

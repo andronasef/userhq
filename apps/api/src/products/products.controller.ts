@@ -145,6 +145,7 @@ export class ProductsController {
         name: products.name,
         logoKey: uploads.storageKey,
         accentColor: products.accentColor,
+        accentTextColor: products.accentTextColor,
       })
       .from(products)
       .leftJoin(uploads, eq(products.logoUploadId, uploads.id))
@@ -161,6 +162,7 @@ export class ProductsController {
       name: r.name,
       logoUrl: r.logoKey ? `/uploads/${r.logoKey}` : null,
       accentColor: r.accentColor,
+      accentTextColor: r.accentTextColor ?? null,
     }));
   }
 
@@ -176,6 +178,7 @@ export class ProductsController {
         logoUploadId: products.logoUploadId,
         logoKey: uploads.storageKey,
         accentColor: products.accentColor,
+        accentTextColor: products.accentTextColor,
         tagline: products.tagline,
         websiteUrl: products.websiteUrl,
       })
@@ -199,6 +202,7 @@ export class ProductsController {
       logoUrl: row.logoKey ? `/uploads/${row.logoKey}` : null,
       logoUploadId: row.logoUploadId ?? null,
       accentColor: row.accentColor,
+      accentTextColor: row.accentTextColor ?? null,
       tagline: row.tagline ?? null,
       websiteUrl: row.websiteUrl ?? null,
     });
@@ -271,6 +275,7 @@ export class ProductsController {
     if (input.tagline !== undefined) updateData.tagline = input.tagline;
     if (input.websiteUrl !== undefined) updateData.websiteUrl = input.websiteUrl;
     if (input.accentColor !== undefined) updateData.accentColor = input.accentColor;
+    if (input.accentTextColor !== undefined) updateData.accentTextColor = input.accentTextColor;
 
     if (Object.keys(updateData).length > 0) {
       try {

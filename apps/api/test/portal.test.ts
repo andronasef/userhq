@@ -51,6 +51,7 @@ describe("Portal API (Plan 02-02)", () => {
         name: "Acme App",
         tagline: null,
         accentColor: "#2563EB",
+        accentTextColor: null,
         logoUrl: null,
         websiteUrl: "https://acme.example",
       },
@@ -62,6 +63,7 @@ describe("Portal API (Plan 02-02)", () => {
     expect(Object.keys(res.body.workspace).sort()).toEqual(["name", "slug"]);
     expect(Object.keys(res.body.product).sort()).toEqual([
       "accentColor",
+      "accentTextColor",
       "logoUrl",
       "name",
       "slug",
@@ -218,6 +220,7 @@ describe("Portal API (Plan 02-02)", () => {
             name: "alpha Product",
             tagline: "The first one",
             accentColor: "#10B981",
+            accentTextColor: null,
             logoUrl: null,
           },
           {
@@ -225,6 +228,7 @@ describe("Portal API (Plan 02-02)", () => {
             name: "Zeta Product",
             tagline: "The last one",
             accentColor: "#2563EB",
+            accentTextColor: null,
             logoUrl: null,
           },
         ],
@@ -244,6 +248,7 @@ describe("Portal API (Plan 02-02)", () => {
       ]);
       expect(Object.keys(res.body.products[0]).sort()).toEqual([
         "accentColor",
+        "accentTextColor",
         "logoUrl",
         "name",
         "slug",

@@ -1,0 +1,2 @@
+ALTER TABLE "products" ADD COLUMN "accent_text_color" text;--> statement-breakpoint
+ALTER TABLE "products" ADD CONSTRAINT "products_accent_text_hex" CHECK ("products"."accent_text_color" IS NULL OR "products"."accent_text_color" ~ '^#[0-9A-F]{6}$');

@@ -13,6 +13,7 @@ export const PublicPortalProductSchema = z.object({
     name: z.string(),
     tagline: z.string().nullable(),
     accentColor: z.string(),
+    accentTextColor: z.string().nullable().optional(),
     logoUrl: z.string().nullable(),
     websiteUrl: z.string().nullable(),
   }),
@@ -48,6 +49,7 @@ export const PublicPortalDirectorySchema = z.object({
       name: z.string(),
       tagline: z.string().nullable(),
       accentColor: z.string(),
+      accentTextColor: z.string().nullable().optional(),
       logoUrl: z.string().nullable(),
     })
   ),
@@ -207,6 +209,17 @@ export const HexColorSchema = z
   .transform((s) => s.toUpperCase());
 export type HexColor = z.infer<typeof HexColorSchema>;
 
+export const NullableHexColorSchema = z
+  .string()
+  .trim()
+  .transform((val) => (val === "" ? null : val))
+  .nullable()
+  .refine((val) => val === null || HEX_COLOR_RE.test(val), {
+    message: "invalid_color",
+  })
+  .transform((val) => (val ? val.toUpperCase() : null));
+export type NullableHexColor = z.infer<typeof NullableHexColorSchema>;
+
 export const TaglineSchema = z
   .string()
   .trim()
@@ -234,6 +247,7 @@ export const ProductSummarySchema = z.object({
   name: z.string(),
   logoUrl: z.string().nullable(),
   accentColor: z.string(),
+  accentTextColor: z.string().nullable().optional(),
 });
 export type ProductSummary = z.infer<typeof ProductSummarySchema>;
 
@@ -251,6 +265,7 @@ export const UpdateProductInputSchema = z.object({
   tagline: TaglineSchema.optional(),
   websiteUrl: WebsiteUrlSchema.optional(),
   accentColor: HexColorSchema.optional(),
+  accentTextColor: NullableHexColorSchema.optional(),
 });
 export type UpdateProductInput = z.infer<typeof UpdateProductInputSchema>;
 

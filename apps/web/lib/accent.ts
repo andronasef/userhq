@@ -27,21 +27,28 @@ export function contrastRatio(hex1: string, hex2: string): number {
 
 export interface AccentTokens {
   primary: string;
-  primaryForeground: "#FFFFFF" | "#000000";
+  primaryForeground: string;
   primaryText: string;
 }
 
-export function accentTokens(hex: string): AccentTokens {
+export function accentTokens(
+  hex: string,
+  customFgHex?: string | null
+): AccentTokens {
   if (!hex || !HEX_COLOR_RE.test(hex)) {
-    return accentTokens(DEFAULT_ACCENT);
+    return accentTokens(DEFAULT_ACCENT, customFgHex);
   }
 
   const primary = hex.toUpperCase();
   const vsWhite = contrastRatio("#FFFFFF", primary);
   const vsBlack = contrastRatio("#000000", primary);
 
-  const primaryForeground: "#FFFFFF" | "#000000" =
-    vsWhite >= vsBlack ? "#FFFFFF" : "#000000";
+  let primaryForeground: string;
+  if (customFgHex && HEX_COLOR_RE.test(customFgHex)) {
+    primaryForeground = customFgHex.toUpperCase();
+  } else {
+    primaryForeground = vsWhite >= vsBlack ? "#FFFFFF" : "#000000";
+  }
 
   const primaryText = vsWhite >= 4.5 ? primary : "#171717";
 
@@ -52,8 +59,11 @@ export function accentTokens(hex: string): AccentTokens {
   };
 }
 
-export function accentStyle(hex: string): Record<string, string> {
-  const tokens = accentTokens(hex);
+export function accentStyle(
+  hex: string,
+  customFgHex?: string | null
+): Record<string, string> {
+  const tokens = accentTokens(hex, customFgHex);
   return {
     "--primary": tokens.primary,
     "--primary-foreground": tokens.primaryForeground,

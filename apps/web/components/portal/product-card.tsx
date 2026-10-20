@@ -10,6 +10,7 @@ export interface ProductCardProps {
     name: string;
     tagline?: string | null;
     accentColor: string;
+    accentTextColor?: string | null;
     logoUrl?: string | null;
   };
 }
@@ -18,7 +19,7 @@ export function ProductCard({
   ws,
   product,
 }: ProductCardProps): React.JSX.Element {
-  const tokens = accentTokens(product.accentColor);
+  const tokens = accentTokens(product.accentColor, product.accentTextColor);
 
   return (
     <a

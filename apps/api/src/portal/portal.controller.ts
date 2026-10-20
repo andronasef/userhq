@@ -62,6 +62,7 @@ export class PortalController {
         name: products.name,
         tagline: products.tagline,
         accentColor: products.accentColor,
+        accentTextColor: products.accentTextColor,
         productLogoKey: productLogo.storageKey,
         workspaceLogoKey: workspaceLogo.storageKey,
       })
@@ -89,6 +90,7 @@ export class PortalController {
           name: p.name,
           tagline: p.tagline ?? null,
           accentColor: p.accentColor,
+          accentTextColor: p.accentTextColor ?? null,
           logoUrl: logoKey ? `/uploads/${logoKey}` : null,
         };
       }),
@@ -114,6 +116,7 @@ export class PortalController {
         productName: products.name,
         productTagline: products.tagline,
         productAccentColor: products.accentColor,
+        productAccentTextColor: products.accentTextColor,
         productWebsiteUrl: products.websiteUrl,
         productLogoKey: productLogo.storageKey,
       })
@@ -163,6 +166,7 @@ export class PortalController {
         name: row.productName,
         tagline: row.productTagline ?? null,
         accentColor: row.productAccentColor,
+        accentTextColor: row.productAccentTextColor ?? null,
         logoUrl,
         websiteUrl,
       },

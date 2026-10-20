@@ -53,7 +53,7 @@ export function DashboardSidebar({
           className={cn(
             "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-muted/60",
             isOverviewActive &&
-              "bg-[var(--brand-lavender)] text-[var(--primary-text)] font-semibold",
+              "bg-[var(--brand-selection)] text-[var(--primary-text)] font-semibold",
           )}
           aria-current={isOverviewActive ? "page" : undefined}
         >
@@ -66,7 +66,7 @@ export function DashboardSidebar({
           className={cn(
             "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-muted/60",
             isTeamActive &&
-              "bg-[var(--brand-lavender)] text-[var(--primary-text)] font-semibold",
+              "bg-[var(--brand-selection)] text-[var(--primary-text)] font-semibold",
           )}
           aria-current={isTeamActive ? "page" : undefined}
         >
@@ -79,7 +79,7 @@ export function DashboardSidebar({
           className={cn(
             "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-muted/60",
             isWorkspaceSettingsActive &&
-              "bg-[var(--brand-lavender)] text-[var(--primary-text)] font-semibold",
+              "bg-[var(--brand-selection)] text-[var(--primary-text)] font-semibold",
           )}
           aria-current={isWorkspaceSettingsActive ? "page" : undefined}
         >
@@ -146,7 +146,7 @@ export function DashboardSidebar({
                     className={cn(
                       "flex items-center gap-2 h-9 px-3 rounded-md text-sm text-foreground hover:bg-muted/60",
                       isProductActive &&
-                        "bg-[var(--brand-lavender)] text-[var(--primary-text)] font-semibold",
+                        "bg-[var(--brand-selection)] text-[var(--primary-text)] font-semibold",
                     )}
                     aria-current={isProductActive ? "page" : undefined}
                   >
@@ -170,7 +170,7 @@ export function DashboardSidebar({
                         className={cn(
                           "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
                           isBoardActive &&
-                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-lavender)]",
+                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-selection)]",
                         )}
                         aria-current={isBoardActive ? "page" : undefined}
                       >
@@ -186,7 +186,7 @@ export function DashboardSidebar({
                         className={cn(
                           "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
                           isRoadmapActive &&
-                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-lavender)]",
+                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-selection)]",
                         )}
                         aria-current={isRoadmapActive ? "page" : undefined}
                       >
@@ -202,7 +202,7 @@ export function DashboardSidebar({
                         className={cn(
                           "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
                           isChangelogActive &&
-                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-lavender)]",
+                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-selection)]",
                         )}
                         aria-current={isChangelogActive ? "page" : undefined}
                       >
@@ -218,7 +218,7 @@ export function DashboardSidebar({
                         className={cn(
                           "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
                           isFaqActive &&
-                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-lavender)]",
+                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-selection)]",
                         )}
                         aria-current={isFaqActive ? "page" : undefined}
                       >
@@ -234,7 +234,7 @@ export function DashboardSidebar({
                         className={cn(
                           "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
                           isSettingsActive &&
-                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-lavender)]",
+                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-selection)]",
                         )}
                         aria-current={isSettingsActive ? "page" : undefined}
                       >

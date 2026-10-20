@@ -20,7 +20,7 @@ A branded public portal shares data with private product planning. Preserve OAut
 
 ## Brand Commitments
 
-The user supplied UserHQ_Brand_Identity.html and requested autonomous adaptation in its spirit rather than literal duplication. Preserve the single-color human face signature and human, useful, energetic character. Working screens must remain calm and readable.
+The user supplied UserHQ_Brand_Identity.html and requested autonomous adaptation in its spirit rather than literal duplication, then approved the Calm Teal palette: #087F75 actions, #F6F8F7 canvas, #E1F1ED selections, and white working surfaces. Preserve the single-color human face signature in #0F182A throughout the light interface, independently of tenant accent or operating-system theme. The proposed face color for a future dark interface is #E8EEF7; dark mode is not currently implemented. Keep the human, useful character and calm, readable working screens.
 
 ## Evidence on Hand
 

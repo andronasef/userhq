@@ -17,28 +17,26 @@
 }
 
 :root {
-  --background: #f6f7fb;
-  --foreground: #10172a;
+  --background: #f6f8f7;
+  --foreground: #0f182a;
   --card: #ffffff;
-  --card-foreground: #10172a;
+  --card-foreground: #0f182a;
   --popover: #ffffff;
-  --popover-foreground: #10172a;
-  --muted: #e9ecf5;
-  --muted-foreground: #59647a;
-  --border: #dce1ed;
-  --input: #c7cfdf;
-  --primary: #5b5cf6;
+  --popover-foreground: #0f182a;
+  --muted: #eaf0ed;
+  --muted-foreground: #53645f;
+  --border: #d8e2de;
+  --input: #bdcdc6;
+  --primary: #087f75;
   --primary-foreground: #ffffff;
-  --ring: #5b5cf6;
+  --ring: #087f75;
   --destructive: oklch(0.505 0.213 27.518);
   --destructive-foreground: oklch(0.985 0 0);
-  --primary-text: #4d4ed8;
+  --primary-text: #066a62;
   --entity-accent: var(--primary);
-  --brand-indigo: #5b5cf6;
-  --brand-ink: #10172a;
-  --brand-lavender: #eeedff;
-  --brand-coral: #ff6b4a;
-  --brand-aqua: #24c8b4;
+  --brand-accent: #087f75;
+  --brand-ink: #0f182a;
+  --brand-selection: #e1f1ed;
   --radius: 0.875rem;
 }
 
@@ -94,7 +92,7 @@
     font-variant-numeric: tabular-nums;
   }
   ::selection {
-    background: var(--brand-lavender);
+    background: var(--brand-selection);
     color: var(--brand-ink);
   }
 }
@@ -107,7 +105,7 @@
   white-space: nowrap;
 }
 .userhq-brand-accent {
-  color: var(--brand-indigo);
+  color: var(--brand-accent);
 }
 .welcome-entry {
   animation: welcome-settle 500ms cubic-bezier(0.16, 1, 0.3, 1) both;

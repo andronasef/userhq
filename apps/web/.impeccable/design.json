@@ -1,67 +1,37 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-20T09:59:45Z",
+  "generatedAt": "2026-10-20T10:17:14Z",
   "title": "Design System: UserHQ",
   "extensions": {
     "colorMeta": {
       "primary": {
         "role": "primary",
-        "displayName": "Electric Indigo",
-        "canonical": "#5B5CF6",
+        "displayName": "Calm Teal",
+        "canonical": "#087F75",
         "tonalRamp": [
-          "#18194b",
-          "#292b73",
-          "#3e3f9d",
-          "#5051cd",
-          "#5b5cf6",
-          "#9091ff",
-          "#c4c4ff",
-          "#eeedff"
+          "#063B37",
+          "#07554F",
+          "#066A62",
+          "#087F75",
+          "#40A69A",
+          "#87C5B8",
+          "#B8DED2",
+          "#E1F1ED"
         ]
       },
       "ink": {
         "role": "neutral",
         "displayName": "Ink",
-        "canonical": "#10172A",
+        "canonical": "#0F182A",
         "tonalRamp": [
-          "#10172a",
-          "#283249",
-          "#414e64",
-          "#59647a",
-          "#828ca2",
-          "#b0b8ca",
-          "#dce1ed",
-          "#f6f7fb"
-        ]
-      },
-      "coral": {
-        "role": "secondary",
-        "displayName": "Warm Coral",
-        "canonical": "#FF6B4A",
-        "tonalRamp": [
-          "#441a11",
-          "#702c1e",
-          "#a5412b",
-          "#d55337",
-          "#ff6b4a",
-          "#ff9a82",
-          "#ffccbe",
-          "#fff0eb"
-        ]
-      },
-      "aqua": {
-        "role": "tertiary",
-        "displayName": "Progress Aqua",
-        "canonical": "#24C8B4",
-        "tonalRamp": [
-          "#082f2a",
-          "#0e4c44",
-          "#147267",
-          "#1a9a8a",
-          "#24c8b4",
-          "#69ddce",
-          "#a5eee4",
-          "#e6faf6"
+          "#0F182A",
+          "#33483F",
+          "#53645F",
+          "#7F938A",
+          "#BDCDC6",
+          "#D8E2DE",
+          "#EAF0ED",
+          "#F6F8F7"
         ]
       }
     },
@@ -125,7 +95,7 @@
       "refersTo": "button-primary",
       "description": "The main task action, with tenant semantic overrides.",
       "html": "<button class=\"ds-primary\">Save changes</button>",
-      "css": ".ds-primary{background:var(--primary,#5b5cf6);color:var(--primary-foreground,#fff);border:0;border-radius:12px;padding:0 16px;height:36px;font:600 14px Manrope,sans-serif;cursor:pointer}.ds-primary:hover{filter:brightness(.95)}.ds-primary:focus-visible{outline:2px solid var(--ring,#5b5cf6);outline-offset:2px}.ds-primary:active{filter:brightness(.9)}"
+      "css": ".ds-primary{background:var(--primary,#087f75);color:var(--primary-foreground,#fff);border:0;border-radius:12px;padding:0 16px;height:36px;font:600 14px Manrope,sans-serif;cursor:pointer}.ds-primary:hover{filter:brightness(.95)}.ds-primary:focus-visible{outline:2px solid var(--ring,#087f75);outline-offset:2px}.ds-primary:active{filter:brightness(.9)}"
     },
     {
       "name": "Outline button",
@@ -133,14 +103,14 @@
       "refersTo": "button-outline",
       "description": "Secondary actions and OAuth providers.",
       "html": "<button class=\"ds-outline\">Continue with GitHub</button>",
-      "css": ".ds-outline{background:var(--card,#fff);color:var(--foreground,#10172a);border:1px solid var(--input,#c7cfdf);border-radius:12px;height:40px;padding:0 24px;font:600 14px Manrope,sans-serif;cursor:pointer}.ds-outline:hover{background:var(--muted,#e9ecf5)}.ds-outline:focus-visible{outline:2px solid var(--ring,#5b5cf6);outline-offset:2px}"
+      "css": ".ds-outline{background:var(--card,#fff);color:var(--foreground,#0f182a);border:1px solid var(--input,#bdcdc6);border-radius:12px;height:40px;padding:0 24px;font:600 14px Manrope,sans-serif;cursor:pointer}.ds-outline:hover{background:var(--muted,#eaf0ed)}.ds-outline:focus-visible{outline:2px solid var(--ring,#087f75);outline-offset:2px}"
     },
     {
       "name": "Ghost button",
       "kind": "button",
       "description": "Quiet secondary controls.",
       "html": "<button class=\"ds-ghost\">Cancel</button>",
-      "css": ".ds-ghost{background:transparent;color:var(--foreground,#10172a);border:0;border-radius:12px;height:36px;padding:0 16px;font:600 14px Manrope,sans-serif;cursor:pointer}.ds-ghost:hover{background:var(--muted,#e9ecf5)}.ds-ghost:focus-visible{outline:2px solid var(--ring,#5b5cf6);outline-offset:2px}"
+      "css": ".ds-ghost{background:transparent;color:var(--foreground,#0f182a);border:0;border-radius:12px;height:36px;padding:0 16px;font:600 14px Manrope,sans-serif;cursor:pointer}.ds-ghost:hover{background:var(--muted,#eaf0ed)}.ds-ghost:focus-visible{outline:2px solid var(--ring,#087f75);outline-offset:2px}"
     },
     {
       "name": "Text field",
@@ -148,15 +118,15 @@
       "refersTo": "input",
       "description": "White field with a visible neutral boundary.",
       "html": "<input class=\"ds-input\" aria-label=\"Workspace name\" placeholder=\"Workspace name\" />",
-      "css": ".ds-input{background:var(--card,#fff);color:var(--foreground,#10172a);border:1px solid var(--input,#c7cfdf);border-radius:12px;height:36px;padding:0 12px;font:400 14px Manrope,sans-serif;caret-color:var(--primary,#5b5cf6)}.ds-input::placeholder{color:var(--muted-foreground,#59647a)}.ds-input:focus-visible{outline:2px solid var(--ring,#5b5cf6);outline-offset:2px}"
+      "css": ".ds-input{background:var(--card,#fff);color:var(--foreground,#0f182a);border:1px solid var(--input,#bdcdc6);border-radius:12px;height:36px;padding:0 12px;font:400 14px Manrope,sans-serif;caret-color:var(--primary,#087f75)}.ds-input::placeholder{color:var(--muted-foreground,#53645f)}.ds-input:focus-visible{outline:2px solid var(--ring,#087f75);outline-offset:2px}"
     },
     {
       "name": "Selected navigation",
       "kind": "nav",
       "refersTo": "navigation-selected",
-      "description": "Lavender selection for workspace navigation.",
+      "description": "Pale teal selection for workspace navigation.",
       "html": "<nav><a class=\"ds-nav\" href=\"#overview\" aria-current=\"page\">Overview</a></nav>",
-      "css": ".ds-nav{display:block;background:var(--brand-lavender,#eeedff);color:var(--primary-text,#4d4ed8);border-radius:12px;padding:8px 12px;text-decoration:none;font:600 14px Manrope,sans-serif}.ds-nav:hover{filter:brightness(.98)}.ds-nav:focus-visible{outline:2px solid var(--ring,#5b5cf6);outline-offset:4px}"
+      "css": ".ds-nav{display:block;background:var(--brand-selection,#e1f1ed);color:var(--primary-text,#066a62);border-radius:12px;padding:8px 12px;text-decoration:none;font:600 14px Manrope,sans-serif}.ds-nav:hover{filter:brightness(.98)}.ds-nav:focus-visible{outline:2px solid var(--ring,#087f75);outline-offset:4px}"
     },
     {
       "name": "Quiet surface",
@@ -164,7 +134,7 @@
       "refersTo": "card",
       "description": "A single boundary for grouped working content.",
       "html": "<div class=\"ds-card\">Your workspace</div>",
-      "css": ".ds-card{background:var(--card,#fff);color:var(--foreground,#10172a);border:1px solid var(--border,#dce1ed);border-radius:14px;padding:24px;font:400 16px Manrope,sans-serif}"
+      "css": ".ds-card{background:var(--card,#fff);color:var(--foreground,#0f182a);border:1px solid var(--border,#d8e2de);border-radius:14px;padding:24px;font:400 16px Manrope,sans-serif}"
     },
     {
       "name": "Neutral badge",
@@ -172,12 +142,12 @@
       "refersTo": "badge-neutral",
       "description": "A compact non-interactive label for metadata.",
       "html": "<span class=\"ds-badge\">Feedback</span>",
-      "css": ".ds-badge{display:inline-flex;align-items:center;background:var(--muted,#e9ecf5);color:var(--foreground,#10172a);height:24px;padding:0 8px;border-radius:9999px;font:600 12px Manrope,sans-serif}"
+      "css": ".ds-badge{display:inline-flex;align-items:center;background:var(--muted,#eaf0ed);color:var(--foreground,#0f182a);height:24px;padding:0 8px;border-radius:9999px;font:600 12px Manrope,sans-serif}"
     }
   ],
   "narrative": {
     "northStar": "A good listener, with a clear plan.",
-    "overview": "UserHQ feels human, attentive, and capable. The supplied face mark introduces warmth; precise type, quiet paper surfaces, and clear indigo actions keep attention on customers and the work ahead. This adapts the supplied brand identity to a working application rather than reproducing its brand book.",
+    "overview": "UserHQ feels human, attentive, and capable. The supplied face mark introduces warmth; precise type, quiet paper surfaces, and calm teal actions keep attention on customers and the work ahead. This adapts the supplied brand identity to a working application rather than reproducing its brand book.",
     "keyCharacteristics": [
       "Warm identity, calm working surfaces.",
       "Clear hierarchy and compact, readable controls.",
@@ -190,8 +160,13 @@
         "section": "colors"
       },
       {
+        "name": "The Face Color Rule",
+        "body": "The supplied face and favicon are always #0F182A on the current light interface, regardless of tenant accent or operating-system theme. For a future dark interface, use #E8EEF7 as the face color against a dark canvas. This recommendation does not activate a dark theme or recolor the current light interface.",
+        "section": "colors"
+      },
+      {
         "name": "The Readable Color Rule",
-        "body": "Body and placeholder text meet 4.5:1 contrast; large text and essential graphical affordances meet 3:1. Never use coral or aqua as small text on white.",
+        "body": "Body and placeholder text meet 4.5:1 contrast; large text and essential graphical affordances meet 3:1. Pale teal is a selection surface; readable ink or primary text belongs on top of it.",
         "section": "colors"
       },
       {
@@ -207,7 +182,7 @@
       "Do verify real content, narrow widths, focus, loading, error, and reduced-motion states."
     ],
     "donts": [
-      "Don't use coral or aqua for low-contrast body text.",
+      "Don't use pale selection colors as body text.",
       "Don't turn working screens into decorative marketing compositions.",
       "Don't add fake customer activity, metrics, or product claims."
     ]

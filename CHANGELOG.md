@@ -4,7 +4,7 @@
 
 ### Changed
 
-- Apply the UserHQ brand identity across the web app with the supplied logo, local Manrope and Space Grotesk fonts, indigo and paper surfaces, and refreshed welcome and sign-in screens while preserving tenant branding.
+- Apply the UserHQ brand identity across the web app with the supplied logo, local Manrope and Space Grotesk fonts, Calm Teal accents, green-tinted paper surfaces, and a fixed #0F182A face and favicon while preserving tenant branding.
 
 ### Fixed
 

@@ -116,7 +116,7 @@ function CreateWorkspaceFormInner({ host }: CreateWorkspaceFormProps): React.JSX
           helper={
             <>
               Lowercase letters, numbers, and hyphens, 2–32 characters.{" "}
-              <strong className="font-semibold text-foreground">
+              <strong className="font-semibold text-foreground bg-yellow-300">
                 You can&apos;t change this later.
               </strong>
             </>

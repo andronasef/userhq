@@ -20,7 +20,8 @@
     }
   },
   "scripts": {
-    "dev": "bun run build:packages && bun run --filter '*' --parallel dev",
+    "dev": "bun run build:packages && bun run dev:migrate && bun run --filter '*' --parallel dev",
+    "dev:migrate": "node --env-file=env.local.dev packages/db/dist/migrate.js",
     "dev:api": "bun run --filter '@userhq/api' dev",
     "dev:web": "bun run --filter '@userhq/web' dev",
     "dev:packages": "bun run --filter '@userhq/types' --filter '@userhq/db' --parallel dev",

@@ -20,7 +20,7 @@
   },
   "scripts": {
     "build": "tsdown src/index.ts --format esm --dts && cp dist/index.mjs dist/index.js",
-    "dev": "tsdown src/index.ts --format esm --watch --on-success \"cp dist/index.mjs dist/index.js 2>/dev/null; touch ../../apps/api/src/main.ts 2>/dev/null || true\"",
+    "dev": "tsdown src/index.ts --format esm --watch --no-clean --on-success \"cp dist/index.mjs dist/index.js 2>/dev/null; touch ../../apps/api/src/main.ts 2>/dev/null || true\"",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run"
   }

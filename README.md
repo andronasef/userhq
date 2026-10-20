@@ -146,20 +146,21 @@ bun install
 ### 3. Start Local Infrastructure
 Launch PostgreSQL and Mailpit using Docker Compose:
 ```bash
-docker compose up -d
+bun run dev:services
 ```
 
 ### 4. Configure Environment Variables
 Copy example environment files and update your credentials:
 ```bash
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env
+cp .env.example env.local.dev
 ```
+
+Both dev servers load the root `env.local.dev` file. Set `PUBLIC_URL=http://localhost:3000`, keep `API_INTERNAL_URL=http://localhost:4000`, and add your OAuth credentials. Register callbacks at `http://localhost:3000/api/auth/callback/google` and `http://localhost:3000/api/auth/callback/github` with the respective providers. This local file is ignored by Git.
 
 ### 5. Generate and Apply Database Migrations
 ```bash
-bun run --filter @userhq/db db:generate
-bun run --filter @userhq/db db:migrate
+bun run build:packages
+bun run dev:migrate
 ```
 
 ### 6. Run the Development Environment
@@ -168,6 +169,8 @@ bun run dev
 ```
 
 The web application will be accessible at `http://localhost:3000` and the API at `http://localhost:4000`.
+
+`bun run dev` builds shared packages and applies committed migrations to the configured development database before starting the servers and watchers.
 
 ---
 

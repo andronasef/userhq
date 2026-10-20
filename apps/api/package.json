@@ -42,7 +42,7 @@
   },
   "scripts": {
     "build": "node ./node_modules/@nestjs/cli/bin/nest.js build --path tsconfig.json",
-    "dev": "node --env-file-if-exists=../../.env ./node_modules/@nestjs/cli/bin/nest.js start --watch --path tsconfig.json",
+    "dev": "node --env-file=../../env.local.dev ./node_modules/@nestjs/cli/bin/nest.js start --watch --path tsconfig.json",
     "start": "node dist/main.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests",

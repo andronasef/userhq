@@ -150,7 +150,7 @@ export function KanbanBoard({
 
   return (
     <DragDropProvider onDragEnd={handleDragEnd}>
-      <div className="flex gap-4 overflow-x-auto pb-6 items-start min-h-[calc(100vh-16rem)]">
+      <div className="w-full flex gap-4 overflow-x-auto pb-6 items-start min-h-[calc(100vh-16rem)]">
         {statuses.map((status) => (
           <KanbanColumn
             key={status.id}

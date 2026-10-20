@@ -45,7 +45,7 @@ export default async function ProductSettingsPage({
   const workspaceData = wsRes.data;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-3xl">
       <PageHeader
         title="Product settings"
         description="Changes appear on the public portal right away."

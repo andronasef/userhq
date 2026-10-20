@@ -52,7 +52,7 @@ export default async function TeamPage({
   const invites = invitesResult.data;
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col max-w-5xl">
       <PageHeader
         title="Team"
         description={`Everyone here is an admin of ${workspace.name}.`}

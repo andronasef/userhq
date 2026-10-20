@@ -101,9 +101,7 @@ export default async function DashboardLayout({
           <DashboardSidebar ws={ws} products={products} />
         </aside>
         <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-          <div className="w-full max-w-3xl">
-            {children}
-          </div>
+          {children}
         </main>
       </div>
       <AppToaster />

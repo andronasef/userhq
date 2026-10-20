@@ -9,6 +9,7 @@ import type {
   ProductDetail,
 } from "@userhq/types";
 import { PageHeader } from "../../../../../components/page-header";
+import { TabNav } from "../../../../../components/tab-nav";
 import { Button } from "../../../../../components/ui/button";
 import { NativeSelect } from "../../../../../components/ui/native-select";
 import { KanbanBoard } from "../../../../../components/roadmap/kanban-board";
@@ -23,6 +24,8 @@ export interface RoadmapViewProps {
   initialItems: AdminRoadmapItem[];
   initialItemId?: string;
   initialLinkPostNumber?: number;
+  tabs?: Array<{ label: string; href: string }>;
+  activeHref?: string;
 }
 
 export function RoadmapView({
@@ -33,6 +36,8 @@ export function RoadmapView({
   initialItems,
   initialItemId,
   initialLinkPostNumber,
+  tabs,
+  activeHref,
 }: RoadmapViewProps) {
   const [statuses, setStatuses] = React.useState<Status[]>(initialStatuses);
   const [items, setItems] = React.useState<AdminRoadmapItem[]>(initialItems);
@@ -48,7 +53,6 @@ export function RoadmapView({
     return null;
   });
   const [prelinkedPost, setPrelinkedPost] = React.useState<any | null>(null);
-
 
   React.useEffect(() => {
     if (initialLinkPostNumber && !isCreateOpen) {
@@ -90,7 +94,7 @@ export function RoadmapView({
   };
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div className="w-full space-y-6">
       <PageHeader
         title="Roadmap"
         description="Plan internal milestones and choose what appears on the public roadmap."
@@ -101,6 +105,10 @@ export function RoadmapView({
           </Button>
         }
       />
+
+      {tabs && activeHref && (
+        <TabNav tabs={tabs} activeHref={activeHref} className="mb-6" />
+      )}
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -140,9 +148,9 @@ export function RoadmapView({
         statuses={statuses}
         items={items}
         selectedAssigneeId={selectedAssigneeId}
-        onItemsChange={setItems}
         onAddItem={handleAddItem}
         onSelectItem={handleSelectItem}
+        onItemsChange={setItems}
       />
 
       {/* Create Modal */}

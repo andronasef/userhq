@@ -30,7 +30,7 @@ export function KanbanColumn({
     <div
       ref={ref}
       className={cn(
-        "w-[300px] shrink-0 rounded-lg bg-muted/40 border border-border p-3 flex flex-col gap-3 min-h-[500px] transition-colors",
+        "flex-1 shrink-0 min-w-[280px] sm:min-w-[320px] max-w-[420px] rounded-lg bg-muted/40 border border-border p-3 flex flex-col gap-3 min-h-[500px] transition-colors",
         isDropTarget && "bg-muted/70 ring-1 ring-primary/30"
       )}
     >

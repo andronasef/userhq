@@ -44,7 +44,7 @@ export default async function DashboardFaqPage({
   const categories = faqRes.ok ? faqRes.data.categories : [];
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 max-w-5xl">
       <PageHeader
         title="Frequently Asked Questions"
         description="Manage self-serve knowledge base articles, categories, and question ordering."

@@ -39,7 +39,7 @@ export default async function WorkspaceSettingsPage({
   }
 
   return (
-    <div>
+    <div className="max-w-3xl">
       <PageHeader
         title="Workspace settings"
         description="Manage your workspace name, branding, and public directory."

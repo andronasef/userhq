@@ -44,7 +44,7 @@ export default async function DashboardPage({
   const products = productsResult.ok ? productsResult.data : [];
 
   return (
-    <div>
+    <div className="w-full max-w-5xl space-y-6">
       <PageHeader
         title="Products"
         description="Each product gets its own public portal."
@@ -87,7 +87,7 @@ export default async function DashboardPage({
                 />
                 <div className="flex flex-col min-w-0">
                   <Link
-                    href={`/dashboard/${ws}/${product.slug}/statuses`}
+                    href={`/dashboard/${ws}/${product.slug}/board`}
                     className="text-sm font-semibold text-foreground hover:underline truncate"
                   >
                     {product.name}

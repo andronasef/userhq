@@ -3,6 +3,7 @@
 import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { cn } from "../../lib/utils";
+import { usePortalAccent } from "../portal/portal-accent-context";
 
 export const DropdownMenu = DropdownMenuPrimitive.Root;
 export const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
@@ -15,9 +16,11 @@ export const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
 >(function DropdownMenuContent(
-  { className, align = "end", sideOffset = 8, collisionPadding = 8, ...props },
+  { className, align = "end", sideOffset = 8, collisionPadding = 8, style, ...props },
   ref,
 ) {
+  const portalAccent = usePortalAccent();
+
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
@@ -25,6 +28,7 @@ export const DropdownMenuContent = React.forwardRef<
         align={align}
         sideOffset={sideOffset}
         collisionPadding={collisionPadding}
+        style={{ ...portalAccent, ...style }}
         className={cn(
           "motion-menu min-w-56 max-w-[calc(100vw-1rem)] p-1 bg-popover text-popover-foreground border border-border rounded-lg shadow-md z-50 overflow-hidden",
           className,

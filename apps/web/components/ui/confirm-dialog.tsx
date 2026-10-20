@@ -7,6 +7,7 @@ import { Button } from "./button";
 import { Alert } from "./alert";
 import { errorCopy } from "@/lib/api-errors";
 import { cn } from "@/lib/utils";
+import { usePortalAccent } from "../portal/portal-accent-context";
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -15,6 +16,7 @@ export interface ConfirmDialogProps {
   description: string;
   dismissLabel: string;
   confirmLabel: string;
+  confirmVariant?: "default" | "destructive";
   pendingLabel: string;
   onConfirm: () => Promise<void>;
   children?: React.ReactNode;
@@ -28,6 +30,7 @@ export function ConfirmDialog({
   description,
   dismissLabel,
   confirmLabel,
+  confirmVariant = "destructive",
   pendingLabel,
   onConfirm,
   children,
@@ -36,6 +39,7 @@ export function ConfirmDialog({
   const [pending, setPending] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>();
   const dismissRef = React.useRef<HTMLButtonElement>(null);
+  const portalAccent = usePortalAccent();
 
   React.useEffect(() => {
     if (open) {
@@ -78,6 +82,7 @@ export function ConfirmDialog({
             e.preventDefault();
             dismissRef.current?.focus();
           }}
+          style={portalAccent}
           className={cn(
             "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50",
             "w-[calc(100%-32px)] max-w-md bg-background border border-border rounded-lg p-6 shadow-lg",
@@ -103,16 +108,16 @@ export function ConfirmDialog({
               ref={dismissRef}
               type="button"
               variant="outline"
-              disabled={pending}
               onClick={() => onOpenChange(false)}
+              disabled={pending}
             >
               {dismissLabel}
             </Button>
             <Button
               type="button"
-              variant="destructive"
-              disabled={pending || confirmDisabled}
+              variant={confirmVariant}
               onClick={handleConfirm}
+              disabled={pending || confirmDisabled}
             >
               {pending ? (
                 <>

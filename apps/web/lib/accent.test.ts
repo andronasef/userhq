@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { PALETTE, DEFAULT_ACCENT } from "@userhq/types";
-import { accentTokens, contrastRatio } from "./accent.js";
+import { accentTokens, accentStyle, contrastRatio } from "./accent.js";
 
 describe("accentTokens & contrastRatio (Plan 02-08 Task 2)", () => {
   it("accentTokens('#2563EB') -> primaryForeground '#FFFFFF', primaryText '#2563EB'", () => {
@@ -30,6 +30,17 @@ describe("accentTokens & contrastRatio (Plan 02-08 Task 2)", () => {
   it("accentTokens('#2563eb') -> primary '#2563EB' (uppercased)", () => {
     const tokens = accentTokens("#2563eb");
     expect(tokens.primary).toBe("#2563EB");
+  });
+
+  it("accentStyle('#2563EB') includes --primary, --primary-foreground, --primary-text, --ring, and --entity-accent", () => {
+    const style = accentStyle("#2563EB");
+    expect(style).toEqual({
+      "--primary": "#2563EB",
+      "--primary-foreground": "#FFFFFF",
+      "--primary-text": "#2563EB",
+      "--ring": "#2563EB",
+      "--entity-accent": "#2563EB",
+    });
   });
 
   it("for every PALETTE hex, contrast(primaryForeground, primary) >= 4.5 and contrast(primaryText, #FFFFFF) >= 4.5", () => {

@@ -3,6 +3,7 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cn } from "../../lib/utils";
+import { usePortalAccent } from "../portal/portal-accent-context";
 
 export const Drawer = DialogPrimitive.Root;
 export const DrawerTrigger = DialogPrimitive.Trigger;
@@ -29,12 +30,15 @@ DrawerOverlay.displayName = DialogPrimitive.Overlay.displayName;
 export const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(function DrawerContent({ className, children, ...props }, ref) {
+>(function DrawerContent({ className, children, style, ...props }, ref) {
+  const portalAccent = usePortalAccent();
+
   return (
     <DrawerPortal>
       <DrawerOverlay />
       <DialogPrimitive.Content
         ref={ref}
+        style={{ ...portalAccent, ...style }}
         className={cn(
           "motion-drawer fixed inset-y-0 left-0 w-72 bg-muted border-r border-border p-4 overflow-y-auto z-50 focus:outline-none",
           className,

@@ -51,3 +51,14 @@ export function accentTokens(hex: string): AccentTokens {
     primaryText,
   };
 }
+
+export function accentStyle(hex: string): Record<string, string> {
+  const tokens = accentTokens(hex);
+  return {
+    "--primary": tokens.primary,
+    "--primary-foreground": tokens.primaryForeground,
+    "--primary-text": tokens.primaryText,
+    "--ring": tokens.primary,
+    "--entity-accent": tokens.primary,
+  };
+}

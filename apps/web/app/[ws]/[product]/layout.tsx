@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPortalProduct, getMe, publicOrigin } from "../../../lib/api-server";
 import { portalHref } from "../../../lib/tenant";
-import { accentTokens } from "../../../lib/accent";
+import { accentStyle } from "../../../lib/accent";
 import { isDevUploadEnabled } from "../../../lib/dev-flags";
 import { PortalFrame } from "../../../components/portal/portal-frame";
 import { AppShell } from "../../../components/app-shell";
@@ -118,13 +118,7 @@ export default async function PortalLayout({
   }
 
   const { workspace, product: p } = result.data;
-  const tokens = accentTokens(p.accentColor);
-  const accentStyle: React.CSSProperties = {
-    "--primary": tokens.primary,
-    "--primary-foreground": tokens.primaryForeground,
-    "--primary-text": tokens.primaryText,
-    "--entity-accent": tokens.primary,
-  } as React.CSSProperties;
+  const productAccentStyle = accentStyle(p.accentColor) as React.CSSProperties;
 
   const right = me.user ? (
     <div className="flex items-center gap-2">
@@ -151,7 +145,7 @@ export default async function PortalLayout({
       tagline={p.tagline}
       websiteUrl={p.websiteUrl}
       companyName={workspace.name}
-      accentStyle={accentStyle}
+      accentStyle={productAccentStyle}
       right={right}
       tabs={<PortalTabs ws={ws} product={product} hasUser={Boolean(me.user)} />}
     >

@@ -3,14 +3,22 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getAccount, getMe } from "@/lib/api-server";
 import { PageHeader } from "@/components/page-header";
+import { safeNext } from "@/lib/safe-next";
 import { EmailPreferences } from "./email-preferences";
 import { DeleteAccount } from "./delete-account";
+import { AccountBackButton } from "./back-button";
 
 export const metadata: Metadata = {
   title: "Account · UserHQ",
 };
 
-export default async function AccountPage(): Promise<React.JSX.Element> {
+export interface AccountPageProps {
+  searchParams?: Promise<{ back?: string }>;
+}
+
+export default async function AccountPage({
+  searchParams,
+}: AccountPageProps): Promise<React.JSX.Element> {
   const me = await getMe();
   if (!me.user) {
     redirect("/login?next=/account");
@@ -22,9 +30,13 @@ export default async function AccountPage(): Promise<React.JSX.Element> {
   }
 
   const account = accountResult.data;
+  const params = searchParams ? await searchParams : undefined;
+  const initialBack = params?.back ? safeNext(params.back, "") : undefined;
 
   return (
     <div className="max-w-3xl">
+      <AccountBackButton initialBack={initialBack} />
+
       <PageHeader
         title="Account"
         description={`Signed in as ${account.name}.`}

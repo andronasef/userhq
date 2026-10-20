@@ -3,7 +3,16 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ImageUp, LogOut, LoaderCircle, LayoutDashboard, ShieldCheck, UserCog, Activity } from "lucide-react";
+import {
+  ImageUp,
+  LogOut,
+  LoaderCircle,
+  LayoutDashboard,
+  ShieldCheck,
+  UserCog,
+  Activity,
+  ArrowLeft,
+} from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar } from "./ui/avatar";
 import {
@@ -35,6 +44,29 @@ export function UserMenu({
   const [isPending, setIsPending] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const pathname = usePathname();
+  const isAccountPage = pathname === "/account";
+  const [accountReturnHref, setAccountReturnHref] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (pathname && pathname !== "/account" && pathname !== "/login") {
+      try {
+        sessionStorage.setItem("userhq_last_return", pathname);
+      } catch {
+        // Ignore storage errors
+      }
+    } else if (isAccountPage) {
+      try {
+        const sp = new URLSearchParams(window.location.search);
+        const back = sp.get("back") || sessionStorage.getItem("userhq_last_return");
+        if (back && back.startsWith("/") && back !== "/account" && back !== "/login") {
+          setAccountReturnHref(back);
+        }
+      } catch {
+        // Ignore storage errors
+      }
+    }
+  }, [pathname, isAccountPage]);
+
   const portalProductMatch = pathname ? pathname.match(/^\/([^/]+)\/([^/]+)(?:\/.*)?$/) : null;
   const isPortalProduct =
     portalProductMatch &&
@@ -42,6 +74,27 @@ export function UserMenu({
   const activityHref = isPortalProduct
     ? `/${portalProductMatch[1]}/${portalProductMatch[2]}/activity`
     : null;
+
+  const returnPortalMatch =
+    isAccountPage && accountReturnHref
+      ? accountReturnHref.match(/^\/([^/]+)\/([^/]+)(?:\/.*)?$/)
+      : null;
+  const isReturnPortal =
+    returnPortalMatch &&
+    !["dashboard", "platform", "account", "login", "dev", "invite", "api"].includes(
+      returnPortalMatch[1]
+    );
+
+  const effectiveActivityHref =
+    activityHref ||
+    (isReturnPortal
+      ? `/${returnPortalMatch[1]}/${returnPortalMatch[2]}/activity`
+      : null);
+
+  const accountHref =
+    pathname && !isAccountPage && pathname !== "/login"
+      ? `/account?back=${encodeURIComponent(pathname)}`
+      : "/account";
 
   const handleSignOut = async () => {
     setIsPending(true);
@@ -114,16 +167,31 @@ export function UserMenu({
           </>
         )}
 
-        {activityHref && (
+        {isAccountPage && accountReturnHref && (
           <DropdownMenuItem asChild>
-            <Link href={activityHref} className="flex items-center gap-2 w-full">
+            <Link href={accountReturnHref} className="flex items-center gap-2 w-full">
+              <ArrowLeft className="size-4 shrink-0" aria-hidden="true" />
+              <span>
+                {accountReturnHref.startsWith("/dashboard")
+                  ? "Back to dashboard"
+                  : isReturnPortal
+                  ? "Back to portal"
+                  : "Back"}
+              </span>
+            </Link>
+          </DropdownMenuItem>
+        )}
+
+        {effectiveActivityHref && (
+          <DropdownMenuItem asChild>
+            <Link href={effectiveActivityHref} className="flex items-center gap-2 w-full">
               <Activity className="size-4 shrink-0" aria-hidden="true" />
               <span>My activity</span>
             </Link>
           </DropdownMenuItem>
         )}
         <DropdownMenuItem asChild>
-          <Link href="/account" className="flex items-center gap-2 w-full">
+          <Link href={accountHref} className="flex items-center gap-2 w-full">
             <UserCog className="size-4 shrink-0" aria-hidden="true" />
             <span>Account settings</span>
           </Link>

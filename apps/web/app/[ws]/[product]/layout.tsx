@@ -15,6 +15,7 @@ import { SessionKeepAlive } from "../../../components/session-keepalive";
 import { PortalTabs } from "../../../components/portal/portal-tabs";
 import { NotificationBell } from "../../../components/notifications/notification-bell";
 import { AppToaster } from "../../../components/ui/toaster";
+import { ProjectContextTracker } from "../../../components/portal/project-context-tracker";
 
 interface PortalLayoutProps {
   children: React.ReactNode;
@@ -28,49 +29,73 @@ export async function generateMetadata({
   const result = await getPortalProduct(ws, product);
   if (!result.ok) {
     if (result.status === 403 && result.code === "workspace_suspended") {
-      return { title: "Unavailable · UserHQ" };
+      return {
+        title: "Workspace unavailable · UserHQ",
+      };
     }
-    return {};
+    return {
+      title: "Not Found",
+    };
   }
 
-  const { workspace, product: p } = result.data;
-  const title =
-    p.name.toLowerCase() === workspace.name.toLowerCase()
-      ? p.name
-      : `${p.name} · ${workspace.name}`;
-
+  const { product: p, workspace } = result.data;
+  const origin = publicOrigin();
+  const title = `${p.name} · ${workspace.name}`;
   const description =
-    p.tagline ?? `Share feedback and follow updates for ${p.name}.`;
+    p.tagline ??
+    `Share feedback, vote on ideas, and follow what's coming next for ${p.name}.`;
 
-  const origin = await publicOrigin();
-  const absoluteLogoUrl = p.logoUrl ? `${origin}${p.logoUrl}` : null;
-
-  return {
+  const meta: Metadata = {
     title,
     description,
     openGraph: {
-      title: p.name,
+      title,
       description,
+      type: "website",
       siteName: workspace.name,
-      images: absoluteLogoUrl ? [absoluteLogoUrl] : undefined,
+      images: p.logoUrl
+        ? [
+            {
+              url: p.logoUrl.startsWith("http")
+                ? p.logoUrl
+                : `${origin}${p.logoUrl}`,
+            },
+          ]
+        : undefined,
     },
-    icons: absoluteLogoUrl
-      ? {
-          icon: [{ url: absoluteLogoUrl, type: "image/webp" }],
-        }
-      : undefined,
+    twitter: {
+      card: "summary",
+      title,
+      description,
+      images: p.logoUrl
+        ? [
+            p.logoUrl.startsWith("http")
+              ? p.logoUrl
+              : `${origin}${p.logoUrl}`,
+          ]
+        : undefined,
+    },
   };
+
+  if (p.logoUrl) {
+    meta.icons = {
+      icon: p.logoUrl,
+    };
+  }
+
+  return meta;
 }
 
 export default async function PortalLayout({
   children,
   params,
-}: PortalLayoutProps) {
+}: PortalLayoutProps): Promise<React.JSX.Element> {
   const { ws, product } = await params;
   const [result, me] = await Promise.all([
     getPortalProduct(ws, product),
     getMe(),
   ]);
+
   const devUploadEnabled = isDevUploadEnabled();
 
   if (!result.ok) {
@@ -130,6 +155,11 @@ export default async function PortalLayout({
       right={right}
       tabs={<PortalTabs ws={ws} product={product} hasUser={Boolean(me.user)} />}
     >
+      <ProjectContextTracker
+        name={p.name}
+        wsName={workspace.name}
+        href={portalHref(ws, product)}
+      />
       <AppToaster />
       {children}
     </PortalFrame>

@@ -2,6 +2,7 @@ import * as React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { AccountBackButton } from "../app/(app)/account/back-button";
+import { HeaderBrand } from "../components/header-brand";
 import { safeNext } from "../lib/safe-next";
 
 // Mock next/navigation
@@ -48,5 +49,11 @@ describe("Account Navigation & Back Button", () => {
   it("renders generic Back button when initialBack is omitted", () => {
     const html = renderToStaticMarkup(<AccountBackButton />);
     expect(html).toContain("Back");
+  });
+
+  it("renders UserHQ brand on SSR in HeaderBrand", () => {
+    const html = renderToStaticMarkup(<HeaderBrand />);
+    expect(html).toContain("UserHQ");
+    expect(html).toContain('href="/"');
   });
 });

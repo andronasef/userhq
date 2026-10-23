@@ -339,6 +339,12 @@ export default async function HomePage(): Promise<React.JSX.Element> {
               <Mail className="size-3 text-[var(--primary)]" aria-hidden="true" />
               hello@increasinglab.com
             </a>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">
+              Terms
+            </Link>
             <Link href="/login" className="hover:text-foreground transition-colors">
               Sign in
             </Link>

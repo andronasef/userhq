@@ -188,6 +188,19 @@ describe("RichTextDocSchema", () => {
     expect(resRelative.success).toBe(false);
   });
 
+  it("accepts editor output: own /uploads image with null alt/title", () => {
+    const res = RichTextDocSchema.safeParse({
+      type: "doc",
+      content: [
+        {
+          type: "image",
+          attrs: { src: "/uploads/p1/abc-123.webp", alt: null, title: null, width: null, height: null },
+        },
+      ],
+    });
+    expect(res.success).toBe(true);
+  });
+
   it("rejects disallowed node types", () => {
     const scriptDoc = {
       type: "doc",

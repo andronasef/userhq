@@ -1,7 +1,8 @@
 ---
 phase: "06"
 slug: product-feature-controls
-status: draft
+status: approved
+reviewed_at: "2026-11-05"
 shadcn_initialized: false
 preset: none
 created: "2026-11-05"

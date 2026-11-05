@@ -16,6 +16,7 @@ export interface PublicRoadmapBoardProps {
   product: string;
   statuses: PostStatus[];
   items: PublicRoadmapItem[];
+  boardEnabled: boolean;
 }
 
 export function PublicRoadmapBoard({
@@ -23,6 +24,7 @@ export function PublicRoadmapBoard({
   product,
   statuses,
   items,
+  boardEnabled,
 }: PublicRoadmapBoardProps): React.JSX.Element {
   const [activeItem, setActiveItem] = React.useState<PublicRoadmapItem | null>(null);
 
@@ -57,14 +59,16 @@ export function PublicRoadmapBoard({
         <Kanban className="size-10 text-muted-foreground/60 mb-3" aria-hidden="true" />
         <h3 className="text-base font-semibold text-foreground">No public roadmap yet</h3>
         <p className="text-sm text-muted-foreground max-w-sm mt-1 mb-5">
-          Check back later or share feedback to help shape what we build next.
+          {boardEnabled
+            ? "Check back later or share feedback to help shape what we build next."
+            : "Check back later to see what we're working on."}
         </p>
-        <Button asChild>
+        {boardEnabled && <Button asChild>
           <Link href={portalHref(ws, product)}>
             <MessageSquarePlus className="size-4 mr-2" aria-hidden="true" />
             <span>View feedback board</span>
           </Link>
-        </Button>
+        </Button>}
       </div>
     );
   }

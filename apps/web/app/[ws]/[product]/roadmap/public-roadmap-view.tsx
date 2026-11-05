@@ -10,6 +10,7 @@ export interface PublicRoadmapViewProps {
   productName: string;
   statuses: PostStatus[];
   items: PublicRoadmapItem[];
+  boardEnabled: boolean;
 }
 
 export function PublicRoadmapView({
@@ -17,6 +18,7 @@ export function PublicRoadmapView({
   product,
   statuses,
   items,
+  boardEnabled,
 }: PublicRoadmapViewProps): React.JSX.Element {
   return (
     <div className="flex flex-col gap-6">
@@ -34,6 +36,7 @@ export function PublicRoadmapView({
         product={product}
         statuses={statuses}
         items={items}
+        boardEnabled={boardEnabled}
       />
     </div>
   );

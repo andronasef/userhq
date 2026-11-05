@@ -7,6 +7,7 @@ import { cn } from "../../lib/utils";
 export interface FaqNotFoundPromptProps {
   ws: string;
   product: string;
+  boardEnabled: boolean;
   query?: string;
   className?: string;
 }
@@ -14,10 +15,20 @@ export interface FaqNotFoundPromptProps {
 export function FaqNotFoundPrompt({
   ws,
   product,
+  boardEnabled,
   query,
   className,
-}: FaqNotFoundPromptProps): React.JSX.Element {
+}: FaqNotFoundPromptProps): React.JSX.Element | null {
   const trimmed = query?.trim() ?? "";
+  if (!boardEnabled) {
+    if (!trimmed) return null;
+    return (
+      <div className="rounded-lg border border-border bg-muted/30 p-6 text-center">
+        <h3 className="text-base font-semibold text-foreground">No answers match your search</h3>
+        <p className="mt-2 text-sm text-muted-foreground">Try different words or clear the search.</p>
+      </div>
+    );
+  }
   const href = trimmed
     ? `/${ws}/${product}?new=true&title=${encodeURIComponent(trimmed)}`
     : `/${ws}/${product}?new=true`;

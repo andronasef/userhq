@@ -40,6 +40,7 @@ export default async function PublicRoadmapPage({
       productName={p.name}
       statuses={publicStatuses}
       items={items}
+      boardEnabled={p.features.board}
     />
   );
 }

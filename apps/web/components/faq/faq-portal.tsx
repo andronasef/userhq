@@ -15,6 +15,7 @@ export interface FaqPortalProps {
   ws: string;
   product: string;
   categories: PublicFaqCategory[];
+  boardEnabled: boolean;
 }
 
 export function extractTextFromRichText(doc: RichTextDoc | null | undefined): string {
@@ -38,6 +39,7 @@ export function FaqPortal({
   ws,
   product,
   categories,
+  boardEnabled,
 }: FaqPortalProps): React.JSX.Element {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [openQuestions, setOpenQuestions] = React.useState<Set<string>>(new Set());
@@ -165,11 +167,11 @@ export function FaqPortal({
         icon={<HelpCircle className="size-6 text-muted-foreground" aria-hidden="true" />}
         title="No frequently asked questions yet"
         body="Self-serve help articles and common questions will appear here soon."
-        action={
+        action={boardEnabled ? (
           <Button asChild variant="default">
             <Link href={`/${ws}/${product}`}>Explore feedback</Link>
           </Button>
-        }
+        ) : undefined}
       />
     );
   }
@@ -183,7 +185,7 @@ export function FaqPortal({
       />
 
       {isSearching && matchCount === 0 ? (
-        <FaqNotFoundPrompt ws={ws} product={product} query={searchQuery} />
+        <FaqNotFoundPrompt boardEnabled={boardEnabled} ws={ws} product={product} query={searchQuery} />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <FaqSidebarNav
@@ -205,6 +207,7 @@ export function FaqPortal({
             ))}
 
             <FaqNotFoundPrompt
+              boardEnabled={boardEnabled}
               ws={ws}
               product={product}
               query={searchQuery}

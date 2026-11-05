@@ -39,7 +39,7 @@ export default async function PublicFaqPage({
         title="Frequently Asked Questions"
         description={`Find quick answers to common questions about ${p.name}.`}
       />
-      <FaqPortal ws={ws} product={product} categories={categories} />
+      <FaqPortal boardEnabled={p.features.board} ws={ws} product={product} categories={categories} />
     </div>
   );
 }

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPortalProduct, getMe, publicOrigin } from "../../../lib/api-server";
-import { portalDescription } from "../../../lib/portal-features";
+import { portalDescription, portalTabs } from "../../../lib/portal-features";
 import { portalHref } from "../../../lib/tenant";
 import { accentStyle } from "../../../lib/accent";
 import { isDevUploadEnabled } from "../../../lib/dev-flags";
@@ -148,7 +148,9 @@ export default async function PortalLayout({
       companyName={workspace.name}
       accentStyle={productAccentStyle}
       right={right}
-      tabs={<PortalTabs ws={ws} product={product} hasUser={Boolean(me.user)} features={p.features} />}
+      tabs={portalTabs(ws, product, p.features, Boolean(me.user)).length >= 2
+        ? <PortalTabs ws={ws} product={product} hasUser={Boolean(me.user)} features={p.features} />
+        : undefined}
     >
       <ProjectContextTracker
         name={p.name}

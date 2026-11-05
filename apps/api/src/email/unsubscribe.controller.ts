@@ -80,6 +80,7 @@ export class UnsubscribeController {
         title: posts.title,
         deletedAt: posts.deletedAt,
         mergedIntoId: posts.mergedIntoId,
+        boardEnabled: products.boardEnabled,
         productSlug: products.slug,
         workspaceSlug: workspaces.slug,
       })
@@ -91,6 +92,10 @@ export class UnsubscribeController {
 
     if (!row || row.deletedAt !== null || row.mergedIntoId !== null) {
       return { live: false, title: null, url: null };
+    }
+
+    if (!row.boardEnabled) {
+      return { live: true, title: null, url: null };
     }
 
     const url = `/${row.workspaceSlug}/${row.productSlug}/p/${row.number}-${postSlug(row.title)}`;

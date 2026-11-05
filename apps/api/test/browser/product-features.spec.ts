@@ -101,6 +101,11 @@ test.describe("Product feature settings", () => {
     );
     expect(reset.status()).toBe(200);
     await page.goto(`/dashboard/${ws}/app/settings`);
+    for (const name of ["Feedback board", "Roadmap", "Changelog", "FAQ"]) {
+      const checkbox = page.locator("#portal-features").getByRole("checkbox", { name, exact: true });
+      await expect(checkbox).toBeEnabled();
+      await expect(checkbox).toBeChecked();
+    }
   });
   test("admin saves feature preferences and they survive reloading", async ({
     page,
@@ -176,6 +181,7 @@ test.describe("Product feature settings", () => {
       name: "Feedback board",
       exact: true,
     });
+    await expect(board).toBeEnabled();
     await board.focus();
     await page.keyboard.press("Space");
     await expect(board).not.toBeChecked();
@@ -267,7 +273,7 @@ test.describe("Product feature settings", () => {
       .getByRole("button", { name: "Hide Roadmap", exact: true })
       .click();
     await intercepted;
-    await expect(roadmap).toBeDisabled();
+    await expect(section.locator("#feature-roadmap")).toBeDisabled();
     await expect(
       dialog.getByRole("button", { name: "Keep visible" }),
     ).toBeDisabled();
@@ -277,11 +283,11 @@ test.describe("Product feature settings", () => {
     await expect(dialog.getByRole("alert")).toContainText(
       "You no longer have access to this. Refresh the page.",
     );
-    await expect(section.getByRole("alert")).toHaveText(
+    await expect(section.locator('[role="alert"]')).toHaveText(
       "You no longer have access to this. Refresh the page.",
     );
-    await expect(roadmap).not.toBeChecked();
-    await expect(roadmap).toBeEnabled();
+    await expect(section.locator("#feature-roadmap")).not.toBeChecked();
+    await expect(section.locator("#feature-roadmap")).toBeEnabled();
     await page.unroute(`**/api/v1/workspaces/${ws}/products/app`);
     await dialog
       .getByRole("button", { name: "Hide Roadmap", exact: true })
@@ -290,6 +296,7 @@ test.describe("Product feature settings", () => {
     await expect(
       section.getByText("Hidden from customers", { exact: true }),
     ).toHaveCount(1);
+    await expect(section.getByRole("alert")).toHaveCount(0);
   });
 
   test("stale settings save only dirty keys and enabling does not ask for confirmation", async ({

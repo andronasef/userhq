@@ -3,6 +3,8 @@ import {
   Get,
   Post,
   Put,
+  Patch,
+  Delete,
   Param,
   Query,
   Body,
@@ -14,6 +16,10 @@ import {
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
 import { z } from "zod";
 import {
+  UpdatePostInputSchema,
+  PostCreatedSchema,
+  type UpdatePostInput,
+  type PostCreated,
   StatusChangeInputSchema,
   StatusChangeResultSchema,
   AdminBoardQuerySchema,
@@ -39,13 +45,41 @@ import { CurrentUser } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { ModerationService } from "./moderation.service.js";
 
+import { PostsService } from "./posts.service.js";
+
 const postNumberParamSchema = z.coerce.number().int().positive();
 
 @Controller("workspaces/:ws/products/:product/posts")
 @UseGuards(TenantGuard)
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class AdminPostsController {
-  constructor(private readonly moderationService: ModerationService) {}
+  constructor(private readonly moderationService: ModerationService, private readonly postsService: PostsService) {}
+
+
+  @Patch(":number")
+  @SerializeOptions({ schema: PostCreatedSchema })
+  async updatePost(
+    @CurrentTenant() tenant: Tenant,
+    @CurrentUser() user: any,
+    @Param("number") number: string,
+    @Body({ schema: UpdatePostInputSchema }) input: UpdatePostInput
+  ): Promise<PostCreated> {
+    const parsed = postNumberParamSchema.safeParse(number);
+    if (!parsed.success) throw new ApiException("post_not_found", 404, "Post not found.");
+    return this.postsService.updatePost({ workspaceId: tenant.workspaceId, productId: tenant.productId! }, user, parsed.data, input);
+  }
+
+  @Delete(":number")
+  @HttpCode(204)
+  async deletePost(
+    @CurrentTenant() tenant: Tenant,
+    @CurrentUser() user: any,
+    @Param("number") number: string
+  ): Promise<void> {
+    const parsed = postNumberParamSchema.safeParse(number);
+    if (!parsed.success) throw new ApiException("post_not_found", 404, "Post not found.");
+    return this.postsService.deletePost({ workspaceId: tenant.workspaceId, productId: tenant.productId! }, user, parsed.data);
+  }
 
   @Get()
   @SerializeOptions({ schema: AdminBoardListResponseSchema })

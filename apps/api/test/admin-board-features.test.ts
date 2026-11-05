@@ -27,7 +27,9 @@ describe("Private Board management with Board disabled", () => {
   it("lets an admin edit and soft-delete a customer's request privately", async () => {
     const edited = await mutate("patch", `${base}/posts/1`, { title: "Updated privately", description: "Details", categoryId: null, version: 1 });
     expect(edited.status).toBe(200);
-    expect(edited.body.title).toBe("Updated privately");
+    expect(edited.body.slug).toBe("updated-privately");
+    const loaded = await request(app.http).get(`${base}/posts/1`).set("Cookie", admin.cookie);
+    expect(loaded.body.post.title).toBe("Updated privately");
     expect((await mutate("delete", `${base}/posts/2`)).status).toBe(204);
     const deleted = await request(app.http).get(`${base}/posts?view=deleted`).set("Cookie", admin.cookie);
     expect(deleted.status).toBe(200);
@@ -38,6 +40,6 @@ describe("Private Board management with Board disabled", () => {
     expect((await mutate("delete", `${base}/posts/1`, {}, customer.cookie)).status).toBe(404);
     expect((await request(app.http).delete(`${base}/posts/1`).set("Origin", app.env.PUBLIC_URL)).status).toBe(401);
     expect((await mutate("delete", "/api/v1/workspaces/other-private-board/products/app/posts/1")).status).toBe(404);
-    expect((await mutate("patch", `${base}/posts/no-number`, {})).status).toBe(404);
+    expect((await mutate("patch", `${base}/posts/no-number`, { title: "Valid", version: 1 })).status).toBe(404);
   });
 });

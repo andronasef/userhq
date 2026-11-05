@@ -151,16 +151,16 @@ export class PortalController {
     const logoUrl = logoKey ? `/uploads/${logoKey}` : null;
     const websiteUrl = row.productWebsiteUrl ?? row.workspaceWebsiteUrl ?? null;
 
-    const catRows = await this.db
+    const catRows = row.boardEnabled ? await this.db
       .select({
         id: categories.id,
         name: categories.name,
       })
       .from(categories)
       .where(eq(categories.productId, productId))
-      .orderBy(asc(categories.createdAt), asc(categories.id));
+      .orderBy(asc(categories.createdAt), asc(categories.id)) : [];
 
-    const statusRows = await this.db
+    const statusRows = row.boardEnabled || row.roadmapEnabled ? await this.db
       .select({
         id: statuses.id,
         name: statuses.name,
@@ -169,8 +169,11 @@ export class PortalController {
         isPublicRoadmap: statuses.isPublicRoadmap,
       })
       .from(statuses)
-      .where(eq(statuses.productId, productId))
-      .orderBy(asc(statuses.position));
+      .where(and(
+        eq(statuses.productId, productId),
+        row.boardEnabled ? undefined : eq(statuses.isPublicRoadmap, true),
+      ))
+      .orderBy(asc(statuses.position)) : [];
 
     return PublicPortalProductSchema.parse({
       workspace: {
@@ -193,7 +196,10 @@ export class PortalController {
         websiteUrl,
       },
       categories: catRows,
-      statuses: statusRows,
+      statuses: statusRows.map((status) => ({
+        ...status,
+        isPublicRoadmap: row.roadmapEnabled && status.isPublicRoadmap,
+      })),
     });
   }
 }

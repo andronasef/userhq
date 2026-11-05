@@ -61,7 +61,7 @@ test.describe("Product feature settings", () => {
       await stack.db.delete(schema.user).where(eq(schema.user.id, user.userId));
     await stack?.close();
   });
-  test("admin saves Board preference and it survives reloading", async ({
+  test("admin saves feature preferences and they survive reloading", async ({
     page,
     baseURL,
   }) => {
@@ -94,26 +94,27 @@ test.describe("Product feature settings", () => {
       });
     await page.context().addCookies(cookies);
     await page.goto(`/dashboard/${ws}/app/settings`);
+    await expect(page.getByRole("heading", { name: "Portal features", exact: true })).toBeVisible();
     await expect(
-      page.getByRole("checkbox", { name: "Board", exact: true }),
+      page.getByRole("checkbox", { name: "Feedback board", exact: true }),
     ).toBeChecked();
-    await page.getByRole("checkbox", { name: "Board", exact: true }).uncheck();
+    await page.getByRole("checkbox", { name: "Feedback board", exact: true }).uncheck();
     await page
       .locator("form")
       .filter({
-        has: page.getByRole("checkbox", { name: "Board", exact: true }),
+        has: page.getByRole("checkbox", { name: "Feedback board", exact: true }),
       })
-      .getByRole("button", { name: "Save changes", exact: true })
+      .getByRole("button", { name: "Save features", exact: true })
       .click();
     await page
-      .getByRole("button", { name: "Hide feature", exact: true })
+      .getByRole("button", { name: "Hide Feedback board", exact: true })
       .click();
     await expect(
-      page.getByText("Changes saved", { exact: true }),
+      page.getByText("Features updated", { exact: true }),
     ).toBeVisible();
     await page.reload();
     await expect(
-      page.getByRole("checkbox", { name: "Board", exact: true }),
+      page.getByRole("checkbox", { name: "Feedback board", exact: true }),
     ).not.toBeChecked();
     const saved = await page.request.get(
       `/api/v1/workspaces/${ws}/products/app`,
@@ -125,16 +126,16 @@ test.describe("Product feature settings", () => {
       changelog: true,
       faq: true,
     });
-    await page.getByRole("checkbox", { name: "Board", exact: true }).check();
+    await page.getByRole("checkbox", { name: "Feedback board", exact: true }).check();
     await page
       .locator("form")
       .filter({
-        has: page.getByRole("checkbox", { name: "Board", exact: true }),
+        has: page.getByRole("checkbox", { name: "Feedback board", exact: true }),
       })
-      .getByRole("button", { name: "Save changes", exact: true })
+      .getByRole("button", { name: "Save features", exact: true })
       .click();
     await expect(
-      page.getByText("Changes saved", { exact: true }),
+      page.getByText("Features updated", { exact: true }),
     ).toBeVisible();
   });
 });

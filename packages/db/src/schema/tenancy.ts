@@ -22,19 +22,23 @@ export const workspaces = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     slug: text("slug").notNull().unique(),
     name: text("name").notNull(),
-    logoUploadId: uuid("logo_upload_id").references(() => uploads.id, { onDelete: "set null" }),
+    logoUploadId: uuid("logo_upload_id").references(() => uploads.id, {
+      onDelete: "set null",
+    }),
     websiteUrl: text("website_url"),
     directoryEnabled: boolean("directory_enabled").notNull().default(true),
     suspendedAt: timestamp("suspended_at", { withTimezone: true }),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     check(
       "workspaces_slug_format",
-      sql`${table.slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$' AND char_length(${table.slug}) BETWEEN 2 AND 32`
+      sql`${table.slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$' AND char_length(${table.slug}) BETWEEN 2 AND 32`,
     ),
-  ]
+  ],
 );
 
 export const products = pgTable(
@@ -46,27 +50,35 @@ export const products = pgTable(
       .references(() => workspaces.id, { onDelete: "restrict" }),
     slug: text("slug").notNull(),
     name: text("name").notNull(),
-    logoUploadId: uuid("logo_upload_id").references(() => uploads.id, { onDelete: "set null" }),
+    logoUploadId: uuid("logo_upload_id").references(() => uploads.id, {
+      onDelete: "set null",
+    }),
     accentColor: text("accent_color").notNull().default("#2563EB"),
     accentTextColor: text("accent_text_color"),
     tagline: text("tagline"),
     websiteUrl: text("website_url"),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
     nextPostNumber: integer("next_post_number").notNull().default(1),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    boardEnabled: boolean("board_enabled").notNull().default(true),
+    roadmapEnabled: boolean("roadmap_enabled").notNull().default(true),
+    changelogEnabled: boolean("changelog_enabled").notNull().default(true),
+    faqEnabled: boolean("faq_enabled").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     unique("products_workspace_slug_unique").on(table.workspaceId, table.slug),
     check(
       "products_slug_format",
-      sql`${table.slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$' AND char_length(${table.slug}) BETWEEN 2 AND 32`
+      sql`${table.slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$' AND char_length(${table.slug}) BETWEEN 2 AND 32`,
     ),
     check("products_accent_hex", sql`${table.accentColor} ~ '^#[0-9A-F]{6}$'`),
     check(
       "products_accent_text_hex",
-      sql`${table.accentTextColor} IS NULL OR ${table.accentTextColor} ~ '^#[0-9A-F]{6}$'`
+      sql`${table.accentTextColor} IS NULL OR ${table.accentTextColor} ~ '^#[0-9A-F]{6}$'`,
     ),
-  ]
+  ],
 );
 
 export const statusType = pgEnum("status_type", [
@@ -98,14 +110,14 @@ export const statuses = pgTable(
     unique("statuses_id_product_unique").on(table.id, table.productId),
     uniqueIndex("statuses_product_name_ci").on(
       table.productId,
-      sql`lower(${table.name})`
+      sql`lower(${table.name})`,
     ),
     uniqueIndex("statuses_one_default")
       .on(table.productId)
       .where(sql`${table.isDefault}`),
     index("statuses_product_position_idx").on(table.productId, table.position),
     check("statuses_color_hex", sql`${table.color} ~ '^#[0-9A-F]{6}$'`),
-  ]
+  ],
 );
 
 export const memberRole = pgEnum("member_role", ["owner", "admin"]);
@@ -120,7 +132,9 @@ export const workspaceMembers = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     role: memberRole("role").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.workspaceId, table.userId] }),
@@ -128,7 +142,7 @@ export const workspaceMembers = pgTable(
       .on(table.workspaceId)
       .where(sql`${table.role} = 'owner'`),
     index("workspace_members_user_idx").on(table.userId),
-  ]
+  ],
 );
 
 export const workspacesRelations = relations(workspaces, ({ one, many }) => ({
@@ -159,16 +173,19 @@ export const statusesRelations = relations(statuses, ({ one }) => ({
   }),
 }));
 
-export const workspaceMembersRelations = relations(workspaceMembers, ({ one }) => ({
-  workspace: one(workspaces, {
-    fields: [workspaceMembers.workspaceId],
-    references: [workspaces.id],
+export const workspaceMembersRelations = relations(
+  workspaceMembers,
+  ({ one }) => ({
+    workspace: one(workspaces, {
+      fields: [workspaceMembers.workspaceId],
+      references: [workspaces.id],
+    }),
+    user: one(user, {
+      fields: [workspaceMembers.userId],
+      references: [user.id],
+    }),
   }),
-  user: one(user, {
-    fields: [workspaceMembers.userId],
-    references: [user.id],
-  }),
-}));
+);
 
 export const inviteKind = pgEnum("invite_kind", ["platform", "workspace"]);
 
@@ -191,16 +208,18 @@ export const invites = pgTable(
       onDelete: "set null",
     }),
     revokedAt: timestamp("revoked_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     check(
       "invites_workspace_kind",
-      sql`${table.kind} = 'platform' OR ${table.workspaceId} IS NOT NULL`
+      sql`${table.kind} = 'platform' OR ${table.workspaceId} IS NOT NULL`,
     ),
     check("invites_email_lower", sql`${table.email} = lower(${table.email})`),
     index("invites_lookup_idx").on(table.kind, table.workspaceId, table.email),
-  ]
+  ],
 );
 
 export const invitesRelations = relations(invites, ({ one }) => ({

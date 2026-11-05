@@ -10,7 +10,15 @@ import {
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
 import { alias } from "drizzle-orm/pg-core";
 import { eq, and, isNull, asc } from "drizzle-orm";
-import { DB, type Db, workspaces, products, uploads, categories, statuses } from "@userhq/db";
+import {
+  DB,
+  type Db,
+  workspaces,
+  products,
+  uploads,
+  categories,
+  statuses,
+} from "@userhq/db";
 import {
   PublicPortalProductSchema,
   PublicPortalDirectorySchema,
@@ -70,7 +78,9 @@ export class PortalController {
       .innerJoin(workspaces, eq(products.workspaceId, workspaces.id))
       .leftJoin(productLogo, eq(products.logoUploadId, productLogo.id))
       .leftJoin(workspaceLogo, eq(workspaces.logoUploadId, workspaceLogo.id))
-      .where(and(eq(products.workspaceId, workspaceId), isNull(products.deletedAt)))
+      .where(
+        and(eq(products.workspaceId, workspaceId), isNull(products.deletedAt)),
+      )
       .orderBy(asc(products.name), asc(products.slug));
 
     const workspaceLogoUrl = wsRow.logoKey ? `/uploads/${wsRow.logoKey}` : null;
@@ -112,6 +122,10 @@ export class PortalController {
         workspaceName: workspaces.name,
         workspaceWebsiteUrl: workspaces.websiteUrl,
         workspaceLogoKey: workspaceLogo.storageKey,
+        boardEnabled: products.boardEnabled,
+        roadmapEnabled: products.roadmapEnabled,
+        changelogEnabled: products.changelogEnabled,
+        faqEnabled: products.faqEnabled,
         productSlug: products.slug,
         productName: products.name,
         productTagline: products.tagline,
@@ -162,6 +176,12 @@ export class PortalController {
         name: row.workspaceName,
       },
       product: {
+        features: {
+          board: row.boardEnabled,
+          roadmap: row.roadmapEnabled,
+          changelog: row.changelogEnabled,
+          faq: row.faqEnabled,
+        },
         slug: row.productSlug,
         name: row.productName,
         tagline: row.productTagline ?? null,

@@ -16,8 +16,12 @@ import {
 import { Field } from "../../../../../components/ui/field";
 import { Input } from "../../../../../components/ui/input";
 import { SlugInput } from "../../../../../components/slug-input";
-import { LogoField, type LogoValue } from "../../../../../components/logo-field";
+import {
+  LogoField,
+  type LogoValue,
+} from "../../../../../components/logo-field";
 import { Button } from "../../../../../components/ui/button";
+import { ConfirmDialog } from "../../../../../components/ui/confirm-dialog";
 import { Alert } from "../../../../../components/ui/alert";
 import { apiFetch, ApiClientError } from "../../../../../lib/api-client";
 import { errorCopy, FIELD_FOR_CODE } from "../../../../../lib/api-errors";
@@ -37,16 +41,19 @@ function ProductGeneralFormInner({
   workspaceName,
 }: ProductGeneralFormProps): React.JSX.Element {
   const router = useRouter();
+  const [pendingSave, setPendingSave] =
+    React.useState<UpdateProductInput | null>(null);
   const [copied, setCopied] = React.useState(false);
   const [alertError, setAlertError] = React.useState<string | null>(null);
   const [logoValue, setLogoValue] = React.useState<LogoValue | null>(
     product.logoUploadId && product.logoUrl
       ? { id: product.logoUploadId, url: product.logoUrl }
-      : null
+      : null,
   );
   const [logoUploading, setLogoUploading] = React.useState(false);
 
   const defaultValues: UpdateProductInput = {
+    features: { board: product.features.board },
     name: product.name,
     slug: product.slug,
     logoUploadId: product.logoUploadId ?? null,
@@ -61,7 +68,7 @@ function ProductGeneralFormInner({
     watch,
     setError,
     reset,
-    formState: { errors, isDirty },
+    formState: { errors, isDirty, dirtyFields },
   } = useForm<UpdateProductInput>({
     resolver: zodResolver(UpdateProductInputSchema),
     mode: "onTouched",
@@ -70,7 +77,8 @@ function ProductGeneralFormInner({
 
   const nameValue = watch("name");
   const taglineValue = watch("tagline") ?? "";
-  const taglineLength = (typeof taglineValue === "string" ? taglineValue : "").length;
+  const taglineLength = (typeof taglineValue === "string" ? taglineValue : "")
+    .length;
 
   const mutation = useMutation({
     mutationFn: async (data: UpdateProductInput) => {
@@ -87,6 +95,7 @@ function ProductGeneralFormInner({
         return;
       }
       reset({
+        features: { board: updated.features.board },
         name: updated.name,
         slug: updated.slug,
         logoUploadId: updated.logoUploadId ?? null,
@@ -98,7 +107,10 @@ function ProductGeneralFormInner({
     onError: (err: unknown) => {
       if (err instanceof ApiClientError && err.code) {
         const field = FIELD_FOR_CODE[err.code];
-        if (field && ["name", "slug", "tagline", "websiteUrl"].includes(field)) {
+        if (
+          field &&
+          ["name", "slug", "tagline", "websiteUrl"].includes(field)
+        ) {
           setError(field as any, { message: errorCopy(err) });
           return;
         }
@@ -110,13 +122,22 @@ function ProductGeneralFormInner({
 
   const onSubmit = (data: UpdateProductInput) => {
     setAlertError(null);
-    mutation.mutate(data);
+    const input = {
+      ...data,
+      features: dirtyFields.features?.board
+        ? { board: data.features!.board }
+        : undefined,
+    };
+    if (product.features.board && input.features?.board === false)
+      setPendingSave(input);
+    else mutation.mutate(input);
   };
 
   const handleCopyUrl = async () => {
-    const origin = typeof window !== "undefined" && window.location.origin
-      ? window.location.origin
-      : `https://${host}`;
+    const origin =
+      typeof window !== "undefined" && window.location.origin
+        ? window.location.origin
+        : `https://${host}`;
     const portalUrl = `${origin}/${ws}/${product.slug}`;
     try {
       await navigator.clipboard.writeText(portalUrl);
@@ -135,15 +156,8 @@ function ProductGeneralFormInner({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <fieldset disabled={mutation.isPending} className="space-y-6">
-        <Field
-          id="product-name"
-          label="Product name"
-          error={nameError}
-        >
-          <Input
-            placeholder="e.g. Web App"
-            {...register("name")}
-          />
+        <Field id="product-name" label="Product name" error={nameError}>
+          <Input placeholder="e.g. Web App" {...register("name")} />
         </Field>
 
         <Field
@@ -224,11 +238,12 @@ function ProductGeneralFormInner({
           />
         </Field>
 
-        {alertError && (
-          <Alert variant="destructive">
-            {alertError}
-          </Alert>
-        )}
+        <label className="flex items-center gap-3 text-sm font-semibold">
+          <input type="checkbox" {...register("features.board")} />
+          Board
+        </label>
+
+        {alertError && <Alert variant="destructive">{alertError}</Alert>}
 
         <div>
           <Button
@@ -246,12 +261,26 @@ function ProductGeneralFormInner({
           </Button>
         </div>
       </fieldset>
+      <ConfirmDialog
+        open={pendingSave !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingSave(null);
+        }}
+        title="Hide Board from your portal?"
+        description="Customers won't be able to see this feature. Your content stays saved and you can turn it back on anytime."
+        dismissLabel="Keep editing"
+        confirmLabel="Hide feature"
+        pendingLabel="Saving…"
+        onConfirm={async () => {
+          if (pendingSave) await mutation.mutateAsync(pendingSave);
+        }}
+      />
     </form>
   );
 }
 
 export function ProductGeneralForm(
-  props: ProductGeneralFormProps
+  props: ProductGeneralFormProps,
 ): React.JSX.Element {
   return (
     <QueryProvider>

@@ -56,7 +56,7 @@ export class ProductsController {
   async createProduct(
     @CurrentTenant() tenant: Tenant,
     @CurrentUser() user: any,
-    @Body({ schema: CreateProductInputSchema }) input: CreateProductInput
+    @Body({ schema: CreateProductInputSchema }) input: CreateProductInput,
   ): Promise<ProductCreated> {
     if (input.logoUploadId) {
       const [upload] = await this.db
@@ -65,8 +65,8 @@ export class ProductsController {
         .where(
           and(
             eq(uploads.id, input.logoUploadId),
-            eq(uploads.uploaderId, user.id)
-          )
+            eq(uploads.uploaderId, user.id),
+          ),
         )
         .limit(1);
 
@@ -74,7 +74,7 @@ export class ProductsController {
         throw new ApiException(
           "validation_failed",
           400,
-          "That logo can't be used."
+          "That logo can't be used.",
         );
       }
     }
@@ -104,7 +104,7 @@ export class ProductsController {
           color: s.color,
           position: idx,
           isDefault: s.isDefault,
-        }))
+        })),
       );
 
       // ponytail: creation order via created_at offset; add a position column if reordering ever ships
@@ -127,7 +127,7 @@ export class ProductsController {
           productId: inserted.id,
           name: t.name,
           color: t.color,
-        }))
+        })),
       );
     });
 
@@ -137,13 +137,17 @@ export class ProductsController {
   @Get()
   @SerializeOptions({ schema: ProductSummarySchema })
   async listProducts(
-    @CurrentTenant() tenant: Tenant
+    @CurrentTenant() tenant: Tenant,
   ): Promise<ProductSummary[]> {
     const rows = await this.db
       .select({
         slug: products.slug,
         name: products.name,
         logoKey: uploads.storageKey,
+        boardEnabled: products.boardEnabled,
+        roadmapEnabled: products.roadmapEnabled,
+        changelogEnabled: products.changelogEnabled,
+        faqEnabled: products.faqEnabled,
         accentColor: products.accentColor,
         accentTextColor: products.accentTextColor,
       })
@@ -152,12 +156,18 @@ export class ProductsController {
       .where(
         and(
           eq(products.workspaceId, tenant.workspaceId),
-          isNull(products.deletedAt)
-        )
+          isNull(products.deletedAt),
+        ),
       )
       .orderBy(asc(products.name), asc(products.slug));
 
     return rows.map((r) => ({
+      features: {
+        board: r.boardEnabled,
+        roadmap: r.roadmapEnabled,
+        changelog: r.changelogEnabled,
+        faq: r.faqEnabled,
+      },
       slug: r.slug,
       name: r.name,
       logoUrl: r.logoKey ? `/uploads/${r.logoKey}` : null,
@@ -168,15 +178,17 @@ export class ProductsController {
 
   @Get(":product")
   @SerializeOptions({ schema: ProductDetailSchema })
-  async getProduct(
-    @CurrentTenant() tenant: Tenant
-  ): Promise<ProductDetail> {
+  async getProduct(@CurrentTenant() tenant: Tenant): Promise<ProductDetail> {
     const [row] = await this.db
       .select({
         slug: products.slug,
         name: products.name,
         logoUploadId: products.logoUploadId,
         logoKey: uploads.storageKey,
+        boardEnabled: products.boardEnabled,
+        roadmapEnabled: products.roadmapEnabled,
+        changelogEnabled: products.changelogEnabled,
+        faqEnabled: products.faqEnabled,
         accentColor: products.accentColor,
         accentTextColor: products.accentTextColor,
         tagline: products.tagline,
@@ -185,10 +197,7 @@ export class ProductsController {
       .from(products)
       .leftJoin(uploads, eq(products.logoUploadId, uploads.id))
       .where(
-        and(
-          eq(products.id, tenant.productId!),
-          isNull(products.deletedAt)
-        )
+        and(eq(products.id, tenant.productId!), isNull(products.deletedAt)),
       )
       .limit(1);
 
@@ -197,6 +206,12 @@ export class ProductsController {
     }
 
     return ProductDetailSchema.parse({
+      features: {
+        board: row.boardEnabled,
+        roadmap: row.roadmapEnabled,
+        changelog: row.changelogEnabled,
+        faq: row.faqEnabled,
+      },
       slug: row.slug,
       name: row.name,
       logoUrl: row.logoKey ? `/uploads/${row.logoKey}` : null,
@@ -213,7 +228,7 @@ export class ProductsController {
   async updateProduct(
     @CurrentTenant() tenant: Tenant,
     @CurrentUser() user: any,
-    @Body({ schema: UpdateProductInputSchema }) input: UpdateProductInput
+    @Body({ schema: UpdateProductInputSchema }) input: UpdateProductInput,
   ): Promise<ProductDetail> {
     if (input.logoUploadId !== undefined && input.logoUploadId !== null) {
       const [current] = await this.db
@@ -229,8 +244,8 @@ export class ProductsController {
           .where(
             and(
               eq(uploads.id, input.logoUploadId),
-              eq(uploads.uploaderId, user.id)
-            )
+              eq(uploads.uploaderId, user.id),
+            ),
           )
           .limit(1);
 
@@ -238,7 +253,7 @@ export class ProductsController {
           throw new ApiException(
             "validation_failed",
             400,
-            "That logo can't be used."
+            "That logo can't be used.",
           );
         }
       }
@@ -252,8 +267,8 @@ export class ProductsController {
         .where(
           and(
             eq(products.workspaceId, tenant.workspaceId),
-            eq(products.slug, input.slug)
-          )
+            eq(products.slug, input.slug),
+          ),
         )
         .limit(1);
 
@@ -262,7 +277,7 @@ export class ProductsController {
           throw new ApiException(
             "slug_taken",
             409,
-            "That URL is taken. Try another."
+            "That URL is taken. Try another.",
           );
         }
       } else {
@@ -270,12 +285,27 @@ export class ProductsController {
       }
     }
 
+    if (input.features) {
+      if (input.features.board !== undefined)
+        updateData.boardEnabled = input.features.board;
+      if (input.features.roadmap !== undefined)
+        updateData.roadmapEnabled = input.features.roadmap;
+      if (input.features.changelog !== undefined)
+        updateData.changelogEnabled = input.features.changelog;
+      if (input.features.faq !== undefined)
+        updateData.faqEnabled = input.features.faq;
+    }
+
     if (input.name !== undefined) updateData.name = input.name;
-    if (input.logoUploadId !== undefined) updateData.logoUploadId = input.logoUploadId;
+    if (input.logoUploadId !== undefined)
+      updateData.logoUploadId = input.logoUploadId;
     if (input.tagline !== undefined) updateData.tagline = input.tagline;
-    if (input.websiteUrl !== undefined) updateData.websiteUrl = input.websiteUrl;
-    if (input.accentColor !== undefined) updateData.accentColor = input.accentColor;
-    if (input.accentTextColor !== undefined) updateData.accentTextColor = input.accentTextColor;
+    if (input.websiteUrl !== undefined)
+      updateData.websiteUrl = input.websiteUrl;
+    if (input.accentColor !== undefined)
+      updateData.accentColor = input.accentColor;
+    if (input.accentTextColor !== undefined)
+      updateData.accentTextColor = input.accentTextColor;
 
     if (Object.keys(updateData).length > 0) {
       try {
@@ -283,15 +313,16 @@ export class ProductsController {
           .update(products)
           .set(updateData)
           .where(
-            and(
-              eq(products.id, tenant.productId!),
-              isNull(products.deletedAt)
-            )
+            and(eq(products.id, tenant.productId!), isNull(products.deletedAt)),
           );
       } catch (e) {
         // The pre-check above can lose a race with a concurrent rename.
         if (isUniqueViolation(e, "products_workspace_slug_unique")) {
-          throw new ApiException("slug_taken", 409, "That URL is taken. Try another.");
+          throw new ApiException(
+            "slug_taken",
+            409,
+            "That URL is taken. Try another.",
+          );
         }
         throw e;
       }
@@ -302,17 +333,12 @@ export class ProductsController {
 
   @Delete(":product")
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteProduct(
-    @CurrentTenant() tenant: Tenant
-  ): Promise<void> {
+  async deleteProduct(@CurrentTenant() tenant: Tenant): Promise<void> {
     const deleted = await this.db
       .update(products)
       .set({ deletedAt: new Date() })
       .where(
-        and(
-          eq(products.id, tenant.productId!),
-          isNull(products.deletedAt)
-        )
+        and(eq(products.id, tenant.productId!), isNull(products.deletedAt)),
       )
       .returning({ id: products.id });
 

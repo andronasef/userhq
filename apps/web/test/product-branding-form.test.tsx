@@ -14,6 +14,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 const mockProduct: ProductDetail = {
+  features: { board: true, roadmap: true, changelog: true, faq: true },
   slug: "core",
   name: "Core App",
   accentColor: "#2563EB",
@@ -27,7 +28,7 @@ const mockProduct: ProductDetail = {
 describe("ProductBrandingForm & ColorField (Button text color)", () => {
   it("renders both accent color and button text color fields with live preview", () => {
     const html = renderToStaticMarkup(
-      <ProductBrandingForm ws="acme" product={mockProduct} />
+      <ProductBrandingForm ws="acme" product={mockProduct} />,
     );
 
     expect(html).toContain("Accent color");
@@ -45,7 +46,7 @@ describe("ProductBrandingForm & ColorField (Button text color)", () => {
     };
 
     const html = renderToStaticMarkup(
-      <ProductBrandingForm ws="acme" product={customProduct} />
+      <ProductBrandingForm ws="acme" product={customProduct} />,
     );
 
     expect(html).toContain("--primary-foreground:#000000");
@@ -64,7 +65,7 @@ describe("ProductBrandingForm & ColorField (Button text color)", () => {
           { name: "White", hex: "#FFFFFF" },
           { name: "Black", hex: "#000000" },
         ]}
-      />
+      />,
     );
 
     expect(html).toContain("Auto");

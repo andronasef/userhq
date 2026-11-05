@@ -3,12 +3,29 @@ import { workspaceSlugSchema, productSlugSchema } from "./slugs.js";
 import { PublicUserSchema } from "./user.js";
 import { HEX_COLOR_RE, STATUS_TYPES } from "./palette.js";
 
+export const PRODUCT_FEATURE_KEYS = [
+  "board",
+  "roadmap",
+  "changelog",
+  "faq",
+] as const;
+export const ProductFeaturesSchema = z
+  .object({
+    board: z.boolean(),
+    roadmap: z.boolean(),
+    changelog: z.boolean(),
+    faq: z.boolean(),
+  })
+  .strict();
+export type ProductFeatures = z.infer<typeof ProductFeaturesSchema>;
+
 export const PublicPortalProductSchema = z.object({
   workspace: z.object({
     slug: z.string(),
     name: z.string(),
   }),
   product: z.object({
+    features: ProductFeaturesSchema,
     slug: z.string(),
     name: z.string(),
     tagline: z.string().nullable(),
@@ -21,7 +38,7 @@ export const PublicPortalProductSchema = z.object({
     z.object({
       id: z.string().uuid(),
       name: z.string(),
-    })
+    }),
   ),
   statuses: z.array(
     z.object({
@@ -30,7 +47,7 @@ export const PublicPortalProductSchema = z.object({
       color: z.string(),
       type: z.enum(STATUS_TYPES),
       isPublicRoadmap: z.boolean().default(false).optional(),
-    })
+    }),
   ),
 });
 export type PublicPortalProduct = z.infer<typeof PublicPortalProductSchema>;
@@ -51,7 +68,7 @@ export const PublicPortalDirectorySchema = z.object({
       accentColor: z.string(),
       accentTextColor: z.string().nullable().optional(),
       logoUrl: z.string().nullable(),
-    })
+    }),
   ),
 });
 export type PublicPortalDirectory = z.infer<typeof PublicPortalDirectorySchema>;
@@ -107,7 +124,7 @@ export const WebsiteUrlSchema = z
         return false;
       }
     },
-    { message: "invalid_url" }
+    { message: "invalid_url" },
   );
 export type WebsiteUrl = z.infer<typeof WebsiteUrlSchema>;
 
@@ -144,7 +161,12 @@ export const ANONYMOUS_ME: MeResponse = {
 
 export const INVITE_TTL_DAYS = 7;
 
-export const InviteStateSchema = z.enum(["pending", "used", "expired", "revoked"]);
+export const InviteStateSchema = z.enum([
+  "pending",
+  "used",
+  "expired",
+  "revoked",
+]);
 export type InviteState = z.infer<typeof InviteStateSchema>;
 
 export const CreateInviteInputSchema = z.object({
@@ -243,6 +265,7 @@ export const ProductCreatedSchema = z.object({
 export type ProductCreated = z.infer<typeof ProductCreatedSchema>;
 
 export const ProductSummarySchema = z.object({
+  features: ProductFeaturesSchema,
   slug: z.string(),
   name: z.string(),
   logoUrl: z.string().nullable(),
@@ -259,6 +282,7 @@ export const ProductDetailSchema = ProductSummarySchema.extend({
 export type ProductDetail = z.infer<typeof ProductDetailSchema>;
 
 export const UpdateProductInputSchema = z.object({
+  features: ProductFeaturesSchema.partial().optional(),
   name: NameSchema.optional(),
   slug: productSlugSchema.optional(),
   logoUploadId: z.uuid().nullable().optional(),
@@ -339,7 +363,9 @@ export const PlatformWorkspaceProductSchema = z.object({
   postCount: z.number().int(),
   voteCount: z.number().int(),
 });
-export type PlatformWorkspaceProduct = z.infer<typeof PlatformWorkspaceProductSchema>;
+export type PlatformWorkspaceProduct = z.infer<
+  typeof PlatformWorkspaceProductSchema
+>;
 
 export const PlatformWorkspaceMemberSchema = z.object({
   name: z.string(),
@@ -347,13 +373,17 @@ export const PlatformWorkspaceMemberSchema = z.object({
   role: MemberRoleSchema,
   joinedAt: z.string(),
 });
-export type PlatformWorkspaceMember = z.infer<typeof PlatformWorkspaceMemberSchema>;
+export type PlatformWorkspaceMember = z.infer<
+  typeof PlatformWorkspaceMemberSchema
+>;
 
 export const PlatformWorkspaceDetailSchema = PlatformWorkspaceRowSchema.extend({
   products: z.array(PlatformWorkspaceProductSchema),
   members: z.array(PlatformWorkspaceMemberSchema),
 });
-export type PlatformWorkspaceDetail = z.infer<typeof PlatformWorkspaceDetailSchema>;
+export type PlatformWorkspaceDetail = z.infer<
+  typeof PlatformWorkspaceDetailSchema
+>;
 
 export const PlatformUserRowSchema = z.object({
   id: z.string(),

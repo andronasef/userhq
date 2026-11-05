@@ -64,6 +64,18 @@ describe("Changelog Admin Studio & Authoring Components", () => {
     publishedAt: null, // Draft
   };
 
+  it("keeps hidden changelog authoring available with a settings notice", () => {
+    for (const component of [
+      <ChangelogStudio ws="acme" product="core" productName="Acme Core" entries={[sampleEntry]} tags={sampleTags} changelogEnabled={false} />,
+      <ChangelogEditor ws="acme" product="core" productName="Acme Core" availableTags={sampleTags} entry={sampleEntry} changelogEnabled={false} />,
+    ]) {
+      const html = renderToStaticMarkup(component);
+      expect(html).toContain("Your entries and drafts are kept.");
+      expect(html).toContain('href="/dashboard/acme/core/settings#portal-features"');
+      expect(html).toContain("Version 2.4 - Faster Exports &amp; Analytics");
+    }
+  });
+
   it("labels future-dated entries Scheduled, not Published", () => {
     const future = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
     const html = renderToStaticMarkup(

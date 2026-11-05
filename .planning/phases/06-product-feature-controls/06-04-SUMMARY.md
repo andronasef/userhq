@@ -81,6 +81,14 @@ Nested projection suppression is still 06-05 scope. Portal page/navigation compo
 
 Global STATE/ROADMAP updates are owned by the parent orchestrator to avoid concurrent edits.
 
+## Follow-up: Full-suite fixture lifecycle
+
+The parent's full API run later observed an unexpected HTTP 400 during the large configuration matrix. Adding response body/text to the assertion and rerunning the full suite reproduced a different transport symptom: the matrix stalled until its unchanged 30-second timeout, and the following FAQ request also stalled (488 passed, 2 failed). The 400 body was not reproduced, so no application error cause is claimed.
+
+The matrix fixture now explicitly starts one local ephemeral listener with `app.listen(0, "127.0.0.1")`. Its existing `app.close()` teardown owns shutdown. Previously SuperTest started and closed the same server for each of hundreds of requests. This limits the change to the large matrix fixture and removes that unnecessary server lifecycle churn; all feature, role, preservation and CRUD assertions and timeouts remain intact. No production code, retry or global fixture was changed.
+
+After the change, `bun run --filter @userhq/api test` passed **42 files, 490 tests**, exit 0 (49.26 seconds). API typecheck and `git diff --check` also passed. Other suites still emit existing concurrent SuperTest listener warnings; they all passed and are outside this local repair.
+
 ## Self-Check: PASSED
 
 The modified test files and this summary exist. Commits 99691e3, 56be759 and 6be4d95 are ancestors of HEAD. All declared automated verification commands executed with nonzero test counts and final exit 0.

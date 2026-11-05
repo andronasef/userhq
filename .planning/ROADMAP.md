@@ -373,7 +373,7 @@ Internal fields live in a separate 1:1 table. Public reads go through explicit `
 - [x] 06-04-PLAN.md — Verify independent Roadmap, Changelog and FAQ public gates (wave 4)
 - [x] 06-05-PLAN.md — Suppress disabled content inside enabled module responses (wave 5)
 - [x] 06-06-PLAN.md — Suppress customer notifications durably across disable/re-enable (wave 2)
-- [ ] 06-07-PLAN.md — Compose feature-aware portal navigation and pages (wave 6)
+- [x] 06-07-PLAN.md — Compose feature-aware portal navigation and pages (wave 6)
 - [ ] 06-08-PLAN.md — Complete the approved product feature settings form (wave 7)
 - [ ] 06-09-PLAN.md — Keep disabled modules clearly manageable in the dashboard (wave 8)
 - [ ] 06-10-PLAN.md — Prove full feature-control journeys and privacy before phase review (wave 9)
@@ -393,4 +393,4 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5 → 6. Phase 5 can start 
 | 3. Feedback Board & Conversations | 16/16 | Complete | 2026-10-11 |
 | 4. Dual-Layer Roadmap & Closing the Loop | 5/5 | Complete | 2026-10-11 |
 | 5. Changelog & FAQ | 5/5 | Complete | 2026-10-12 |
-| 6. Product Feature Controls | 6/10 | Executing | - |
+| 6. Product Feature Controls | 7/10 | Executing | - |

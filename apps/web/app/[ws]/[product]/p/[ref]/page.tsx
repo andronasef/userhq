@@ -39,12 +39,10 @@ export async function generateMetadata({
   const postNumber = parsePostRef(ref);
   if (!postNumber) return {};
 
-  const [productResult, postResult] = await Promise.all([
-    getPortalProduct(ws, product),
-    getPost(ws, product, postNumber),
-  ]);
-
-  if (!productResult.ok || !postResult.ok) return {};
+  const productResult = await getPortalProduct(ws, product);
+  if (!productResult.ok || !productResult.data.product.features.board) return {};
+  const postResult = await getPost(ws, product, postNumber);
+  if (!postResult.ok) return {};
   if (postResult.data.kind === "redirect") return {};
 
   const p = productResult.data.product;
@@ -78,15 +76,10 @@ export default async function PostPage({
     notFound();
   }
 
-  const [productResult, postResult, me] = await Promise.all([
-    getPortalProduct(ws, product),
-    getPost(ws, product, postNumber),
-    getMe(),
-  ]);
-
-  if (!productResult.ok || !postResult.ok) {
-    notFound();
-  }
+  const productResult = await getPortalProduct(ws, product);
+  if (!productResult.ok || !productResult.data.product.features.board) notFound();
+  const [postResult, me] = await Promise.all([getPost(ws, product, postNumber), getMe()]);
+  if (!postResult.ok) notFound();
 
   if (postResult.data.kind === "redirect") {
     permanentRedirect(

@@ -13,9 +13,7 @@ export async function generateMetadata({
 }: PublicRoadmapPageProps): Promise<Metadata> {
   const { ws, product } = await params;
   const result = await getPortalProduct(ws, product);
-  if (!result.ok) {
-    return { title: "Roadmap · UserHQ" };
-  }
+  if (!result.ok || !result.data.product.features.roadmap) return {};
   return {
     title: `Roadmap · ${result.data.product.name}`,
     description: `Follow public roadmap progress and upcoming features for ${result.data.product.name}.`,
@@ -26,14 +24,10 @@ export default async function PublicRoadmapPage({
   params,
 }: PublicRoadmapPageProps): Promise<React.JSX.Element> {
   const { ws, product } = await params;
-  const [productRes, roadmapRes] = await Promise.all([
-    getPortalProduct(ws, product),
-    getPublicRoadmap(ws, product),
-  ]);
-
-  if (!productRes.ok) {
-    notFound();
-  }
+  const productRes = await getPortalProduct(ws, product);
+  if (!productRes.ok || !productRes.data.product.features.roadmap) notFound();
+  const roadmapRes = await getPublicRoadmap(ws, product);
+  if (!roadmapRes.ok && roadmapRes.status === 404) notFound();
 
   const { product: p, statuses } = productRes.data;
   const publicStatuses = statuses.filter((s) => Boolean(s.isPublicRoadmap));

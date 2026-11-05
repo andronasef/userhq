@@ -13,9 +13,7 @@ export async function generateMetadata({
 }: ActivityPageProps): Promise<Metadata> {
   const { ws, product } = await params;
   const result = await getPortalProduct(ws, product);
-  if (!result.ok) {
-    return { title: "My activity · UserHQ" };
-  }
+  if (!result.ok || !result.data.product.features.board) return {};
   return {
     title: `My activity · ${result.data.product.name}`,
     description: `Track updates and status changes on feedback you follow for ${result.data.product.name}.`,
@@ -26,19 +24,15 @@ export default async function ActivityPage({
   params,
 }: ActivityPageProps): Promise<React.JSX.Element> {
   const { ws, product } = await params;
+  const productRes = await getPortalProduct(ws, product);
+  if (!productRes.ok || !productRes.data.product.features.board) notFound();
   const me = await getMe();
   if (!me.user) {
     redirect(`/login?next=/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/activity`);
   }
 
-  const [productRes, activityRes] = await Promise.all([
-    getPortalProduct(ws, product),
-    getActivity(ws, product),
-  ]);
-
-  if (!productRes.ok) {
-    notFound();
-  }
+  const activityRes = await getActivity(ws, product);
+  if (!activityRes.ok && activityRes.status === 404) notFound();
 
   const activities = activityRes.ok ? activityRes.data.activities : [];
 

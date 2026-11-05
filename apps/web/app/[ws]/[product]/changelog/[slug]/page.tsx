@@ -12,14 +12,10 @@ export async function generateMetadata({
   params,
 }: ChangelogArticlePageProps): Promise<Metadata> {
   const { ws, product, slug } = await params;
-  const [productRes, entryRes] = await Promise.all([
-    getPortalProduct(ws, product),
-    getPublicChangelogEntry(ws, product, slug),
-  ]);
-
-  if (!productRes.ok || !entryRes.ok) {
-    return { title: "Changelog · UserHQ" };
-  }
+  const productRes = await getPortalProduct(ws, product);
+  if (!productRes.ok || !productRes.data.product.features.changelog) return {};
+  const entryRes = await getPublicChangelogEntry(ws, product, slug);
+  if (!entryRes.ok) return {};
 
   const entry = entryRes.data;
   const prod = productRes.data.product;
@@ -42,14 +38,10 @@ export default async function ChangelogArticlePage({
   params,
 }: ChangelogArticlePageProps): Promise<React.JSX.Element> {
   const { ws, product, slug } = await params;
-  const [productRes, entryRes] = await Promise.all([
-    getPortalProduct(ws, product),
-    getPublicChangelogEntry(ws, product, slug),
-  ]);
-
-  if (!productRes.ok || !entryRes.ok) {
-    notFound();
-  }
+  const productRes = await getPortalProduct(ws, product);
+  if (!productRes.ok || !productRes.data.product.features.changelog) notFound();
+  const entryRes = await getPublicChangelogEntry(ws, product, slug);
+  if (!entryRes.ok) notFound();
 
   return (
     <ChangelogArticle

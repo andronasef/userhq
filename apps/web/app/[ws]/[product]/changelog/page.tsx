@@ -14,9 +14,7 @@ export async function generateMetadata({
 }: PublicChangelogPageProps): Promise<Metadata> {
   const { ws, product } = await params;
   const result = await getPortalProduct(ws, product);
-  if (!result.ok) {
-    return { title: "Changelog · UserHQ" };
-  }
+  if (!result.ok || !result.data.product.features.changelog) return {};
   return {
     title: `Changelog · ${result.data.product.name}`,
     description: `New features, improvements, and bug fixes for ${result.data.product.name}.`,
@@ -27,14 +25,10 @@ export default async function PublicChangelogPage({
   params,
 }: PublicChangelogPageProps): Promise<React.JSX.Element> {
   const { ws, product } = await params;
-  const [productRes, feedRes] = await Promise.all([
-    getPortalProduct(ws, product),
-    getPublicChangelogFeed(ws, product),
-  ]);
-
-  if (!productRes.ok) {
-    notFound();
-  }
+  const productRes = await getPortalProduct(ws, product);
+  if (!productRes.ok || !productRes.data.product.features.changelog) notFound();
+  const feedRes = await getPublicChangelogFeed(ws, product);
+  if (!feedRes.ok && feedRes.status === 404) notFound();
 
   const { product: p } = productRes.data;
   const entries = feedRes.ok ? feedRes.data.entries : [];

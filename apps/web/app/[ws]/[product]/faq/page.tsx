@@ -14,9 +14,7 @@ export async function generateMetadata({
 }: PublicFaqPageProps): Promise<Metadata> {
   const { ws, product } = await params;
   const result = await getPortalProduct(ws, product);
-  if (!result.ok) {
-    return { title: "FAQ · UserHQ" };
-  }
+  if (!result.ok || !result.data.product.features.faq) return {};
   return {
     title: `Frequently Asked Questions · ${result.data.product.name}`,
     description: `Find quick answers to common questions about ${result.data.product.name}.`,
@@ -27,14 +25,10 @@ export default async function PublicFaqPage({
   params,
 }: PublicFaqPageProps): Promise<React.JSX.Element> {
   const { ws, product } = await params;
-  const [productRes, faqRes] = await Promise.all([
-    getPortalProduct(ws, product),
-    getPublicFaqTree(ws, product),
-  ]);
-
-  if (!productRes.ok) {
-    notFound();
-  }
+  const productRes = await getPortalProduct(ws, product);
+  if (!productRes.ok || !productRes.data.product.features.faq) notFound();
+  const faqRes = await getPublicFaqTree(ws, product);
+  if (!faqRes.ok && faqRes.status === 404) notFound();
 
   const { product: p } = productRes.data;
   const categories = faqRes.ok ? faqRes.data.categories : [];

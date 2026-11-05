@@ -4,6 +4,7 @@ import { schema } from "@userhq/db";
 import { eq } from "drizzle-orm";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
 import { EmailWorker } from "../src/email/worker.js";
+import { enqueueCommentEmail } from "../src/email/outbox.js";
 
 describe("Product availability and customer delivery", () => {
   let app: Awaited<ReturnType<typeof createTestApp>>;
@@ -38,7 +39,7 @@ describe("Product availability and customer delivery", () => {
     };
     const move = async () => {
       const [current] = await app.db.select().from(schema.posts).where(eq(schema.posts.id, post.id));
-      const res = await request(app.http).put(`${admin}/posts/1/status`).set("Cookie", owner.cookie).set("Origin", app.env.PUBLIC_URL).send({ statusId: next.id, version: current.version });
+      const res = await request(app.http).put(`${admin}/posts/1/status`).set("Cookie", owner.cookie).set("Origin", app.env.PUBLIC_URL).send({ statusId: current.statusId === next.id ? status.id : next.id, version: current.version });
       expect(res.status).toBe(200);
     };
     const list = async () => {
@@ -72,5 +73,69 @@ describe("Product availability and customer delivery", () => {
     expect(await read.list()).toHaveLength(1);
     expect(await unread.list()).toHaveLength(0);
     expect(await other.list()).toHaveLength(1);
+  });
+
+  it("does not enqueue off-window events, but delivers new events after re-enable", async () => {
+    const f = await fixture();
+    await f.toggle(false);
+    await f.move();
+    const [comment] = await app.db.insert(schema.comments).values({ postId: f.post.id, authorId: owner.userId, body: "Off-window" }).returning();
+    await enqueueCommentEmail(app.db, { postId: f.post.id, commentId: comment.id, actorId: owner.userId, workspaceId: f.ws.id });
+    await f.toggle(true);
+    expect(await f.list()).toHaveLength(0);
+    expect((await app.app.get(EmailWorker).runOnce(new Date(Date.now() + 25 * 3600_000))).sent).toBe(0);
+    await f.comment(); await f.move();
+    expect(await f.list()).toHaveLength(1);
+    expect((await app.app.get(EmailWorker).runOnce(new Date(Date.now() + 25 * 3600_000))).sent).toBe(1);
+  });
+
+  // Flip the flag with raw SQL so the PATCH-time cleanup does not run: these prove the read/send gates alone.
+  const setBoard = (productId: string, on: boolean) =>
+    app.db.update(schema.products).set({ boardEnabled: on }).where(eq(schema.products.id, productId));
+
+  it("hides surviving unread rows while Board is off (list and count)", async () => {
+    const f = await fixture();
+    await f.move();
+    expect(await f.list()).toHaveLength(1);
+    const unread = async () => (await request(app.http).get("/api/v1/notifications/unread-count").set("Cookie", customer.cookie)).body.unreadCount as number;
+    const before = await unread();
+    await setBoard(f.product.id, false);
+    expect(await f.list()).toHaveLength(0);
+    expect(await unread()).toBe(before - 1);
+    await setBoard(f.product.id, true);
+    expect(await unread()).toBe(before);
+    expect(await f.list()).toHaveLength(1);
+  });
+
+  it("worker drops queued items of a product whose Board is off, durably, and keeps enabled-product items", async () => {
+    const off = await fixture();
+    await off.comment();
+    await setBoard(off.product.id, false);
+    const [offBatch] = await app.db.select().from(schema.commentEmailBatches).where(eq(schema.commentEmailBatches.workspaceId, off.ws.id));
+    expect((await app.app.get(EmailWorker).runOnce(new Date(Date.now() + 25 * 3600_000))).sent).toBe(0);
+    await setBoard(off.product.id, true);
+    expect((await app.app.get(EmailWorker).runOnce(new Date(Date.now() + 50 * 3600_000))).sent).toBe(0);
+    const [after] = await app.db.select().from(schema.commentEmailBatches).where(eq(schema.commentEmailBatches.id, offBatch.id));
+    expect(after.status).toBe("cancelled");
+
+    // Mixed batch: same workspace, product B stays enabled and still gets its mail.
+    const mixed = await fixture();
+    const [productB] = await app.db.insert(schema.products).values({ workspaceId: mixed.ws.id, name: "B", slug: "prod-b" }).returning();
+    const [statusB] = await app.db.insert(schema.statuses).values({ productId: productB.id, name: "Review", type: "review", color: "#123456", position: 0, isDefault: true }).returning();
+    const [postB] = await app.db.insert(schema.posts).values({ productId: productB.id, number: 1, title: "Keep-this-B", authorId: customer.userId, statusId: statusB.id }).returning();
+    for (const post of [mixed.post, postB]) {
+      const [c] = await app.db.insert(schema.comments).values({ postId: post.id, authorId: owner.userId, body: "Mixed" }).returning();
+      await enqueueCommentEmail(app.db, { postId: post.id, commentId: c.id, actorId: owner.userId, workspaceId: mixed.ws.id });
+    }
+    await setBoard(mixed.product.id, false);
+    const result = await app.app.get(EmailWorker).runOnce(new Date(Date.now() + 25 * 3600_000));
+    expect(result.sent).toBe(1);
+    const [batch] = await app.db.select().from(schema.commentEmailBatches).where(eq(schema.commentEmailBatches.workspaceId, mixed.ws.id));
+    expect(batch.status).toBe("sent");
+    const list = (await (await fetch("http://127.0.0.1:8025/api/v1/search?query=" + encodeURIComponent("to:delivery-customer@test.local Keep-this-B"))).json()) as { messages: { ID: string }[] };
+    expect(list.messages.length).toBeGreaterThan(0);
+    const mail = (await (await fetch(`http://127.0.0.1:8025/api/v1/message/${list.messages[0].ID}`)).json()) as { Text: string };
+    expect(mail.Text).toContain("Keep-this-B");
+    expect(mail.Text).not.toContain(`/${mixed.ws.slug}/app/p/`);
   });
 });

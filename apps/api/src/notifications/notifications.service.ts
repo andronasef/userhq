@@ -52,6 +52,10 @@ export class NotificationsService {
         SELECT author_id AS user_id FROM comments WHERE post_id = ${opts.postId} AND deleted_at IS NULL
       ) s
       WHERE user_id IS NOT NULL AND user_id != ${opts.actorId}
+        AND EXISTS (
+          SELECT 1 FROM products
+          WHERE id = ${opts.productId} AND workspace_id = ${opts.workspaceId} AND board_enabled
+        )
     `);
 
     const rows: { user_id: string }[] = stakeholders.rows ?? stakeholders;
@@ -81,13 +85,14 @@ export class NotificationsService {
   }
 
   // Notifications whose post (or its product/workspace) was deleted lead nowhere:
-  // hide them from both the list and the unread badge.
+  // hide them from both the list and the unread badge. Same for a product whose Board is off.
   private visible(userId: string) {
     return and(
       eq(notifications.userId, userId),
       isNull(posts.deletedAt),
       isNull(products.deletedAt),
-      isNull(workspaces.deletedAt)
+      isNull(workspaces.deletedAt),
+      eq(products.boardEnabled, true)
     );
   }
 

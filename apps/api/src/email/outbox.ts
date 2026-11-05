@@ -22,6 +22,10 @@ export async function enqueueCommentEmail(
       ) c JOIN "user" u ON u.id = c.uid
       WHERE u.id <> ${actorId} AND u.comment_emails AND u.deleted_at IS NULL AND u.banned_at IS NULL
         AND NOT EXISTS (SELECT 1 FROM post_mutes m WHERE m.user_id = u.id AND m.post_id = ${postId})
+        AND EXISTS (
+          SELECT 1 FROM posts p JOIN products pr ON pr.id = p.product_id
+          WHERE p.id = ${postId} AND pr.workspace_id = ${workspaceId} AND pr.board_enabled
+        )
     ), b AS (
       INSERT INTO comment_email_batches (user_id, workspace_id, send_after)
       SELECT id, ${workspaceId}, now() + interval '24 hours' FROM r

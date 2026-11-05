@@ -5,6 +5,8 @@ import { HighlightText, escapeRegex } from "../components/faq/faq-highlight";
 import { FaqSearchBar } from "../components/faq/faq-search-bar";
 import { FaqNotFoundPrompt } from "../components/faq/faq-not-found-prompt";
 import { FaqAccordionItem } from "../components/faq/faq-accordion-item";
+import { PublicRoadmapBoard } from "../components/roadmap/public-roadmap-board";
+import { LinkedRoadmapBanner } from "../components/post/linked-roadmap-banner";
 import { FaqPortal, extractTextFromRichText } from "../components/faq/faq-portal";
 import type { PublicFaqCategory, RichTextDoc } from "@userhq/types";
 
@@ -120,6 +122,7 @@ describe("FAQ Portal Components & Client Logic", () => {
     it("formats redirect URL with query parameter when query is provided", () => {
       const html = renderToStaticMarkup(
         <FaqNotFoundPrompt
+          boardEnabled={true}
           ws="acme-ws"
           product="core-prod"
           query="sso saml support"
@@ -135,7 +138,7 @@ describe("FAQ Portal Components & Client Logic", () => {
 
     it("formats redirect URL without title parameter when query is empty", () => {
       const html = renderToStaticMarkup(
-        <FaqNotFoundPrompt ws="acme-ws" product="core-prod" query="" />
+        <FaqNotFoundPrompt boardEnabled={true} ws="acme-ws" product="core-prod" query="" />
       );
 
       expect(html).toContain('href="/acme-ws/core-prod?new=true"');
@@ -215,7 +218,7 @@ describe("FAQ Portal Components & Client Logic", () => {
 
     it("renders empty state when there are 0 categories or questions", () => {
       const html = renderToStaticMarkup(
-        <FaqPortal ws="acme-ws" product="core" categories={[]} />
+        <FaqPortal boardEnabled={true} ws="acme-ws" product="core" categories={[]} />
       );
 
       expect(html).toContain("No frequently asked questions yet");
@@ -227,6 +230,7 @@ describe("FAQ Portal Components & Client Logic", () => {
     it("renders full portal layout with categories and questions", () => {
       const html = renderToStaticMarkup(
         <FaqPortal
+          boardEnabled={true}
           ws="acme-ws"
           product="core"
           categories={sampleCategories}
@@ -241,4 +245,33 @@ describe("FAQ Portal Components & Client Logic", () => {
       expect(html).toContain("Didn&#x27;t find what you were looking for?");
     });
   });
+  describe("hidden Board cross-links", () => {
+    it("keeps FAQ empty help without advertising feedback", () => {
+      const html = renderToStaticMarkup(<FaqPortal boardEnabled={false} ws="w" product="p" categories={[]} />);
+      expect(html).toContain("No frequently asked questions yet");
+      expect(html).not.toContain("Explore feedback");
+      expect(html).not.toContain('href="/w/p"');
+    });
+    it("removes the feedback prompt and retains FAQ answers", () => {
+      const html = renderToStaticMarkup(<FaqPortal boardEnabled={false} ws="w" product="p" categories={sampleCategories} />);
+      expect(html).toContain("How do I reset my password?");
+      expect(html).not.toContain("Post to feedback board");
+      expect(renderToStaticMarkup(<FaqNotFoundPrompt boardEnabled={false} ws="w" product="p" />)).toBe("");
+    });
+    it("offers neutral search guidance when feedback is unavailable", () => {
+      const html = renderToStaticMarkup(<FaqNotFoundPrompt boardEnabled={false} ws="w" product="p" query="missing" />);
+      expect(html).toContain("No answers match your search");
+      expect(html).toContain("Try different words or clear the search.");
+      expect(html).not.toContain("<a");
+    });
+    it("keeps an empty Roadmap independent of feedback", () => {
+      const html = renderToStaticMarkup(<PublicRoadmapBoard boardEnabled={false} ws="w" product="p" statuses={[]} items={[]} />);
+      expect(html).toContain("Check back later to see what we&#x27;re working on.");
+      expect(html).not.toContain("View feedback board");
+    });
+    it("does not render a null linked roadmap banner", () => {
+      expect(renderToStaticMarkup(<LinkedRoadmapBanner ws="w" product="p" roadmapItem={null} />)).toBe("");
+    });
+  });
+
 });

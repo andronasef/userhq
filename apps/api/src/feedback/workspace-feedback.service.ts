@@ -391,7 +391,8 @@ export class WorkspaceFeedbackService {
     tenant: { workspaceId: string },
     viewer: { id: string; name: string | null; image: string | null },
     commentId: string,
-    input: ReplyWorkspaceCommentInput
+    input: ReplyWorkspaceCommentInput,
+    apiKeyId?: string | null
   ): Promise<WorkspaceCommentItem> {
     return this.db.transaction(async (tx) => {
       const [parent] = await tx
@@ -442,6 +443,7 @@ export class WorkspaceFeedbackService {
           body: input.body,
           handledAt: new Date(),
           handledById: viewer.id,
+          createdByApiKeyId: apiKeyId ?? null,
         })
         .returning();
 

@@ -12,6 +12,8 @@ export * from "./notifications.js";
 export * from "./rich-text.js";
 export * from "./changelog.js";
 export * from "./faq.js";
+export * from "./api-keys.js";
+export * from "./export.js";
 
 export const API_ERROR_CODES = [
   "unauthorized",
@@ -80,6 +82,11 @@ export const API_ERROR_CODES = [
   "category_name_required",
   "category_not_found",
   "reorder_failed",
+  "api_key_invalid",
+  "api_key_expired",
+  "api_key_revoked",
+  "insufficient_scope",
+  "product_restricted",
 ] as const;
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];
 

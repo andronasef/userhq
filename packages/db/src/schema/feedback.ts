@@ -19,6 +19,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { user } from "./auth.js";
 import { products, statuses, workspaces } from "./tenancy.js";
+import { workspaceApiKeys } from "./api-keys.js";
 
 const tsvector = customType<{ data: string }>({ dataType: () => "tsvector" });
 
@@ -61,6 +62,7 @@ export const posts = pgTable(
     deletedById: text("deleted_by_id").references(() => user.id, { onDelete: "set null" }),
     mergedIntoId: uuid("merged_into_id"), // self-ref, set on merge (D-04)
     roadmapItemId: uuid("roadmap_item_id").references(() => roadmapItems.id, { onDelete: "set null" }),
+    createdByApiKeyId: uuid("created_by_api_key_id").references(() => workspaceApiKeys.id, { onDelete: "set null" }),
     deviceInfo: jsonb("device_info").$type<{
       browser?: string | null;
       os?: string | null;
@@ -143,6 +145,7 @@ export const comments = pgTable(
     deletedById: text("deleted_by_id").references(() => user.id, { onDelete: "set null" }),
     handledAt: timestamp("handled_at", { withTimezone: true }),
     handledById: text("handled_by_id").references(() => user.id, { onDelete: "set null" }),
+    createdByApiKeyId: uuid("created_by_api_key_id").references(() => workspaceApiKeys.id, { onDelete: "set null" }),
     deviceInfo: jsonb("device_info").$type<{
       browser?: string | null;
       os?: string | null;

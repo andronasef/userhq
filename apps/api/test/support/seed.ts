@@ -22,6 +22,7 @@ export interface TenantSeed {
   changelogTagId?: string;
   faqCategoryId?: string;
   faqQuestionId?: string;
+  apiKeyId?: string;
 }
 
 export interface Seed {
@@ -251,6 +252,18 @@ export async function seedTenants(
     })
     .returning();
 
+  const [apiKeyB] = await testApp.db
+    .insert(schema.workspaceApiKeys)
+    .values({
+      workspaceId: wsB.id,
+      name: "Tenant B Test Key",
+      keyPrefix: "uhq_live_12345678",
+      keyHash: "dummyhashb",
+      scopes: ["admin"],
+      createdByUserId: userB.userId,
+    })
+    .returning();
+
   return {
     a: {
       slug: slugA,
@@ -280,6 +293,7 @@ export async function seedTenants(
       changelogTagId: tagB.id,
       faqCategoryId: faqCatB.id,
       faqQuestionId: faqQB.id,
+      apiKeyId: apiKeyB.id,
     },
   };
 }

@@ -6,6 +6,7 @@ import {
   Param,
   Query,
   Body,
+  Req,
   HttpCode,
   UseGuards,
   UseInterceptors,
@@ -32,6 +33,7 @@ import { CurrentTenant } from "../tenancy/current-tenant.decorator.js";
 import { CurrentUser } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { WorkspaceFeedbackService } from "./workspace-feedback.service.js";
+import { RequireScopes } from "../api-keys/api-key.decorator.js";
 
 const uuidParamSchema = z.string().uuid();
 
@@ -44,6 +46,7 @@ export class WorkspaceFeedbackController {
   ) {}
 
   @Get("requests")
+  @RequireScopes("requests:read")
   @SerializeOptions({ schema: WorkspaceRequestsResponseSchema })
   async listRequests(
     @CurrentTenant() tenant: Tenant,
@@ -56,6 +59,7 @@ export class WorkspaceFeedbackController {
   }
 
   @Get("comments")
+  @RequireScopes("comments:read")
   @SerializeOptions({ schema: WorkspaceCommentsResponseSchema })
   async listComments(
     @CurrentTenant() tenant: Tenant,
@@ -70,6 +74,7 @@ export class WorkspaceFeedbackController {
   }
 
   @Post("comments/:id/handled")
+  @RequireScopes("comments:write")
   @HttpCode(204)
   async markCommentHandled(
     @CurrentTenant() tenant: Tenant,
@@ -88,6 +93,7 @@ export class WorkspaceFeedbackController {
   }
 
   @Delete("comments/:id/handled")
+  @RequireScopes("comments:write")
   @HttpCode(204)
   async reopenComment(
     @CurrentTenant() tenant: Tenant,
@@ -104,11 +110,13 @@ export class WorkspaceFeedbackController {
   }
 
   @Post("comments/:id/reply")
+  @RequireScopes("comments:write")
   @HttpCode(201)
   @SerializeOptions({ schema: WorkspaceCommentItemSchema })
   async replyToComment(
     @CurrentTenant() tenant: Tenant,
     @CurrentUser() user: any,
+    @Req() req: any,
     @Param("id") id: string,
     @Body({ schema: ReplyWorkspaceCommentInputSchema }) input: ReplyWorkspaceCommentInput
   ): Promise<WorkspaceCommentItem> {
@@ -120,7 +128,8 @@ export class WorkspaceFeedbackController {
       { workspaceId: tenant.workspaceId },
       user,
       parsed.data,
-      input
+      input,
+      req.apiKey?.id
     );
   }
 

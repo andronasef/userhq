@@ -92,6 +92,10 @@ const CROSS_TENANT_ROUTES: Record<
   "DELETE /workspaces/:ws/products/:product/categories/:id": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/categories/${s.b.categoryId}`,
   }),
+  "POST /workspaces/:ws/products/:product/posts": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts`,
+    body: { title: "Cross Tenant Post", description: "Test post description" },
+  }),
   "PUT /workspaces/:ws/products/:product/posts/:number/status": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts/${s.b.postNumber}/status`,
     body: { statusId: s.b.statusId, version: 1 },
@@ -271,6 +275,21 @@ const CROSS_TENANT_ROUTES: Record<
   }),
   "DELETE /workspaces/:ws/products/:product/faq/questions/:id": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/faq/questions/${s.b.faqQuestionId}`,
+  }),
+  // Export
+  "GET /workspaces/:ws/export/feedback": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/export/feedback`,
+  }),
+  // API Keys
+  "GET /workspaces/:ws/api-keys": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/api-keys`,
+  }),
+  "POST /workspaces/:ws/api-keys": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/api-keys`,
+    body: { name: "Cross Test Key", scopes: ["requests:read"] },
+  }),
+  "DELETE /workspaces/:ws/api-keys/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/api-keys/${s.b.apiKeyId}`,
   }),
 };
 

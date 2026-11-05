@@ -34,6 +34,7 @@ import { CurrentTenant } from "../tenancy/current-tenant.decorator.js";
 import { CurrentUser } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { RoadmapService } from "./roadmap.service.js";
+import { RequireScopes } from "../api-keys/api-key.decorator.js";
 
 const UuidParamSchema = z.string().uuid();
 const LinkPostInputSchema = z.object({
@@ -47,6 +48,7 @@ export class RoadmapController {
   constructor(private readonly roadmapService: RoadmapService) {}
 
   @Get()
+  @RequireScopes("roadmap:read")
   @SerializeOptions({ schema: AdminRoadmapListResponseSchema })
   async listItems(
     @CurrentTenant() tenant: Tenant
@@ -59,6 +61,7 @@ export class RoadmapController {
   }
 
   @Get("search-posts")
+  @RequireScopes("roadmap:read")
   @SerializeOptions({ schema: RoadmapPostLinkSearchResponseSchema })
   async searchPosts(
     @CurrentTenant() tenant: Tenant,
@@ -75,6 +78,7 @@ export class RoadmapController {
   }
 
   @Post()
+  @RequireScopes("roadmap:write")
   @HttpCode(HttpStatus.CREATED)
   @SerializeOptions({ schema: AdminRoadmapItemSchema })
   async createItem(
@@ -93,6 +97,7 @@ export class RoadmapController {
   }
 
   @Patch(":id/move")
+  @RequireScopes("roadmap:write")
   @SerializeOptions({ schema: AdminRoadmapItemSchema })
   async moveItem(
     @CurrentTenant() tenant: Tenant,
@@ -117,6 +122,7 @@ export class RoadmapController {
   }
 
   @Patch(":id")
+  @RequireScopes("roadmap:write")
   @SerializeOptions({ schema: AdminRoadmapItemSchema })
   async updateItem(
     @CurrentTenant() tenant: Tenant,
@@ -141,6 +147,7 @@ export class RoadmapController {
   }
 
   @Delete(":id")
+  @RequireScopes("roadmap:write")
   async deleteItem(
     @CurrentTenant() tenant: Tenant,
     @Param("id") rawId: string
@@ -162,6 +169,7 @@ export class RoadmapController {
   }
 
   @Post(":id/link")
+  @RequireScopes("roadmap:write")
   async linkPost(
     @CurrentTenant() tenant: Tenant,
     @CurrentUser() user: { id: string },
@@ -185,6 +193,7 @@ export class RoadmapController {
   }
 
   @Delete(":id/unlink/:postId")
+  @RequireScopes("roadmap:write")
   async unlinkPost(
     @CurrentTenant() tenant: Tenant,
     @Param("id") rawId: string,

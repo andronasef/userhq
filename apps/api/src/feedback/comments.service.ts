@@ -39,7 +39,8 @@ export class CommentsService {
     currentUser: { id: string; name: string | null; image: string | null },
     number: number,
     input: CreateCommentInput,
-    userAgent?: string | null
+    userAgent?: string | null,
+    apiKeyId?: string | null
   ): Promise<PublicComment> {
     const deviceInfo = parseUserAgent(userAgent);
 
@@ -93,6 +94,7 @@ export class CommentsService {
           isAdmin,
           body: input.body,
           deviceInfo,
+          createdByApiKeyId: apiKeyId ?? null,
         })
         .returning();
 
@@ -106,8 +108,8 @@ export class CommentsService {
       return {
         id: newComment.id,
         author: {
-          name: currentUser.name,
-          image: currentUser.image,
+          name: currentUser.name ?? null,
+          image: currentUser.image ?? null,
           isAdmin,
           deleted: false,
         },

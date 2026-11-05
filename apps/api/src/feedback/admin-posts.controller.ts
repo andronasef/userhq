@@ -17,6 +17,8 @@ import {
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
 import { z } from "zod";
 import {
+  CreatePostInputSchema,
+  type CreatePostInput,
   CreateCommentInputSchema,
   PublicCommentSchema,
   type CreateCommentInput,
@@ -49,6 +51,7 @@ import { CurrentTenant } from "../tenancy/current-tenant.decorator.js";
 import { CurrentUser } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { ModerationService } from "./moderation.service.js";
+import { RequireScopes } from "../api-keys/api-key.decorator.js";
 
 import { PostsService } from "./posts.service.js";
 import { CommentsService } from "./comments.service.js";
@@ -67,7 +70,27 @@ export class AdminPostsController {
     private readonly commentsService: CommentsService
   ) {}
 
+  @Post()
+  @RequireScopes("requests:write")
+  @HttpCode(201)
+  @SerializeOptions({ schema: PostCreatedSchema })
+  async createPost(
+    @CurrentTenant() tenant: Tenant,
+    @CurrentUser() user: any,
+    @Req() req: any,
+    @Body({ schema: CreatePostInputSchema }) input: CreatePostInput
+  ): Promise<PostCreated> {
+    return this.postsService.createPost(
+      { workspaceId: tenant.workspaceId, productId: tenant.productId! },
+      user,
+      input,
+      req.headers?.["user-agent"],
+      req.apiKey?.id
+    );
+  }
+
   @Post(":number/comments")
+  @RequireScopes("comments:write")
   @UseGuards(UserThrottlerGuard)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(201)
@@ -81,10 +104,18 @@ export class AdminPostsController {
   ): Promise<PublicComment> {
     const parsed = postNumberParamSchema.safeParse(number);
     if (!parsed.success) throw new ApiException("post_not_found", 404, "Post not found.");
-    return this.commentsService.createComment({ workspaceId: tenant.workspaceId, productId: tenant.productId! }, user, parsed.data, input, req.headers?.["user-agent"]);
+    return this.commentsService.createComment(
+      { workspaceId: tenant.workspaceId, productId: tenant.productId! },
+      user,
+      parsed.data,
+      input,
+      req.headers?.["user-agent"],
+      req.apiKey?.id
+    );
   }
 
   @Patch(":number")
+  @RequireScopes("requests:write")
   @SerializeOptions({ schema: PostCreatedSchema })
   async updatePost(
     @CurrentTenant() tenant: Tenant,
@@ -98,6 +129,7 @@ export class AdminPostsController {
   }
 
   @Delete(":number")
+  @RequireScopes("requests:write")
   @HttpCode(204)
   async deletePost(
     @CurrentTenant() tenant: Tenant,
@@ -110,6 +142,7 @@ export class AdminPostsController {
   }
 
   @Get()
+  @RequireScopes("requests:read")
   @SerializeOptions({ schema: AdminBoardListResponseSchema })
   async listPosts(
     @CurrentTenant() tenant: Tenant,
@@ -128,6 +161,7 @@ export class AdminPostsController {
   }
 
   @Post("merge")
+  @RequireScopes("requests:write")
   @HttpCode(200)
   @SerializeOptions({ schema: MergeResultSchema })
   async bulkMerge(
@@ -142,6 +176,7 @@ export class AdminPostsController {
   }
 
   @Post(":number/merge")
+  @RequireScopes("requests:write")
   @HttpCode(200)
   @SerializeOptions({ schema: MergeResultSchema })
   async mergePost(
@@ -162,6 +197,7 @@ export class AdminPostsController {
   }
 
   @Get(":number")
+  @RequireScopes("requests:read")
   @SerializeOptions({ schema: AdminPostDetailSchema })
   async getPost(
     @CurrentTenant() tenant: Tenant,
@@ -185,6 +221,7 @@ export class AdminPostsController {
   }
 
   @Get(":number/voters")
+  @RequireScopes("requests:read")
   @SerializeOptions({ schema: VoterPageSchema })
   async listVoters(
     @CurrentTenant() tenant: Tenant,
@@ -208,6 +245,7 @@ export class AdminPostsController {
   }
 
   @Post(":number/restore")
+  @RequireScopes("requests:write")
   @HttpCode(204)
   async restorePost(
     @CurrentTenant() tenant: Tenant,
@@ -229,6 +267,7 @@ export class AdminPostsController {
   }
 
   @Put(":number/status")
+  @RequireScopes("requests:write")
   @SerializeOptions({ schema: StatusChangeResultSchema })
   async changeStatus(
     @CurrentTenant() tenant: Tenant,

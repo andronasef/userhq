@@ -28,6 +28,7 @@ import { CurrentUser } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { ModerationService } from "./moderation.service.js";
 import { CommentsService } from "./comments.service.js";
+import { RequireScopes } from "../api-keys/api-key.decorator.js";
 
 const uuidParamSchema = z.string().uuid();
 
@@ -41,6 +42,7 @@ export class AdminCommentsController {
   ) {}
 
   @Patch(":id")
+  @RequireScopes("comments:write")
   @SerializeOptions({ schema: PublicCommentSchema })
   async updateComment(
     @CurrentTenant() tenant: Tenant,
@@ -54,6 +56,7 @@ export class AdminCommentsController {
   }
 
   @Delete(":id")
+  @RequireScopes("comments:write")
   @HttpCode(204)
   async deleteComment(
     @CurrentTenant() tenant: Tenant,
@@ -66,6 +69,7 @@ export class AdminCommentsController {
   }
 
   @Get("deleted")
+  @RequireScopes("comments:read")
   @SerializeOptions({ schema: DeletedCommentPageSchema })
   async listDeletedComments(
     @CurrentTenant() tenant: Tenant,
@@ -78,6 +82,7 @@ export class AdminCommentsController {
   }
 
   @Post(":id/restore")
+  @RequireScopes("comments:write")
   @HttpCode(204)
   async restoreComment(
     @CurrentTenant() tenant: Tenant,

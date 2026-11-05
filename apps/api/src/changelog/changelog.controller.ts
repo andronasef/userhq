@@ -34,6 +34,7 @@ import { TenantGuard, type Tenant } from "../tenancy/tenant.guard.js";
 import { CurrentTenant } from "../tenancy/current-tenant.decorator.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { ChangelogService } from "./changelog.service.js";
+import { RequireScopes } from "../api-keys/api-key.decorator.js";
 
 const UuidParamSchema = z.string().uuid();
 
@@ -44,12 +45,14 @@ export class ChangelogController {
   constructor(private readonly changelogService: ChangelogService) {}
 
   @Get()
+  @RequireScopes("changelog:read")
   @SerializeOptions({ schema: AdminChangelogListResponseSchema })
   async listEntries(@CurrentTenant() tenant: Tenant): Promise<AdminChangelogListResponse> {
     return this.changelogService.listAdminEntries(tenant.productId!);
   }
 
   @Post()
+  @RequireScopes("changelog:write")
   @HttpCode(HttpStatus.CREATED)
   @SerializeOptions({ schema: AdminChangelogEntrySchema })
   async createEntry(
@@ -60,12 +63,14 @@ export class ChangelogController {
   }
 
   @Get("tags")
+  @RequireScopes("changelog:read")
   @SerializeOptions({ schema: ChangelogTagSchema })
   async listTags(@CurrentTenant() tenant: Tenant): Promise<ChangelogTag[]> {
     return this.changelogService.listTags(tenant.productId!);
   }
 
   @Post("tags")
+  @RequireScopes("changelog:write")
   @HttpCode(HttpStatus.CREATED)
   @SerializeOptions({ schema: ChangelogTagSchema })
   async createTag(
@@ -76,6 +81,7 @@ export class ChangelogController {
   }
 
   @Delete("tags/:tagId")
+  @RequireScopes("changelog:write")
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteTag(
     @CurrentTenant() tenant: Tenant,
@@ -89,6 +95,7 @@ export class ChangelogController {
   }
 
   @Get(":id")
+  @RequireScopes("changelog:read")
   @SerializeOptions({ schema: AdminChangelogEntrySchema })
   async getEntry(
     @CurrentTenant() tenant: Tenant,
@@ -102,6 +109,7 @@ export class ChangelogController {
   }
 
   @Patch(":id")
+  @RequireScopes("changelog:write")
   @SerializeOptions({ schema: AdminChangelogEntrySchema })
   async updateEntry(
     @CurrentTenant() tenant: Tenant,
@@ -116,6 +124,7 @@ export class ChangelogController {
   }
 
   @Post(":id/publish")
+  @RequireScopes("changelog:write")
   @HttpCode(HttpStatus.OK)
   @SerializeOptions({ schema: AdminChangelogEntrySchema })
   async publishEntry(
@@ -131,6 +140,7 @@ export class ChangelogController {
   }
 
   @Post(":id/unpublish")
+  @RequireScopes("changelog:write")
   @HttpCode(HttpStatus.OK)
   @SerializeOptions({ schema: AdminChangelogEntrySchema })
   async unpublishEntry(
@@ -145,6 +155,7 @@ export class ChangelogController {
   }
 
   @Delete(":id")
+  @RequireScopes("changelog:write")
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteEntry(
     @CurrentTenant() tenant: Tenant,

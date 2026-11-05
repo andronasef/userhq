@@ -90,7 +90,8 @@ export class PostsService {
     portal: { workspaceId: string; productId: string },
     currentUser: { id: string },
     input: CreatePostInput,
-    userAgent?: string | null
+    userAgent?: string | null,
+    apiKeyId?: string | null
   ): Promise<PostCreated> {
     const isAdmin = await isWorkspaceAdmin(
       this.db,
@@ -144,6 +145,7 @@ export class PostsService {
           authorIsAdmin: isAdmin,
           voteCount: 1,
           deviceInfo,
+          createdByApiKeyId: apiKeyId ?? null,
         })
         .returning({
           id: posts.id,

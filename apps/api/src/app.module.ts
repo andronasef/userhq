@@ -33,6 +33,8 @@ import { RoadmapModule } from "./roadmap/roadmap.module.js";
 import { NotificationsModule } from "./notifications/notifications.module.js";
 import { ChangelogModule } from "./changelog/changelog.module.js";
 import { FaqModule } from "./faq/faq.module.js";
+import { ApiKeysModule } from "./api-keys/api-keys.module.js";
+import { ExportModule } from "./export/export.module.js";
 
 const DB_POOL = Symbol.for("@userhq/api/db-pool");
 
@@ -78,6 +80,8 @@ export class AppModule {
         NotificationsModule,
         ChangelogModule,
         FaqModule,
+        ApiKeysModule,
+        ExportModule,
       ],
       controllers: [HealthController, MeController],
       providers: [

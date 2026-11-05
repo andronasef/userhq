@@ -154,7 +154,6 @@ function ProductFeaturesFormInner({
               >
                 <input
                   type="checkbox"
-                  defaultChecked={product.features[key]}
                   id={`feature-${key}`}
                   aria-labelledby={`feature-${key}-name`}
                   aria-describedby={`feature-${key}-desc`}

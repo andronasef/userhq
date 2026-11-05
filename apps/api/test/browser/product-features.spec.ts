@@ -94,15 +94,22 @@ test.describe("Product feature settings", () => {
       });
     await page.context().addCookies(cookies);
     await page.goto(`/dashboard/${ws}/app/settings`);
-    await expect(page.getByRole("heading", { name: "Portal features", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Portal features", exact: true }),
+    ).toBeVisible();
     await expect(
       page.getByRole("checkbox", { name: "Feedback board", exact: true }),
     ).toBeChecked();
-    await page.getByRole("checkbox", { name: "Feedback board", exact: true }).uncheck();
+    await page
+      .getByRole("checkbox", { name: "Feedback board", exact: true })
+      .uncheck();
     await page
       .locator("form")
       .filter({
-        has: page.getByRole("checkbox", { name: "Feedback board", exact: true }),
+        has: page.getByRole("checkbox", {
+          name: "Feedback board",
+          exact: true,
+        }),
       })
       .getByRole("button", { name: "Save features", exact: true })
       .click();
@@ -126,11 +133,16 @@ test.describe("Product feature settings", () => {
       changelog: true,
       faq: true,
     });
-    await page.getByRole("checkbox", { name: "Feedback board", exact: true }).check();
+    await page
+      .getByRole("checkbox", { name: "Feedback board", exact: true })
+      .check();
     await page
       .locator("form")
       .filter({
-        has: page.getByRole("checkbox", { name: "Feedback board", exact: true }),
+        has: page.getByRole("checkbox", {
+          name: "Feedback board",
+          exact: true,
+        }),
       })
       .getByRole("button", { name: "Save features", exact: true })
       .click();

@@ -1,9 +1,14 @@
 import * as React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getProduct, getWorkspace, publicHost } from "../../../../../lib/api-server";
+import {
+  getProduct,
+  getWorkspace,
+  publicHost,
+} from "../../../../../lib/api-server";
 import { PageHeader } from "../../../../../components/page-header";
 import { ProductGeneralForm } from "./product-general-form";
+import { ProductFeaturesForm } from "./product-features-form";
 import { ProductBrandingForm } from "./product-branding-form";
 import { ProductDangerZone } from "./product-danger-zone";
 
@@ -35,7 +40,11 @@ export default async function ProductSettingsPage({
   ]);
 
   if (!productRes.ok || !wsRes.ok) {
-    if (!wsRes.ok && wsRes.status === 403 && wsRes.code === "workspace_suspended") {
+    if (
+      !wsRes.ok &&
+      wsRes.status === 403 &&
+      wsRes.code === "workspace_suspended"
+    ) {
       return null;
     }
     notFound();
@@ -57,6 +66,8 @@ export default async function ProductSettingsPage({
         host={host}
         workspaceName={workspaceData.name}
       />
+
+      <ProductFeaturesForm ws={ws} product={productData} host={host} />
 
       <div className="border-t border-border pt-8 mt-8">
         <ProductBrandingForm ws={ws} product={productData} />

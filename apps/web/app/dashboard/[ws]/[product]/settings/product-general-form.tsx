@@ -21,7 +21,6 @@ import {
   type LogoValue,
 } from "../../../../../components/logo-field";
 import { Button } from "../../../../../components/ui/button";
-import { ConfirmDialog } from "../../../../../components/ui/confirm-dialog";
 import { Alert } from "../../../../../components/ui/alert";
 import { apiFetch, ApiClientError } from "../../../../../lib/api-client";
 import { errorCopy, FIELD_FOR_CODE } from "../../../../../lib/api-errors";
@@ -41,8 +40,6 @@ function ProductGeneralFormInner({
   workspaceName,
 }: ProductGeneralFormProps): React.JSX.Element {
   const router = useRouter();
-  const [pendingSave, setPendingSave] =
-    React.useState<UpdateProductInput | null>(null);
   const [copied, setCopied] = React.useState(false);
   const [alertError, setAlertError] = React.useState<string | null>(null);
   const [logoValue, setLogoValue] = React.useState<LogoValue | null>(
@@ -53,7 +50,6 @@ function ProductGeneralFormInner({
   const [logoUploading, setLogoUploading] = React.useState(false);
 
   const defaultValues: UpdateProductInput = {
-    features: { board: product.features.board },
     name: product.name,
     slug: product.slug,
     logoUploadId: product.logoUploadId ?? null,
@@ -68,7 +64,7 @@ function ProductGeneralFormInner({
     watch,
     setError,
     reset,
-    formState: { errors, isDirty, dirtyFields },
+    formState: { errors, isDirty },
   } = useForm<UpdateProductInput>({
     resolver: zodResolver(UpdateProductInputSchema),
     mode: "onTouched",
@@ -95,7 +91,6 @@ function ProductGeneralFormInner({
         return;
       }
       reset({
-        features: { board: updated.features.board },
         name: updated.name,
         slug: updated.slug,
         logoUploadId: updated.logoUploadId ?? null,
@@ -122,15 +117,7 @@ function ProductGeneralFormInner({
 
   const onSubmit = (data: UpdateProductInput) => {
     setAlertError(null);
-    const input = {
-      ...data,
-      features: dirtyFields.features?.board
-        ? { board: data.features!.board }
-        : undefined,
-    };
-    if (product.features.board && input.features?.board === false)
-      setPendingSave(input);
-    else mutation.mutate(input);
+    mutation.mutate(data);
   };
 
   const handleCopyUrl = async () => {
@@ -238,11 +225,6 @@ function ProductGeneralFormInner({
           />
         </Field>
 
-        <label className="flex items-center gap-3 text-sm font-semibold">
-          <input type="checkbox" {...register("features.board")} />
-          Board
-        </label>
-
         {alertError && <Alert variant="destructive">{alertError}</Alert>}
 
         <div>
@@ -261,20 +243,6 @@ function ProductGeneralFormInner({
           </Button>
         </div>
       </fieldset>
-      <ConfirmDialog
-        open={pendingSave !== null}
-        onOpenChange={(open) => {
-          if (!open) setPendingSave(null);
-        }}
-        title="Hide Board from your portal?"
-        description="Customers won't be able to see this feature. Your content stays saved and you can turn it back on anytime."
-        dismissLabel="Keep editing"
-        confirmLabel="Hide feature"
-        pendingLabel="Saving…"
-        onConfirm={async () => {
-          if (pendingSave) await mutation.mutateAsync(pendingSave);
-        }}
-      />
     </form>
   );
 }

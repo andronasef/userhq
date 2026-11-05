@@ -68,7 +68,7 @@ Each product has one feedback board plus roadmap, changelog and FAQ. The workspa
 
 Extend existing product settings and shared response contracts with a four-boolean capability object. Reuse tenant authorization and add a public feature policy; disabled public access should return a consistent not-found response. Keep branding metadata reachable while excluding disabled module data.
 
-Proposed landing fallback: Board, Roadmap, Changelog, FAQ, then a neutral unavailable state when all are disabled. No automatic replay of notifications suppressed while a feature was disabled. These exact choices are proposals, not additional product approvals.
+**D-13 (confirmed 2026-11-05):** landing fallback is Board, Roadmap, Changelog, FAQ, then a neutral unavailable state when all are disabled. **D-14 (confirmed 2026-11-05):** notifications suppressed while a feature was disabled are not replayed on re-enable.
 
 Theme storage, exact API key scopes, route names, retry timings and webhook signing format remain implementation details to resolve during phase research. Store only secure API-key hashes. Reuse business services, explicit public response allowlists, and generated committed migrations applied by the existing migrator. No database schema push.
 

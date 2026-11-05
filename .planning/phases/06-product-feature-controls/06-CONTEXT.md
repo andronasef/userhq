@@ -1,6 +1,6 @@
 # Phase 6: Product Feature Controls
 
-**Status: proposed / not started.** Product behavior approved; exact engineering proposals below await concrete review. No phase research, UI-SPEC or plan-check verdict has yet been produced.
+**Status: proposed / not started.** Product behavior approved (including D-13 landing fallback and D-14 no-replay, confirmed 2026-11-05); remaining engineering proposals below await concrete review. No phase research, UI-SPEC or plan-check verdict has yet been produced.
 
 ## Locked decisions
 
@@ -13,6 +13,8 @@ Source: [expansion draft](../../../docs/specs/workspace-platform-expansion.md).
 - D-11: Existing products keep all four enabled defaults; tenant isolation and roadmap privacy remain mandatory.
 - D-12: Both GSD and Matt workflows remain required. GitHub tracker and a shared glossary are intended; setup/spec/ticket drafts require concrete review.
 - D-02 applies only to reuse of the delivery-policy seam. Building browser push is a separate slice, not phase 6.
+- D-13 (confirmed 2026-11-05): All-disabled landing fallback order is Board → Roadmap → Changelog → FAQ, then a neutral branded unavailable state.
+- D-14 (confirmed 2026-11-05): Notifications suppressed while a module was disabled are NOT replayed on re-enable; only events after re-enable notify.
 
 ## Grounded current state and source pointers
 
@@ -34,9 +36,9 @@ Compose public feature enforcement with PortalGuard/session authorization; it mu
 
 Inventory before coding: board posts/comments/votes/mutes and product categories/statuses (including where returned inside metadata); roadmap list/detail; changelog list/permalink; FAQ read/search/deep-link; activity and notifications. Public product/workspace branding metadata remains accessible without disabled feature content. Auth, account settings and unsubscribe must remain reachable; unsubscribe must keep working even if Board is disabled.
 
-Proposed fallback landing order: Board → Roadmap → Changelog → FAQ → neutral unavailable state. Preserve directory entries unless a reviewed UX rule says otherwise; never link them to a disabled feature. Public JSON must suppress disabled-module previews/linked data, not merely rely on hidden links. Preserve underlying relationships.
+Landing order is locked by D-13: Board → Roadmap → Changelog → FAQ → neutral unavailable state. Preserve directory entries unless a reviewed UX rule says otherwise; never link them to a disabled feature. Public JSON must suppress disabled-module previews/linked data, not merely rely on hidden links. Preserve underlying relationships.
 
-Pause means suppressed deliveries are not blindly replayed on re-enable. Research should define a durable skip/suppression outcome for existing queued email and prevent in-app unread badges from counting hidden items. This exact re-enable policy remains a proposal for review.
+Per D-14, suppressed deliveries are not replayed on re-enable. Research should define a durable skip/suppression outcome for existing queued email and prevent in-app unread badges from counting hidden items.
 
 ## Verification and migration constraints
 

@@ -42,4 +42,21 @@ describe("Private Board management with Board disabled", () => {
     expect((await mutate("delete", "/api/v1/workspaces/other-private-board/products/app/posts/1")).status).toBe(404);
     expect((await mutate("patch", `${base}/posts/no-number`, { title: "Valid", version: 1 })).status).toBe(404);
   });
+
+  it("creates admin replies and edits/deletes them while Board is disabled", async () => {
+    const created = await mutate("post", `${base}/posts/1/comments`, { body: "Private preparation" });
+    expect(created.status).toBe(201);
+    expect(created.body.author.isAdmin).toBe(true);
+    const id = created.body.id;
+    const reply = await mutate("post", `${base}/posts/1/comments`, { body: "Reply", parentId: id });
+    expect(reply.status).toBe(201);
+    const edited = await mutate("patch", `${base}/comments/${id}`, { body: "Updated preparation", version: created.body.version });
+    expect(edited.status).toBe(200);
+    expect(edited.body.body).toBe("Updated preparation");
+    expect((await mutate("patch", `${base}/comments/${id}`, { body: "Stale", version: created.body.version })).status).toBe(409);
+    expect((await mutate("delete", `${base}/comments/${id}`, {}, customer.cookie)).status).toBe(404);
+    expect((await mutate("delete", `/api/v1/workspaces/other-private-board/products/app/comments/${id}`)).status).toBe(404);
+    expect((await mutate("delete", `${base}/comments/${id}`)).status).toBe(204);
+    expect((await mutate("post", `${base}/posts/1/comments`, { body: "" })).status).toBe(400);
+  });
 });

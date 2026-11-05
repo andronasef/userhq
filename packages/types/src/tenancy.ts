@@ -265,6 +265,7 @@ export const ProductCreatedSchema = z.object({
 export type ProductCreated = z.infer<typeof ProductCreatedSchema>;
 
 export const ProductSummarySchema = z.object({
+  id: z.string().uuid().optional(),
   features: ProductFeaturesSchema,
   slug: z.string(),
   name: z.string(),

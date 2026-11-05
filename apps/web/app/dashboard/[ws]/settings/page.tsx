@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getWorkspace, publicHost } from "../../../../lib/api-server";
 import { PageHeader } from "../../../../components/page-header";
+import { TabNav } from "../../../../components/tab-nav";
 import { WorkspaceSettingsForms } from "./workspace-settings-forms";
 
 interface WorkspaceSettingsPageProps {
@@ -43,6 +44,14 @@ export default async function WorkspaceSettingsPage({
       <PageHeader
         title="Workspace settings"
         description="Manage your workspace name, branding, and public directory."
+      />
+      <TabNav
+        tabs={[
+          { label: "General", href: `/dashboard/${ws}/settings` },
+          { label: "API Keys", href: `/dashboard/${ws}/settings/api-keys` },
+        ]}
+        activeHref={`/dashboard/${ws}/settings`}
+        className="mb-8"
       />
       <WorkspaceSettingsForms
         ws={ws}

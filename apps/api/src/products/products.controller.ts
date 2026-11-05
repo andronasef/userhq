@@ -142,6 +142,7 @@ export class ProductsController {
   ): Promise<ProductSummary[]> {
     const rows = await this.db
       .select({
+        id: products.id,
         slug: products.slug,
         name: products.name,
         logoKey: uploads.storageKey,
@@ -160,6 +161,7 @@ export class ProductsController {
       .orderBy(asc(products.name), asc(products.slug));
 
     return rows.map((r) => ({
+      id: r.id,
       features: pickFeatures(r),
       slug: r.slug,
       name: r.name,
@@ -174,6 +176,7 @@ export class ProductsController {
   async getProduct(@CurrentTenant() tenant: Tenant): Promise<ProductDetail> {
     const [row] = await this.db
       .select({
+        id: products.id,
         slug: products.slug,
         name: products.name,
         logoUploadId: products.logoUploadId,

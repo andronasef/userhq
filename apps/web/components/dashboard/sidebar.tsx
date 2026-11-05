@@ -37,7 +37,9 @@ export function DashboardSidebar({
 
   const isOverviewActive = pathname === `/dashboard/${ws}`;
   const isTeamActive = pathname === `/dashboard/${ws}/team`;
-  const isWorkspaceSettingsActive = pathname === `/dashboard/${ws}/settings`;
+  const isWorkspaceSettingsActive =
+    pathname === `/dashboard/${ws}/settings` ||
+    pathname.startsWith(`/dashboard/${ws}/settings/`);
 
   return (
     <aside

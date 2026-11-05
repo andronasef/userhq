@@ -61,3 +61,9 @@ export const createdApiKeyResponseSchema = z.object({
 });
 
 export type CreatedApiKeyResponse = z.infer<typeof createdApiKeyResponseSchema>;
+
+export const apiKeyListResponseSchema = z.object({
+  keys: z.array(apiKeyMetadataSchema),
+});
+
+export type ApiKeyListResponse = z.infer<typeof apiKeyListResponseSchema>;

@@ -75,6 +75,8 @@ import {
   type WorkspaceCommentsResponse,
   type WorkspaceRequestsQuery,
   type WorkspaceCommentsQuery,
+  apiKeyListResponseSchema,
+  type ApiKeyListResponse,
   ANONYMOUS_ME,
 } from "@userhq/types";
 
@@ -550,3 +552,13 @@ export const getWorkspaceComments = cache(
     );
   }
 );
+
+export const getWorkspaceApiKeys = cache(
+  (ws: string): Promise<ApiReadResult<ApiKeyListResponse>> => {
+    return apiRead(
+      `/api/v1/workspaces/${encodeURIComponent(ws)}/api-keys`,
+      apiKeyListResponseSchema
+    );
+  }
+);
+

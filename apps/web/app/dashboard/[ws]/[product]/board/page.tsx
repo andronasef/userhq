@@ -10,6 +10,7 @@ import {
   getDeletedComments,
 } from "@/lib/api-server";
 import { PageHeader } from "@/components/page-header";
+import { HiddenModuleNotice } from "@/components/dashboard/hidden-module-notice";
 import { TabNav } from "@/components/tab-nav";
 import { BoardView } from "./board-view";
 import { DeletedItems } from "@/components/dashboard/deleted-items";
@@ -90,6 +91,8 @@ export default async function BoardPage({
         title="Board"
         description={`Every post on ${productRes.data.name}'s public board. Change statuses, merge duplicates, and restore deleted posts here.`}
       />
+
+      {!productRes.data.features.board && <HiddenModuleNotice ws={ws} product={product} module="board" />}
 
       <TabNav tabs={tabs} activeHref={activeHref} className="mb-6" />
 

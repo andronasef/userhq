@@ -78,6 +78,7 @@ export default async function DashboardPostPage({
     <PostDetailView
       ws={ws}
       product={product}
+      boardEnabled={productRes.data.features.board}
       post={post}
       initialDeleted={deleted}
       viewer={viewer}

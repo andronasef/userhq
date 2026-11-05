@@ -11,6 +11,7 @@ import type {
   TimelineItem,
   PostStatus,
 } from "@userhq/types";
+import { HiddenModuleNotice } from "@/components/dashboard/hidden-module-notice";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
@@ -29,6 +30,7 @@ import { apiFetch } from "@/lib/api-client";
 export interface PostDetailViewProps {
   ws: string;
   product: string;
+  boardEnabled: boolean;
   post: PublicPostDetail;
   initialDeleted: boolean;
   viewer: PostViewer;
@@ -41,6 +43,7 @@ export function PostDetailView({
   ws,
   product,
   post,
+  boardEnabled,
   initialDeleted,
   viewer,
   timeline,
@@ -151,6 +154,8 @@ export function PostDetailView({
           </div>
         }
       />
+
+      {!boardEnabled && <HiddenModuleNotice ws={ws} product={product} module="board" />}
 
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge name={post.status.name} color={post.status.color} />

@@ -14,6 +14,7 @@ import {
   Kanban,
   Megaphone,
   HelpCircle,
+  EyeOff,
 } from "lucide-react";
 import type { ProductSummary } from "@userhq/types";
 import { cn } from "../../lib/utils";
@@ -167,6 +168,7 @@ export function DashboardSidebar({
                     <div className="flex flex-col gap-0.5 pl-7">
                       <Link
                         href={boardHref}
+                        title={!product.features.board ? "Hidden from customers" : undefined}
                         className={cn(
                           "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
                           isBoardActive &&
@@ -179,10 +181,15 @@ export function DashboardSidebar({
                           aria-hidden="true"
                         />
                         <span className="truncate">Board</span>
+                        {!product.features.board && (<>
+                          <EyeOff className="size-3.5 ml-auto shrink-0 text-muted-foreground" aria-hidden />
+                          <span className="sr-only">Hidden from customers</span>
+                        </>)}
                       </Link>
 
                       <Link
                         href={roadmapHref}
+                        title={!product.features.roadmap ? "Hidden from customers" : undefined}
                         className={cn(
                           "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
                           isRoadmapActive &&
@@ -195,10 +202,15 @@ export function DashboardSidebar({
                           aria-hidden="true"
                         />
                         <span className="truncate">Roadmap</span>
+                        {!product.features.roadmap && (<>
+                          <EyeOff className="size-3.5 ml-auto shrink-0 text-muted-foreground" aria-hidden />
+                          <span className="sr-only">Hidden from customers</span>
+                        </>)}
                       </Link>
 
                       <Link
                         href={changelogHref}
+                        title={!product.features.changelog ? "Hidden from customers" : undefined}
                         className={cn(
                           "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
                           isChangelogActive &&
@@ -211,10 +223,15 @@ export function DashboardSidebar({
                           aria-hidden="true"
                         />
                         <span className="truncate">Changelog</span>
+                        {!product.features.changelog && (<>
+                          <EyeOff className="size-3.5 ml-auto shrink-0 text-muted-foreground" aria-hidden />
+                          <span className="sr-only">Hidden from customers</span>
+                        </>)}
                       </Link>
 
                       <Link
                         href={faqHref}
+                        title={!product.features.faq ? "Hidden from customers" : undefined}
                         className={cn(
                           "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
                           isFaqActive &&
@@ -227,6 +244,10 @@ export function DashboardSidebar({
                           aria-hidden="true"
                         />
                         <span className="truncate">FAQ</span>
+                        {!product.features.faq && (<>
+                          <EyeOff className="size-3.5 ml-auto shrink-0 text-muted-foreground" aria-hidden />
+                          <span className="sr-only">Hidden from customers</span>
+                        </>)}
                       </Link>
 
                       <Link

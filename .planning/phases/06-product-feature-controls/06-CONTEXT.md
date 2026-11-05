@@ -1,22 +1,22 @@
 # Phase 6: Product Feature Controls
 
-**Status: proposed / not started.** Product behavior approved (including D-13 landing fallback and D-14 no-replay, confirmed 2026-11-05); remaining engineering proposals below await concrete review. No phase research, UI-SPEC or plan-check verdict has yet been produced.
+**Status: proposed / not started.** Product behavior approved (including D-13 landing fallback and D-14 no-replay, confirmed 2026-11-05); remaining engineering proposals below await concrete review. Research and pattern mapping are complete; UI-SPEC is approved. Independent plan checking remains pending.
 
 ## Locked decisions
 
 Source: [expansion draft](../../../docs/specs/workspace-platform-expansion.md).
 
-- D-07: Owners/admins independently control Board, Roadmap, Changelog and FAQ per product.
-- D-08: Disable public navigation and direct public API/page access, including public writes; backend enforcement is required.
-- D-09: Preserve data and relationships; authenticated admins can continue managing and re-enable content.
-- D-10: Suppress public links/previews and customer notifications for disabled modules; recheck delivery; restore valid links on re-enable.
-- D-11: Existing products keep all four enabled defaults; tenant isolation and roadmap privacy remain mandatory.
-- D-12: Both GSD and Matt workflows remain required. GitHub tracker and a shared glossary are intended; setup/spec/ticket drafts require concrete review.
+- **D-07:** Owners/admins independently control Board, Roadmap, Changelog and FAQ per product.
+- **D-08:** Disable public navigation and direct public API/page access, including public writes; backend enforcement is required.
+- **D-09:** Preserve data and relationships; authenticated admins can continue managing and re-enable content.
+- **D-10:** Suppress public links/previews and customer notifications for disabled modules; recheck delivery; restore valid links on re-enable.
+- **D-11:** Existing products keep all four enabled defaults; tenant isolation and roadmap privacy remain mandatory.
+- **D-12:** Both GSD and Matt workflows remain required. GitHub tracker and a shared glossary are intended; setup/spec/ticket drafts require concrete review.
 - D-02 applies only to reuse of the delivery-policy seam. Building browser push is a separate slice, not phase 6.
-- D-13 (confirmed 2026-11-05): All-disabled landing fallback order is Board → Roadmap → Changelog → FAQ, then a neutral branded unavailable state.
-- D-15 (confirmed 2026-11-05): All-off product root returns a branded neutral page with HTTP 200 and noindex; the product stays listed in the workspace directory (UI-SPEC U3/U4).
-- D-16 (orchestrator call from research, 2026-11-05): D-14 is implemented strictly (queued mail and unread in-app rows from before a disable never surface after re-enable), and dashboard Board management moves to TenantGuard admin routes instead of reusing public portal routes (06-RESEARCH Critical Findings 1 and Open Questions 1-2).
-- D-14 (confirmed 2026-11-05): Notifications suppressed while a module was disabled are NOT replayed on re-enable; only events after re-enable notify.
+- **D-13:** (confirmed 2026-11-05) All-disabled landing fallback order is Board → Roadmap → Changelog → FAQ, then a neutral branded unavailable state.
+- **D-15:** (confirmed 2026-11-05) All-off product root returns a branded neutral page with HTTP 200 and noindex; the product stays listed in the workspace directory (UI-SPEC U3/U4).
+- **D-16:** (orchestrator call from research, 2026-11-05) D-14 is implemented strictly (queued mail and unread in-app rows from before a disable never surface after re-enable), and dashboard Board management moves to TenantGuard admin routes instead of reusing public portal routes (06-RESEARCH Critical Findings 1 and Open Questions 1-2).
+- **D-14:** (confirmed 2026-11-05) Notifications suppressed while a module was disabled are NOT replayed on re-enable; only events after re-enable notify.
 
 ## Grounded current state and source pointers
 

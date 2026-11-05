@@ -540,15 +540,14 @@ Suggested re-cut (planner's discretion): (1) persistence + contract + policy + g
 | A10 | Flag read once per request; mid-request flips acceptable | Security | negligible at ASVS 1 |
 | A11 | Option A (strict public gate + admin routes) is what the user wants over Option B | CF-1 | wrong scope; needs confirmation |
 
-## Open Questions
+## Resolved Questions (2026-11-05)
 
-1. **Strict D-14 for items queued before a disable.**
-   - Known: with the recommended gate, batches due during the off-window are cancelled durably; queued-before/due-after-re-enable mail and pre-disable unread in-app rows are delivered/visible again.
-   - Unclear: whether "not replayed on re-enable" should also cover those.
-   - Recommendation: ship stateless default; if strict, in the same `updateProduct` transaction on `board=false` delete the product's pending `comment_email_items` (worker then cancels the empty batches) and set `read_at = now()` on the product's unread notifications (about 15 lines, no schema change). Needs user confirmation (A2/A3).
-2. **CF-1 Option A vs Option B** (A11). Recommendation A; confirm.
-3. **All-off HTTP status and whether all-off products stay in the directory** (CONTEXT says preserve entries unless UX rule). UI-SPEC decision.
-4. **Dashboard affordances while a module is off** (badge in sidebar, disable "View on portal"). UI-SPEC decision.
+1. **RESOLVED — strict delivery suppression (D-14/D-16).** The earlier stateless recommendation and assumptions A2/A3 are superseded. Disabling atomically removes pending comment-email items and derived unread notification rows; enqueue and final delivery checks prevent old rows from resurfacing after re-enable. Source posts, comments, activity and relationships remain intact. Marking unread rows read alone does not implement strict suppression.
+2. **RESOLVED — admin Board routes (D-16).** Option A is selected: public endpoints enforce availability for everyone; TenantGuard admin endpoints retain private management. A11 is resolved.
+3. **RESOLVED — all-off portal (D-13/D-15, approved UI-SPEC).** Branded neutral HTTP 200 page with noindex; directory entry remains. Landing fallback is Board → Roadmap → Changelog → FAQ → neutral. A1 is resolved.
+4. **RESOLVED — admin affordances (approved UI-SPEC U6/U8).** Keep sidebar links, show hidden-module notices and accessible icons, suppress public preview links for disabled modules, and retain editing. No further UX confirmation is needed.
+
+These resolutions override earlier exploratory recommendations elsewhere in this research document.
 
 ## Sources
 
@@ -572,7 +571,7 @@ Suggested re-cut (planner's discretion): (1) persistence + contract + policy + g
 - Standard stack: HIGH - no new packages; versions read from manifests
 - Architecture: HIGH - guard/service/controller code read end to end; CF-1..3 reproduced by reading or execution
 - Pitfalls: HIGH - CF-2 reproduced; others from direct reads
-- Delivery semantics: MEDIUM - mechanics verified by reading, D-14 interpretation flagged (Open Question 1)
+- Delivery semantics: resolved by D-14/D-16; strict suppression supersedes the exploratory stateless recommendation
 - Web/vinext behaviour: MEDIUM - precedent-based; no browser run was possible (no Docker)
 
 **Research date:** 2026-11-05

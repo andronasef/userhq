@@ -1,50 +1,62 @@
 # Phase 6 source and decision audit
 
-**Proposed, not executed.** No separate phase RESEARCH, UI-SPEC, plan-check verdict or implementation evidence was produced by the documentation capture.
+Research/UI reconciliation and independent plan check complete; see 06-PLAN-CHECK.md. Implementation is not claimed.
 
-## Goal coverage
+| Source | ID | Item | Plan/task | Status |
+|---|---|---|---|---|
+| GOAL | Phase6 | Four independently controlled modules, public denial and preserved private management | 01–10 | COVERED |
+| REQ | CAP-01 | Owner/admin scoped choices | 01,04,08,10 | COVERED |
+| REQ | CAP-02 | Defaults/content/relationships and restoration | 01,05,06,10 | COVERED |
+| REQ | CAP-03 | Public API reads/writes and page denial | 03,04,07,10 | COVERED |
+| REQ | CAP-04 | Retained private management | 02,04,08,10 | COVERED |
+| REQ | CAP-05 | Navigation, landing, directory, single/all-off | 07,08,10 | COVERED |
+| REQ | CAP-06 | Nested projections, links and metadata | 05,07,08,10 | COVERED |
+| REQ | CAP-07 | Current notification availability and no replay | 06,10 | COVERED |
+| REQ | CAP-08 | Migration/isolation/privacy/browser verification | all; final10 | COVERED |
+| REQ | CAP-09 | Shared policy composing with auth | 01,03,04,06 | COVERED |
+| RESEARCH | CF-1 | Board dashboard uses public endpoints | 02 before03 public gate | COVERED |
+| RESEARCH | CF-2 | Generated duplicate device_info statements | 01.1 trim/regenerate;01.2 fresh/upgrade migration | COVERED |
+| RESEARCH | N1 | Roadmap item in public post | 05.1;07 permalink | COVERED |
+| RESEARCH | N2/N3 | Board linked posts/counts in Roadmap | 05.1;07.3 | COVERED |
+| RESEARCH | N4 | Categories/shared status metadata | 05.2 | COVERED |
+| RESEARCH | N5/N6 | Notification list/count/activity | 03.2;06.2 | COVERED |
+| RESEARCH | N7 | Token-bearing unsubscribe title/URL | 05.2, preserving token actions | COVERED |
+| RESEARCH | N8/N9 | Email and post timeline | 06;03 | COVERED |
+| RESEARCH | N10 | FAQ/roadmap/dashboard links | 07.3;09.2 | COVERED |
+| RESEARCH | Route scan | All product portal handlers explicitly classified | 03.3 | COVERED |
+| RESEARCH | Migration/runtime | Generated committed SQL/advisory migrator/built packages/local fixtures | 01;all preconditions;10 | COVERED |
+| RESEARCH | Open questions | Stateless recommendation superseded by D-16; OptionA admin routes selected | 02;06 | COVERED |
+| UI-SPEC | U1/U2/U8 | Checkboxes, explicit Save, disable confirmation, typed flags | 01;08.1 | COVERED |
+| UI-SPEC | U3/U4 | Branded200 noindex, retained directory entry | 07.1;10 | COVERED |
+| UI-SPEC | U5/U7 | Hide less-than2 tabs, generic404 direct URLs | 07;10 | COVERED |
+| UI-SPEC | U6 | Icons/notices, hidden public preview links | 09.1–2 | COVERED |
+| UI-SPEC | States/copy | Errors, loading, saved-vs-dirty, exact empty/dialog copy, keyboard/mobile | 07;08;10 | COVERED |
+| CONTEXT | D-02 | Existing delivery-policy seam only | 06 | COVERED |
+| CONTEXT | D-07 | Four independent modules | 01;04;08 | COVERED |
+| CONTEXT | D-08 | Backend/public URL enforcement | 03;04;07 | COVERED |
+| CONTEXT | D-09 | Preserve content and private management | 02;05;09 | COVERED |
+| CONTEXT | D-10 | Suppress projections/links/delivery and restore links | 05;06;07;09 | COVERED |
+| CONTEXT | D-11 | Defaults, isolation and private field allowlists | 01;03–06;10 | COVERED |
+| CONTEXT | D-12 | Both workflows, behavior-first tests, concrete review and diff review | every plan;10.2 | COVERED |
+| CONTEXT | D-13 | Board→Roadmap→Changelog→FAQ→neutral | 07.1;10 | COVERED |
+| CONTEXT | D-14 | No off-window replay | 06 | COVERED |
+| CONTEXT | D-15 | All-off200 noindex and directory presence | 07.1;10 | COVERED |
+| CONTEXT | D-16 | Strict old queued/unread suppression; TenantGuard Board paths | 06.1;02→03 | COVERED |
 
-| Scope | Requirement | Plans/tasks | Existing evidence/pattern |
-|---|---|---|---|
-| Independent scoped controls | CAP-01 | 06-01 tasks 1–2; 06-02 task 1 | ProductsController, TenantGuard, product general settings |
-| Defaults/data preservation | CAP-02 | 06-01 tasks 1–3; 06-04 task 2 | tenancy schema; committed migrations/test database migrator |
-| Public API/page denial | CAP-03 | 06-01 tasks 1–3; 06-02 both | PortalGuard and portal feature controllers |
-| Authorized admin access | CAP-04 | 06-01/02; 06-04 task 2 | Existing TenantGuard-protected controllers |
-| Navigation/landing | CAP-05 | 06-01 Board tracer; 06-03 task 1 | Product page/layout, portal tabs/cards |
-| Cross-feature projection | CAP-06 | 06-03 task 2 | Roadmap linked posts, portal metadata, FAQ CTA, activity |
-| Notification delivery | CAP-07 | 06-04 task 1 | Existing outbox/worker/render and in-app service |
-| Isolation/privacy proof | CAP-08 | Every plan; 06-04 task 2 | HTTP fixtures, portal-isolation/canary tests, Playwright |
-| Shared policy/future reuse | CAP-09 | 06-01/02; 06-04 task 1 | Composed tenant/public guards, worker policy seam |
+## Dependencies and sizing
 
-## Locked decision traceability
+Wave1:01. Wave2:02+06 (disjoint file ownership). Wave3:03. Wave4:04. Wave5:05. Wave6:07. Wave7:08. Wave8:09. Wave9:10. Each plan has1–3 tasks and at most28k estimated tokens, calibration factor1/confidence low from zero samples.
 
-| Decision | Destination |
-|---|---|
-| D-01 appearance | Expansion slice 1; outside phase 6 |
-| D-02 push | Expansion slice 8; only existing delivery-policy reuse in 06-04 |
-| D-03 workspace requests/comments | Expansion slices 3–4; outside phase 6 |
-| D-04 shared attention/unread | Expansion slice 4; outside phase 6 |
-| D-05 automation keys/API | Expansion slices 5–6; outside phase 6 |
-| D-06 webhooks | Expansion slice 7; outside phase 6 |
-| D-07 independent modules | 06-01/02/03 |
-| D-08 public enforcement | 06-01/02/03 |
-| D-09 preserved content/admin access | 06-01/02/03/04 |
-| D-10 links/notifications/re-enable | 06-03/04 |
-| D-11 defaults/isolation/privacy | Every plan, final matrix in 06-04 |
-| D-12 both workflows/setup review | Context prerequisites, all plan objectives, setup proposal |
+Initial persistence tracer uses five authored source/test files plus generated SQL/snapshot/journal and an export when required. Guard declarations and shared component/page props require explicitly enumerated coupled edits. These are bounded vertical slices; no task silently omits caller wiring.
 
-## Constraints and open engineering proposals
+Strict D-16 removes only derived unread delivery rows, never source content/activity/relationships. Marking read alone would allow them to reappear in notification history. Worker tests cover completed disable/re-enable before the final current-item read; an SMTP handoff already sent cannot be recalled. Existing bounded request race is distinguished from queued replay.
 
-Existing schema/contract/controller/component/test pointers are listed in 06-CONTEXT. No new board entity, auth stack or native dependency is planned. Migration generation/committed SQL/advisory-lock application remain mandatory. Scope expansion must preserve admin authorization and public explicit DTO allowlists.
+Raw uploaded assets remain served under existing unguessable URLs (Research A4); no disabled endpoint enumerates them. Per-file storage authorization is outside this phase and would need an explicit separate decision.
 
-Engineering details awaiting review/research: four booleans versus comparable typed persistence; capability object exact contract; not_found response; landing fallback order; durable notification suppression outcome; final policy module placement; category/status metadata suppression. Endpoint inventory must cover public signed-in mutations, standalone permalinks, activity and nested linked data; auth/account/unsubscribe are explicit exemptions.
+## Exclusions and pending gates
 
-Main proposed test seams are existing Nest HTTP/Postgres acceptance and Docker HTTP/Playwright journeys, with controlled delivery receivers. Exact endpoint/code scope is reconciled during research and plan checking. Paths named product-features.test.ts and product-features.spec.ts are future test artifacts, not current evidence.
+Appearance D-01, workspace inbox/attention D-03/D-04, automation D-05, webhooks D-06 and actual browser-push infrastructure D-02 remain their approved expansion slices. No new dependency or external API integration is needed in Phase6.
 
-## Review status
+Research/PATTERNS are present and UI-SPEC frontmatter approved. Concrete Matt spec/test-seam/ticket/setup review and independent GSD checker remain parent gates. No implementation, product test/build result or live publication is claimed.
 
-- Product behavior: approved in two user interview rounds.
-- Concrete spec/test seams/ticket sizing/blockers: pending Matt review.
-- Tracker setup draft: pending concrete review; intended GitHub/single-glossary direction approved.
-- Phase research, UI-SPEC, security/plan checking: pending.
-- Feature implementation and live roadmap publication: not performed or verified by this capture.
+Parent owns REQUIREMENTS and STATE: update proposed-plan traceability cells to the CAP mapping above when accepting the ten-plan set.

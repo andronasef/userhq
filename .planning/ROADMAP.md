@@ -365,12 +365,18 @@ Internal fields live in a separate 1:1 table. Public reads go through explicit `
   5. Customers are not notified about, or linked to, a disabled module's content, and notifications suppressed while a module was off are not sent when it is turned back on.
   6. Cross-tenant, disabled-module bypass, migration-default, re-enable and public-roadmap-privacy tests all pass.
 
-**Plans**: 4 plans (proposed drafts; to be reconciled with 06-RESEARCH.md)
+**Plans**: 10 plans (research/UI reconciled; independent plan check passed, concrete review pending)
 
-- [ ] 06-01-PLAN.md — Board capability tracer: settings, persistence, public access, re-enable
-- [ ] 06-02-PLAN.md — Independent Roadmap, Changelog and FAQ controls with public endpoint enforcement
-- [ ] 06-03-PLAN.md — Enabled-feature landing/navigation and cross-feature public projections
-- [ ] 06-04-PLAN.md — Notification suppression at delivery and complete isolation/privacy acceptance
+- [ ] 06-01-PLAN.md — Persist product feature choices through settings (wave 1)
+- [ ] 06-02-PLAN.md — Move dashboard Board actions to tenant-authorized routes (wave 2)
+- [ ] 06-03-PLAN.md — Enforce disabled Board at public request boundaries (wave 3)
+- [ ] 06-04-PLAN.md — Verify independent Roadmap, Changelog and FAQ public gates (wave 4)
+- [ ] 06-05-PLAN.md — Suppress disabled content inside enabled module responses (wave 5)
+- [ ] 06-06-PLAN.md — Suppress customer notifications durably across disable/re-enable (wave 2)
+- [ ] 06-07-PLAN.md — Compose feature-aware portal navigation and pages (wave 6)
+- [ ] 06-08-PLAN.md — Complete the approved product feature settings form (wave 7)
+- [ ] 06-09-PLAN.md — Keep disabled modules clearly manageable in the dashboard (wave 8)
+- [ ] 06-10-PLAN.md — Prove full feature-control journeys and privacy before phase review (wave 9)
 
 **UI hint**: yes
 **Notes**: Context: [06-CONTEXT.md](phases/06-product-feature-controls/06-CONTEXT.md); research: [06-RESEARCH.md](phases/06-product-feature-controls/06-RESEARCH.md). The [approved expansion draft](../docs/specs/workspace-platform-expansion.md) reserves appearance, workspace inbox, admin automation/webhooks and browser push for later phases.
@@ -387,4 +393,4 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5 → 6. Phase 5 can start 
 | 3. Feedback Board & Conversations | 16/16 | Complete | 2026-10-11 |
 | 4. Dual-Layer Roadmap & Closing the Loop | 5/5 | Complete | 2026-10-11 |
 | 5. Changelog & FAQ | 5/5 | Complete | 2026-10-12 |
-| 6. Product Feature Controls | 0/4 | Planned | - |
+| 6. Product Feature Controls | 0/10 | Planned | - |

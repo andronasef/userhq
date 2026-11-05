@@ -338,12 +338,12 @@ Pending phase-6 requirements, appended 2026-11-05. Prior requirements, traceabil
 
 | Requirement | Proposed phase | Proposed plan(s) | Status |
 |---|---|---|---|
-| CAP-01 | 6 | 06-01, 06-02 | Pending |
-| CAP-02 | 6 | 06-01, 06-04 | Pending |
-| CAP-03 | 6 | 06-01, 06-02 | Pending |
-| CAP-04 | 6 | 06-01, 06-02, 06-04 | Pending |
-| CAP-05 | 6 | 06-01, 06-03 | Pending |
-| CAP-06 | 6 | 06-03 | Pending |
-| CAP-07 | 6 | 06-04 | Pending |
-| CAP-08 | 6 | 06-01, 06-02, 06-03, 06-04 | Pending |
-| CAP-09 | 6 | 06-01, 06-02, 06-04 | Pending |
+| CAP-01 | 6 | 06-01, 06-04, 06-08, 06-10 | Pending |
+| CAP-02 | 6 | 06-01, 06-05, 06-06, 06-10 | Pending |
+| CAP-03 | 6 | 06-03, 06-04, 06-07, 06-10 | Pending |
+| CAP-04 | 6 | 06-02, 06-04, 06-08, 06-10, 06-09 | Pending |
+| CAP-05 | 6 | 06-07, 06-08, 06-10, 06-09 | Pending |
+| CAP-06 | 6 | 06-05, 06-07, 06-08, 06-10, 06-09 | Pending |
+| CAP-07 | 6 | 06-06, 06-10 | Pending |
+| CAP-08 | 6 | 06-01, 06-02, 06-03, 06-04, 06-05, 06-06, 06-07, 06-08, 06-09, 06-10 | Pending |
+| CAP-09 | 6 | 06-01, 06-03, 06-04, 06-06 | Pending |

@@ -7,6 +7,7 @@ import { safeNext } from "@/lib/safe-next";
 import { EmailPreferences } from "./email-preferences";
 import { DeleteAccount } from "./delete-account";
 import { AccountBackButton } from "./back-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const metadata: Metadata = {
   title: "Account · UserHQ",
@@ -43,6 +44,16 @@ export default async function AccountPage({
       />
 
       <div className="mt-8 space-y-8">
+        <section className="rounded-lg border border-border bg-card p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-1">
+            Appearance
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Customize how UserHQ looks on your device. Choose between system settings, light mode, or dark mode.
+          </p>
+          <ThemeToggle variant="segmented" />
+        </section>
+
         <section className="rounded-lg border border-border bg-card p-6">
           <h2 className="text-lg font-semibold text-foreground mb-4">
             Comment emails

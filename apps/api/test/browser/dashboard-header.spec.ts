@@ -74,8 +74,11 @@ test.describe("320px Dashboard Header Backstop (Plan 02-04)", () => {
 
     const openNavBtn = page.locator('button[aria-label="Open navigation"]');
     const wordmarkLink = page.locator(
-      'header[data-shell="dashboard"] a[href="/dashboard"]:has-text("UserHQ")'
+      'header[data-shell="dashboard"] a[href="/dashboard"]'
     );
+    // At 320px, the wordmark is hidden (hidden sm:inline) so the mobile controls fit on one line
+    expect(await wordmarkLink.isHidden()).toBe(true);
+
     const switcherTrigger = page.locator(
       'button[aria-label^="Switch workspace, current:"]'
     );
@@ -85,7 +88,6 @@ test.describe("320px Dashboard Header Backstop (Plan 02-04)", () => {
 
     const elements = [
       openNavBtn,
-      wordmarkLink,
       switcherTrigger,
       accountMenuTrigger,
     ];

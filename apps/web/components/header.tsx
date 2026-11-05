@@ -5,6 +5,7 @@ import { UserMenu, SignInButton } from "./user-menu";
 import { SessionKeepAlive } from "./session-keepalive";
 import { NotificationBell } from "./notifications/notification-bell";
 import { HeaderBrand } from "./header-brand";
+import { ThemeToggle } from "./theme-toggle";
 
 export async function Header(): Promise<React.JSX.Element> {
   const me = await getMe();
@@ -15,7 +16,8 @@ export async function Header(): Promise<React.JSX.Element> {
       <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 flex items-center justify-between h-full">
         <HeaderBrand />
 
-        <div>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
           {me.user ? (
             <div className="flex items-center gap-2">
               <NotificationBell />

@@ -186,7 +186,7 @@ test.describe("Portal Branding Backstop (Plan 02-10)", () => {
     await page.waitForLoadState("networkidle");
 
     const ogTitle = await page.locator('meta[property="og:title"]').getAttribute("content");
-    expect(ogTitle).toBe("Sunny");
+    expect(ogTitle).toBe("Sunny · Acme");
 
     const ogDesc = await page.locator('meta[property="og:description"]').getAttribute("content");
     expect(ogDesc).toBe("Bright ideas");
@@ -208,6 +208,6 @@ test.describe("Portal Branding Backstop (Plan 02-10)", () => {
     expect(oceanOgImageCount).toBe(0);
 
     const oceanOgDesc = await page.locator('meta[property="og:description"]').getAttribute("content");
-    expect(oceanOgDesc).toBe("Share feedback and follow updates for Ocean.");
+    expect(oceanOgDesc).toBe("Share feedback, vote on ideas, and follow what's coming next for Ocean.");
   });
 });

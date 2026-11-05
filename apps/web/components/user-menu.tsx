@@ -12,6 +12,10 @@ import {
   UserCog,
   Activity,
   ArrowLeft,
+  Sun,
+  Moon,
+  Monitor,
+  Check,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar } from "./ui/avatar";
@@ -22,7 +26,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from "./ui/dropdown-menu";
+import { useTheme } from "./theme-provider";
 import { authClient } from "../lib/auth-client";
 
 export interface UserMenuProps {
@@ -41,11 +49,19 @@ export function UserMenu({
   hasWorkspaces = false,
   isPlatformOwner = false,
 }: UserMenuProps): React.JSX.Element {
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [isPending, setIsPending] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const pathname = usePathname();
   const isAccountPage = pathname === "/account";
   const [accountReturnHref, setAccountReturnHref] = React.useState<string | null>(null);
+
+  const ThemeIcon =
+    theme === "system"
+      ? Monitor
+      : resolvedTheme === "dark"
+      ? Moon
+      : Sun;
 
   React.useEffect(() => {
     if (pathname && pathname !== "/account" && pathname !== "/login") {
@@ -190,6 +206,45 @@ export function UserMenu({
             </Link>
           </DropdownMenuItem>
         )}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="flex items-center gap-2 w-full cursor-pointer">
+            <ThemeIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <span>Theme</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-36">
+            <DropdownMenuItem
+              onClick={() => setTheme("system")}
+              className="flex items-center justify-between cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                <Monitor className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <span>System</span>
+              </span>
+              {theme === "system" && <Check className="size-3.5 text-primary shrink-0" aria-hidden="true" />}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => setTheme("light")}
+              className="flex items-center justify-between cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                <Sun className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <span>Light</span>
+              </span>
+              {theme === "light" && <Check className="size-3.5 text-primary shrink-0" aria-hidden="true" />}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => setTheme("dark")}
+              className="flex items-center justify-between cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                <Moon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <span>Dark</span>
+              </span>
+              {theme === "dark" && <Check className="size-3.5 text-primary shrink-0" aria-hidden="true" />}
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+
         <DropdownMenuItem asChild>
           <Link href={accountHref} className="flex items-center gap-2 w-full">
             <UserCog className="size-4 shrink-0" aria-hidden="true" />

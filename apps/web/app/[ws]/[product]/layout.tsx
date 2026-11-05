@@ -40,7 +40,7 @@ export async function generateMetadata({
   }
 
   const { product: p, workspace } = result.data;
-  const origin = publicOrigin();
+  const origin = await publicOrigin();
   const title = `${p.name} · ${workspace.name}`;
   const description =
     p.tagline ??
@@ -80,7 +80,14 @@ export async function generateMetadata({
 
   if (p.logoUrl) {
     meta.icons = {
-      icon: p.logoUrl,
+      icon: [
+        {
+          url: p.logoUrl.startsWith("http")
+            ? p.logoUrl
+            : `${origin}${p.logoUrl}`,
+          type: "image/webp",
+        },
+      ],
     };
   }
 

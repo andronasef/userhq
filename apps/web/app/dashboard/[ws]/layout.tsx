@@ -5,6 +5,7 @@ import { getWorkspace, getMe, getProducts } from "../../../lib/api-server";
 import { isDevUploadEnabled } from "../../../lib/dev-flags";
 import { UserMenu } from "../../../components/user-menu";
 import { NotificationBell } from "../../../components/notifications/notification-bell";
+import { ThemeToggle } from "../../../components/theme-toggle";
 import { WorkspaceSwitcher } from "../../../components/dashboard/workspace-switcher";
 import { DashboardSidebar } from "../../../components/dashboard/sidebar";
 import { MobileNav } from "../../../components/dashboard/mobile-nav";
@@ -92,6 +93,7 @@ export default async function DashboardLayout({
         />
         {me.user && (
           <div className="ml-auto shrink-0 flex items-center gap-2">
+            <ThemeToggle />
             <NotificationBell />
             <UserMenu
               user={me.user}

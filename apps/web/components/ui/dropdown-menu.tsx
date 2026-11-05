@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
+import { ChevronRight } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { usePortalAccent } from "../portal/portal-accent-context";
 
@@ -11,6 +12,54 @@ export const DropdownMenuGroup = DropdownMenuPrimitive.Group;
 export const DropdownMenuPortal = DropdownMenuPrimitive.Portal;
 export const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 export const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
+
+export const DropdownMenuSubTrigger = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
+    inset?: boolean;
+  }
+>(function DropdownMenuSubTrigger({ className, inset, children, ...props }, ref) {
+  const Comp = DropdownMenuPrimitive.SubTrigger ?? "div";
+  return (
+    <Comp
+      ref={ref as any}
+      className={cn(
+        "h-9 px-2 gap-2 rounded-md text-sm outline-none data-[highlighted]:bg-muted data-[state=open]:bg-muted data-[disabled]:opacity-50 data-[disabled]:pointer-events-none flex items-center cursor-default select-none",
+        inset && "pl-8",
+        className
+      )}
+      {...(props as any)}
+    >
+      {children}
+      <ChevronRight className="ml-auto size-4" />
+    </Comp>
+  );
+});
+DropdownMenuSubTrigger.displayName = "DropdownMenuSubTrigger";
+
+export const DropdownMenuSubContent = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>
+>(function DropdownMenuSubContent({ className, style, ...props }, ref) {
+  const portalAccent = usePortalAccent();
+  const SubContentComp = DropdownMenuPrimitive.SubContent ?? "div";
+  const PortalComp = DropdownMenuPrimitive.Portal ?? React.Fragment;
+
+  return (
+    <PortalComp>
+      <SubContentComp
+        ref={ref as any}
+        style={{ ...portalAccent, ...style }}
+        className={cn(
+          "motion-menu min-w-40 p-1 bg-popover text-popover-foreground border border-border rounded-lg shadow-md z-50 overflow-hidden",
+          className
+        )}
+        {...(props as any)}
+      />
+    </PortalComp>
+  );
+});
+DropdownMenuSubContent.displayName = "DropdownMenuSubContent";
 
 export const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,

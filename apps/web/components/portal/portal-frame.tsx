@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { EntityLogo } from "../entity-logo";
 import { UserHQBrand } from "../userhq-brand";
+import { ThemeToggle } from "../theme-toggle";
 import { PortalSectionMotion } from "./portal-section-motion";
 import { PortalAccentProvider } from "./portal-accent-context";
 
@@ -98,14 +99,17 @@ export function PortalFrame({
         </main>
 
         <footer className="border-t border-border py-6">
-          <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            Powered by{" "}
-            <Link
-              href="/"
-              className="hover:underline font-medium text-foreground"
-            >
-              <UserHQBrand compact className="text-sm" />
-            </Link>
+          <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2">
+              Powered by{" "}
+              <Link
+                href="/"
+                className="hover:underline font-medium text-foreground"
+              >
+                <UserHQBrand compact className="text-sm" />
+              </Link>
+            </div>
+            <ThemeToggle variant="segmented" />
           </div>
         </footer>
       </div>

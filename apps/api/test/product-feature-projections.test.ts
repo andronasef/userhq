@@ -25,6 +25,8 @@ describe("Disabled module public projections", () => {
     const [status] = await app.db.insert(schema.statuses).values({ productId: product.id, name: "Public planned", type: "planned", color: "#123456", position: 0, isPublicRoadmap: true }).returning();
     const [item] = await app.db.insert(schema.roadmapItems).values({ productId: product.id, statusId: status.id, publicTitle: "ROADMAP_TITLE_CANARY", publicDescription: "Roadmap description", isPublic: true, rank: "a0" }).returning();
     roadmapId = item.id;
+    await app.db.insert(schema.statuses).values({ productId: product.id, name: "BOARD_STATUS_CANARY", type: "review", color: "#654321", position: 1, isPublicRoadmap: false });
+    await app.db.insert(schema.categories).values({ productId: product.id, name: "BOARD_CATEGORY_CANARY" });
     await app.db.insert(schema.roadmapItemInternals).values({ productId: product.id, itemId: item.id, internalTitle: "INTERNAL_CANARY" });
     await app.db.insert(schema.posts).values({ productId: product.id, number: 1, title: "BOARD_TITLE_CANARY", authorId: owner.userId, statusId: status.id, roadmapItemId: item.id, voteCount: 7 });
   });
@@ -76,5 +78,34 @@ describe("Disabled module public projections", () => {
     const restored = await get(`${portal}/roadmap/${roadmapId}`);
     expect(restored.body).toEqual(before.body);
     expect((await get(`${portal}/roadmap`)).body.items[0].postCount).toBe(1);
+  });
+
+  it("projects categories and status metadata only for enabled modules without losing branding or saved status flags", async () => {
+    await change({ board: true, roadmap: true });
+    const before = await get(portal);
+    expect(before.status).toBe(200);
+    expect(before.body.categories).toHaveLength(1);
+    expect(before.body.statuses).toHaveLength(2);
+    await change({ board: false });
+    const roadmapOnly = await get(portal);
+    expect(roadmapOnly.status).toBe(200);
+    expect(roadmapOnly.body.categories).toEqual([]);
+    expect(roadmapOnly.body.statuses).toMatchObject([{ name: "Public planned", isPublicRoadmap: true }]);
+    expect(roadmapOnly.body.statuses).toHaveLength(1);
+    expect(JSON.stringify(roadmapOnly.body)).not.toMatch(/BOARD_STATUS_CANARY|BOARD_CATEGORY_CANARY|boardEnabled|roadmapEnabled|INTERNAL_CANARY/);
+    await change({ roadmap: false });
+    const neither = await get(portal);
+    expect(neither.status).toBe(200);
+    expect(neither.body.categories).toEqual([]);
+    expect(neither.body.statuses).toEqual([]);
+    expect(neither.body.product.name).toBe("App");
+    expect(neither.body.workspace.name).toBe("Projections");
+    await change({ board: true });
+    const boardOnly = await get(portal);
+    expect(boardOnly.body.categories).toEqual(before.body.categories);
+    expect(boardOnly.body.statuses).toHaveLength(2);
+    expect(boardOnly.body.statuses.every((s: { isPublicRoadmap: boolean }) => !s.isPublicRoadmap)).toBe(true);
+    await change({ roadmap: true });
+    expect((await get(portal)).body).toEqual(before.body);
   });
 });

@@ -76,7 +76,12 @@ function ProductFeaturesFormInner({
   } = useForm<ProductFeatures>({
     resolver: zodResolver(ProductFeaturesSchema),
     defaultValues: product.features,
+    // router.refresh() delivers fresh server flags: pristine fields follow them, dirty ones keep the user's choice.
+    values: product.features,
+    resetOptions: { keepDirtyValues: true },
   });
+  const serverKey = PRODUCT_FEATURE_KEYS.map((key) => product.features[key]).join();
+  React.useEffect(() => setSavedFeatures(product.features), [serverKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const values = watch();
   const allOff = PRODUCT_FEATURE_KEYS.every((key) => !values[key]);
   const mutation = useMutation({

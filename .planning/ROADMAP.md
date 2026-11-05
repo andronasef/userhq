@@ -26,6 +26,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Feedback Board & Conversations** - Customers post, vote, search, and comment; admins moderate and merge; commenters get reply emails
 - [x] **Phase 4: Dual-Layer Roadmap & Closing the Loop** - Private Kanban, a public roadmap that can't leak internal fields, linked-post status sync, in-app notifications, and My activity
 - [x] **Phase 5: Changelog & FAQ** - Rich-text release notes with WebP images, tags, drafts, and permalinks; a searchable FAQ that links to the feedback board
+- [ ] **Phase 6: Product Feature Controls** - Owners/admins switch Board, Roadmap, Changelog and FAQ on or off per product; disabled modules vanish publicly (navigation, URLs, API, notifications) while content and admin management survive
 
 ## Phase Details
 
@@ -350,10 +351,34 @@ Internal fields live in a separate 1:1 table. Public reads go through explicit `
 **UI hint**: yes
 **Notes**: Research flag: the Tiptap static renderer under vinext RSC, and CSP nonces (vinext #3205). Rich text is stored as Tiptap JSON in jsonb, checked against a strict Zod allowlist, and never rendered with `dangerouslySetInnerHTML`. Changelog work needs only Phase 2. FAQ-07 needs Phase 3's new-post form.
 
+### Phase 6: Product Feature Controls
+
+**Goal:** As a workspace owner or admin, I want to enable Board, Roadmap, Changelog and FAQ independently for each product, so that each portal shows only what that product uses.
+**Depends on**: Phases 2-5
+**Requirements**: CAP-01, CAP-02, CAP-03, CAP-04, CAP-05, CAP-06, CAP-07, CAP-08, CAP-09
+**Success Criteria** (what must be TRUE):
+
+  1. An owner or admin can switch each of a product's four modules on or off independently, and the change applies only to that product in that workspace. Existing products keep all four modules enabled after the upgrade.
+  2. A disabled module is gone from the portal's navigation, the product directory, and every link or preview that pointed into it. Visiting its URL directly, or calling its public API to read or write, returns not-found.
+  3. A product with some modules disabled lands visitors on the first enabled one (Board, Roadmap, Changelog, FAQ); a product with all four disabled shows a neutral branded unavailable page.
+  4. Admins can still view, edit and prepare content in a disabled module from the dashboard. Turning the module back on restores the content, its links and its relationships unchanged.
+  5. Customers are not notified about, or linked to, a disabled module's content, and notifications suppressed while a module was off are not sent when it is turned back on.
+  6. Cross-tenant, disabled-module bypass, migration-default, re-enable and public-roadmap-privacy tests all pass.
+
+**Plans**: 4 plans (proposed drafts; to be reconciled with 06-RESEARCH.md)
+
+- [ ] 06-01-PLAN.md — Board capability tracer: settings, persistence, public access, re-enable
+- [ ] 06-02-PLAN.md — Independent Roadmap, Changelog and FAQ controls with public endpoint enforcement
+- [ ] 06-03-PLAN.md — Enabled-feature landing/navigation and cross-feature public projections
+- [ ] 06-04-PLAN.md — Notification suppression at delivery and complete isolation/privacy acceptance
+
+**UI hint**: yes
+**Notes**: Context: [06-CONTEXT.md](phases/06-product-feature-controls/06-CONTEXT.md); research: [06-RESEARCH.md](phases/06-product-feature-controls/06-RESEARCH.md). The [approved expansion draft](../docs/specs/workspace-platform-expansion.md) reserves appearance, workspace inbox, admin automation/webhooks and browser push for later phases.
+
 ## Progress
 
 **Execution Order:**
-Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once Phase 3 is done and run in parallel with Phase 4.
+Phases run in numeric order: 1 → 2 → 3 → 4 → 5 → 6. Phase 5 can start once Phase 3 is done and run in parallel with Phase 4.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -362,24 +387,4 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once P
 | 3. Feedback Board & Conversations | 16/16 | Complete | 2026-10-11 |
 | 4. Dual-Layer Roadmap & Closing the Loop | 5/5 | Complete | 2026-10-11 |
 | 5. Changelog & FAQ | 5/5 | Complete | 2026-10-12 |
-
-## Expansion proposal — Phase 6: Product Feature Controls
-
-**Status:** Proposed / not started. Phases 1–5 above retain their historical completion evidence. This entry does not claim that new behavior is implemented.
-
-**Goal:** Workspace owners/admins independently configure Board, Roadmap, Changelog and FAQ; disabled modules are unreachable publicly while stored content and authorized admin management remain available.
-
-**Depends on:** Completed phases 2–5. **Requirements:** CAP-01 through CAP-09.
-
-**Context:** [06-CONTEXT.md](phases/06-product-feature-controls/06-CONTEXT.md). **Source audit:** [06-SOURCE-AUDIT.md](phases/06-product-feature-controls/06-SOURCE-AUDIT.md).
-
-**Proposed plans (0/4 complete):**
-
-- [ ] 06-01 — Board capability tracer: settings → persistence → public access → re-enable.
-- [ ] 06-02 — Independent Roadmap, Changelog and FAQ controls with public endpoint enforcement.
-- [ ] 06-03 — Enabled-feature landing/navigation and cross-feature public projections.
-- [ ] 06-04 — Notification suppression at delivery and complete isolation/privacy acceptance.
-
-**Prerequisites before execution:** review the concrete spec/test seams/ticket breakdown; perform phase research, UI specification and GSD plan checking. These are proposed execution plans, not execution authorization or verification evidence.
-
-The [approved expansion draft](../docs/specs/workspace-platform-expansion.md) also reserves appearance, workspace feedback inbox, scoped admin automation/webhooks and browser push. Schedule those after feature controls; their dependency graph permits independent slices without fabricating blockers. Later phases are not yet assigned executable plans.
+| 6. Product Feature Controls | 0/4 | Planned | - |

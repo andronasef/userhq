@@ -112,6 +112,83 @@ describe("Independent public product modules (CAP-03, D-07..D-11)", () => {
     expect((await call("delete", `${base}/changelog/${changelog.body.id}`, admin)).status).toBe(204);
     expect((await call("get", `${base}/changelog/${changelog.body.id}`, admin)).status).toBe(404);
   });
+
+  it("honors all sixteen independent flag combinations without changing stored content", async () => {
+    await setFeatures(allOn);
+    // Observe source content through the same admin HTTP interfaces before/after.
+    const adminPaths = ["/posts", "/roadmap", "/changelog", "/faq"];
+    const before = [];
+    for (const path of adminPaths) {
+      const res = await call("get", base + path, admin);
+      expect(res.status).toBe(200);
+      before.push(res.body);
+    }
+    const combinations = [
+      [false, false, false, false], [false, false, false, true],
+      [false, false, true, false], [false, false, true, true],
+      [false, true, false, false], [false, true, false, true],
+      [false, true, true, false], [false, true, true, true],
+      [true, false, false, false], [true, false, false, true],
+      [true, false, true, false], [true, false, true, true],
+      [true, true, false, false], [true, true, false, true],
+      [true, true, true, false], [true, true, true, true],
+    ];
+    for (const [board, roadmap, changelog, faq] of combinations) {
+      const features = { board, roadmap, changelog, faq };
+      await setFeatures(features);
+      for (const endpoint of endpoints()) {
+        for (const who of [undefined, customer, admin, owner]) {
+          const res = await call("get", portal + endpoint.path, who);
+          expect(res.status, `${JSON.stringify(features)} ${endpoint.path} as ${who?.userId ?? "anonymous"}`).toBe(features[endpoint.feature] ? 200 : 404);
+          if (!features[endpoint.feature]) expect(res.body.code).toBe("not_found");
+        }
+      }
+      const metadata = await call("get", portal);
+      expect(metadata.status).toBe(200);
+      expect(metadata.body.product.features).toEqual(features);
+      const directory = await call("get", "/api/v1/portal/module-controls");
+      expect(directory.status).toBe(200);
+      expect(directory.body.products.some((p: { slug: string }) => p.slug === "app")).toBe(true);
+    }
+    for (const [index, path] of adminPaths.entries()) {
+      expect((await call("get", base + path, admin)).body).toEqual(before[index]);
+    }
+    expect((await call("get", `${portal}/roadmap/${roadmapId}`)).body.item.title).toBe("Public plan");
+    expect((await call("get", `${portal}/changelog/release`)).body.title).toBe("Public release");
+    expect((await call("get", `${portal}/faq`)).body.categories[0].questions[0].answer).toEqual(doc);
+    expect((await call("get", "/api/v1/portal/module-controls/sibling/posts")).status).toBe(404);
+    expect((await call("get", "/api/v1/portal/other-module-controls/app/faq")).status).toBe(404);
+  });
+
+  it("keeps FAQ category/question CRUD and authorization usable with every public module disabled", async () => {
+    await setFeatures({ board: false, roadmap: false, changelog: false, faq: false });
+    const category = await call("post", `${base}/faq/categories`, admin, { name: "Private help" });
+    expect(category.status).toBe(201);
+    const categoryPath = `${base}/faq/categories/${category.body.id}`;
+    expect((await call("patch", categoryPath, admin, { name: "Prepared help" })).body.name).toBe("Prepared help");
+    const question = await call("post", `${base}/faq/questions`, admin, { categoryId: category.body.id, question: "How will this work?", answer: doc });
+    expect(question.status).toBe(201);
+    const questionPath = `${base}/faq/questions/${question.body.id}`;
+    const edited = await call("patch", questionPath, admin, { question: "How does this work?" });
+    expect(edited.status).toBe(200);
+    expect(edited.body.question).toBe("How does this work?");
+    const tree = await call("get", `${base}/faq`, admin);
+    expect(tree.status).toBe(200);
+    expect(tree.body.categories.find((c: { id: string }) => c.id === category.body.id).questions[0].question).toBe("How does this work?");
+    expect((await call("patch", questionPath, customer, { question: "Foreign question?" })).status).toBe(404);
+    expect((await call("delete", questionPath)).status).toBe(401);
+    expect((await call("delete", questionPath.replace("module-controls", "other-module-controls"), admin)).status).toBe(404);
+    expect((await call("get", `${portal}/faq`, owner)).status).toBe(404);
+    await setFeatures({ faq: true });
+    const visible = await call("get", `${portal}/faq`);
+    expect(visible.status).toBe(200);
+    expect(JSON.stringify(visible.body)).toContain("How does this work?");
+    await setFeatures({ faq: false });
+    expect((await call("delete", questionPath, admin)).status).toBe(204);
+    expect((await call("delete", categoryPath, admin)).status).toBe(204);
+    const remaining = await call("get", `${base}/faq`, admin);
+    expect(remaining.body.categories.some((c: { id: string }) => c.id === category.body.id)).toBe(false);
+  });
 });
 
 describe("Disabled Board at the public request boundary (CAP-03, D-08)", () => {

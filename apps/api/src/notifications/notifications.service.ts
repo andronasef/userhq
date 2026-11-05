@@ -43,6 +43,15 @@ export class NotificationsService {
       actorId: string;
     }
   ): Promise<void> {
+    // Share-lock the product row until the caller's transaction ends: a concurrent Board disable
+    // (UPDATE products) waits for this insert, so its cleanup always sees the row (D-14).
+    const enabled = await tx.execute(sql`
+      SELECT 1 FROM products
+      WHERE id = ${opts.productId} AND workspace_id = ${opts.workspaceId} AND board_enabled
+      FOR SHARE
+    `);
+    if ((enabled.rows ?? enabled).length === 0) return;
+
     const stakeholders = await tx.execute(sql<{ user_id: string }>`
       SELECT DISTINCT user_id FROM (
         SELECT author_id AS user_id FROM posts WHERE id = ${opts.postId}
@@ -52,10 +61,6 @@ export class NotificationsService {
         SELECT author_id AS user_id FROM comments WHERE post_id = ${opts.postId} AND deleted_at IS NULL
       ) s
       WHERE user_id IS NOT NULL AND user_id != ${opts.actorId}
-        AND EXISTS (
-          SELECT 1 FROM products
-          WHERE id = ${opts.productId} AND workspace_id = ${opts.workspaceId} AND board_enabled
-        )
     `);
 
     const rows: { user_id: string }[] = stakeholders.rows ?? stakeholders;

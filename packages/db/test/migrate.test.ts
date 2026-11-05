@@ -13,7 +13,7 @@ const packageRoot = path.resolve(__dirname, "..");
 const distMigratePath = path.resolve(packageRoot, "dist/migrate.js");
 
 function runMigrateCli(
-  env: Record<string, string>
+  env: Record<string, string>,
 ): Promise<{ code: number | null; stdout: string; stderr: string }> {
   return new Promise((resolve) => {
     const proc = spawn("node", [distMigratePath], {
@@ -68,6 +68,69 @@ const journal = JSON.parse(fs.readFileSync(journalPath, "utf-8"));
 const totalMigrations = (journal.entries as unknown[]).length;
 
 describe("Migration Runner Properties (Plan 01-09)", () => {
+  it("upgrades existing products with enabled features without changing their content", async () => {
+    const tempDb = await createTempDb();
+    const folder = fs.mkdtempSync(
+      path.join(os.tmpdir(), "userhq-feature-migrations-"),
+    );
+    try {
+      fs.cpSync(path.resolve(packageRoot, "migrations"), folder, {
+        recursive: true,
+      });
+      const beforeFeatures = journal.entries.findIndex(
+        (entry: { tag: string }) => entry.tag.endsWith("_product_features"),
+      );
+      expect(beforeFeatures).toBeGreaterThan(0);
+      fs.writeFileSync(
+        path.join(folder, "meta/_journal.json"),
+        JSON.stringify({
+          ...journal,
+          entries: journal.entries.slice(0, beforeFeatures),
+        }),
+      );
+      expect(
+        (
+          await runMigrateCli({
+            DATABASE_URL: tempDb.url,
+            MIGRATIONS_FOLDER: folder,
+          })
+        ).code,
+      ).toBe(0);
+      const client = new Client({ connectionString: tempDb.url });
+      await client.connect();
+      try {
+        const ws = await client.query(
+          "INSERT INTO workspaces (name, slug) VALUES ('Existing', 'existing') RETURNING id",
+        );
+        await client.query(
+          "INSERT INTO products (workspace_id, name, slug, tagline) VALUES ($1, 'Existing product', 'existing', 'Keep this')",
+          [ws.rows[0].id],
+        );
+        expect((await runMigrateCli({ DATABASE_URL: tempDb.url })).code).toBe(
+          0,
+        );
+        const result = await client.query(
+          "SELECT name, tagline, board_enabled, roadmap_enabled, changelog_enabled, faq_enabled FROM products WHERE workspace_id=$1",
+          [ws.rows[0].id],
+        );
+        expect(result.rows).toEqual([
+          {
+            name: "Existing product",
+            tagline: "Keep this",
+            board_enabled: true,
+            roadmap_enabled: true,
+            changelog_enabled: true,
+            faq_enabled: true,
+          },
+        ]);
+      } finally {
+        await client.end();
+      }
+    } finally {
+      fs.rmSync(folder, { recursive: true, force: true });
+      await tempDb.drop();
+    }
+  });
   it("concurrent start: two racing migrate processes apply migrations once without crash", async () => {
     const tempDb = await createTempDb();
     try {
@@ -87,7 +150,7 @@ describe("Migration Runner Properties (Plan 01-09)", () => {
           count: string;
           distinct_hashes: string;
         }>(
-          "SELECT count(*)::int as count, count(distinct hash)::int as distinct_hashes FROM drizzle.__drizzle_migrations"
+          "SELECT count(*)::int as count, count(distinct hash)::int as distinct_hashes FROM drizzle.__drizzle_migrations",
         );
         expect(Number(rowsRes.rows[0].count)).toBe(totalMigrations);
         expect(Number(rowsRes.rows[0].distinct_hashes)).toBe(totalMigrations);
@@ -108,14 +171,14 @@ describe("Migration Runner Properties (Plan 01-09)", () => {
       const thirdRun = await runMigrateCli({ DATABASE_URL: tempDb.url });
       expect(thirdRun.code).toBe(0);
       expect(thirdRun.stdout).toContain(
-        `up to date (${totalMigrations} applied in total)`
+        `up to date (${totalMigrations} applied in total)`,
       );
 
       const client = new Client({ connectionString: tempDb.url });
       await client.connect();
       try {
         const rowsRes = await client.query<{ count: string }>(
-          "SELECT count(*)::int as count FROM drizzle.__drizzle_migrations"
+          "SELECT count(*)::int as count FROM drizzle.__drizzle_migrations",
         );
         expect(Number(rowsRes.rows[0].count)).toBe(totalMigrations);
       } finally {
@@ -130,7 +193,7 @@ describe("Migration Runner Properties (Plan 01-09)", () => {
     const tempDb = await createTempDb();
     const tempMigrationsDir = path.join(
       os.tmpdir(),
-      `userhq-temp-migrations-${crypto.randomBytes(4).toString("hex")}`
+      `userhq-temp-migrations-${crypto.randomBytes(4).toString("hex")}`,
     );
 
     try {
@@ -138,10 +201,18 @@ describe("Migration Runner Properties (Plan 01-09)", () => {
       fs.cpSync(originalMigrationsDir, tempMigrationsDir, { recursive: true });
 
       // Rewrite copy's journal to have only entry 0000_auth
-      const journalCopyPath = path.join(tempMigrationsDir, "meta/_journal.json");
-      const journalContent = JSON.parse(fs.readFileSync(journalCopyPath, "utf-8"));
+      const journalCopyPath = path.join(
+        tempMigrationsDir,
+        "meta/_journal.json",
+      );
+      const journalContent = JSON.parse(
+        fs.readFileSync(journalCopyPath, "utf-8"),
+      );
       journalContent.entries = [journalContent.entries[0]];
-      fs.writeFileSync(journalCopyPath, JSON.stringify(journalContent, null, 2));
+      fs.writeFileSync(
+        journalCopyPath,
+        JSON.stringify(journalContent, null, 2),
+      );
 
       // 1. Run with partial folder (1 migration)
       const res1 = await runMigrateCli({
@@ -154,7 +225,7 @@ describe("Migration Runner Properties (Plan 01-09)", () => {
       await client.connect();
       try {
         const rows1 = await client.query<{ count: string }>(
-          "SELECT count(*)::int as count FROM drizzle.__drizzle_migrations"
+          "SELECT count(*)::int as count FROM drizzle.__drizzle_migrations",
         );
         expect(Number(rows1.rows[0].count)).toBe(1);
 
@@ -163,7 +234,7 @@ describe("Migration Runner Properties (Plan 01-09)", () => {
         expect(res2.code).toBe(0);
 
         const rows2 = await client.query<{ count: string }>(
-          "SELECT count(*)::int as count FROM drizzle.__drizzle_migrations"
+          "SELECT count(*)::int as count FROM drizzle.__drizzle_migrations",
         );
         expect(Number(rows2.rows[0].count)).toBe(totalMigrations);
       } finally {

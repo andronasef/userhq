@@ -47,6 +47,7 @@ describe("Portal API (Plan 02-02)", () => {
         name: "Acme",
       },
       product: {
+        features: { board: true, roadmap: true, changelog: true, faq: true },
         slug: "app",
         name: "Acme App",
         tagline: null,
@@ -59,11 +60,14 @@ describe("Portal API (Plan 02-02)", () => {
       statuses: [],
     });
 
-    expect(Object.keys(res.body).sort()).toEqual(["categories", "product", "statuses", "workspace"].sort());
+    expect(Object.keys(res.body).sort()).toEqual(
+      ["categories", "product", "statuses", "workspace"].sort(),
+    );
     expect(Object.keys(res.body.workspace).sort()).toEqual(["name", "slug"]);
     expect(Object.keys(res.body.product).sort()).toEqual([
       "accentColor",
       "accentTextColor",
+      "features",
       "logoUrl",
       "name",
       "slug",
@@ -77,7 +81,9 @@ describe("Portal API (Plan 02-02)", () => {
   });
 
   it("unknown workspace returns 404 not_found", async () => {
-    const res = await request(testApp.http).get("/api/v1/portal/unknown-ws/app");
+    const res = await request(testApp.http).get(
+      "/api/v1/portal/unknown-ws/app",
+    );
     expect(res.status).toBe(404);
     expect(res.body).toEqual({
       code: "not_found",
@@ -86,7 +92,9 @@ describe("Portal API (Plan 02-02)", () => {
   });
 
   it("unknown product returns 404 not_found", async () => {
-    const res = await request(testApp.http).get("/api/v1/portal/acme/unknown-product");
+    const res = await request(testApp.http).get(
+      "/api/v1/portal/acme/unknown-product",
+    );
     expect(res.status).toBe(404);
     expect(res.body).toEqual({
       code: "not_found",
@@ -106,7 +114,7 @@ describe("Portal API (Plan 02-02)", () => {
       .returning();
 
     const res = await request(testApp.http).get(
-      "/api/v1/portal/acme/deleted-prod"
+      "/api/v1/portal/acme/deleted-prod",
     );
     expect(res.status).toBe(404);
     expect(res.body).toEqual({
@@ -132,7 +140,7 @@ describe("Portal API (Plan 02-02)", () => {
     });
 
     const res = await request(testApp.http).get(
-      "/api/v1/portal/suspended-ws/some-prod"
+      "/api/v1/portal/suspended-ws/some-prod",
     );
     expect(res.status).toBe(403);
     expect(res.body).toEqual({
@@ -161,7 +169,9 @@ describe("Portal API (Plan 02-02)", () => {
 
     const res = await request(testApp.http).get("/api/v1/portal/acme/app");
     expect(res.status).toBe(200);
-    expect(res.body.product.logoUrl).toBe("/uploads/2026/10/workspace-logo.webp");
+    expect(res.body.product.logoUrl).toBe(
+      "/uploads/2026/10/workspace-logo.webp",
+    );
 
     const bodyStr = JSON.stringify(res.body);
     expect(bodyStr).not.toContain(upload.id);
@@ -259,18 +269,16 @@ describe("Portal API (Plan 02-02)", () => {
       const bodyStr = JSON.stringify(res.body);
       expect(bodyStr).not.toContain(dirWs.id);
       expect(bodyStr).not.toMatch(
-        /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
+        /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i,
       );
     });
 
     it("directoryEnabled false is still returned", async () => {
-      await testApp.db
-        .insert(schema.workspaces)
-        .values({
-          slug: "disabled-ws",
-          name: "Disabled WS",
-          directoryEnabled: false,
-        });
+      await testApp.db.insert(schema.workspaces).values({
+        slug: "disabled-ws",
+        name: "Disabled WS",
+        directoryEnabled: false,
+      });
 
       const res = await request(testApp.http).get("/api/v1/portal/disabled-ws");
       expect(res.status).toBe(200);
@@ -278,15 +286,15 @@ describe("Portal API (Plan 02-02)", () => {
     });
 
     it("directory for suspended workspace returns 403 workspace_suspended", async () => {
-      await testApp.db
-        .insert(schema.workspaces)
-        .values({
-          slug: "suspended-dir-ws",
-          name: "Suspended Dir WS",
-          suspendedAt: new Date(),
-        });
+      await testApp.db.insert(schema.workspaces).values({
+        slug: "suspended-dir-ws",
+        name: "Suspended Dir WS",
+        suspendedAt: new Date(),
+      });
 
-      const res = await request(testApp.http).get("/api/v1/portal/suspended-dir-ws");
+      const res = await request(testApp.http).get(
+        "/api/v1/portal/suspended-dir-ws",
+      );
       expect(res.status).toBe(403);
       expect(res.body).toEqual({
         code: "workspace_suspended",
@@ -295,7 +303,9 @@ describe("Portal API (Plan 02-02)", () => {
     });
 
     it("directory for unknown workspace returns 404 not_found", async () => {
-      const res = await request(testApp.http).get("/api/v1/portal/non-existent-ws");
+      const res = await request(testApp.http).get(
+        "/api/v1/portal/non-existent-ws",
+      );
       expect(res.status).toBe(404);
       expect(res.body).toEqual({
         code: "not_found",

@@ -26,6 +26,7 @@ import {
   type TimelineItem,
   postSlug,
   BOARD_PAGE_SIZE,
+  type ProductFeatures,
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
 import { isWorkspaceAdmin } from "./membership.js";
@@ -462,8 +463,10 @@ export class PostsService {
   async getPostPage(
     portal: { workspaceId: string; productId: string },
     viewerId: string | null,
-    postNumber: number
+    postNumber: number,
+    projection: { kind: "admin" } | { kind: "public"; features: ProductFeatures } = { kind: "admin" }
   ): Promise<PublicPostPage> {
+    const includeRoadmap = projection.kind === "admin" || projection.features.roadmap;
     const [row] = await this.db
       .select({
         id: posts.id,
@@ -498,7 +501,8 @@ export class PostsService {
         roadmapItems,
         and(
           eq(posts.roadmapItemId, roadmapItems.id),
-          eq(roadmapItems.isPublic, true)
+          eq(roadmapItems.isPublic, true),
+          includeRoadmap ? undefined : sql`false`
         )
       )
       .where(
@@ -651,7 +655,7 @@ export class PostsService {
             ? { id: row.categoryId, name: row.categoryName }
             : null,
         author,
-        roadmapItem: row.roadmapItemId && row.publicRoadmapTitle
+        roadmapItem: includeRoadmap && row.roadmapItemId && row.publicRoadmapTitle
           ? {
               id: row.roadmapItemId,
               title: row.publicRoadmapTitle,

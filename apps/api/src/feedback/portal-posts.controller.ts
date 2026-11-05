@@ -74,7 +74,10 @@ export class PortalPostsController {
 
     const portal = req.portal;
     const viewerId = req.user?.id ?? null;
-    return this.postsService.getPostPage(portal, viewerId, parseResult.data);
+    return this.postsService.getPostPage(portal, viewerId, parseResult.data, {
+      kind: "public",
+      features: portal.features,
+    });
   }
 
   @Post("posts")

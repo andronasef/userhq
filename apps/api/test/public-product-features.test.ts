@@ -1,8 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import request from "supertest";
+import { Reflector } from "@nestjs/core";
+import { SetMetadata, type ExecutionContext } from "@nestjs/common";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { schema } from "@userhq/db";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
+import { PortalGuard } from "../src/portal/portal.guard.js";
+import { PORTAL_FEATURE } from "../src/portal/product-features.js";
 
 type TestApp = Awaited<ReturnType<typeof createTestApp>>;
 type Cookie = { cookie: string; userId: string };
@@ -137,6 +141,30 @@ describe("Disabled Board at the public request boundary (CAP-03, D-08)", () => {
     expect(list.status).toBe(200);
     expect(JSON.stringify(list.body)).toContain("Primary idea");
     expect((await call("get", `${portal}/posts/1`)).status).toBe(200);
+  });
+
+  describe("PortalGuard classification fixture", () => {
+    class Unclassified { read() {} }
+    class Classified { read() {} }
+    SetMetadata(PORTAL_FEATURE, "exempt")(Classified);
+    const ctxFor = (cls: new () => object, params: Record<string, string>) =>
+      ({
+        switchToHttp: () => ({ getRequest: () => ({ params }) }),
+        getClass: () => cls,
+        getHandler: () => cls.prototype.read,
+      }) as unknown as ExecutionContext;
+    const params = { ws: "pf-board", product: "app" };
+
+    it("rejects a product route with no classification, even for a real tenant", async () => {
+      const guard = new PortalGuard(app.db, new Reflector());
+      await expect(guard.canActivate(ctxFor(Unclassified, params))).rejects.toThrow(/missing @PortalFeature/);
+    });
+
+    it("accepts the same route once classified, and workspace-only routes need no classification", async () => {
+      const guard = new PortalGuard(app.db, new Reflector());
+      await expect(guard.canActivate(ctxFor(Classified, params))).resolves.toBe(true);
+      await expect(guard.canActivate(ctxFor(Unclassified, { ws: "pf-board" }))).resolves.toBe(true);
+    });
   });
 
   // ---- Task 2: writes, activity (CAP-03) ----

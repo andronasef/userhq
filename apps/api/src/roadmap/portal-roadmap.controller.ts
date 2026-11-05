@@ -37,12 +37,12 @@ export class PortalRoadmapController {
   @Public()
   @SerializeOptions({ schema: PublicRoadmapListResponseSchema })
   async getPublicRoadmap(@Req() req: any): Promise<PublicRoadmapListResponse> {
-    const { productId } = req.portal ?? {};
+    const { productId, features } = req.portal ?? {};
     if (!productId) {
       throw new ApiException("not_found", 404, "Not found.");
     }
 
-    // Strict query: ONLY selects from roadmapItems, statuses where is_public_roadmap = true, and posts
+    // Linked requests are queried only when Board is publicly available.
     // STRICT ZERO-JOIN to roadmapItemInternals (ROAD-12)
     const rows = await this.db
       .select({
@@ -52,7 +52,9 @@ export class PortalRoadmapController {
         description: roadmapItems.publicDescription,
         rank: roadmapItems.rank,
         createdAt: roadmapItems.createdAt,
-        postCount: sql<number>`count(${posts.id})::int`,
+        postCount: features.board
+          ? sql<number>`(select count(*)::int from ${posts} where ${posts.roadmapItemId} = ${roadmapItems.id} and ${posts.productId} = ${productId} and ${posts.deletedAt} is null and ${posts.mergedIntoId} is null)`
+          : sql<number>`0`,
       })
       .from(roadmapItems)
       .innerJoin(
@@ -62,21 +64,12 @@ export class PortalRoadmapController {
           eq(statuses.isPublicRoadmap, true)
         )
       )
-      .leftJoin(
-        posts,
-        and(
-          eq(posts.roadmapItemId, roadmapItems.id),
-          isNull(posts.deletedAt),
-          isNull(posts.mergedIntoId)
-        )
-      )
       .where(
         and(
           eq(roadmapItems.productId, productId),
           eq(roadmapItems.isPublic, true)
         )
       )
-      .groupBy(roadmapItems.id)
       .orderBy(asc(sql`${roadmapItems.rank} COLLATE "C"`), asc(roadmapItems.createdAt));
 
     return {
@@ -98,7 +91,7 @@ export class PortalRoadmapController {
     @Req() req: any,
     @Param("id") rawId: string
   ): Promise<PublicRoadmapDetailResponse> {
-    const { productId } = req.portal ?? {};
+    const { productId, features } = req.portal ?? {};
     if (!productId) {
       throw new ApiException("not_found", 404, "Not found.");
     }
@@ -139,7 +132,7 @@ export class PortalRoadmapController {
       throw new ApiException("not_found", 404, "Roadmap item not found.");
     }
 
-    const linkedPosts = await this.db
+    const linkedPosts = features.board ? await this.db
       .select({
         number: posts.number,
         title: posts.title,
@@ -154,7 +147,7 @@ export class PortalRoadmapController {
           isNull(posts.mergedIntoId)
         )
       )
-      .orderBy(asc(posts.number));
+      .orderBy(asc(posts.number)) : [];
 
     return {
       item: {

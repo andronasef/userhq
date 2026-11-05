@@ -60,6 +60,8 @@ function ProductFeaturesFormInner({
   host,
 }: ProductFeaturesFormProps) {
   const router = useRouter();
+  const [ready, setReady] = React.useState(false);
+  React.useEffect(() => setReady(true), []);
   const [savedFeatures, setSavedFeatures] = React.useState(product.features);
   const [pendingSave, setPendingSave] = React.useState<PendingSave | null>(
     null,
@@ -85,6 +87,7 @@ function ProductFeaturesFormInner({
         schema: ProductDetailSchema,
       }),
     onSuccess: (updated) => {
+      setAlertError(null);
       setSavedFeatures(updated.features);
       reset(updated.features);
       toast.success("Features updated");
@@ -139,7 +142,7 @@ function ProductFeaturesFormInner({
       <form onSubmit={handleSubmit(submit)}>
         <fieldset
           aria-describedby="portal-features-help"
-          disabled={mutation.isPending}
+          disabled={!ready || mutation.isPending}
           className="space-y-4"
         >
           <legend className="sr-only">Features visible to customers</legend>
@@ -151,6 +154,7 @@ function ProductFeaturesFormInner({
               >
                 <input
                   type="checkbox"
+                  defaultChecked={product.features[key]}
                   id={`feature-${key}`}
                   aria-labelledby={`feature-${key}-name`}
                   aria-describedby={`feature-${key}-desc`}

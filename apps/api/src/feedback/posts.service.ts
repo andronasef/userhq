@@ -464,9 +464,12 @@ export class PostsService {
     portal: { workspaceId: string; productId: string },
     viewerId: string | null,
     postNumber: number,
-    projection: { kind: "admin" } | { kind: "public"; features: ProductFeatures } = { kind: "admin" }
+    projection:
+      | { kind: "admin" }
+      | { kind: "public"; features: ProductFeatures } = { kind: "admin" }
   ): Promise<PublicPostPage> {
-    const includeRoadmap = projection.kind === "admin" || projection.features.roadmap;
+    const includeRoadmap =
+      projection.kind === "admin" || projection.features.roadmap;
     const [row] = await this.db
       .select({
         id: posts.id,

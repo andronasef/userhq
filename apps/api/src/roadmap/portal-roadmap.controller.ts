@@ -53,7 +53,13 @@ export class PortalRoadmapController {
         rank: roadmapItems.rank,
         createdAt: roadmapItems.createdAt,
         postCount: features.board
-          ? sql<number>`(select count(*)::int from ${posts} where ${posts.roadmapItemId} = ${roadmapItems.id} and ${posts.productId} = ${productId} and ${posts.deletedAt} is null and ${posts.mergedIntoId} is null)`
+          ? sql<number>`(
+              select count(*)::int from ${posts}
+              where ${posts.roadmapItemId} = ${roadmapItems.id}
+                and ${posts.productId} = ${productId}
+                and ${posts.deletedAt} is null
+                and ${posts.mergedIntoId} is null
+            )`
           : sql<number>`0`,
       })
       .from(roadmapItems)

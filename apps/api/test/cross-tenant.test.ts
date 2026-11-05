@@ -102,6 +102,24 @@ const CROSS_TENANT_ROUTES: Record<
   "GET /workspaces/:ws/products/:product/posts/:number": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts/${s.b.postNumber}`,
   }),
+  "PATCH /workspaces/:ws/products/:product/posts/:number": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts/${s.b.postNumber}`,
+    body: { title: "Foreign edit", version: 1 },
+  }),
+  "DELETE /workspaces/:ws/products/:product/posts/:number": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts/${s.b.postNumber}`,
+  }),
+  "POST /workspaces/:ws/products/:product/posts/:number/comments": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts/${s.b.postNumber}/comments`,
+    body: { body: "Foreign reply" },
+  }),
+  "PATCH /workspaces/:ws/products/:product/comments/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/comments/${s.b.commentId}`,
+    body: { body: "Foreign edit", version: 1 },
+  }),
+  "DELETE /workspaces/:ws/products/:product/comments/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/comments/${s.b.commentId}`,
+  }),
   "GET /workspaces/:ws/products/:product/posts/:number/voters": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/posts/${s.b.postNumber}/voters`,
   }),

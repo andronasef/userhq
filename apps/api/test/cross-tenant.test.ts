@@ -208,6 +208,26 @@ const CROSS_TENANT_ROUTES: Record<
   "POST /workspaces/:ws/products/:product/changelog/:id/unpublish": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/changelog/${s.b.changelogEntryId}/unpublish`,
   }),
+  // Workspace Feedback Dashboard (All Boards)
+  "GET /workspaces/:ws/requests": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/requests`,
+  }),
+  "GET /workspaces/:ws/comments": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/comments`,
+  }),
+  "POST /workspaces/:ws/comments/:id/handled": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/comments/${crypto.randomUUID()}/handled`,
+  }),
+  "DELETE /workspaces/:ws/comments/:id/handled": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/comments/${crypto.randomUUID()}/handled`,
+  }),
+  "POST /workspaces/:ws/comments/:id/reply": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/comments/${crypto.randomUUID()}/reply`,
+    body: { body: "Cross-tenant reply" },
+  }),
+  "POST /workspaces/:ws/comments/:id/read": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/comments/${crypto.randomUUID()}/read`,
+  }),
   // FAQ
   "GET /workspaces/:ws/products/:product/faq": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/faq`,

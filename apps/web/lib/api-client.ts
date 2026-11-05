@@ -1,4 +1,15 @@
 import type { z } from "zod";
+import {
+  WorkspaceCommentItemSchema,
+  type WorkspaceCommentItem,
+  type ReplyWorkspaceCommentInput,
+  WorkspaceRequestsResponseSchema,
+  type WorkspaceRequestsResponse,
+  type WorkspaceRequestsQuery,
+  WorkspaceCommentsResponseSchema,
+  type WorkspaceCommentsResponse,
+  type WorkspaceCommentsQuery,
+} from "@userhq/types";
 
 export class ApiClientError extends Error {
   readonly status: number;
@@ -75,3 +86,85 @@ export async function apiFetch<T = unknown>(
   }
   return json as T;
 }
+
+export async function fetchWorkspaceRequests(
+  ws: string,
+  query?: WorkspaceRequestsQuery
+): Promise<WorkspaceRequestsResponse> {
+  const params = new URLSearchParams();
+  if (query?.product) params.set("product", query.product);
+  if (query?.statusId) params.set("statusId", query.statusId);
+  if (query?.statusType) params.set("statusType", query.statusType);
+  if (query?.categoryId) params.set("categoryId", query.categoryId);
+  if (query?.search) params.set("search", query.search);
+  if (query?.sort) params.set("sort", query.sort);
+  if (query?.cursor) params.set("cursor", query.cursor);
+  if (query?.limit) params.set("limit", String(query.limit));
+  const qs = params.toString();
+  return apiFetch(
+    `/api/v1/workspaces/${encodeURIComponent(ws)}/requests${qs ? `?${qs}` : ""}`,
+    { schema: WorkspaceRequestsResponseSchema }
+  );
+}
+
+export async function fetchWorkspaceComments(
+  ws: string,
+  query?: WorkspaceCommentsQuery
+): Promise<WorkspaceCommentsResponse> {
+  const params = new URLSearchParams();
+  if (query?.product) params.set("product", query.product);
+  if (query?.attention) params.set("attention", query.attention);
+  if (query?.cursor) params.set("cursor", query.cursor);
+  if (query?.limit) params.set("limit", String(query.limit));
+  const qs = params.toString();
+  return apiFetch(
+    `/api/v1/workspaces/${encodeURIComponent(ws)}/comments${qs ? `?${qs}` : ""}`,
+    { schema: WorkspaceCommentsResponseSchema }
+  );
+}
+
+export async function markCommentHandled(
+  ws: string,
+  commentId: string
+): Promise<void> {
+  return apiFetch(
+    `/api/v1/workspaces/${encodeURIComponent(ws)}/comments/${encodeURIComponent(commentId)}/handled`,
+    { method: "POST" }
+  );
+}
+
+export async function reopenComment(
+  ws: string,
+  commentId: string
+): Promise<void> {
+  return apiFetch(
+    `/api/v1/workspaces/${encodeURIComponent(ws)}/comments/${encodeURIComponent(commentId)}/handled`,
+    { method: "DELETE" }
+  );
+}
+
+export async function replyWorkspaceComment(
+  ws: string,
+  commentId: string,
+  input: ReplyWorkspaceCommentInput
+): Promise<WorkspaceCommentItem> {
+  return apiFetch(
+    `/api/v1/workspaces/${encodeURIComponent(ws)}/comments/${encodeURIComponent(commentId)}/reply`,
+    {
+      method: "POST",
+      body: input,
+      schema: WorkspaceCommentItemSchema,
+    }
+  );
+}
+
+export async function markCommentRead(
+  ws: string,
+  commentId: string
+): Promise<void> {
+  return apiFetch(
+    `/api/v1/workspaces/${encodeURIComponent(ws)}/comments/${encodeURIComponent(commentId)}/read`,
+    { method: "POST" }
+  );
+}
+

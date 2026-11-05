@@ -69,6 +69,12 @@ import {
   type PublicFaqResponse,
   AdminFaqResponseSchema,
   type AdminFaqResponse,
+  WorkspaceRequestsResponseSchema,
+  type WorkspaceRequestsResponse,
+  WorkspaceCommentsResponseSchema,
+  type WorkspaceCommentsResponse,
+  type WorkspaceRequestsQuery,
+  type WorkspaceCommentsQuery,
   ANONYMOUS_ME,
 } from "@userhq/types";
 
@@ -501,6 +507,46 @@ export const getAdminFaqCategories = cache(
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/faq`,
       AdminFaqResponseSchema
+    );
+  }
+);
+
+export const getWorkspaceRequests = cache(
+  (
+    ws: string,
+    query?: WorkspaceRequestsQuery
+  ): Promise<ApiReadResult<WorkspaceRequestsResponse>> => {
+    const params = new URLSearchParams();
+    if (query?.product) params.set("product", query.product);
+    if (query?.statusId) params.set("statusId", query.statusId);
+    if (query?.statusType) params.set("statusType", query.statusType);
+    if (query?.categoryId) params.set("categoryId", query.categoryId);
+    if (query?.search) params.set("search", query.search);
+    if (query?.sort) params.set("sort", query.sort);
+    if (query?.cursor) params.set("cursor", query.cursor);
+    if (query?.limit) params.set("limit", String(query.limit));
+    const qs = params.toString();
+    return apiRead(
+      `/api/v1/workspaces/${encodeURIComponent(ws)}/requests${qs ? `?${qs}` : ""}`,
+      WorkspaceRequestsResponseSchema
+    );
+  }
+);
+
+export const getWorkspaceComments = cache(
+  (
+    ws: string,
+    query?: WorkspaceCommentsQuery
+  ): Promise<ApiReadResult<WorkspaceCommentsResponse>> => {
+    const params = new URLSearchParams();
+    if (query?.product) params.set("product", query.product);
+    if (query?.attention) params.set("attention", query.attention);
+    if (query?.cursor) params.set("cursor", query.cursor);
+    if (query?.limit) params.set("limit", String(query.limit));
+    const qs = params.toString();
+    return apiRead(
+      `/api/v1/workspaces/${encodeURIComponent(ws)}/comments${qs ? `?${qs}` : ""}`,
+      WorkspaceCommentsResponseSchema
     );
   }
 );

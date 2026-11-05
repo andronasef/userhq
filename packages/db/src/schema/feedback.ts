@@ -141,6 +141,8 @@ export const comments = pgTable(
     editedAt: timestamp("edited_at", { withTimezone: true }),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
     deletedById: text("deleted_by_id").references(() => user.id, { onDelete: "set null" }),
+    handledAt: timestamp("handled_at", { withTimezone: true }),
+    handledById: text("handled_by_id").references(() => user.id, { onDelete: "set null" }),
     deviceInfo: jsonb("device_info").$type<{
       browser?: string | null;
       os?: string | null;
@@ -158,6 +160,24 @@ export const comments = pgTable(
     }),
     index("comments_post_created").on(t.postId, t.createdAt),
     index("comments_author_idx").on(t.authorId),
+    index("comments_handled_idx").on(t.handledAt),
+  ]
+);
+
+export const commentReads = pgTable(
+  "comment_reads",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    commentId: uuid("comment_id")
+      .notNull()
+      .references(() => comments.id, { onDelete: "cascade" }),
+    readAt: timestamp("read_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.commentId] }),
+    index("comment_reads_user_idx").on(t.userId),
   ]
 );
 
@@ -314,6 +334,21 @@ export const commentsRelations = relations(comments, ({ one, many }) => ({
   deletedBy: one(user, {
     fields: [comments.deletedById],
     references: [user.id],
+  }),
+  handledBy: one(user, {
+    fields: [comments.handledById],
+    references: [user.id],
+  }),
+}));
+
+export const commentReadsRelations = relations(commentReads, ({ one }) => ({
+  user: one(user, {
+    fields: [commentReads.userId],
+    references: [user.id],
+  }),
+  comment: one(comments, {
+    fields: [commentReads.commentId],
+    references: [comments.id],
   }),
 }));
 

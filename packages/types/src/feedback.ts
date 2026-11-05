@@ -408,3 +408,90 @@ export const MergeResultSchema = z.object({
   voteCount: z.number().int().nonnegative(),
 });
 export type MergeResult = z.infer<typeof MergeResultSchema>;
+
+export const WorkspaceProductRefSchema = z.object({
+  id: z.string().uuid(),
+  slug: z.string(),
+  name: z.string(),
+  logoUrl: z.string().nullable(),
+  accentColor: z.string(),
+});
+export type WorkspaceProductRef = z.infer<typeof WorkspaceProductRefSchema>;
+
+export const WorkspaceRequestItemSchema = z.object({
+  id: z.string().uuid(),
+  number: z.number().int().positive(),
+  slug: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  voteCount: z.number().int().nonnegative(),
+  createdAt: z.string(),
+  product: WorkspaceProductRefSchema,
+  status: PostStatusSchema,
+  category: z.object({ id: z.string().uuid(), name: z.string() }).nullable(),
+  author: PublicAuthorSchema,
+  commentCount: z.number().int().nonnegative(),
+});
+export type WorkspaceRequestItem = z.infer<typeof WorkspaceRequestItemSchema>;
+
+export const WorkspaceRequestsQuerySchema = z.object({
+  product: z.string().optional(),
+  statusId: z.string().uuid().optional(),
+  statusType: z.enum(STATUS_TYPES).optional(),
+  categoryId: z.string().uuid().optional(),
+  sort: z.enum(["top", "new", "activity"]).default("top"),
+  search: z.string().max(SEARCH_QUERY_MAX).optional(),
+  cursor: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+});
+export type WorkspaceRequestsQuery = z.input<typeof WorkspaceRequestsQuerySchema>;
+export type WorkspaceRequestsParsedQuery = z.output<typeof WorkspaceRequestsQuerySchema>;
+
+export const WorkspaceRequestsResponseSchema = z.object({
+  items: z.array(WorkspaceRequestItemSchema),
+  nextCursor: z.string().nullable(),
+  totalCount: z.number().int().nonnegative(),
+});
+export type WorkspaceRequestsResponse = z.infer<typeof WorkspaceRequestsResponseSchema>;
+
+export const WorkspaceCommentItemSchema = z.object({
+  id: z.string().uuid(),
+  body: z.string(),
+  isAdmin: z.boolean(),
+  createdAt: z.string(),
+  editedAt: z.string().nullable(),
+  handledAt: z.string().nullable(),
+  handledBy: PublicAuthorSchema.nullable(),
+  isUnread: z.boolean(),
+  post: z.object({
+    id: z.string().uuid(),
+    number: z.number().int().positive(),
+    slug: z.string(),
+    title: z.string(),
+  }),
+  product: WorkspaceProductRefSchema,
+  author: PublicAuthorSchema,
+});
+export type WorkspaceCommentItem = z.infer<typeof WorkspaceCommentItemSchema>;
+
+export const WorkspaceCommentsQuerySchema = z.object({
+  product: z.string().optional(),
+  attention: z.enum(["all", "needs_attention", "handled"]).default("needs_attention"),
+  cursor: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+});
+export type WorkspaceCommentsQuery = z.input<typeof WorkspaceCommentsQuerySchema>;
+export type WorkspaceCommentsParsedQuery = z.output<typeof WorkspaceCommentsQuerySchema>;
+
+export const WorkspaceCommentsResponseSchema = z.object({
+  items: z.array(WorkspaceCommentItemSchema),
+  nextCursor: z.string().nullable(),
+  needsAttentionCount: z.number().int().nonnegative(),
+});
+export type WorkspaceCommentsResponse = z.infer<typeof WorkspaceCommentsResponseSchema>;
+
+export const ReplyWorkspaceCommentInputSchema = z.object({
+  body: z.string().min(1, { message: "body_required" }).max(COMMENT_BODY_MAX, { message: "body_too_long" }),
+});
+export type ReplyWorkspaceCommentInput = z.infer<typeof ReplyWorkspaceCommentInputSchema>;
+

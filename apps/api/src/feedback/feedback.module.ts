@@ -6,10 +6,12 @@ import { PortalCommentsController } from "./portal-comments.controller.js";
 import { PortalMutesController } from "./portal-mutes.controller.js";
 import { AdminPostsController } from "./admin-posts.controller.js";
 import { AdminCommentsController } from "./admin-comments.controller.js";
+import { WorkspaceFeedbackController } from "./workspace-feedback.controller.js";
 import { PostsService } from "./posts.service.js";
 import { VotesService } from "./votes.service.js";
 import { CommentsService } from "./comments.service.js";
 import { ModerationService } from "./moderation.service.js";
+import { WorkspaceFeedbackService } from "./workspace-feedback.service.js";
 import { UserThrottlerGuard } from "./throttle.js";
 import { PortalGuard } from "../portal/portal.guard.js";
 import { TenantGuard } from "../tenancy/tenant.guard.js";
@@ -24,6 +26,7 @@ import { NotificationsModule } from "../notifications/notifications.module.js";
     PortalCommentsController,
     AdminPostsController,
     AdminCommentsController,
+    WorkspaceFeedbackController,
     CategoriesController,
   ],
   providers: [
@@ -31,6 +34,7 @@ import { NotificationsModule } from "../notifications/notifications.module.js";
     VotesService,
     CommentsService,
     ModerationService,
+    WorkspaceFeedbackService,
     UserThrottlerGuard,
     PortalGuard,
     TenantGuard,
@@ -40,6 +44,7 @@ import { NotificationsModule } from "../notifications/notifications.module.js";
     VotesService,
     CommentsService,
     ModerationService,
+    WorkspaceFeedbackService,
     UserThrottlerGuard,
   ],
 })

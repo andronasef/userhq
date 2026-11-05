@@ -60,4 +60,17 @@ describe("Product availability and customer delivery", () => {
     const content = await request(app.http).get(`${f.portal}/posts/1`).set("Cookie", owner.cookie);
     expect(content.status).toBe(200);
   });
+
+  it("preserves read history and unrelated products when suppressing unread delivery", async () => {
+    const read = await fixture(); const unread = await fixture(); const other = await fixture();
+    await read.move();
+    const marked = await request(app.http).post(`/api/v1/notifications/${read.post.id}/read`).set("Cookie", customer.cookie).set("Origin", app.env.PUBLIC_URL).send({});
+    expect(marked.status).toBe(201);
+    await unread.move(); await other.move();
+    await read.toggle(false); await unread.toggle(false);
+    await read.toggle(true); await unread.toggle(true);
+    expect(await read.list()).toHaveLength(1);
+    expect(await unread.list()).toHaveLength(0);
+    expect(await other.list()).toHaveLength(1);
+  });
 });

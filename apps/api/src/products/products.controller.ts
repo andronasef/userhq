@@ -13,7 +13,7 @@ import {
   SerializeOptions,
 } from "@nestjs/common";
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
-import { and, eq, isNull, asc } from "drizzle-orm";
+import { and, eq, isNull, asc, sql } from "drizzle-orm";
 import {
   DB,
   type Db,
@@ -309,12 +309,28 @@ export class ProductsController {
 
     if (Object.keys(updateData).length > 0) {
       try {
-        await this.db
+        await this.db.transaction(async (tx) => {
+        await tx
           .update(products)
           .set(updateData)
           .where(
-            and(eq(products.id, tenant.productId!), isNull(products.deletedAt)),
+            and(eq(products.id, tenant.productId!), eq(products.workspaceId, tenant.workspaceId), isNull(products.deletedAt)),
           );
+        if (input.features?.board === false) {
+          // Delete only derived, unsent delivery state. Source content and read history survive.
+          await tx.execute(sql`
+            DELETE FROM comment_email_items i USING comment_email_batches b, comments c, posts p, products pr
+            WHERE i.batch_id = b.id AND i.comment_id = c.id AND c.post_id = p.id
+              AND p.product_id = pr.id AND pr.id = ${tenant.productId!}
+              AND pr.workspace_id = ${tenant.workspaceId} AND b.workspace_id = pr.workspace_id
+              AND b.status IN ('pending', 'retrying', 'sending')
+          `);
+          await tx.execute(sql`
+            DELETE FROM notifications WHERE product_id = ${tenant.productId!}
+              AND workspace_id = ${tenant.workspaceId} AND read_at IS NULL
+          `);
+        }
+        });
       } catch (e) {
         // The pre-check above can lose a race with a concurrent rename.
         if (isUniqueViolation(e, "products_workspace_slug_unique")) {

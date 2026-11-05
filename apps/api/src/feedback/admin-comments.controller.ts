@@ -2,6 +2,9 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Delete,
+  Body,
   Param,
   Query,
   HttpCode,
@@ -12,13 +15,19 @@ import {
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
 import { z } from "zod";
 import {
+  PublicCommentSchema,
+  UpdateCommentInputSchema,
+  type PublicComment,
+  type UpdateCommentInput,
   DeletedCommentPageSchema,
   type DeletedCommentPage,
 } from "@userhq/types";
 import { TenantGuard, type Tenant } from "../tenancy/tenant.guard.js";
 import { CurrentTenant } from "../tenancy/current-tenant.decorator.js";
+import { CurrentUser } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { ModerationService } from "./moderation.service.js";
+import { CommentsService } from "./comments.service.js";
 
 const uuidParamSchema = z.string().uuid();
 
@@ -26,7 +35,35 @@ const uuidParamSchema = z.string().uuid();
 @UseGuards(TenantGuard)
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class AdminCommentsController {
-  constructor(private readonly moderationService: ModerationService) {}
+  constructor(
+    private readonly moderationService: ModerationService,
+    private readonly commentsService: CommentsService
+  ) {}
+
+  @Patch(":id")
+  @SerializeOptions({ schema: PublicCommentSchema })
+  async updateComment(
+    @CurrentTenant() tenant: Tenant,
+    @CurrentUser() user: any,
+    @Param("id") id: string,
+    @Body({ schema: UpdateCommentInputSchema }) input: UpdateCommentInput
+  ): Promise<PublicComment> {
+    const parsed = uuidParamSchema.safeParse(id);
+    if (!parsed.success) throw new ApiException("comment_not_found", 404, "Comment not found.");
+    return this.commentsService.updateComment({ workspaceId: tenant.workspaceId, productId: tenant.productId! }, user, parsed.data, input);
+  }
+
+  @Delete(":id")
+  @HttpCode(204)
+  async deleteComment(
+    @CurrentTenant() tenant: Tenant,
+    @CurrentUser() user: any,
+    @Param("id") id: string
+  ): Promise<void> {
+    const parsed = uuidParamSchema.safeParse(id);
+    if (!parsed.success) throw new ApiException("comment_not_found", 404, "Comment not found.");
+    return this.commentsService.deleteComment({ workspaceId: tenant.workspaceId, productId: tenant.productId! }, user, parsed.data);
+  }
 
   @Get("deleted")
   @SerializeOptions({ schema: DeletedCommentPageSchema })

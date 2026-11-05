@@ -8,6 +8,7 @@ import {
   Param,
   Query,
   Body,
+  Req,
   HttpCode,
   UseGuards,
   UseInterceptors,
@@ -16,6 +17,10 @@ import {
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
 import { z } from "zod";
 import {
+  CreateCommentInputSchema,
+  PublicCommentSchema,
+  type CreateCommentInput,
+  type PublicComment,
   UpdatePostInputSchema,
   PostCreatedSchema,
   type UpdatePostInput,
@@ -46,6 +51,9 @@ import { ApiException } from "../common/api-error.filter.js";
 import { ModerationService } from "./moderation.service.js";
 
 import { PostsService } from "./posts.service.js";
+import { CommentsService } from "./comments.service.js";
+import { Throttle } from "@nestjs/throttler";
+import { UserThrottlerGuard } from "./throttle.js";
 
 const postNumberParamSchema = z.coerce.number().int().positive();
 
@@ -53,8 +61,28 @@ const postNumberParamSchema = z.coerce.number().int().positive();
 @UseGuards(TenantGuard)
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class AdminPostsController {
-  constructor(private readonly moderationService: ModerationService, private readonly postsService: PostsService) {}
+  constructor(
+    private readonly moderationService: ModerationService,
+    private readonly postsService: PostsService,
+    private readonly commentsService: CommentsService
+  ) {}
 
+  @Post(":number/comments")
+  @UseGuards(UserThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @HttpCode(201)
+  @SerializeOptions({ schema: PublicCommentSchema })
+  async createComment(
+    @CurrentTenant() tenant: Tenant,
+    @CurrentUser() user: any,
+    @Req() req: any,
+    @Param("number") number: string,
+    @Body({ schema: CreateCommentInputSchema }) input: CreateCommentInput
+  ): Promise<PublicComment> {
+    const parsed = postNumberParamSchema.safeParse(number);
+    if (!parsed.success) throw new ApiException("post_not_found", 404, "Post not found.");
+    return this.commentsService.createComment({ workspaceId: tenant.workspaceId, productId: tenant.productId! }, user, parsed.data, input, req.headers?.["user-agent"]);
+  }
 
   @Patch(":number")
   @SerializeOptions({ schema: PostCreatedSchema })

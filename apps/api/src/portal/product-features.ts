@@ -1,6 +1,6 @@
 import { SetMetadata } from "@nestjs/common";
 import { products } from "@userhq/db";
-import type { ProductFeatures } from "@userhq/types";
+import { PRODUCT_FEATURE_KEYS, type ProductFeatures } from "@userhq/types";
 
 type ProductFeatureKey = keyof ProductFeatures;
 
@@ -19,7 +19,12 @@ export const productFeatureColumns = {
   faq: products.faqEnabled,
 } as const satisfies Record<ProductFeatureKey, unknown>;
 
-const SETTINGS: readonly string[] = ["board", "roadmap", "changelog", "faq", "exempt"];
+const SETTINGS: readonly string[] = [...PRODUCT_FEATURE_KEYS, "exempt"];
+
+/** Reduce a row selected with `productFeatureColumns` to just the capability object. */
+export function pickFeatures(row: ProductFeatures): ProductFeatures {
+  return Object.fromEntries(PRODUCT_FEATURE_KEYS.map((key) => [key, row[key]])) as ProductFeatures;
+}
 
 export function isPortalFeatureSetting(value: unknown): value is PortalFeatureSetting {
   return typeof value === "string" && SETTINGS.includes(value);

@@ -43,6 +43,7 @@ import { CurrentTenant } from "../tenancy/current-tenant.decorator.js";
 import { CurrentUser } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { isUniqueViolation } from "../common/db-errors.js";
+import { pickFeatures, productFeatureColumns } from "../portal/product-features.js";
 
 @Controller("workspaces/:ws/products")
 @UseGuards(TenantGuard)
@@ -144,10 +145,7 @@ export class ProductsController {
         slug: products.slug,
         name: products.name,
         logoKey: uploads.storageKey,
-        boardEnabled: products.boardEnabled,
-        roadmapEnabled: products.roadmapEnabled,
-        changelogEnabled: products.changelogEnabled,
-        faqEnabled: products.faqEnabled,
+        ...productFeatureColumns,
         accentColor: products.accentColor,
         accentTextColor: products.accentTextColor,
       })
@@ -162,12 +160,7 @@ export class ProductsController {
       .orderBy(asc(products.name), asc(products.slug));
 
     return rows.map((r) => ({
-      features: {
-        board: r.boardEnabled,
-        roadmap: r.roadmapEnabled,
-        changelog: r.changelogEnabled,
-        faq: r.faqEnabled,
-      },
+      features: pickFeatures(r),
       slug: r.slug,
       name: r.name,
       logoUrl: r.logoKey ? `/uploads/${r.logoKey}` : null,
@@ -185,10 +178,7 @@ export class ProductsController {
         name: products.name,
         logoUploadId: products.logoUploadId,
         logoKey: uploads.storageKey,
-        boardEnabled: products.boardEnabled,
-        roadmapEnabled: products.roadmapEnabled,
-        changelogEnabled: products.changelogEnabled,
-        faqEnabled: products.faqEnabled,
+        ...productFeatureColumns,
         accentColor: products.accentColor,
         accentTextColor: products.accentTextColor,
         tagline: products.tagline,
@@ -206,12 +196,7 @@ export class ProductsController {
     }
 
     return ProductDetailSchema.parse({
-      features: {
-        board: row.boardEnabled,
-        roadmap: row.roadmapEnabled,
-        changelog: row.changelogEnabled,
-        faq: row.faqEnabled,
-      },
+      features: pickFeatures(row),
       slug: row.slug,
       name: row.name,
       logoUrl: row.logoKey ? `/uploads/${row.logoKey}` : null,

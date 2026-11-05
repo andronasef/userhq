@@ -28,7 +28,7 @@ import {
 import { Public } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { PortalGuard } from "./portal.guard.js";
-import { PortalFeature } from "./product-features.js";
+import { PortalFeature, pickFeatures, productFeatureColumns } from "./product-features.js";
 
 const productLogo = alias(uploads, "product_logo");
 const workspaceLogo = alias(uploads, "workspace_logo");
@@ -124,10 +124,7 @@ export class PortalController {
         workspaceName: workspaces.name,
         workspaceWebsiteUrl: workspaces.websiteUrl,
         workspaceLogoKey: workspaceLogo.storageKey,
-        boardEnabled: products.boardEnabled,
-        roadmapEnabled: products.roadmapEnabled,
-        changelogEnabled: products.changelogEnabled,
-        faqEnabled: products.faqEnabled,
+        ...productFeatureColumns,
         productSlug: products.slug,
         productName: products.name,
         productTagline: products.tagline,
@@ -151,7 +148,7 @@ export class PortalController {
     const logoUrl = logoKey ? `/uploads/${logoKey}` : null;
     const websiteUrl = row.productWebsiteUrl ?? row.workspaceWebsiteUrl ?? null;
 
-    const catRows = row.boardEnabled ? await this.db
+    const catRows = row.board ? await this.db
       .select({
         id: categories.id,
         name: categories.name,
@@ -160,7 +157,7 @@ export class PortalController {
       .where(eq(categories.productId, productId))
       .orderBy(asc(categories.createdAt), asc(categories.id)) : [];
 
-    const statusRows = row.boardEnabled || row.roadmapEnabled ? await this.db
+    const statusRows = row.board || row.roadmap ? await this.db
       .select({
         id: statuses.id,
         name: statuses.name,
@@ -171,7 +168,7 @@ export class PortalController {
       .from(statuses)
       .where(and(
         eq(statuses.productId, productId),
-        row.boardEnabled ? undefined : eq(statuses.isPublicRoadmap, true),
+        row.board ? undefined : eq(statuses.isPublicRoadmap, true),
       ))
       .orderBy(asc(statuses.position)) : [];
 
@@ -181,12 +178,7 @@ export class PortalController {
         name: row.workspaceName,
       },
       product: {
-        features: {
-          board: row.boardEnabled,
-          roadmap: row.roadmapEnabled,
-          changelog: row.changelogEnabled,
-          faq: row.faqEnabled,
-        },
+        features: pickFeatures(row),
         slug: row.productSlug,
         name: row.productName,
         tagline: row.productTagline ?? null,
@@ -198,7 +190,7 @@ export class PortalController {
       categories: catRows,
       statuses: statusRows.map((status) => ({
         ...status,
-        isPublicRoadmap: row.roadmapEnabled && status.isPublicRoadmap,
+        isPublicRoadmap: row.roadmap && status.isPublicRoadmap,
       })),
     });
   }

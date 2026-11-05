@@ -14,6 +14,7 @@ import {
   featureEnabled,
   isPortalFeatureSetting,
   type PortalFeatureSetting,
+  pickFeatures,
   productFeatureColumns,
 } from "./product-features.js";
 
@@ -82,12 +83,7 @@ export class PortalGuard implements CanActivate {
         throw new ApiException("not_found", 404, "Not found.");
       }
 
-      features = {
-        board: prod.board,
-        roadmap: prod.roadmap,
-        changelog: prod.changelog,
-        faq: prod.faq,
-      };
+      features = pickFeatures(prod);
       if (!featureEnabled(features, setting as PortalFeatureSetting)) {
         throw new ApiException("not_found", 404, "Not found.");
       }

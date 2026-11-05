@@ -321,3 +321,29 @@ Which phases cover which requirements. Updated during roadmap creation.
 ---
 *Requirements defined: 2026-10-01*
 *Last updated: 2026-10-01 after roadmap creation (traceability mapped)*
+
+## Expansion proposal: Product Feature Controls
+
+Pending phase-6 requirements, appended 2026-11-05. Prior requirements, traceability and coverage counts above are historical and unchanged. Scope: [expansion draft](../docs/specs/workspace-platform-expansion.md).
+
+- [ ] **CAP-01:** Workspace owners/admins independently enable or disable Board, Roadmap, Changelog and FAQ for a product; changes remain workspace-scoped.
+- [ ] **CAP-02:** Existing products retain all four enabled modules after migration; toggling preserves content and relationships and re-enabling restores access.
+- [ ] **CAP-03:** Disabled modules reject public reads/writes and direct URLs, enforced by the API in addition to web navigation.
+- [ ] **CAP-04:** Authorized admins retain private management access to disabled modules without weakening authentication or tenant guards.
+- [ ] **CAP-05:** Public navigation, product directory links and landing routes honor enabled modules, including standalone modules and all-disabled products.
+- [ ] **CAP-06:** Public cross-feature links/previews and nested API projections do not expose disabled-module content; relationships survive suppression.
+- [ ] **CAP-07:** Customer notifications and current delivery pipelines check current availability before delivery and suppress links into disabled modules.
+- [ ] **CAP-08:** Cross-tenant, unavailable-feature bypass, migration persistence, re-enable and public-roadmap privacy tests verify the complete feature.
+- [ ] **CAP-09:** One reusable public capability policy composes with existing authorization and is available for later automation and browser-push integrations.
+
+| Requirement | Proposed phase | Proposed plan(s) | Status |
+|---|---|---|---|
+| CAP-01 | 6 | 06-01, 06-02 | Pending |
+| CAP-02 | 6 | 06-01, 06-04 | Pending |
+| CAP-03 | 6 | 06-01, 06-02 | Pending |
+| CAP-04 | 6 | 06-01, 06-02, 06-04 | Pending |
+| CAP-05 | 6 | 06-01, 06-03 | Pending |
+| CAP-06 | 6 | 06-03 | Pending |
+| CAP-07 | 6 | 06-04 | Pending |
+| CAP-08 | 6 | 06-01, 06-02, 06-03, 06-04 | Pending |
+| CAP-09 | 6 | 06-01, 06-02, 06-04 | Pending |

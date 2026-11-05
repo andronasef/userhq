@@ -362,3 +362,24 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5. Phase 5 can start once P
 | 3. Feedback Board & Conversations | 16/16 | Complete | 2026-10-11 |
 | 4. Dual-Layer Roadmap & Closing the Loop | 5/5 | Complete | 2026-10-11 |
 | 5. Changelog & FAQ | 5/5 | Complete | 2026-10-12 |
+
+## Expansion proposal — Phase 6: Product Feature Controls
+
+**Status:** Proposed / not started. Phases 1–5 above retain their historical completion evidence. This entry does not claim that new behavior is implemented.
+
+**Goal:** Workspace owners/admins independently configure Board, Roadmap, Changelog and FAQ; disabled modules are unreachable publicly while stored content and authorized admin management remain available.
+
+**Depends on:** Completed phases 2–5. **Requirements:** CAP-01 through CAP-09.
+
+**Context:** [06-CONTEXT.md](phases/06-product-feature-controls/06-CONTEXT.md). **Source audit:** [06-SOURCE-AUDIT.md](phases/06-product-feature-controls/06-SOURCE-AUDIT.md).
+
+**Proposed plans (0/4 complete):**
+
+- [ ] 06-01 — Board capability tracer: settings → persistence → public access → re-enable.
+- [ ] 06-02 — Independent Roadmap, Changelog and FAQ controls with public endpoint enforcement.
+- [ ] 06-03 — Enabled-feature landing/navigation and cross-feature public projections.
+- [ ] 06-04 — Notification suppression at delivery and complete isolation/privacy acceptance.
+
+**Prerequisites before execution:** review the concrete spec/test seams/ticket breakdown; perform phase research, UI specification and GSD plan checking. These are proposed execution plans, not execution authorization or verification evidence.
+
+The [approved expansion draft](../docs/specs/workspace-platform-expansion.md) also reserves appearance, workspace feedback inbox, scoped admin automation/webhooks and browser push. Schedule those after feature controls; their dependency graph permits independent slices without fabricating blockers. Later phases are not yet assigned executable plans.

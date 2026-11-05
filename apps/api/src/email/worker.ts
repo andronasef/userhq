@@ -178,6 +178,7 @@ export class EmailWorker
             isNull(posts.mergedIntoId),
             isNull(products.deletedAt),
             eq(products.workspaceId, ws.id),
+            eq(products.boardEnabled, true),
             notExists(
               this.db
                 .select()

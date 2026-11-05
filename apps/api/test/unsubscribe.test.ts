@@ -321,6 +321,31 @@ describe("Unsubscribe & Mute (Plan 03-13)", () => {
     expect(mutesAfterDelete).toHaveLength(0);
   });
 
+  it("keeps token mute and unmute usable with Board hidden without revealing the request title or URL", async () => {
+    const [post] = await testApp.db.insert(posts).values({
+      productId: prodId, number: 7, title: "HIDDEN_UNSUBSCRIBE_TITLE", statusId: defaultStatusId, authorId: userA.userId,
+    }).returning();
+    const token = signToken(testApp.env.BETTER_AUTH_SECRET, userA.userId, `p:${post.id}`);
+    const path = `/api/v1/unsubscribe/${token}`;
+    const setBoard = async (board: boolean) => {
+      const res = await request(testApp.http).patch(`/api/v1/workspaces/${wsSlug}/products/${prodSlug}`)
+        .set("Cookie", userA.cookie).set("Origin", testApp.env.PUBLIC_URL).send({ features: { board } });
+      expect(res.status).toBe(200);
+    };
+    await setBoard(false);
+    try {
+      for (const [method, state] of [["get", "subscribed"], ["post", "unsubscribed"], ["get", "unsubscribed"], ["delete", "subscribed"], ["get", "subscribed"]] as const) {
+        const res = await request(testApp.http)[method](path).set("Origin", testApp.env.PUBLIC_URL);
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual({ scope: "post", state, postTitle: null, postUrl: null });
+      }
+    } finally {
+      await setBoard(true);
+    }
+    const restored = await request(testApp.http).get(path);
+    expect(restored.body).toEqual({ scope: "post", state: "subscribed", postTitle: "HIDDEN_UNSUBSCRIBE_TITLE", postUrl: `/${wsSlug}/${prodSlug}/p/7-hidden-unsubscribe-title` });
+  });
+
   it("returns post_unavailable for deleted and merged posts, with no mute row written", async () => {
     // Deleted post
     const [deletedP] = await testApp.db

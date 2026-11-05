@@ -72,6 +72,14 @@ const SCOPE_LABELS: Record<ApiKeyScope, { title: string; description: string }> 
     title: "Manage Changelog (changelog:write)",
     description: "Publish, update, and categorize changelog releases",
   },
+  "webhooks:read": {
+    title: "Read Webhooks (webhooks:read)",
+    description: "View webhook subscriptions and delivery logs",
+  },
+  "webhooks:write": {
+    title: "Manage Webhooks (webhooks:write)",
+    description: "Create, update, and delete webhook subscriptions and redeliver events",
+  },
 };
 
 export function CreateApiKeyDialog({

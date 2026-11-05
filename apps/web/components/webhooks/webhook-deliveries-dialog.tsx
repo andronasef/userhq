@@ -1,0 +1,271 @@
+"use client";
+
+import * as React from "react";
+import {
+  Clock,
+  CheckCircle2,
+  XCircle,
+  RotateCw,
+  ChevronRight,
+  ChevronDown,
+  RefreshCw,
+  Send,
+} from "lucide-react";
+import { toast } from "sonner";
+import type {
+  WebhookSubscription,
+  WebhookDelivery,
+  WebhookDeliveryListResponse,
+} from "@userhq/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { apiFetch } from "../../lib/api-client";
+import { errorCopy } from "../../lib/api-errors";
+
+export interface WebhookDeliveriesDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  ws: string;
+  subscription: WebhookSubscription | null;
+}
+
+export function WebhookDeliveriesDialog({
+  open,
+  onOpenChange,
+  ws,
+  subscription,
+}: WebhookDeliveriesDialogProps): React.JSX.Element {
+  const [deliveries, setDeliveries] = React.useState<WebhookDelivery[]>([]);
+  const [total, setTotal] = React.useState(0);
+  const [loading, setLoading] = React.useState(false);
+  const [expandedDeliveryId, setExpandedDeliveryId] = React.useState<string | null>(null);
+  const [redeliveringId, setRedeliveringId] = React.useState<string | null>(null);
+
+  const fetchDeliveries = React.useCallback(async () => {
+    if (!subscription) return;
+    try {
+      setLoading(true);
+      const res = await apiFetch<WebhookDeliveryListResponse>(
+        `/api/v1/workspaces/${ws}/webhooks/${subscription.id}/deliveries?page=1&limit=50`
+      );
+      setDeliveries(res.deliveries);
+      setTotal(res.total);
+    } catch (err: any) {
+      toast.error(errorCopy(err, "Failed to load deliveries"));
+    } finally {
+      setLoading(false);
+    }
+  }, [subscription, ws]);
+
+  React.useEffect(() => {
+    if (open && subscription) {
+      fetchDeliveries();
+      setExpandedDeliveryId(null);
+    }
+  }, [open, subscription, fetchDeliveries]);
+
+  const handleRedeliver = async (deliveryId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!subscription) return;
+
+    try {
+      setRedeliveringId(deliveryId);
+      await apiFetch<WebhookDelivery>(
+        `/api/v1/workspaces/${ws}/webhooks/${subscription.id}/deliveries/${deliveryId}/redeliver`,
+        { method: "POST" }
+      );
+      toast.success("Delivery re-enqueued for transmission");
+      setDeliveries((prev) =>
+        prev.map((d) => (d.id === deliveryId ? { ...d, status: "pending" } : d))
+      );
+    } catch (err: any) {
+      toast.error(errorCopy(err, "Failed to redeliver"));
+    } finally {
+      setRedeliveringId(null);
+    }
+  };
+
+  const getStatusBadge = (status: WebhookDelivery["status"], statusCode?: number | null) => {
+    switch (status) {
+      case "delivered":
+        return (
+          <Badge variant="success" className="gap-1 text-xs">
+            <CheckCircle2 className="size-3" />
+            <span>{statusCode ? `${statusCode} OK` : "Delivered"}</span>
+          </Badge>
+        );
+      case "failed":
+        return (
+          <Badge variant="danger" className="gap-1 text-xs">
+            <XCircle className="size-3" />
+            <span>{statusCode ? `${statusCode} Error` : "Failed"}</span>
+          </Badge>
+        );
+      case "sending":
+        return (
+          <Badge variant="warning" className="gap-1 text-xs">
+            <RotateCw className="size-3 animate-spin" />
+            <span>Sending</span>
+          </Badge>
+        );
+      case "pending":
+      default:
+        return (
+          <Badge variant="neutral" className="gap-1 text-xs">
+            <Clock className="size-3" />
+            <span>Pending</span>
+          </Badge>
+        );
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-6">
+        <DialogHeader className="shrink-0">
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle className="flex items-center gap-2">
+                <span>Recent Deliveries</span>
+                <Badge variant="neutral" className="text-xs">
+                  {total}
+                </Badge>
+              </DialogTitle>
+              <DialogDescription className="font-mono text-xs truncate max-w-lg mt-0.5">
+                {subscription?.url}
+              </DialogDescription>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchDeliveries}
+              disabled={loading}
+              className="gap-1.5"
+            >
+              <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+              <span>Refresh</span>
+            </Button>
+          </div>
+        </DialogHeader>
+
+        <div className="flex-1 overflow-y-auto mt-4 pr-1 space-y-2">
+          {loading && deliveries.length === 0 ? (
+            <div className="p-8 text-center text-sm text-muted-foreground">
+              Loading delivery logs...
+            </div>
+          ) : deliveries.length === 0 ? (
+            <div className="p-8 text-center border border-dashed border-border rounded-lg text-sm text-muted-foreground">
+              No webhook deliveries recorded yet. Trigger an event or send a test ping to inspect delivery logs.
+            </div>
+          ) : (
+            deliveries.map((delivery) => {
+              const isExpanded = expandedDeliveryId === delivery.id;
+              const formattedDate = new Date(delivery.createdAt).toLocaleString(undefined, {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              });
+
+              return (
+                <div
+                  key={delivery.id}
+                  className="rounded-lg border border-border bg-card transition-colors hover:border-foreground/20"
+                >
+                  <div
+                    onClick={() =>
+                      setExpandedDeliveryId(isExpanded ? null : delivery.id)
+                    }
+                    className="flex items-center justify-between p-3.5 cursor-pointer text-sm gap-3"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {isExpanded ? (
+                        <ChevronDown className="size-4 text-muted-foreground shrink-0" />
+                      ) : (
+                        <ChevronRight className="size-4 text-muted-foreground shrink-0" />
+                      )}
+                      {getStatusBadge(delivery.status, delivery.responseStatusCode)}
+                      <span className="font-mono text-xs font-semibold text-foreground truncate">
+                        {delivery.eventType}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-xs text-muted-foreground">{formattedDate}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => handleRedeliver(delivery.id, e)}
+                        disabled={redeliveringId === delivery.id}
+                        className="h-7 px-2 text-xs gap-1"
+                        title="Re-deliver this webhook payload"
+                      >
+                        <RotateCw
+                          className={`size-3 ${
+                            redeliveringId === delivery.id ? "animate-spin" : ""
+                          }`}
+                        />
+                        <span>Redeliver</span>
+                      </Button>
+                    </div>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="p-3.5 pt-0 border-t border-border/50 text-xs space-y-3 bg-muted/20 rounded-b-lg">
+                      <div className="grid grid-cols-2 gap-2 text-muted-foreground pt-3">
+                        <div>
+                          <span className="font-medium text-foreground">Delivery ID: </span>
+                          <span className="font-mono">{delivery.id}</span>
+                        </div>
+                        <div>
+                          <span className="font-medium text-foreground">Attempts: </span>
+                          <span>{delivery.attempts}</span>
+                        </div>
+                        {delivery.deliveredAt && (
+                          <div>
+                            <span className="font-medium text-foreground">Delivered at: </span>
+                            <span>{new Date(delivery.deliveredAt).toLocaleString()}</span>
+                          </div>
+                        )}
+                        {delivery.lastAttemptAt && (
+                          <div>
+                            <span className="font-medium text-foreground">Last attempt: </span>
+                            <span>{new Date(delivery.lastAttemptAt).toLocaleString()}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {delivery.responseBody && (
+                        <div className="space-y-1">
+                          <span className="font-medium text-foreground">Response Body:</span>
+                          <pre className="p-2.5 rounded bg-background border border-border font-mono text-[11px] max-h-32 overflow-y-auto whitespace-pre-wrap">
+                            {delivery.responseBody}
+                          </pre>
+                        </div>
+                      )}
+
+                      <div className="space-y-1">
+                        <span className="font-medium text-foreground">Dispatched Payload:</span>
+                        <pre className="p-2.5 rounded bg-background border border-border font-mono text-[11px] max-h-48 overflow-y-auto whitespace-pre-wrap">
+                          {JSON.stringify(delivery.payload, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

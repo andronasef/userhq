@@ -35,6 +35,7 @@ import { ChangelogModule } from "./changelog/changelog.module.js";
 import { FaqModule } from "./faq/faq.module.js";
 import { ApiKeysModule } from "./api-keys/api-keys.module.js";
 import { ExportModule } from "./export/export.module.js";
+import { WebhooksModule } from "./webhooks/webhooks.module.js";
 
 const DB_POOL = Symbol.for("@userhq/api/db-pool");
 
@@ -82,6 +83,7 @@ export class AppModule {
         FaqModule,
         ApiKeysModule,
         ExportModule,
+        WebhooksModule,
       ],
       controllers: [HealthController, MeController],
       providers: [

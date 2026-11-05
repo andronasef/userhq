@@ -113,6 +113,13 @@
       "when": 1793919019240,
       "tag": "0015_workspace_api_keys",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1793921845229,
+      "tag": "0016_outbound_webhooks",
+      "breakpoints": true
     }
   ]
 }

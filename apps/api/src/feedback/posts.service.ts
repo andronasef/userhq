@@ -33,6 +33,7 @@ import { isWorkspaceAdmin } from "./membership.js";
 import { prefixTsQuery } from "./search.js";
 import { encodeBoardCursor, decodeBoardCursor } from "./cursor.js";
 import { CommentsService } from "./comments.service.js";
+import { enqueueWebhookEvent } from "../webhooks/outbox.js";
 import { parseUserAgent } from "./device-info.js";
 
 export function engagedSql(postsTable: typeof posts = posts) {
@@ -157,6 +158,21 @@ export class PostsService {
         .insert(votes)
         .values({ postId: newPost.id, userId: currentUser.id });
 
+      await enqueueWebhookEvent(tx, {
+        workspaceId: portal.workspaceId,
+        productId: portal.productId,
+        eventType: "post.created",
+        data: {
+          id: newPost.id,
+          number: newPost.number,
+          title: newPost.title,
+          description: input.description ?? null,
+          authorId: currentUser.id,
+          categoryId: verifiedCategoryId,
+          statusId: def.id,
+        },
+      });
+
       return newPost;
     });
 
@@ -278,6 +294,19 @@ export class PostsService {
         );
       }
 
+      await enqueueWebhookEvent(tx, {
+        workspaceId: portal.workspaceId,
+        productId: portal.productId,
+        eventType: "post.updated",
+        data: {
+          id: post.id,
+          number: updated.number,
+          title: updated.title,
+          description: input.description ?? null,
+          categoryId: verifiedCategoryId,
+        },
+      });
+
       return {
         number: updated.number,
         slug: postSlug(updated.title),
@@ -358,6 +387,16 @@ export class PostsService {
           "This post was removed or merged. Go back to the board."
         );
       }
+
+      await enqueueWebhookEvent(tx, {
+        workspaceId: portal.workspaceId,
+        productId: portal.productId,
+        eventType: "post.deleted",
+        data: {
+          id: post.id,
+          number: postNumber,
+        },
+      });
     });
   }
 

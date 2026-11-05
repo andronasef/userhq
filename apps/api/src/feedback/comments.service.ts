@@ -11,6 +11,7 @@ import type {
 import { ApiException } from "../common/api-error.filter.js";
 import { isWorkspaceAdmin } from "./membership.js";
 import { enqueueCommentEmail } from "../email/outbox.js";
+import { enqueueWebhookEvent } from "../webhooks/outbox.js";
 import { parseUserAgent } from "./device-info.js";
 
 export interface CommentRowWithAuthor {
@@ -103,6 +104,20 @@ export class CommentsService {
         commentId: newComment.id,
         actorId: currentUser.id,
         workspaceId: portal.workspaceId,
+      });
+
+      await enqueueWebhookEvent(tx, {
+        workspaceId: portal.workspaceId,
+        productId: portal.productId,
+        eventType: "comment.created",
+        data: {
+          id: newComment.id,
+          postId: p.id,
+          postNumber: p.number,
+          authorId: currentUser.id,
+          body: newComment.body,
+          parentId: resolvedParentId,
+        },
       });
 
       return {
@@ -271,6 +286,16 @@ export class CommentsService {
     if (!deleted) {
       throw new ApiException("comment_not_found", 404, "Comment not found.");
     }
+
+    await enqueueWebhookEvent(this.db, {
+      workspaceId: portal.workspaceId,
+      productId: portal.productId,
+      eventType: "comment.deleted",
+      data: {
+        id: commentId,
+        postId: row.postId,
+      },
+    });
   }
 
   shapeTimeline(

@@ -49,6 +49,7 @@ export default async function WorkspaceSettingsPage({
         tabs={[
           { label: "General", href: `/dashboard/${ws}/settings` },
           { label: "API Keys", href: `/dashboard/${ws}/settings/api-keys` },
+          { label: "Webhooks", href: `/dashboard/${ws}/settings/webhooks` },
         ]}
         activeHref={`/dashboard/${ws}/settings`}
         className="mb-8"

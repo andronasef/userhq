@@ -13,6 +13,7 @@ import * as notificationsSchema from "./schema/notifications.js";
 import * as changelogSchema from "./schema/changelog.js";
 import * as faqSchema from "./schema/faq.js";
 import * as apiKeysSchema from "./schema/api-keys.js";
+import * as webhooksSchema from "./schema/webhooks.js";
 
 export const schema = {
   ...authSchema,
@@ -24,6 +25,7 @@ export const schema = {
   ...changelogSchema,
   ...faqSchema,
   ...apiKeysSchema,
+  ...webhooksSchema,
 };
 
 export * from "./schema/auth.js";
@@ -35,6 +37,7 @@ export * from "./schema/notifications.js";
 export * from "./schema/changelog.js";
 export * from "./schema/faq.js";
 export * from "./schema/api-keys.js";
+export * from "./schema/webhooks.js";
 
 export type Db = NodePgDatabase<typeof schema>;
 export const DB: unique symbol = Symbol.for("@userhq/db");

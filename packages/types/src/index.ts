@@ -14,6 +14,7 @@ export * from "./changelog.js";
 export * from "./faq.js";
 export * from "./api-keys.js";
 export * from "./export.js";
+export * from "./webhooks.js";
 
 export const API_ERROR_CODES = [
   "unauthorized",

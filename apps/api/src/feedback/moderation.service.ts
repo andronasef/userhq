@@ -45,6 +45,7 @@ import { encodeBoardCursor, decodeBoardCursor } from "./cursor.js";
 import { loadTimeline } from "./posts.service.js";
 import { CommentsService } from "./comments.service.js";
 import { NotificationsService } from "../notifications/notifications.service.js";
+import { enqueueWebhookEvent } from "../webhooks/outbox.js";
 
 @Injectable()
 export class ModerationService {
@@ -171,6 +172,25 @@ export class ModerationService {
           actorId: actor.id,
         });
       }
+
+      await enqueueWebhookEvent(tx, {
+        workspaceId: tenant.workspaceId,
+        productId: tenant.productId,
+        eventType: "post.status_changed",
+        data: {
+          postId: post.id,
+          postNumber,
+          previousStatusId: post.statusId,
+          newStatus: {
+            id: targetStatus.id,
+            name: targetStatus.name,
+            color: targetStatus.color,
+            type: targetStatus.type,
+          },
+          actorId: actor.id,
+          note: trimmedNote,
+        },
+      });
 
       return {
         status: {

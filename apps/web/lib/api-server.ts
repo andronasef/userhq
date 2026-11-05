@@ -77,6 +77,8 @@ import {
   type WorkspaceCommentsQuery,
   apiKeyListResponseSchema,
   type ApiKeyListResponse,
+  webhookSubscriptionListResponseSchema,
+  type WebhookSubscriptionListResponse,
   ANONYMOUS_ME,
 } from "@userhq/types";
 
@@ -558,6 +560,15 @@ export const getWorkspaceApiKeys = cache(
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/api-keys`,
       apiKeyListResponseSchema
+    );
+  }
+);
+
+export const getWorkspaceWebhooks = cache(
+  (ws: string): Promise<ApiReadResult<WebhookSubscriptionListResponse>> => {
+    return apiRead(
+      `/api/v1/workspaces/${encodeURIComponent(ws)}/webhooks`,
+      webhookSubscriptionListResponseSchema
     );
   }
 );

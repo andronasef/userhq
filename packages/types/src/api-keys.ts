@@ -11,6 +11,8 @@ export const API_KEY_SCOPES = [
   "changelog:read",
   "changelog:write",
   "export:read",
+  "webhooks:read",
+  "webhooks:write",
 ] as const;
 
 export type ApiKeyScope = (typeof API_KEY_SCOPES)[number];

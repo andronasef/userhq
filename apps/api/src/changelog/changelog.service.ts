@@ -6,6 +6,7 @@ import {
   changelogEntries,
   changelogTags,
   changelogEntryTags,
+  products,
 } from "@userhq/db";
 import {
   slugify,
@@ -18,6 +19,7 @@ import {
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
 import { isUniqueViolation } from "../common/db-errors.js";
+import { enqueueWebhookEvent } from "../webhooks/outbox.js";
 
 @Injectable()
 export class ChangelogService {
@@ -314,7 +316,29 @@ export class ChangelogService {
         })
         .where(eq(changelogEntries.id, entryId));
 
-      return this.getEntryById(productId, entryId, tx);
+      const entry = await this.getEntryById(productId, entryId, tx);
+
+      const [prod] = await tx
+        .select({ workspaceId: products.workspaceId })
+        .from(products)
+        .where(eq(products.id, productId))
+        .limit(1);
+
+      if (prod) {
+        await enqueueWebhookEvent(tx, {
+          workspaceId: prod.workspaceId,
+          productId,
+          eventType: "changelog.published",
+          data: {
+            id: entry.id,
+            title: entry.title,
+            summary: entry.summary,
+            publishedAt: publishedAt.toISOString(),
+          },
+        });
+      }
+
+      return entry;
     });
   }
 

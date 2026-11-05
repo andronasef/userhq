@@ -7,10 +7,12 @@ import { CommentItem } from "@/components/post/comment-item";
 import { CommentComposer } from "@/components/post/comment-composer";
 import { SignInPrompt } from "@/components/post/sign-in-prompt";
 import { ActivityItem } from "@/components/post/activity-item";
+import type { BoardVariant } from "@/lib/tenant";
 
 export interface PostTimelineProps {
   ws: string;
   product: string;
+  variant?: BoardVariant;
   postNumber: number;
   postSlug: string;
   initialTimeline: TimelineItem[];
@@ -32,6 +34,7 @@ export function DeletedStub(): React.JSX.Element {
 export function PostTimeline({
   ws,
   product,
+  variant = "portal",
   postNumber,
   postSlug,
   initialTimeline,
@@ -192,6 +195,7 @@ export function PostTimeline({
                     comment={item.comment}
                     ws={ws}
                     product={product}
+                    variant={variant}
                     postNumber={postNumber}
                     postRef={postRef}
                     signedIn={signedIn}
@@ -210,6 +214,7 @@ export function PostTimeline({
                         comment={reply}
                         ws={ws}
                         product={product}
+                        variant={variant}
                         postNumber={postNumber}
                         postRef={postRef}
                         parentId={topLevelId}
@@ -228,6 +233,7 @@ export function PostTimeline({
                     <CommentComposer
                       ws={ws}
                       product={product}
+                      variant={variant}
                       postNumber={postNumber}
                       parentId={topLevelId}
                       mode="reply"
@@ -253,6 +259,7 @@ export function PostTimeline({
           <CommentComposer
             ws={ws}
             product={product}
+            variant={variant}
             postNumber={postNumber}
             onSuccess={handleCommentSuccess}
           />

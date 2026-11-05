@@ -197,6 +197,7 @@ export function PostDetailView({
         <PostTimeline
           ws={ws}
           product={product}
+          variant="dashboard"
           postNumber={post.number}
           postSlug={post.slug}
           initialTimeline={timeline}

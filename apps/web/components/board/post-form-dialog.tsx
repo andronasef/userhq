@@ -32,11 +32,12 @@ import { Alert } from "@/components/ui/alert";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
 import { errorCopy, FIELD_FOR_CODE } from "@/lib/api-errors";
 import { QueryProvider } from "@/lib/query-client";
-import { postHref, portalHref } from "@/lib/tenant";
+import { postHref, portalHref, boardApiBase, type BoardVariant } from "@/lib/tenant";
 
 export interface PostFormDialogProps {
   ws: string;
   product: string;
+  variant?: BoardVariant;
   categories?: { id: string; name: string }[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -54,6 +55,7 @@ export interface PostFormDialogProps {
 function PostFormDialogInner({
   ws,
   product,
+  variant = "portal",
   categories = [],
   open,
   onOpenChange,
@@ -104,7 +106,7 @@ function PostFormDialogInner({
     mutationFn: async (data: CreatePostInput) => {
       if (mode === "edit" && initial) {
         return apiFetch(
-          `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/posts/${initial.number}`,
+          `${boardApiBase(variant, ws, product)}/posts/${initial.number}`,
           {
             method: "PATCH",
             body: {
@@ -130,7 +132,8 @@ function PostFormDialogInner({
       onOpenChange(false);
       if (mode === "edit") {
         toast.success("Post updated");
-        if (initial?.slug && result.slug !== initial.slug) {
+        // Dashboard URLs are keyed by number, so only the portal URL changes with the slug.
+        if (variant === "portal" && initial?.slug && result.slug !== initial.slug) {
           router.replace(postHref(ws, product, result.number, result.slug));
         } else {
           router.refresh();

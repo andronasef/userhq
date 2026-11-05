@@ -4,7 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { ArrowDown, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
-import type { PublicPostRow, PublicBoardPage, MergeResult } from "@userhq/types";
+import type { PublicPostRow, PublicBoardPage, AdminPostPage, MergeResult } from "@userhq/types";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,9 @@ import { Alert } from "@/components/ui/alert";
 import { StatusBadge } from "@/components/status-badge";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
 import { errorCopy } from "@/lib/api-errors";
-import { postHref } from "@/lib/tenant";
+import { postHref, boardApiBase } from "@/lib/tenant";
+
+type MergeCandidate = Pick<PublicPostRow, "number" | "title" | "voteCount" | "status">;
 
 export interface MergeDialogProps {
   open: boolean;
@@ -45,9 +47,9 @@ export function MergeDialog({
   const router = useRouter();
   const [step, setStep] = React.useState<1 | 2>(1);
   const [query, setQuery] = React.useState("");
-  const [results, setResults] = React.useState<PublicPostRow[]>([]);
+  const [results, setResults] = React.useState<MergeCandidate[]>([]);
   const [loading, setLoading] = React.useState(false);
-  const [selectedTarget, setSelectedTarget] = React.useState<PublicPostRow | null>(null);
+  const [selectedTarget, setSelectedTarget] = React.useState<MergeCandidate | null>(null);
   const [isMerging, setIsMerging] = React.useState(false);
   const [alertError, setAlertError] = React.useState<string | null>(null);
 
@@ -68,11 +70,13 @@ export function MergeDialog({
     const timer = setTimeout(
       () => {
         setLoading(true);
+        const base = `${boardApiBase(variant, ws, product)}/posts`;
         const url = trimmed
-          ? `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/posts?q=${encodeURIComponent(trimmed)}&status=all`
-          : `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/posts?sort=top&status=all&limit=8`;
+          ? `${base}?q=${encodeURIComponent(trimmed)}&status=all`
+          : `${base}?sort=top&status=all&limit=8`;
 
-        apiFetch<PublicBoardPage>(url)
+        // Dashboard uses the admin list (AdminPostRow carries the same fields we render).
+        apiFetch<PublicBoardPage | AdminPostPage>(url)
           .then((res) => {
             if (!cancelled) {
               setResults(res.posts.filter((p) => p.number !== post.number));
@@ -93,7 +97,7 @@ export function MergeDialog({
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [open, query, ws, product, post.number]);
+  }, [open, query, ws, product, variant, post.number]);
 
   const handleMerge = async () => {
     if (!selectedTarget || isMerging) return;

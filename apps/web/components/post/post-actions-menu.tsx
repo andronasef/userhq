@@ -20,7 +20,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { VotersDialog } from "@/components/post/voters-dialog";
 import { MergeDialog } from "@/components/post/merge-dialog";
 import { apiFetch } from "@/lib/api-client";
-import { portalHref } from "@/lib/tenant";
+import { portalHref, boardApiBase } from "@/lib/tenant";
 
 export interface PostActionsMenuProps {
   ws: string;
@@ -54,7 +54,7 @@ export function PostActionsMenu({
 
   const handleDelete = async () => {
     await apiFetch(
-      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/posts/${post.number}`,
+      `${boardApiBase(variant, ws, product)}/posts/${post.number}`,
       { method: "DELETE" }
     );
     toast.success("Post deleted");
@@ -204,6 +204,7 @@ export function PostActionsMenu({
         onOpenChange={setEditDialogOpen}
         ws={ws}
         product={product}
+        variant={variant}
         categories={categories}
         mode="edit"
         initial={{

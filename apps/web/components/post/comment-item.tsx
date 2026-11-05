@@ -13,11 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
 import { errorCopy } from "@/lib/api-errors";
+import { boardApiBase, type BoardVariant } from "@/lib/tenant";
 
 export interface CommentItemProps {
   comment: PublicComment;
   ws: string;
   product: string;
+  variant?: BoardVariant;
   postNumber: number;
   postRef?: string;
   parentId?: string;
@@ -32,6 +34,7 @@ export function CommentItem({
   comment,
   ws,
   product,
+  variant = "portal",
   postRef,
   parentId,
   signedIn,
@@ -83,7 +86,7 @@ export function CommentItem({
 
     try {
       const updated = await apiFetch<PublicComment>(
-        `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/comments/${comment.id}`,
+        `${boardApiBase(variant, ws, product)}/comments/${comment.id}`,
         {
           method: "PATCH",
           body: {
@@ -114,7 +117,7 @@ export function CommentItem({
 
   const handleDelete = async () => {
     await apiFetch(
-      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/comments/${comment.id}`,
+      `${boardApiBase(variant, ws, product)}/comments/${comment.id}`,
       {
         method: "DELETE",
       }

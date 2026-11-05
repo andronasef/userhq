@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
 import { errorCopy } from "@/lib/api-errors";
+import { boardApiBase, type BoardVariant } from "@/lib/tenant";
 
 export interface CommentComposerProps {
   ws: string;
   product: string;
+  variant?: BoardVariant;
   postNumber: number;
   parentId?: string;
   mode?: "comment" | "reply";
@@ -26,6 +28,7 @@ export interface CommentComposerProps {
 export function CommentComposer({
   ws,
   product,
+  variant = "portal",
   postNumber,
   parentId,
   mode = "comment",
@@ -75,7 +78,7 @@ export function CommentComposer({
 
     try {
       const result = await apiFetch<PublicComment>(
-        `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/posts/${postNumber}/comments`,
+        `${boardApiBase(variant, ws, product)}/posts/${postNumber}/comments`,
         {
           method: "POST",
           body: {

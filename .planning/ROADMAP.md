@@ -26,7 +26,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Feedback Board & Conversations** - Customers post, vote, search, and comment; admins moderate and merge; commenters get reply emails
 - [x] **Phase 4: Dual-Layer Roadmap & Closing the Loop** - Private Kanban, a public roadmap that can't leak internal fields, linked-post status sync, in-app notifications, and My activity
 - [x] **Phase 5: Changelog & FAQ** - Rich-text release notes with WebP images, tags, drafts, and permalinks; a searchable FAQ that links to the feedback board
-- [ ] **Phase 6: Product Feature Controls** - Owners/admins switch Board, Roadmap, Changelog and FAQ on or off per product; disabled modules vanish publicly (navigation, URLs, API, notifications) while content and admin management survive
+- [x] **Phase 6: Product Feature Controls** - Owners/admins switch Board, Roadmap, Changelog and FAQ on or off per product; disabled modules vanish publicly (navigation, URLs, API, notifications) while content and admin management survive
 
 ## Phase Details
 
@@ -393,4 +393,4 @@ Phases run in numeric order: 1 → 2 → 3 → 4 → 5 → 6. Phase 5 can start 
 | 3. Feedback Board & Conversations | 16/16 | Complete | 2026-10-11 |
 | 4. Dual-Layer Roadmap & Closing the Loop | 5/5 | Complete | 2026-10-11 |
 | 5. Changelog & FAQ | 5/5 | Complete | 2026-10-12 |
-| 6. Product Feature Controls | 10/10 | Executed - awaiting verification | - |
+| 6. Product Feature Controls | 10/10 | Complete | 2026-11-05 |

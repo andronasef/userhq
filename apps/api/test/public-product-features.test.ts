@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import request from "supertest";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { schema } from "@userhq/db";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
 
@@ -136,5 +137,83 @@ describe("Disabled Board at the public request boundary (CAP-03, D-08)", () => {
     expect(list.status).toBe(200);
     expect(JSON.stringify(list.body)).toContain("Primary idea");
     expect((await call("get", `${portal}/posts/1`)).status).toBe(200);
+  });
+
+  // ---- Task 2: writes, activity (CAP-03) ----
+  describe("Board writes and activity when disabled", () => {
+    const snapshot = async () => {
+      const count = async (table: any, where: any) => {
+        const [{ n }] = await app.db.select({ n: sql<number>`count(*)::int` }).from(table).where(where);
+        return n;
+      };
+      const posts = await app.db.select().from(schema.posts).where(eq(schema.posts.productId, productId)).orderBy(schema.posts.number);
+      const postIdList = posts.map((p) => p.id);
+      return {
+        posts: posts.map((p) => ({ n: p.number, title: p.title, v: p.version, del: p.deletedAt, votes: p.voteCount })),
+        comments: await app.db.select({ id: schema.comments.id, body: schema.comments.body, del: schema.comments.deletedAt, v: schema.comments.version }).from(schema.comments).where(inArray(schema.comments.postId, postIdList)).orderBy(schema.comments.id),
+        votes: await count(schema.votes, inArray(schema.votes.postId, postIdList)),
+        mutes: await count(schema.postMutes, inArray(schema.postMutes.postId, postIdList)),
+        visits: await count(schema.userProductActivityVisits, eq(schema.userProductActivityVisits.productId, productId)),
+      };
+    };
+
+    const writes = () => [
+      { name: "POST posts", method: "post" as const, path: `${portal}/posts`, body: { title: "Brand new idea", description: "d" } },
+      { name: "PATCH posts/:number", method: "patch" as const, path: `${portal}/posts/1`, body: { title: "Edited", description: null, version: 1 } },
+      { name: "DELETE posts/:number", method: "delete" as const, path: `${portal}/posts/1` },
+      { name: "POST posts/:number/comments", method: "post" as const, path: `${portal}/posts/1/comments`, body: { body: "A reply" } },
+      { name: "PATCH comments/:id", method: "patch" as const, path: `${portal}/comments/${commentId}`, body: { body: "Edited comment", version: 1 } },
+      { name: "DELETE comments/:id", method: "delete" as const, path: `${portal}/comments/${commentId}` },
+      { name: "PUT posts/:number/vote", method: "put" as const, path: `${portal}/posts/1/vote` },
+      { name: "DELETE posts/:number/vote", method: "delete" as const, path: `${portal}/posts/1/vote` },
+      { name: "PUT posts/:number/mute", method: "put" as const, path: `${portal}/posts/1/mute` },
+      { name: "DELETE posts/:number/mute", method: "delete" as const, path: `${portal}/posts/1/mute` },
+    ];
+
+    it("accepts a Board write, a vote, a mute and an activity read while enabled", async () => {
+      const comment = await call("post", `${portal}/posts/1/comments`, customer, { body: "Enabled reply" });
+      expect(comment.status).toBe(201);
+      expect((await call("put", `${portal}/posts/1/vote`, stranger)).status).toBeLessThan(300);
+      expect((await call("put", `${portal}/posts/1/mute`, stranger)).status).toBeLessThan(300);
+      const activity = await call("get", `${portal}/activity`, customer);
+      expect(activity.status).toBe(200);
+      // restore the neutral state for the disabled matrix
+      await call("delete", `${portal}/posts/1/vote`, stranger);
+      await call("delete", `${portal}/posts/1/mute`, stranger);
+      await app.db.delete(schema.userProductActivityVisits).where(eq(schema.userProductActivityVisits.productId, productId));
+      await app.db.delete(schema.comments).where(and(eq(schema.comments.postId, postIds.one), eq(schema.comments.body, "Enabled reply")));
+    });
+
+    it("denies every Board write and activity read for every role with no row changes", async () => {
+      await setBoard(false);
+      const before = await snapshot();
+      for (const who of [customer, stranger, admin, owner]) {
+        for (const w of writes()) {
+          const res = await call(w.method, w.path, who, w.body);
+          expect(res.status, `${w.name} as ${who.userId}`).toBe(404);
+          expect(res.body.code, w.name).toBe("not_found");
+        }
+        const activity = await call("get", `${portal}/activity`, who);
+        expect(activity.status, "GET activity").toBe(404);
+      }
+      expect(await snapshot()).toEqual(before);
+      expect(before.visits).toBe(0);
+    });
+
+    it("answers unauthenticated writes with the same 401 as an enabled product", async () => {
+      for (const w of writes()) {
+        expect((await call(w.method, w.path, undefined, w.body)).status, w.name).toBe(401);
+      }
+      expect((await call("get", `${portal}/activity`)).status).toBe(401);
+    });
+
+    it("keeps admin comment management usable and restores portal writes on re-enable", async () => {
+      const reply = await call("post", `${adminBase}/posts/1/comments`, admin, { body: "Private admin reply" });
+      expect(reply.status).toBe(201);
+      await setBoard(true);
+      const live = await call("post", `${portal}/posts/1/comments`, customer, { body: "Back online" });
+      expect(live.status).toBe(201);
+      expect((await call("get", `${portal}/activity`, customer)).status).toBe(200);
+    });
   });
 });

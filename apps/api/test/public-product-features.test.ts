@@ -7,9 +7,112 @@ import { schema } from "@userhq/db";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
 import { PortalGuard } from "../src/portal/portal.guard.js";
 import { PORTAL_FEATURE } from "../src/portal/product-features.js";
+import type { ProductFeatures } from "@userhq/types";
 
 type TestApp = Awaited<ReturnType<typeof createTestApp>>;
 type Cookie = { cookie: string; userId: string };
+
+describe("Independent public product modules (CAP-03, D-07..D-11)", () => {
+  let app: TestApp;
+  let owner: Cookie;
+  let admin: Cookie;
+  let customer: Cookie;
+  let statusId: string;
+  let roadmapId: string;
+  const base = "/api/v1/workspaces/module-controls/products/app";
+  const portal = "/api/v1/portal/module-controls/app";
+  const doc = { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Public answer" }] }] };
+  const allOn: ProductFeatures = { board: true, roadmap: true, changelog: true, faq: true };
+  const call = (method: "get" | "post" | "patch" | "delete", path: string, who?: Cookie, body?: object) => {
+    let req = request(app.http)[method](path).set("Origin", app.env.PUBLIC_URL);
+    if (who) req = req.set("Cookie", who.cookie);
+    return body ? req.send(body) : req;
+  };
+  const setFeatures = async (features: Partial<ProductFeatures>) => {
+    const res = await call("patch", base, owner, { features });
+    expect(res.status).toBe(200);
+    expect(res.body.features).toMatchObject(features);
+  };
+  const endpoints = () => [
+    { feature: "board" as const, path: "/posts" },
+    { feature: "roadmap" as const, path: "/roadmap" },
+    { feature: "roadmap" as const, path: `/roadmap/${roadmapId}` },
+    { feature: "changelog" as const, path: "/changelog" },
+    { feature: "changelog" as const, path: "/changelog/release" },
+    { feature: "faq" as const, path: "/faq" },
+  ];
+
+  beforeAll(async () => {
+    app = await createTestApp();
+    owner = await signedInCookie(app.test, { name: "Owner", email: "owner@module-controls.test", emailVerified: true });
+    admin = await signedInCookie(app.test, { name: "Admin", email: "admin@module-controls.test", emailVerified: true });
+    customer = await signedInCookie(app.test, { name: "Customer", email: "customer@module-controls.test", emailVerified: true });
+    const [ws] = await app.db.insert(schema.workspaces).values({ name: "Modules", slug: "module-controls" }).returning();
+    await app.db.insert(schema.workspaceMembers).values([
+      { workspaceId: ws.id, userId: owner.userId, role: "owner" },
+      { workspaceId: ws.id, userId: admin.userId, role: "admin" },
+    ]);
+    const [product] = await app.db.insert(schema.products).values({ workspaceId: ws.id, name: "App", slug: "app" }).returning();
+    const [status] = await app.db.insert(schema.statuses).values({ productId: product.id, name: "Planned", type: "planned", color: "#123456", position: 0, isPublicRoadmap: true }).returning();
+    statusId = status.id;
+    const [item] = await app.db.insert(schema.roadmapItems).values({ productId: product.id, statusId, publicTitle: "Public plan", isPublic: true, rank: "a0" }).returning();
+    roadmapId = item.id;
+    await app.db.insert(schema.roadmapItemInternals).values({ productId: product.id, itemId: item.id, internalTitle: "SECRET MODULE PLAN", internalNotes: "PRIVATE MODULE NOTES" });
+    await app.db.insert(schema.changelogEntries).values({ productId: product.id, title: "Public release", slug: "release", content: doc, publishedAt: new Date("2026-01-01T00:00:00Z") });
+    const [category] = await app.db.insert(schema.faqCategories).values({ productId: product.id, name: "General", rank: "a0" }).returning();
+    await app.db.insert(schema.faqQuestions).values({ productId: product.id, categoryId: category.id, question: "What is available?", answer: doc, rank: "a0" });
+    // Conflicting flags exercise both product and workspace scope in the same DB.
+    await app.db.insert(schema.products).values({ workspaceId: ws.id, name: "Sibling", slug: "sibling", boardEnabled: false });
+    const [other] = await app.db.insert(schema.workspaces).values({ name: "Other", slug: "other-module-controls" }).returning();
+    await app.db.insert(schema.products).values({ workspaceId: other.id, name: "Other App", slug: "app", faqEnabled: false });
+  });
+  afterAll(async () => { await app?.close(); });
+
+  it.each(["roadmap", "changelog"] as const)("denies %s list and detail for every caller while other modules stay available", async (feature) => {
+    await setFeatures({ ...allOn, [feature]: false });
+    for (const endpoint of endpoints()) {
+      for (const who of [undefined, customer, admin, owner]) {
+        const res = await call("get", portal + endpoint.path, who);
+        expect(res.status, `${endpoint.path} as ${who?.userId ?? "anonymous"}`).toBe(endpoint.feature === feature ? 404 : 200);
+        if (endpoint.feature === feature) expect(res.body.code).toBe("not_found");
+        expect(JSON.stringify(res.body)).not.toMatch(/SECRET MODULE PLAN|PRIVATE MODULE NOTES|internalTitle|internalNotes/);
+      }
+    }
+    for (const control of ["/api/v1/portal/module-controls/sibling", "/api/v1/portal/other-module-controls/app"]) {
+      expect((await call("get", `${control}/${feature}`)).status).toBe(200);
+    }
+    await setFeatures({ [feature]: true });
+    const restored = await call("get", `${portal}/${feature}`);
+    expect(restored.status).toBe(200);
+    expect(JSON.stringify(restored.body)).toContain(feature === "roadmap" ? "Public plan" : "Public release");
+  });
+
+  it("keeps real admin draft Roadmap and Changelog CRUD usable with both modules disabled", async () => {
+    await setFeatures({ roadmap: false, changelog: false });
+    const roadmap = await call("post", `${base}/roadmap`, admin, { statusId, internalTitle: "Private draft" });
+    expect(roadmap.status).toBe(201);
+    expect(roadmap.body.isPublic).toBe(false);
+    const updated = await call("patch", `${base}/roadmap/${roadmap.body.id}`, admin, { internalTitle: "Updated draft" });
+    expect(updated.status).toBe(200);
+    expect(updated.body.internalTitle).toBe("Updated draft");
+    const list = await call("get", `${base}/roadmap`, admin);
+    expect(list.status).toBe(200);
+    expect(list.body.items.some((item: { id: string }) => item.id === roadmap.body.id)).toBe(true);
+    const deleted = await call("delete", `${base}/roadmap/${roadmap.body.id}`, admin);
+    expect(deleted.status).toBe(200);
+    expect(deleted.body.success).toBe(true);
+    expect((await call("get", `${base}/roadmap`, admin)).body.items.some((item: { id: string }) => item.id === roadmap.body.id)).toBe(false);
+    const changelog = await call("post", `${base}/changelog`, admin, { title: "Private release", slug: "private-release", content: doc });
+    expect(changelog.status).toBe(201);
+    expect(changelog.body.publishedAt).toBeNull();
+    const edited = await call("patch", `${base}/changelog/${changelog.body.id}`, admin, { title: "Updated release" });
+    expect(edited.status).toBe(200);
+    expect(edited.body.title).toBe("Updated release");
+    expect((await call("get", `${base}/changelog/${changelog.body.id}`, admin)).body.title).toBe("Updated release");
+    expect((await call("delete", `${base}/changelog/${changelog.body.id}`, admin)).status).toBe(204);
+    expect((await call("get", `${base}/changelog/${changelog.body.id}`, admin)).status).toBe(404);
+  });
+});
 
 describe("Disabled Board at the public request boundary (CAP-03, D-08)", () => {
   let app: TestApp;

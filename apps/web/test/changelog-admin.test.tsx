@@ -82,6 +82,7 @@ describe("Changelog Admin Studio & Authoring Components", () => {
       <ChangelogStudio
         ws="acme"
         product="core"
+        changelogEnabled={true}
         productName="Acme Core"
         entries={[{ ...sampleEntry, publishedAt: future }]}
         tags={sampleTags}
@@ -97,6 +98,7 @@ describe("Changelog Admin Studio & Authoring Components", () => {
       <ChangelogStudio
         ws="acme"
         product="core"
+        changelogEnabled={true}
         productName="Acme Core"
         entries={[]}
         tags={sampleTags}
@@ -113,6 +115,7 @@ describe("Changelog Admin Studio & Authoring Components", () => {
       <ChangelogStudio
         ws="acme"
         product="core"
+        changelogEnabled={true}
         productName="Acme Core"
         entries={[sampleEntry, draftEntry]}
         tags={sampleTags}
@@ -133,6 +136,7 @@ describe("Changelog Admin Studio & Authoring Components", () => {
       <ChangelogEditor
         ws="acme"
         product="core"
+        changelogEnabled={true}
         productName="Acme Core"
         availableTags={sampleTags}
       />
@@ -151,6 +155,7 @@ describe("Changelog Admin Studio & Authoring Components", () => {
       <ChangelogEditor
         ws="acme"
         product="core"
+        changelogEnabled={true}
         productName="Acme Core"
         entry={sampleEntry}
         availableTags={sampleTags}

@@ -2,6 +2,7 @@ import * as React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getProduct, getAdminFaqCategories } from "../../../../../lib/api-server";
+import { HiddenModuleNotice } from "@/components/dashboard/hidden-module-notice";
 import { PageHeader } from "../../../../../components/page-header";
 import { FaqManager } from "../../../../../components/faq/faq-manager";
 
@@ -49,6 +50,7 @@ export default async function DashboardFaqPage({
         title="Frequently Asked Questions"
         description="Manage self-serve knowledge base articles, categories, and question ordering."
       />
+      {!productRes.data.features.faq && <HiddenModuleNotice ws={ws} product={product} module="faq" />}
       <FaqManager
         ws={ws}
         product={product}

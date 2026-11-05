@@ -25,6 +25,7 @@ import { portalHref, boardApiBase } from "@/lib/tenant";
 export interface PostActionsMenuProps {
   ws: string;
   product: string;
+  boardEnabled: boolean;
   post: PublicPostDetail;
   statuses: PostStatus[];
   categories?: { id: string; name: string }[];
@@ -37,6 +38,7 @@ export interface PostActionsMenuProps {
 export function PostActionsMenu({
   ws,
   product,
+  boardEnabled,
   post,
   statuses,
   categories = [],
@@ -123,7 +125,7 @@ export function PostActionsMenu({
               </DropdownMenuItem>
             )}
 
-            {variant === "dashboard" && (
+            {variant === "dashboard" && boardEnabled && (
               <DropdownMenuItem asChild>
                 <a
                   href={`${portalHref(ws, product)}/p/${post.number}`}

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { HiddenModuleNotice } from "../dashboard/hidden-module-notice";
 import Link from "next/link";
 import {
   Plus,
@@ -34,6 +35,7 @@ export interface ChangelogStudioProps {
   ws: string;
   product: string;
   productName: string;
+  changelogEnabled: boolean;
   entries: AdminChangelogEntry[];
   tags: ChangelogTag[];
 }
@@ -41,6 +43,7 @@ export interface ChangelogStudioProps {
 export function ChangelogStudio({
   ws,
   product,
+  changelogEnabled,
   entries: initialEntries,
   tags: initialTags,
 }: ChangelogStudioProps): React.JSX.Element {
@@ -130,6 +133,8 @@ export function ChangelogStudio({
           </Button>
         </div>
       </div>
+
+      {!changelogEnabled && <HiddenModuleNotice ws={ws} product={product} module="changelog" />}
 
       {/* Main Table or Empty State */}
       {entriesList.length === 0 ? (
@@ -240,7 +245,7 @@ export function ChangelogStudio({
                           </Link>
                         </DropdownMenuItem>
 
-                        {isPublished && !scheduled && (
+                        {changelogEnabled && isPublished && !scheduled && (
                           <DropdownMenuItem asChild>
                             <Link
                               href={`/${ws}/${product}/changelog/${entry.slug}`}

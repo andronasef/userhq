@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 export interface BoardTableProps {
   ws: string;
   product: string;
+  boardEnabled: boolean;
   posts: AdminPostRow[];
   statuses: PostStatus[];
   categories?: { id: string; name: string }[];
@@ -24,6 +25,7 @@ export interface BoardTableProps {
 export function BoardTable({
   ws,
   product,
+  boardEnabled,
   posts,
   statuses,
   categories = [],
@@ -195,6 +197,7 @@ export function BoardTable({
                     <PostActionsMenu
                       ws={ws}
                       product={product}
+                      boardEnabled={boardEnabled}
                       post={{
                         number: post.number,
                         slug: post.slug,

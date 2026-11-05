@@ -8,6 +8,7 @@ import type {
   MemberRow,
   ProductDetail,
 } from "@userhq/types";
+import { HiddenModuleNotice } from "@/components/dashboard/hidden-module-notice";
 import { PageHeader } from "../../../../../components/page-header";
 import { TabNav } from "../../../../../components/tab-nav";
 import { Button } from "../../../../../components/ui/button";
@@ -105,6 +106,8 @@ export function RoadmapView({
           </Button>
         }
       />
+
+      {!product.features.roadmap && <HiddenModuleNotice ws={ws} product={product.slug} module="roadmap" />}
 
       {tabs && activeHref && (
         <TabNav tabs={tabs} activeHref={activeHref} className="mb-6" />

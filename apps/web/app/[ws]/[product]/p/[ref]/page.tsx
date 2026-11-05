@@ -148,6 +148,7 @@ export default async function PostPage({
               <PostActionsMenu
                 ws={ws}
                 product={product}
+                boardEnabled={productResult.data.product.features.board}
                 post={post}
                 statuses={productResult.data.statuses}
                 categories={productResult.data.categories}

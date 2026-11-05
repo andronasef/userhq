@@ -144,6 +144,7 @@ export function PostDetailView({
             <PostActionsMenu
               ws={ws}
               product={product}
+              boardEnabled={boardEnabled}
               post={post}
               statuses={statuses}
               categories={categories}

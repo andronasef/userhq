@@ -50,6 +50,7 @@ export default async function NewChangelogPage({
     <ChangelogEditor
       ws={ws}
       product={product}
+      changelogEnabled={productRes.data.features.changelog}
       productName={p.name}
       productLogoUrl={p.logoUrl}
       availableTags={tags}

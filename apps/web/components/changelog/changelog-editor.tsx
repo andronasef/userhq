@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { HiddenModuleNotice } from "../dashboard/hidden-module-notice";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -35,6 +36,7 @@ export interface ChangelogEditorProps {
   ws: string;
   product: string;
   productName: string;
+  changelogEnabled: boolean;
   productLogoUrl?: string | null;
   entry?: AdminChangelogEntry;
   availableTags: ChangelogTag[];
@@ -72,6 +74,7 @@ function publishedToast(publishedAt: string, wasPublished: boolean): string {
 export function ChangelogEditor({
   ws,
   product,
+  changelogEnabled,
   productName,
   productLogoUrl,
   entry: initialEntry,
@@ -470,6 +473,8 @@ export function ChangelogEditor({
           )}
         </div>
       </div>
+
+      {!changelogEnabled && <HiddenModuleNotice ws={ws} product={product} module="changelog" />}
 
       {/* Metadata Configuration Section */}
       <div className="bg-card border border-border rounded-lg p-4 sm:p-6 space-y-4">

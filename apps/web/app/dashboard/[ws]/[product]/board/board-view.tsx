@@ -13,6 +13,7 @@ import { apiFetch } from "@/lib/api-client";
 export interface BoardViewProps {
   ws: string;
   product: string;
+  boardEnabled: boolean;
   initialPosts: AdminPostRow[];
   initialNextCursor: string | null;
   statuses: PostStatus[];
@@ -23,6 +24,7 @@ export interface BoardViewProps {
 export function BoardView({
   ws,
   product,
+  boardEnabled,
   initialPosts,
   initialNextCursor,
   statuses,
@@ -109,6 +111,7 @@ export function BoardView({
           <BoardTable
             ws={ws}
             product={product}
+            boardEnabled={boardEnabled}
             posts={posts}
             statuses={statuses}
             categories={categories}

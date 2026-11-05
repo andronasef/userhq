@@ -57,6 +57,7 @@ export default async function DashboardChangelogPage({
     <ChangelogStudio
       ws={ws}
       product={product}
+      changelogEnabled={productRes.data.features.changelog}
       productName={productData.name}
       entries={entries}
       tags={tags}

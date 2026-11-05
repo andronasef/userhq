@@ -113,6 +113,7 @@ export default async function BoardPage({
         <PostsViewLoader
           ws={ws}
           product={product}
+          boardEnabled={productRes.data.features.board}
           query={query}
           statuses={statusesRes.data}
           categories={categoriesRes.data}
@@ -156,6 +157,7 @@ async function PostsViewLoader({
   ws,
   product,
   query,
+  boardEnabled,
   statuses,
   categories,
 }: {
@@ -168,6 +170,7 @@ async function PostsViewLoader({
     status?: string;
     cursor?: string;
   };
+  boardEnabled: boolean;
   statuses: any[];
   categories: any[];
 }) {
@@ -188,6 +191,7 @@ async function PostsViewLoader({
     <BoardView
       ws={ws}
       product={product}
+      boardEnabled={boardEnabled}
       initialPosts={postsRes.data.posts}
       initialNextCursor={postsRes.data.nextCursor}
       statuses={statuses}

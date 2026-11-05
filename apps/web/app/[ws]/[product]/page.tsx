@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getPortalProduct, getBoard, getMe } from "@/lib/api-server";
 import { NewPostButton } from "@/components/board/post-form-dialog";
 import { BoardToolbar } from "@/components/board/board-toolbar";
@@ -8,6 +8,8 @@ import { PostList } from "@/components/board/post-list";
 import { EmptyState } from "@/components/empty-state";
 
 import Link from "next/link";
+import { landingHref } from "@/lib/portal-features";
+import { StatePage } from "@/components/state-page";
 import { buttonVariants } from "@/components/ui/button";
 
 interface PortalBoardPageProps {
@@ -21,6 +23,9 @@ export async function generateMetadata({
   const { ws, product } = await params;
   const result = await getPortalProduct(ws, product);
   if (!result.ok) return {};
+  const features = result.data.product.features;
+  if (!landingHref(ws, product, features)) return { robots: { index: false, follow: false } };
+  if (!features.board) return {};
   return {
     title: `Feedback · ${result.data.product.name}`,
   };
@@ -42,15 +47,25 @@ export default async function PortalBoardPage({
   }
   const search = searchParamsObj.toString();
 
-  const [productResult, boardResult, me] = await Promise.all([
-    getPortalProduct(ws, product),
-    getBoard(ws, product, search),
-    getMe(),
-  ]);
-
-  if (!productResult.ok) {
-    notFound();
+  const productResult = await getPortalProduct(ws, product);
+  if (!productResult.ok) notFound();
+  const p = productResult.data.product;
+  if (!p.features.board) {
+    const href = landingHref(ws, product, p.features);
+    if (href) redirect(href);
+    const company = productResult.data.workspace.name;
+    return (
+      <div className="mx-auto max-w-3xl py-12 break-words">
+        <StatePage
+          title="Nothing is available here right now"
+          body={`${p.name} isn't open to visitors at the moment. Please check back later.`}
+          actions={p.websiteUrl ? <Link href={p.websiteUrl} className={buttonVariants({ variant: "outline" })}>Visit {company}</Link> : undefined}
+        />
+      </div>
+    );
   }
+  const [boardResult, me] = await Promise.all([getBoard(ws, product, search), getMe()]);
+  if (!boardResult.ok && boardResult.status === 404) notFound();
 
   const productName = productResult.data.product.name;
   const categories = productResult.data.categories;

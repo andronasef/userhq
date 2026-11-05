@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPortalProduct, getMe, publicOrigin } from "../../../lib/api-server";
+import { portalDescription } from "../../../lib/portal-features";
 import { portalHref } from "../../../lib/tenant";
 import { accentStyle } from "../../../lib/accent";
 import { isDevUploadEnabled } from "../../../lib/dev-flags";
@@ -43,7 +44,7 @@ export async function generateMetadata({
   const title = `${p.name} · ${workspace.name}`;
   const description =
     p.tagline ??
-    `Share feedback, vote on ideas, and follow what's coming next for ${p.name}.`;
+    portalDescription(p.name, workspace.name, p.features);
 
   const meta: Metadata = {
     title,
@@ -147,7 +148,7 @@ export default async function PortalLayout({
       companyName={workspace.name}
       accentStyle={productAccentStyle}
       right={right}
-      tabs={<PortalTabs ws={ws} product={product} hasUser={Boolean(me.user)} />}
+      tabs={<PortalTabs ws={ws} product={product} hasUser={Boolean(me.user)} features={p.features} />}
     >
       <ProjectContextTracker
         name={p.name}

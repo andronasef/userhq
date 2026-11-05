@@ -2,15 +2,18 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
+import type { ProductFeatures } from "@userhq/types";
+import { portalTabs } from "../../lib/portal-features";
 import { TabNav } from "../tab-nav";
 
 export interface PortalTabsProps {
   ws: string;
   product: string;
   hasUser: boolean;
+  features: ProductFeatures;
 }
 
-export function PortalTabs({ ws, product, hasUser }: PortalTabsProps): React.JSX.Element {
+export function PortalTabs({ ws, product, hasUser, features }: PortalTabsProps): React.JSX.Element | null {
   const pathname = usePathname();
   const baseHref = `/${encodeURIComponent(ws)}/${encodeURIComponent(product)}`;
   const roadmapHref = `${baseHref}/roadmap`;
@@ -18,13 +21,8 @@ export function PortalTabs({ ws, product, hasUser }: PortalTabsProps): React.JSX
   const faqHref = `${baseHref}/faq`;
   const activityHref = `${baseHref}/activity`;
 
-  const tabs = [
-    { label: "Feedback", href: baseHref },
-    { label: "Roadmap", href: roadmapHref },
-    { label: "Changelog", href: changelogHref },
-    { label: "FAQ", href: faqHref },
-    ...(hasUser ? [{ label: "Activity", href: activityHref }] : []),
-  ];
+  const tabs = portalTabs(ws, product, features, hasUser);
+  if (tabs.length < 2) return null;
 
   let activeHref = baseHref;
   if (pathname.startsWith(roadmapHref)) {

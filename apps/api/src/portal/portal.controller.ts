@@ -28,12 +28,14 @@ import {
 import { Public } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { PortalGuard } from "./portal.guard.js";
+import { PortalFeature } from "./product-features.js";
 
 const productLogo = alias(uploads, "product_logo");
 const workspaceLogo = alias(uploads, "workspace_logo");
 
 @Controller("portal")
 @Public()
+@PortalFeature("exempt")
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class PortalController {
   constructor(@Inject(DB) private readonly db: Db) {}

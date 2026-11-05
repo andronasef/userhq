@@ -20,10 +20,12 @@ import {
   type ActivityItem,
 } from "@userhq/types";
 import { PortalGuard } from "../portal/portal.guard.js";
+import { PortalFeature } from "../portal/product-features.js";
 import { ApiException } from "../common/api-error.filter.js";
 
 @Controller("portal/:ws/:product/activity")
 @UseGuards(PortalGuard)
+@PortalFeature("board")
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class PortalActivityController {
   constructor(@Inject(DB) private readonly db: Db) {}

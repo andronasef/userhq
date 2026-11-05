@@ -33,6 +33,7 @@ import {
 import { Public, CurrentUser } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { PortalGuard } from "../portal/portal.guard.js";
+import { PortalFeature } from "../portal/product-features.js";
 import { PostsService } from "./posts.service.js";
 
 import { Throttle } from "@nestjs/throttler";
@@ -42,6 +43,7 @@ const postNumberParamSchema = z.coerce.number().int().positive();
 
 @Controller("portal/:ws/:product")
 @UseGuards(PortalGuard)
+@PortalFeature("board")
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class PortalPostsController {
   constructor(private readonly postsService: PostsService) {}

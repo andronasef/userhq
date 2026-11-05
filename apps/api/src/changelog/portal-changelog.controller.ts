@@ -28,6 +28,7 @@ import {
 import { Public } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { PortalGuard } from "../portal/portal.guard.js";
+import { PortalFeature } from "../portal/product-features.js";
 import { encodeBoardCursor, decodeBoardCursor } from "../feedback/cursor.js";
 
 // Published and not future-dated: an entry dated ahead goes live when its date
@@ -36,6 +37,7 @@ const isLive = lte(changelogEntries.publishedAt, sql`now()`);
 
 @Controller("portal/:ws/:product/changelog")
 @UseGuards(PortalGuard)
+@PortalFeature("changelog")
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class PortalChangelogController {
   constructor(@Inject(DB) private readonly db: Db) {}

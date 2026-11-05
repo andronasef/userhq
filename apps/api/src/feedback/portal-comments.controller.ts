@@ -25,6 +25,7 @@ import {
 import { CurrentUser } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { PortalGuard } from "../portal/portal.guard.js";
+import { PortalFeature } from "../portal/product-features.js";
 import { CommentsService } from "./comments.service.js";
 import { Throttle } from "@nestjs/throttler";
 import { UserThrottlerGuard } from "./throttle.js";
@@ -34,6 +35,7 @@ const uuidParamSchema = z.string().uuid();
 
 @Controller("portal/:ws/:product")
 @UseGuards(PortalGuard)
+@PortalFeature("board")
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class PortalCommentsController {
   constructor(private readonly commentsService: CommentsService) {}

@@ -18,9 +18,11 @@ import {
 import { Public } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { PortalGuard } from "../portal/portal.guard.js";
+import { PortalFeature } from "../portal/product-features.js";
 
 @Controller("portal/:ws/:product/faq")
 @UseGuards(PortalGuard)
+@PortalFeature("faq")
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class PortalFaqController {
   constructor(@Inject(DB) private readonly db: Db) {}

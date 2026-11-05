@@ -17,6 +17,7 @@ import { VoteResultSchema, type VoteResult } from "@userhq/types";
 import { CurrentUser } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { PortalGuard } from "../portal/portal.guard.js";
+import { PortalFeature } from "../portal/product-features.js";
 import { VotesService } from "./votes.service.js";
 import { UserThrottlerGuard } from "./throttle.js";
 
@@ -24,6 +25,7 @@ const postNumberParamSchema = z.coerce.number().int().positive();
 
 @Controller("portal/:ws/:product/posts/:number/vote")
 @UseGuards(PortalGuard)
+@PortalFeature("board")
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class PortalVotesController {
   constructor(private readonly votesService: VotesService) {}

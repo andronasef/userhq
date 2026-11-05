@@ -20,12 +20,14 @@ import { MuteResultSchema, type MuteResult } from "@userhq/types";
 import { CurrentUser } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { PortalGuard } from "../portal/portal.guard.js";
+import { PortalFeature } from "../portal/product-features.js";
 import { UserThrottlerGuard } from "./throttle.js";
 
 const postNumberParamSchema = z.coerce.number().int().positive();
 
 @Controller("portal/:ws/:product/posts/:number/mute")
 @UseGuards(PortalGuard)
+@PortalFeature("board")
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class PortalMutesController {
   constructor(@Inject(DB) private readonly db: Db) {}

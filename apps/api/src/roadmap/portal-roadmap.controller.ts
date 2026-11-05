@@ -22,11 +22,13 @@ import {
 import { Public } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { PortalGuard } from "../portal/portal.guard.js";
+import { PortalFeature } from "../portal/product-features.js";
 
 const UuidParamSchema = z.string().uuid();
 
 @Controller("portal/:ws/:product/roadmap")
 @UseGuards(PortalGuard)
+@PortalFeature("roadmap")
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class PortalRoadmapController {
   constructor(@Inject(DB) private readonly db: Db) {}

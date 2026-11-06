@@ -9,6 +9,7 @@ import {
 } from "@userhq/db";
 import { randomBytes } from "node:crypto";
 import { ApiException } from "../common/api-error.filter.js";
+import { OutboundHttp } from "../common/outbound-http.js";
 import type {
   CreateWebhookSubscriptionInput,
   UpdateWebhookSubscriptionInput,
@@ -19,7 +20,7 @@ import type {
 
 @Injectable()
 export class WebhookService {
-  constructor(@Inject(DB) private readonly db: Db) {}
+  constructor(@Inject(DB) private readonly db: Db, private readonly outbound: OutboundHttp) {}
 
   async listSubscriptions(workspaceId: string): Promise<WebhookSubscription[]> {
     const rows = await this.db
@@ -62,6 +63,7 @@ export class WebhookService {
     userId: string | null,
     input: CreateWebhookSubscriptionInput
   ): Promise<WebhookSubscription> {
+    await this.outbound.validateTarget(input.url);
     const secret = `whsec_${randomBytes(24).toString("base64url")}`;
 
     const [row] = await this.db
@@ -87,6 +89,7 @@ export class WebhookService {
     input: UpdateWebhookSubscriptionInput
   ): Promise<WebhookSubscription> {
     const existing = await this.getSubscription(workspaceId, id);
+    if (input.url !== undefined) await this.outbound.validateTarget(input.url);
 
     const updates: Partial<typeof webhookSubscriptions.$inferInsert> = {
       updatedAt: new Date(),

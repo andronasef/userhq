@@ -9,6 +9,7 @@ import {
   verifyWebhookSignature,
 } from "../src/webhooks/signature.js";
 import { WebhookWorker } from "../src/webhooks/webhook.worker.js";
+import { fixtureOutboundNetwork } from "./support/outbound-network.js";
 
 describe("Signed Outbound Webhooks (Phase 10)", () => {
   let testApp: Awaited<ReturnType<typeof createTestApp>>;
@@ -25,9 +26,21 @@ describe("Signed Outbound Webhooks (Phase 10)", () => {
   let categoryId: string;
   let statusId: string;
   let webhookWorker: WebhookWorker;
+  let dnsAddress = "8.8.8.8";
 
   beforeAll(async () => {
-    testApp = await createTestApp();
+    testApp = await createTestApp({ outboundNetwork: {
+      ...fixtureOutboundNetwork,
+      resolve: async hostname => hostname === "changing.example.test"
+        ? [{ address: dnsAddress, family: 4 }]
+        : hostname === "mixed.example.test"
+          ? [{ address: "8.8.8.8", family: 4 }, { address: "10.0.0.1", family: 4 }]
+          : fixtureOutboundNetwork.resolve(hostname),
+      request: (url, options, response) => {
+        if (url.hostname !== "receiver.example.test") throw new Error("No fixture receiver");
+        return http.request(new URL(`http://127.0.0.1:${url.port}${url.pathname}`), options, response);
+      },
+    } });
     webhookWorker = testApp.app.get(WebhookWorker);
 
     admin = await signedInCookie(testApp.test, {
@@ -126,6 +139,41 @@ describe("Signed Outbound Webhooks (Phase 10)", () => {
 
   afterAll(async () => {
     await testApp?.close();
+  });
+
+  it("rejects unsafe webhook targets before persistence", async () => {
+    for (const url of [
+      "http://127.0.0.1/internal", "https://user:pass@example.com/hook",
+      "https://127.1/hook", "https://2130706433/hook", "https://0x7f000001/hook",
+      "https://10.1.2.3/hook", "https://169.254.169.254/hook", "https://100.64.0.1/hook",
+      "https://192.168.1.1/hook", "https://172.20.1.1/hook", "https://198.18.0.1/hook",
+      "https://192.0.2.1/hook", "https://224.0.0.1/hook", "https://240.0.0.1/hook",
+      "https://[::1]/hook", "https://[::ffff:127.0.0.1]/hook", "https://[fc00::1]/hook",
+      "https://[fe80::1]/hook", "https://[64:ff9b::7f00:1]/hook", "https://[2001:db8::1]/hook",
+      "https://[2002:7f00:1::]/hook", "https://[3fff::1]/hook", "https://missing.example.test/hook",
+      "https://mixed.example.test/hook",
+    ]) {
+      const res = await request(testApp.http)
+        .post(`/api/v1/workspaces/${wsSlug}/webhooks`)
+        .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL)
+        .send({ url, events: ["*"] });
+      expect(res.status, url).toBe(400);
+      expect(res.body.code).toBe("invalid_url");
+    }
+  });
+
+  it("revalidates changed webhook URLs and rejects non-public DNS answers", async () => {
+    const created = await request(testApp.http).post(`/api/v1/workspaces/${wsSlug}/webhooks`)
+      .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL)
+      .send({ url: "https://changing.example.test/hook", events: ["*"] });
+    expect(created.status).toBe(201);
+    dnsAddress = "127.0.0.1";
+    const updated = await request(testApp.http).patch(`/api/v1/workspaces/${wsSlug}/webhooks/${created.body.id}`)
+      .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL)
+      .send({ url: "https://changing.example.test/changed" });
+    expect(updated.status).toBe(400);
+    expect(updated.body.code).toBe("invalid_url");
+    dnsAddress = "8.8.8.8";
   });
 
   describe("HMAC Signing & Verification", () => {

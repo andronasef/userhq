@@ -38,6 +38,7 @@ import { apiKeyToken } from "./api-keys/authorization.js";
 import { ExportModule } from "./export/export.module.js";
 import { WebhooksModule } from "./webhooks/webhooks.module.js";
 import { PushModule } from "./push/push.module.js";
+import { OutboundHttp, OUTBOUND_NETWORK, systemOutboundNetwork } from "./common/outbound-http.js";
 
 const DB_POOL = Symbol.for("@userhq/api/db-pool");
 
@@ -99,6 +100,8 @@ export class AppModule {
       ],
       controllers: [HealthController, MeController],
       providers: [
+        { provide: OUTBOUND_NETWORK, useValue: systemOutboundNetwork },
+        OutboundHttp,
         {
           provide: ENV,
           useValue: deps.env,
@@ -133,7 +136,7 @@ export class AppModule {
           useClass: ApiErrorFilter,
         },
       ],
-      exports: [ENV, DB, AUTH],
+      exports: [ENV, DB, AUTH, OutboundHttp],
     };
   }
 }

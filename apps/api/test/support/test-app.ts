@@ -12,6 +12,8 @@ import { createDb, runMigrations, type Db } from "@userhq/db";
 import { AppModule, configureApp } from "../../src/app.module.js";
 import { createAuth, type Auth } from "../../src/auth/auth.js";
 import type { Env } from "../../src/env.js";
+import { OUTBOUND_NETWORK, type OutboundNetwork } from "../../src/common/outbound-http.js";
+import { fixtureOutboundNetwork } from "./outbound-network.js";
 
 export async function createTestDatabase(): Promise<{
   url: string;
@@ -49,7 +51,7 @@ export async function createTestDatabase(): Promise<{
 }
 
 export async function createTestApp(
-  overrides?: Partial<Env> & { extraControllers?: Type[] }
+  overrides?: Partial<Env> & { extraControllers?: Type[]; outboundNetwork?: OutboundNetwork }
 ): Promise<{
   app: NestExpressApplication;
   http: Server;
@@ -93,7 +95,8 @@ export async function createTestApp(
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule.register({ env, db, pool, auth })],
     controllers: overrides?.extraControllers ?? [],
-  }).compile();
+  }).overrideProvider(OUTBOUND_NETWORK)
+    .useValue(overrides?.outboundNetwork ?? fixtureOutboundNetwork).compile();
 
   const app =
     moduleRef.createNestApplication<NestExpressApplication>({

@@ -9,6 +9,7 @@ import {
   getWorkspaceRequests,
   getWorkspaceComments,
   getCategories,
+  getPushFollowedProducts,
 } from "../../../lib/api-server";
 import { portalHref } from "../../../lib/tenant";
 import { PageHeader } from "../../../components/page-header";
@@ -20,6 +21,7 @@ import {
   type DashboardTab,
 } from "../../../components/workspace-dashboard/workspace-dashboard-tabs";
 import { WorkspaceRequestsView } from "../../../components/workspace-dashboard/workspace-requests-view";
+import { ProductFollowToggle } from "../../../components/workspace-dashboard/product-follow-toggle";
 import { WorkspaceCommentsView } from "../../../components/workspace-dashboard/workspace-comments-view";
 
 interface DashboardPageProps {
@@ -71,11 +73,18 @@ export default async function DashboardPage({
       ? search.tab
       : "products";
 
-  const [wsResult, productsResult, initialCommentsResult] = await Promise.all([
+  const [wsResult, productsResult, initialCommentsResult, followedResult] = await Promise.all([
     getWorkspace(ws),
     getProducts(ws),
     getWorkspaceComments(ws, { limit: 1 }),
+    // Only the Products tab renders follow toggles; a failed read just shows every toggle off.
+    currentTab === "products"
+      ? getPushFollowedProducts().catch(() => null)
+      : Promise.resolve(null),
   ]);
+  const followedProductIds = new Set(
+    followedResult?.ok ? followedResult.data.map((f) => f.productId) : [],
+  );
 
   if (!wsResult.ok) {
     if (wsResult.status === 403 && wsResult.code === "workspace_suspended") {
@@ -213,6 +222,12 @@ export default async function DashboardPage({
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
+                    <ProductFollowToggle
+                      ws={ws}
+                      productSlug={product.slug}
+                      productName={product.name}
+                      initialFollowing={product.id !== undefined && followedProductIds.has(product.id)}
+                    />
                     <Button variant="outline" size="sm" asChild>
                       <Link
                         href={`/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(product.slug)}/board`}

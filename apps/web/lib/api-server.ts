@@ -80,6 +80,8 @@ import {
   webhookSubscriptionListResponseSchema,
   type WebhookSubscriptionListResponse,
   ANONYMOUS_ME,
+  FollowedProductItemSchema,
+  type FollowedProductItem,
 } from "@userhq/types";
 
 export async function apiServer(
@@ -554,6 +556,12 @@ export const getWorkspaceComments = cache(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/comments${qs ? `?${qs}` : ""}`,
       WorkspaceCommentsResponseSchema
     );
+  }
+);
+
+export const getPushFollowedProducts = cache(
+  (): Promise<ApiReadResult<FollowedProductItem[]>> => {
+    return apiRead("/api/v1/push/followed-products", z.array(FollowedProductItemSchema));
   }
 );
 

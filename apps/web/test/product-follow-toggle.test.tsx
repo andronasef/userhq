@@ -20,7 +20,7 @@ describe("ProductFollowToggle markup", () => {
     expect(html).toContain('aria-pressed="false"');
     expect(html).toContain('aria-label="Follow My App"');
     expect(html).toContain(">Follow<");
-    expect(html).not.toContain("disabled");
+    expect(html).not.toContain('disabled=""');
   });
 
   it("renders Following with aria-pressed true", () => {

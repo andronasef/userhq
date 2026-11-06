@@ -25,10 +25,15 @@ import { ApiException } from "../common/api-error.filter.js";
 import { prefixTsQuery } from "./search.js";
 import { encodeBoardCursor, decodeBoardCursor } from "./cursor.js";
 import { postSlug } from "@userhq/types";
+import type { Actor } from "../auth/principal.js";
+import { CommentsService } from "./comments.service.js";
 
 @Injectable()
 export class WorkspaceFeedbackService {
-  constructor(@Inject(DB) private readonly db: Db) {}
+  constructor(
+    @Inject(DB) private readonly db: Db,
+    private readonly commentsService: CommentsService
+  ) {}
 
   async listRequests(
     tenant: { workspaceId: string },
@@ -389,99 +394,78 @@ export class WorkspaceFeedbackService {
 
   async replyToComment(
     tenant: { workspaceId: string },
-    viewer: { id: string; name: string | null; image: string | null },
+    viewer: Actor & { name: string | null; image: string | null },
     commentId: string,
     input: ReplyWorkspaceCommentInput,
     apiKeyId?: string | null
   ): Promise<WorkspaceCommentItem> {
-    return this.db.transaction(async (tx) => {
-      const [parent] = await tx
-        .select({
-          id: comments.id,
-          postId: comments.postId,
-          productId: posts.productId,
-          postNumber: posts.number,
-          postTitle: posts.title,
-          productSlug: products.slug,
-          productName: products.name,
-          productLogoKey: uploads.storageKey,
-          productAccentColor: products.accentColor,
-        })
-        .from(comments)
-        .innerJoin(posts, eq(comments.postId, posts.id))
-        .innerJoin(products, eq(posts.productId, products.id))
-        .leftJoin(uploads, eq(products.logoUploadId, uploads.id))
-        .where(
-          and(
-            eq(comments.id, commentId),
-            eq(products.workspaceId, tenant.workspaceId),
-            isNull(products.deletedAt),
-            isNull(posts.deletedAt),
-            isNull(comments.deletedAt)
-          )
+    // Tenant-scoped lookup first: a foreign or deleted comment id is a 404 before anything else runs.
+    const [parent] = await this.db
+      .select({
+        id: comments.id,
+        postId: comments.postId,
+        productId: posts.productId,
+        postNumber: posts.number,
+        postTitle: posts.title,
+        productSlug: products.slug,
+        productName: products.name,
+        productLogoKey: uploads.storageKey,
+        productAccentColor: products.accentColor,
+      })
+      .from(comments)
+      .innerJoin(posts, eq(comments.postId, posts.id))
+      .innerJoin(products, eq(posts.productId, products.id))
+      .leftJoin(uploads, eq(products.logoUploadId, uploads.id))
+      .where(
+        and(
+          eq(comments.id, commentId),
+          eq(products.workspaceId, tenant.workspaceId),
+          isNull(products.deletedAt),
+          isNull(posts.deletedAt),
+          isNull(comments.deletedAt)
         )
-        .limit(1);
+      )
+      .limit(1);
 
-      if (!parent) {
-        throw new ApiException("comment_not_found", 404, "Comment not found.");
-      }
+    if (!parent) {
+      throw new ApiException("comment_not_found", 404, "Comment not found.");
+    }
 
-      // Mark target comment as handled
-      await tx
-        .update(comments)
-        .set({ handledAt: new Date(), handledById: viewer.id })
-        .where(eq(comments.id, commentId));
+    // Same creation path as the portal: folds to the thread root, resolves the thread,
+    // post lock + merged guard, email (Board switch), webhook and push.
+    const created = await this.commentsService.createComment(
+      { workspaceId: tenant.workspaceId, productId: parent.productId },
+      viewer,
+      parent.postNumber,
+      { body: input.body, parentId: parent.id },
+      null,
+      apiKeyId
+    );
 
-      // Insert new admin reply comment
-      const [reply] = await tx
-        .insert(comments)
-        .values({
-          postId: parent.postId,
-          parentId: parent.id,
-          authorId: viewer.id,
-          isAdmin: true,
-          body: input.body,
-          handledAt: new Date(),
-          handledById: viewer.id,
-          createdByApiKeyId: apiKeyId ?? null,
-        })
-        .returning();
-
-      return {
-        id: reply.id,
-        body: reply.body,
-        isAdmin: true,
-        createdAt: reply.createdAt.toISOString(),
-        editedAt: null,
-        handledAt: reply.handledAt ? reply.handledAt.toISOString() : null,
-        handledBy: {
-          name: viewer.name,
-          image: viewer.image,
-          isAdmin: true,
-          deleted: false,
-        },
-        isUnread: false,
-        post: {
-          id: parent.postId,
-          number: parent.postNumber,
-          slug: postSlug(parent.postTitle),
-          title: parent.postTitle,
-        },
-        product: {
-          id: parent.productId,
-          slug: parent.productSlug,
-          name: parent.productName,
-          logoUrl: parent.productLogoKey ? `/uploads/${parent.productLogoKey}` : null,
-          accentColor: parent.productAccentColor,
-        },
-        author: {
-          name: viewer.name,
-          image: viewer.image,
-          isAdmin: true,
-          deleted: false,
-        },
-      };
-    });
+    return {
+      id: created.id,
+      body: created.body,
+      isAdmin: created.author.isAdmin,
+      createdAt: created.createdAt,
+      editedAt: created.editedAt,
+      handledAt: null,
+      handledBy: null,
+      isUnread: false,
+      post: {
+        id: parent.postId,
+        number: parent.postNumber,
+        slug: postSlug(parent.postTitle),
+        title: parent.postTitle,
+      },
+      product: {
+        id: parent.productId,
+        slug: parent.productSlug,
+        name: parent.productName,
+        logoUrl: parent.productLogoKey ? `/uploads/${parent.productLogoKey}` : null,
+        accentColor: parent.productAccentColor,
+      },
+      author: created.author,
+    };
   }
 
   async markCommentRead(

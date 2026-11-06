@@ -1,5 +1,5 @@
 import { Injectable, Inject, Optional } from "@nestjs/common";
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, or, sql } from "drizzle-orm";
 import { DB, type Db, posts, comments, user, products, workspaces } from "@userhq/db";
 import type {
   CreateCommentInput,
@@ -107,6 +107,23 @@ export class CommentsService {
           createdByApiKeyId: apiKeyId ?? null,
         })
         .returning();
+
+      // D-04: an admin reply resolves the whole customer thread (root plus its direct replies).
+      // Conditional on unhandled so an existing handler and time are never overwritten.
+      if (isAdmin && resolvedParentId) {
+        await tx
+          .update(comments)
+          .set({ handledAt: sql`now()`, handledById: currentUser.id })
+          .where(
+            and(
+              eq(comments.postId, p.id),
+              eq(comments.isAdmin, false),
+              isNull(comments.deletedAt),
+              isNull(comments.handledAt),
+              or(eq(comments.id, resolvedParentId), eq(comments.parentId, resolvedParentId))
+            )
+          );
+      }
 
       await enqueueCommentEmail(tx, {
         postId: p.id,

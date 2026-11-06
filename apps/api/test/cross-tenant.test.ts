@@ -59,6 +59,12 @@ const CROSS_TENANT_ROUTES: Record<
   "DELETE /workspaces/:ws/products/:product": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}`,
   }),
+  "POST /workspaces/:ws/products/:product/push-follow": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/push-follow`,
+  }),
+  "DELETE /workspaces/:ws/products/:product/push-follow": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/push-follow`,
+  }),
   "GET /workspaces/:ws/products/:product/statuses": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/statuses`,
   }),
@@ -439,6 +445,14 @@ describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
       .from(schema.commentReads)
       .where(eq(schema.commentReads.commentId, seed.b.commentId!));
     expect(reads).toHaveLength(0);
+  });
+
+  it("tenant B's product has no push follows after the foreign-tenant route sweep", async () => {
+    const rows = await testApp.db
+      .select()
+      .from(schema.pushFollowedProducts)
+      .where(eq(schema.pushFollowedProducts.productId, seed.b.productId!));
+    expect(rows).toHaveLength(0);
   });
 
   it("tenant A's own workspace cannot act on tenant B's real comment id (404 comment_not_found, no mutation)", async () => {

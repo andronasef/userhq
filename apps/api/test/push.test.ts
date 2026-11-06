@@ -210,7 +210,7 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
   it("follows and unfollows products for new post/comment notifications", async () => {
     // Follow product
     await request(testApp.http)
-      .post(`/api/v1/push/followed-products/${prodId}`)
+      .post(`/api/v1/workspaces/${wsSlug}/products/${prodSlug}/push-follow`)
       .set("Cookie", userA.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)
       .expect(200);
@@ -233,7 +233,7 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
 
     // Unfollow product
     await request(testApp.http)
-      .delete(`/api/v1/push/followed-products/${prodId}`)
+      .delete(`/api/v1/workspaces/${wsSlug}/products/${prodSlug}/push-follow`)
       .set("Cookie", userA.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)
       .expect(200);
@@ -419,11 +419,26 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
     expect(latest.body).toContain("Here is a helpful comment reply!");
   });
 
-  it("enqueues new post push notification to followers of a product", async () => {
-    // UserB follows the product
+  it("enqueues new post push notification to admin followers of a product", async () => {
+    // A third user is made a workspace admin and follows the product through the guarded route.
+    const userC = await signedInCookie(testApp.test, {
+      name: "User Carol",
+      email: "carol@push.test",
+      emailVerified: true,
+    });
+    await testApp.db.insert(schema.workspaceMembers).values({ workspaceId: wsId, userId: userC.userId, role: "admin" });
     await request(testApp.http)
-      .post(`/api/v1/push/followed-products/${prodId}`)
-      .set("Cookie", userB.cookie)
+      .post("/api/v1/push/subscriptions")
+      .set("Cookie", userC.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({
+        endpoint: `https://fcm.googleapis.com/fcm/send/user-c-${Date.now()}`,
+        keys: { p256dh: "BFakeKeyP256dh1234567890abcdef...", auth: "fakeAuth123456789==" },
+      })
+      .expect(201);
+    await request(testApp.http)
+      .post(`/api/v1/workspaces/${wsSlug}/products/${prodSlug}/push-follow`)
+      .set("Cookie", userC.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)
       .expect(200);
 
@@ -444,7 +459,7 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
       .from(schema.pushDeliveries)
       .where(
         and(
-          eq(schema.pushDeliveries.userId, userB.userId),
+          eq(schema.pushDeliveries.userId, userC.userId),
           eq(schema.pushDeliveries.eventType, "new_post")
         )
       );
@@ -746,5 +761,148 @@ describe("Push notification path: canonical URL, tag, Board lock and cleanup (D-
       commit.release();
       await producer;
     }
+  });
+});
+
+describe("Admin-only tenant-guarded product follow (D-11)", () => {
+  let testApp: Awaited<ReturnType<typeof createTestApp>>;
+  let pushService: PushService;
+  let owner: Awaited<ReturnType<typeof signedInCookie>>;
+  let admin: Awaited<ReturnType<typeof signedInCookie>>;
+  let customer: Awaited<ReturnType<typeof signedInCookie>>;
+  let foreign: Awaited<ReturnType<typeof signedInCookie>>;
+  let wsId: string;
+  let prodId: string;
+  let foreignProdId: string;
+  const wsSlug = "ws-follow";
+  const prodSlug = "follow-prod";
+  const followPath = `/api/v1/workspaces/${wsSlug}/products/${prodSlug}/push-follow`;
+
+  const follows = (productId: string) =>
+    testApp.db.select().from(schema.pushFollowedProducts).where(eq(schema.pushFollowedProducts.productId, productId));
+  const mut = (method: "post" | "delete", path: string, cookie: string) =>
+    request(testApp.http)[method](path).set("Cookie", cookie).set("Origin", testApp.env.PUBLIC_URL);
+
+  beforeAll(async () => {
+    testApp = await createTestApp();
+    pushService = testApp.app.get(PushService);
+    owner = await signedInCookie(testApp.test, { name: "F Owner", email: "f-owner@push.test", emailVerified: true });
+    admin = await signedInCookie(testApp.test, { name: "F Admin", email: "f-admin@push.test", emailVerified: true });
+    customer = await signedInCookie(testApp.test, { name: "F Customer", email: "f-customer@push.test", emailVerified: true });
+    foreign = await signedInCookie(testApp.test, { name: "F Foreign", email: "f-foreign@push.test", emailVerified: true });
+    const [ws] = await testApp.db.insert(schema.workspaces).values({ name: "Follow WS", slug: wsSlug }).returning();
+    wsId = ws.id;
+    await testApp.db.insert(schema.workspaceMembers).values([
+      { workspaceId: wsId, userId: owner.userId, role: "owner" },
+      { workspaceId: wsId, userId: admin.userId, role: "admin" },
+    ]);
+    const [prod] = await testApp.db.insert(schema.products).values({ workspaceId: wsId, name: "Follow Product", slug: prodSlug }).returning();
+    prodId = prod.id;
+    const [fws] = await testApp.db.insert(schema.workspaces).values({ name: "Foreign WS", slug: "ws-follow-foreign" }).returning();
+    await testApp.db.insert(schema.workspaceMembers).values({ workspaceId: fws.id, userId: foreign.userId, role: "owner" });
+    const [fprod] = await testApp.db.insert(schema.products).values({ workspaceId: fws.id, name: "Foreign Product", slug: "foreign-prod" }).returning();
+    foreignProdId = fprod.id;
+  });
+  afterAll(async () => { await testApp?.close(); });
+  beforeEach(async () => { await testApp.db.delete(schema.pushFollowedProducts); await testApp.db.delete(schema.pushDeliveries); });
+
+  it("lets workspace owners and admins follow idempotently, list, and unfollow", async () => {
+    for (const who of [owner, admin]) {
+      expect((await mut("post", followPath, who.cookie)).body).toEqual({ success: true });
+      expect((await mut("post", followPath, who.cookie)).status).toBe(200);
+    }
+    expect(await follows(prodId)).toHaveLength(2);
+    const list = await request(testApp.http).get("/api/v1/push/followed-products").set("Cookie", owner.cookie).expect(200);
+    expect(list.body.map((p: any) => p.productId)).toEqual([prodId]);
+    expect((await mut("delete", followPath, owner.cookie)).status).toBe(200);
+    const left = await follows(prodId);
+    expect(left.map((f) => f.userId)).toEqual([admin.userId]);
+  });
+
+  it("rejects a non-member customer, a foreign tenant's admin, anonymous callers and API keys without creating a row", async () => {
+    const nonMember = await mut("post", followPath, customer.cookie);
+    expect(nonMember.status).toBe(404);
+    expect(nonMember.body.code).toBe("not_found");
+
+    const crossTenant = await mut("post", `/api/v1/workspaces/${wsSlug}/products/${prodSlug}/push-follow`, foreign.cookie);
+    expect(crossTenant.status).toBe(404);
+    const reversed = await mut("post", "/api/v1/workspaces/ws-follow-foreign/products/foreign-prod/push-follow", owner.cookie);
+    expect(reversed.status).toBe(404);
+
+    const anon = await request(testApp.http).post(followPath).set("Origin", testApp.env.PUBLIC_URL);
+    expect(anon.status).toBe(401);
+
+    const key = await request(testApp.http).post(`/api/v1/workspaces/${wsSlug}/api-keys`)
+      .set("Cookie", owner.cookie).set("Origin", testApp.env.PUBLIC_URL)
+      .send({ name: "Follow policy", scopes: ["admin"] });
+    expect(key.status).toBe(201);
+    for (const method of ["post", "delete"] as const) {
+      const res = await request(testApp.http)[method](followPath).set("Authorization", `Bearer ${key.body.token}`).send({});
+      expect(res.status, method).toBe(403);
+      expect(res.body.code).toBe("api_key_route_forbidden");
+    }
+
+    expect(await follows(prodId)).toHaveLength(0);
+    expect(await follows(foreignProdId)).toHaveLength(0);
+  });
+
+  it("no longer exposes the raw product id follow route", async () => {
+    const res = await mut("post", `/api/v1/push/followed-products/${prodId}`, owner.cookie);
+    expect(res.status).toBe(404);
+    expect(await follows(prodId)).toHaveLength(0);
+  });
+
+  it("keeps the user-scoped unfollow limited to the caller's own follow", async () => {
+    await testApp.db.insert(schema.pushFollowedProducts).values([
+      { userId: owner.userId, productId: prodId },
+      { userId: admin.userId, productId: prodId },
+    ]);
+    expect((await mut("delete", `/api/v1/push/followed-products/${prodId}`, admin.cookie)).status).toBe(200);
+    expect((await follows(prodId)).map((f) => f.userId)).toEqual([owner.userId]);
+  });
+
+  it("hides a product from the followed list once the caller left the workspace", async () => {
+    await testApp.db.insert(schema.pushFollowedProducts).values({ userId: admin.userId, productId: prodId });
+    const before = await request(testApp.http).get("/api/v1/push/followed-products").set("Cookie", admin.cookie).expect(200);
+    expect(before.body).toHaveLength(1);
+    await testApp.db.delete(schema.workspaceMembers).where(and(eq(schema.workspaceMembers.workspaceId, wsId), eq(schema.workspaceMembers.userId, admin.userId)));
+    try {
+      const after = await request(testApp.http).get("/api/v1/push/followed-products").set("Cookie", admin.cookie).expect(200);
+      expect(after.body).toEqual([]);
+    } finally {
+      await testApp.db.insert(schema.workspaceMembers).values({ workspaceId: wsId, userId: admin.userId, role: "admin" });
+    }
+  });
+
+  it("does not enqueue new-post or new-comment alerts for followers who are no longer members", async () => {
+    const stale = customer; // never a member of this workspace
+    const mkSub = async (userId: string, host: string) => {
+      const ecdh = createECDH("prime256v1");
+      await testApp.db.insert(schema.pushSubscriptions).values({
+        userId, endpoint: `https://${host}.example.test/push`,
+        p256dh: ecdh.generateKeys().toString("base64url"), auth: randomBytes(16).toString("base64url"),
+      });
+    };
+    await mkSub(stale.userId, "stale");
+    await mkSub(admin.userId, "current");
+    await testApp.db.insert(schema.pushFollowedProducts).values([
+      { userId: stale.userId, productId: prodId },
+      { userId: admin.userId, productId: prodId },
+    ]);
+    const [st] = await testApp.db.insert(schema.statuses).values({ productId: prodId, name: "Open", color: "#123456", type: "review", position: 0, isDefault: true }).returning();
+    const [post] = await testApp.db.insert(schema.posts).values({ productId: prodId, number: 1, title: "Stale Post", authorId: owner.userId, statusId: st.id }).returning();
+    const [comment] = await testApp.db.insert(schema.comments).values({ postId: post.id, authorId: owner.userId, body: "c" }).returning();
+    const common = {
+      workspaceId: wsId, productId: prodId, postId: post.id, actorId: owner.userId, postTitle: "Stale Post",
+      productName: "Follow Product", productSlug: prodSlug, workspaceSlug: wsSlug, postNumber: 1,
+    };
+    await testApp.db.transaction(async (tx) => {
+      await pushService.enqueueNewPostPush(tx, common);
+      await pushService.enqueueNewCommentPush(tx, { ...common, commentId: comment.id, actorName: "Owner" });
+    });
+    const rows = await testApp.db.select().from(schema.pushDeliveries);
+    expect(rows.map((r) => `${r.userId}:${r.eventType}`).sort()).toEqual([
+      `${admin.userId}:new_comment`, `${admin.userId}:new_post`,
+    ].sort());
   });
 });

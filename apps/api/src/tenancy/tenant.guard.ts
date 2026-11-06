@@ -118,9 +118,10 @@ export class TenantGuard implements CanActivate {
       productId = p.id;
     }
 
-    // Check product restrictions for API keys
+    // Workspace-wide handlers cannot prove product isolation. Restricted keys
+    // must address an allowed product explicitly, even when they have admin scope.
     if (req.apiKey?.productRestrictions && req.apiKey.productRestrictions.length > 0) {
-      if (productId && !req.apiKey.productRestrictions.includes(productId)) {
+      if (!productId || !req.apiKey.productRestrictions.includes(productId)) {
         throw new ApiException(
           "product_restricted",
           403,

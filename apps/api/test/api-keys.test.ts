@@ -271,6 +271,19 @@ describe("Workspace Admin API Keys (Plan 09-02)", () => {
     expect(afterRes.body.code).toBe("api_key_revoked");
   });
 
+  it("denies product-restricted keys on workspace resources including webhooks and aggregates", async () => {
+    const key = await request(testApp.http).post(`/api/v1/workspaces/${wsSlug}/api-keys`)
+      .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL)
+      .send({ name: "Product only", scopes: ["admin"], productRestrictions: [prodAId] });
+    expect(key.status).toBe(201);
+    for (const path of ["webhooks", "requests", "comments", "export/feedback"]) {
+      const res = await request(testApp.http).get(`/api/v1/workspaces/${wsSlug}/${path}`)
+        .set("Authorization", `Bearer ${key.body.token}`);
+      expect(res.status, path).toBe(403);
+      expect(res.body.code).toBe("product_restricted");
+    }
+  });
+
   it("prevents using an API key from Workspace A on Workspace B", async () => {
     const createRes = await request(testApp.http)
       .post(`/api/v1/workspaces/${wsSlug}/api-keys`)

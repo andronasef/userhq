@@ -434,16 +434,34 @@ export const WorkspaceRequestItemSchema = z.object({
 });
 export type WorkspaceRequestItem = z.infer<typeof WorkspaceRequestItemSchema>;
 
-export const WorkspaceRequestsQuerySchema = z.object({
-  product: z.string().optional(),
-  statusId: z.string().uuid().optional(),
-  statusType: z.enum(STATUS_TYPES).optional(),
-  categoryId: z.string().uuid().optional(),
-  sort: z.enum(["top", "new", "activity"]).default("top"),
-  search: z.string().max(SEARCH_QUERY_MAX).optional(),
-  cursor: z.string().optional(),
-  limit: z.coerce.number().int().min(1).max(50).default(20),
-});
+export const WORKSPACE_CURSOR_MAX = 512;
+
+// YYYY-MM-DD that is a real calendar date (UTC)
+const IsoDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .refine((v) => {
+    const d = new Date(`${v}T00:00:00Z`);
+    return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === v;
+  }, { message: "invalid_date" });
+
+export const WorkspaceRequestsQuerySchema = z
+  .object({
+    product: z.string().optional(),
+    statusId: z.string().uuid().optional(),
+    statusType: z.enum(STATUS_TYPES).optional(),
+    categoryId: z.string().uuid().optional(),
+    sort: z.enum(["top", "new", "activity"]).default("top"),
+    search: z.string().max(SEARCH_QUERY_MAX).optional(),
+    createdFrom: IsoDateSchema.optional(),
+    createdTo: IsoDateSchema.optional(),
+    cursor: z.string().max(WORKSPACE_CURSOR_MAX).optional(),
+    limit: z.coerce.number().int().min(1).max(50).default(20),
+  })
+  .refine((q) => !q.createdFrom || !q.createdTo || q.createdFrom <= q.createdTo, {
+    message: "created_range_reversed",
+    path: ["createdFrom"],
+  });
 export type WorkspaceRequestsQuery = z.input<typeof WorkspaceRequestsQuerySchema>;
 export type WorkspaceRequestsParsedQuery = z.output<typeof WorkspaceRequestsQuerySchema>;
 
@@ -477,7 +495,7 @@ export type WorkspaceCommentItem = z.infer<typeof WorkspaceCommentItemSchema>;
 export const WorkspaceCommentsQuerySchema = z.object({
   product: z.string().optional(),
   attention: z.enum(["all", "needs_attention", "handled"]).default("needs_attention"),
-  cursor: z.string().optional(),
+  cursor: z.string().max(WORKSPACE_CURSOR_MAX).optional(),
   limit: z.coerce.number().int().min(1).max(50).default(20),
 });
 export type WorkspaceCommentsQuery = z.input<typeof WorkspaceCommentsQuerySchema>;
@@ -491,7 +509,7 @@ export const WorkspaceCommentsResponseSchema = z.object({
 export type WorkspaceCommentsResponse = z.infer<typeof WorkspaceCommentsResponseSchema>;
 
 export const ReplyWorkspaceCommentInputSchema = z.object({
-  body: z.string().min(1, { message: "body_required" }).max(COMMENT_BODY_MAX, { message: "body_too_long" }),
+  body: CommentBodySchema,
 });
 export type ReplyWorkspaceCommentInput = z.infer<typeof ReplyWorkspaceCommentInputSchema>;
 

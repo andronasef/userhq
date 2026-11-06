@@ -1,5 +1,5 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { and, eq, isNull, isNotNull, sql, desc, inArray } from "drizzle-orm";
+import { and, eq, isNull, isNotNull, sql, desc, inArray, gte, lt } from "drizzle-orm";
 import {
   DB,
   type Db,
@@ -23,7 +23,7 @@ import type {
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
 import { prefixTsQuery } from "./search.js";
-import { encodeBoardCursor, decodeBoardCursor } from "./cursor.js";
+import { encodeKeysetCursor, decodeKeysetCursor, type KeysetKind } from "./cursor.js";
 import { postSlug } from "@userhq/types";
 import type { Actor } from "../auth/principal.js";
 import { CommentsService } from "./comments.service.js";
@@ -40,7 +40,10 @@ export class WorkspaceFeedbackService {
     query: WorkspaceRequestsQuery
   ): Promise<WorkspaceRequestsResponse> {
     const limit = typeof query.limit === "number" ? query.limit : (Number(query.limit) || 20);
-    const offset = query.cursor ? decodeBoardCursor(query.cursor) : 0;
+    const sort = query.sort ?? "top";
+    const kind: KeysetKind = `requests:${sort}`;
+    // Decode (and reject tampered cursors) before touching the database.
+    const position = query.cursor ? decodeKeysetCursor(kind, query.cursor) : null;
 
     const baseWhere = and(
       eq(products.workspaceId, tenant.workspaceId),
@@ -68,12 +71,22 @@ export class WorkspaceFeedbackService {
       ? sql`${posts.search} @@ to_tsquery('english', ${tsQuery})`
       : undefined;
 
+    // UTC calendar days: from is the start of createdFrom, to is exclusive of the day after createdTo.
+    const fromWhere = query.createdFrom
+      ? gte(posts.createdAt, new Date(`${query.createdFrom}T00:00:00Z`))
+      : undefined;
+    const toWhere = query.createdTo
+      ? lt(posts.createdAt, new Date(new Date(`${query.createdTo}T00:00:00Z`).getTime() + 86_400_000))
+      : undefined;
+
     const effectiveWhere = and(
       baseWhere,
       productWhere,
       statusWhere,
       categoryWhere,
-      searchWhere
+      searchWhere,
+      fromWhere,
+      toWhere
     );
 
     const totalCountQuery = await this.db
@@ -85,18 +98,24 @@ export class WorkspaceFeedbackService {
 
     const totalCount = totalCountQuery[0]?.count ?? 0;
 
-    const sort = query.sort ?? "top";
+    const activityAt = sql`coalesce((SELECT max(c.created_at) FROM ${comments} c WHERE c.post_id = ${posts.id} AND c.deleted_at IS NULL), ${posts.createdAt})`;
     const orderClauses =
       sort === "new"
         ? [desc(posts.createdAt), desc(posts.id)]
         : sort === "activity"
-          ? [
-              desc(
-                sql`coalesce((SELECT max(c.created_at) FROM ${comments} c WHERE c.post_id = ${posts.id} AND c.deleted_at IS NULL), ${posts.createdAt})`
-              ),
-              desc(posts.id),
-            ]
+          ? [desc(activityAt), desc(posts.id)]
           : [desc(posts.voteCount), desc(posts.createdAt), desc(posts.id)];
+
+    // Row-value comparison, strictly less-than because every ordering is descending.
+    const cursorWhere = position
+      ? sort === "new"
+        ? sql`(${posts.createdAt}, ${posts.id}) < (${position.t}::timestamptz, ${position.id}::uuid)`
+        : sort === "activity"
+          ? sql`(${activityAt}, ${posts.id}) < (${position.t}::timestamptz, ${position.id}::uuid)`
+          : sql`(${posts.voteCount}, ${posts.createdAt}, ${posts.id}) < (${position.v}::int, ${position.t}::timestamptz, ${position.id}::uuid)`
+      : undefined;
+    const cursorTs =
+      sort === "activity" ? sql<string>`(${activityAt})::text` : sql<string>`${posts.createdAt}::text`;
 
     const rows = await this.db
       .select({
@@ -106,6 +125,7 @@ export class WorkspaceFeedbackService {
         description: posts.description,
         voteCount: posts.voteCount,
         createdAt: posts.createdAt,
+        cursorTs,
         authorId: posts.authorId,
         authorIsAdmin: posts.authorIsAdmin,
         authorName: user.name,
@@ -130,13 +150,13 @@ export class WorkspaceFeedbackService {
       .leftJoin(categories, eq(posts.categoryId, categories.id))
       .leftJoin(uploads, eq(products.logoUploadId, uploads.id))
       .leftJoin(user, eq(posts.authorId, user.id))
-      .where(effectiveWhere)
+      .where(and(effectiveWhere, cursorWhere))
       .orderBy(...orderClauses)
-      .limit(limit + 1)
-      .offset(offset);
+      .limit(limit + 1);
 
     const hasMore = rows.length > limit;
     const pageRows = hasMore ? rows.slice(0, limit) : rows;
+    const lastRow = pageRows[pageRows.length - 1];
 
     const items: WorkspaceRequestItem[] = pageRows.map((r) => ({
       id: r.id,
@@ -171,9 +191,13 @@ export class WorkspaceFeedbackService {
       commentCount: r.commentCount,
     }));
 
+    // ponytail: votes or comments changing between page loads can move a row across the cursor; snapshot the sort key if that matters
     return {
       items,
-      nextCursor: hasMore ? encodeBoardCursor(offset + limit) : null,
+      nextCursor:
+        hasMore && lastRow
+          ? encodeKeysetCursor(kind, { t: lastRow.cursorTs, id: lastRow.id, v: lastRow.voteCount })
+          : null,
       totalCount,
     };
   }
@@ -184,7 +208,7 @@ export class WorkspaceFeedbackService {
     query: WorkspaceCommentsQuery
   ): Promise<WorkspaceCommentsResponse> {
     const limit = typeof query.limit === "number" ? query.limit : (Number(query.limit) || 20);
-    const offset = query.cursor ? decodeBoardCursor(query.cursor) : 0;
+    const position = query.cursor ? decodeKeysetCursor("comments", query.cursor) : null;
 
     const baseWhere = and(
       eq(products.workspaceId, tenant.workspaceId),
@@ -206,6 +230,9 @@ export class WorkspaceFeedbackService {
           : undefined;
 
     const effectiveWhere = and(baseWhere, productWhere, attentionWhere);
+    const cursorWhere = position
+      ? sql`(${comments.createdAt}, ${comments.id}) < (${position.t}::timestamptz, ${position.id}::uuid)`
+      : undefined;
 
     // Count needs attention across workspace
     const needsAttentionCountQuery = await this.db
@@ -232,6 +259,7 @@ export class WorkspaceFeedbackService {
         body: comments.body,
         isAdmin: comments.isAdmin,
         createdAt: comments.createdAt,
+        cursorTs: sql<string>`${comments.createdAt}::text`,
         editedAt: comments.editedAt,
         handledAt: comments.handledAt,
         handledById: comments.handledById,
@@ -258,27 +286,30 @@ export class WorkspaceFeedbackService {
         commentReads,
         and(eq(commentReads.commentId, comments.id), eq(commentReads.userId, viewer.id))
       )
-      .where(effectiveWhere)
+      .where(and(effectiveWhere, cursorWhere))
       .orderBy(desc(comments.createdAt), desc(comments.id))
-      .limit(limit + 1)
-      .offset(offset);
+      .limit(limit + 1);
 
     const hasMore = rows.length > limit;
     const pageRows = hasMore ? rows.slice(0, limit) : rows;
+    const lastRow = pageRows[pageRows.length - 1];
 
     // Collect handledBy user names if any
     const handledByIds = pageRows
       .map((r) => r.handledById)
       .filter((id): id is string => Boolean(id));
 
-    const handledUsersMap = new Map<string, { name: string | null; image: string | null }>();
+    const handledUsersMap = new Map<
+      string,
+      { name: string | null; image: string | null; deleted: boolean }
+    >();
     if (handledByIds.length > 0) {
       const handledUsers = await this.db
-        .select({ id: user.id, name: user.name, image: user.image })
+        .select({ id: user.id, name: user.name, image: user.image, deletedAt: user.deletedAt })
         .from(user)
         .where(inArray(user.id, handledByIds));
       for (const u of handledUsers) {
-        handledUsersMap.set(u.id, { name: u.name, image: u.image });
+        handledUsersMap.set(u.id, { name: u.name, image: u.image, deleted: Boolean(u.deletedAt) });
       }
     }
 
@@ -292,12 +323,9 @@ export class WorkspaceFeedbackService {
         editedAt: r.editedAt ? r.editedAt.toISOString() : null,
         handledAt: r.handledAt ? r.handledAt.toISOString() : null,
         handledBy: handledUser
-          ? {
-              name: handledUser.name,
-              image: handledUser.image,
-              isAdmin: true,
-              deleted: false,
-            }
+          ? handledUser.deleted
+            ? { name: null, image: null, isAdmin: false, deleted: true }
+            : { name: handledUser.name, image: handledUser.image, isAdmin: true, deleted: false }
           : null,
         isUnread: !r.isRead && r.authorId !== viewer.id,
         post: {
@@ -326,7 +354,10 @@ export class WorkspaceFeedbackService {
 
     return {
       items,
-      nextCursor: hasMore ? encodeBoardCursor(offset + limit) : null,
+      nextCursor:
+        hasMore && lastRow
+          ? encodeKeysetCursor("comments", { t: lastRow.cursorTs, id: lastRow.id })
+          : null,
       needsAttentionCount,
     };
   }
@@ -359,7 +390,7 @@ export class WorkspaceFeedbackService {
     await this.db
       .update(comments)
       .set({ handledAt: new Date(), handledById: viewer.id })
-      .where(eq(comments.id, commentId));
+      .where(and(eq(comments.id, commentId), isNull(comments.handledAt)));
   }
 
   async reopenComment(

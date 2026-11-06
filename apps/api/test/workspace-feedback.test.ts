@@ -809,9 +809,7 @@ describe("Inbox keyset paging, cursor validation and date filters (quick-261107-
   let cust: { cookie: string; userId: string };
   const wsSlug = "ws-inbox-paging";
   let pagingStatusId: string;
-  let datesStatusId: string;
   let pagingProdId: string;
-  let datesProdId: string;
   const uid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
   const get = (path: string) => request(t.http).get(`/api/v1/workspaces/${wsSlug}${path}`).set("Cookie", admin.cookie);
 
@@ -872,8 +870,6 @@ describe("Inbox keyset paging, cursor validation and date filters (quick-261107-
     const dates = await mkProduct("dates");
     pagingProdId = paging.id;
     pagingStatusId = paging.status;
-    datesProdId = dates.id;
-    datesStatusId = dates.status;
 
     // posts: [number, votes, created_at]; ties on id order, on exact time, on same-ms-different-micro, on votes
     const fixtures: Array<[number, number, string]> = [

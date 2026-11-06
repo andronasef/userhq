@@ -40,6 +40,10 @@ services:
       SMTP_PASS: ${SMTP_PASS:-}
       SMTP_FROM: ${SMTP_FROM:-}
       SMTP_REQUIRE_TLS: ${SMTP_REQUIRE_TLS:-true}
+      # Not `:?` so `docker compose build` works without them; the API refuses to boot in production if unset.
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
     volumes:
       - uploads:/data/uploads
 

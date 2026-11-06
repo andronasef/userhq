@@ -94,7 +94,7 @@ export const pushDeliveries = pgTable(
     url: text("url"),
     data: jsonb("data").$type<Record<string, any>>(),
     status: text("status")
-      .$type<"pending" | "sending" | "delivered" | "failed">()
+      .$type<"pending" | "sending" | "delivered" | "failed" | "suppressed">()
       .notNull()
       .default("pending"),
     attempts: integer("attempts").notNull().default(0),

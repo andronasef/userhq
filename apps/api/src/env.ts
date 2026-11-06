@@ -51,6 +51,18 @@ export const EnvSchema = z
         message: "SMTP_FROM is required when SMTP_HOST is set",
       });
     }
+    // Throwaway keys regenerate on every restart and orphan every subscription.
+    if (data.NODE_ENV === "production") {
+      for (const key of ["VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY"] as const) {
+        if (!data[key]) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [key],
+            message: `${key} is required in production`,
+          });
+        }
+      }
+    }
   });
 
 export type Env = z.infer<typeof EnvSchema>;

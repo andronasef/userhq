@@ -10,6 +10,10 @@ export interface VapidKeys {
 let cachedKeys: VapidKeys | null = null;
 
 export function getVapidKeys(env: Env): VapidKeys {
+  // Checked before the cache so a warm cache can never mask missing production keys.
+  if (env.NODE_ENV === "production" && !(env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY)) {
+    throw new Error("VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY are required in production");
+  }
   if (cachedKeys) {
     return cachedKeys;
   }

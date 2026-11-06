@@ -179,7 +179,7 @@ export function WorkspaceCommentsView({
       setNeedsAttentionCount((prev) => Math.max(0, prev + applied.needsAttentionDelta));
       setReplyingCommentId(null);
       setReplyBody("");
-      toast.success("Reply posted. The thread is marked handled.");
+      toast.success("Reply posted and marked handled");
       router.refresh();
     } catch {
       toast.error("Failed to post reply");

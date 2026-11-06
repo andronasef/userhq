@@ -253,6 +253,12 @@ describe("Bulk Feedback Export & Automation API (Plan 09-03)", () => {
       (p: any) => p.title === "Automated Feedback Item 1"
     );
     expect(post1).toBeDefined();
+    expect(post1.author.id).not.toBe(admin.userId);
+    expect(post1.author.name).toBe("Write Key (integration)");
+    expect(post1.comments[0].author.id).toBe(post1.author.id);
+    expect(post1.comments[0].author.name).toBe("Write Key (integration)");
+    expect(post1.comments[0].isAdmin).toBe(true);
+    expect(post1.voteCount).toBe(0);
     expect(post1.createdByApiKeyId).toBe(writeApiKeyId);
     expect(post1.commentCount).toBe(1);
     expect(post1.comments).toHaveLength(1);

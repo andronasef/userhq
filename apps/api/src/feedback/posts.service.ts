@@ -30,7 +30,8 @@ import {
   type ProductFeatures,
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
-import { isWorkspaceAdmin } from "./membership.js";
+import { isWorkspaceAdmin, isFeedbackAdmin } from "./membership.js";
+import type { Actor } from "../auth/principal.js";
 import { prefixTsQuery } from "./search.js";
 import { encodeBoardCursor, decodeBoardCursor } from "./cursor.js";
 import { CommentsService } from "./comments.service.js";
@@ -92,14 +93,14 @@ export class PostsService {
 
   async createPost(
     portal: { workspaceId: string; productId: string },
-    currentUser: { id: string },
+    currentUser: Actor,
     input: CreatePostInput,
     userAgent?: string | null,
     apiKeyId?: string | null
   ): Promise<PostCreated> {
-    const isAdmin = await isWorkspaceAdmin(
+    const isAdmin = await isFeedbackAdmin(
       this.db,
-      currentUser.id,
+      currentUser,
       portal.workspaceId
     );
     const deviceInfo = parseUserAgent(userAgent);
@@ -147,7 +148,7 @@ export class PostsService {
           categoryId: verifiedCategoryId,
           authorId: currentUser.id,
           authorIsAdmin: isAdmin,
-          voteCount: 1,
+          voteCount: currentUser.apiPrincipal ? 0 : 1,
           deviceInfo,
           createdByApiKeyId: apiKeyId ?? null,
         })
@@ -157,9 +158,9 @@ export class PostsService {
           title: posts.title,
         });
 
-      await tx
-        .insert(votes)
-        .values({ postId: newPost.id, userId: currentUser.id });
+      if (!currentUser.apiPrincipal) {
+        await tx.insert(votes).values({ postId: newPost.id, userId: currentUser.id });
+      }
 
       await enqueueWebhookEvent(tx, {
         workspaceId: portal.workspaceId,
@@ -214,13 +215,13 @@ export class PostsService {
 
   async updatePost(
     portal: { workspaceId: string; productId: string },
-    currentUser: { id: string },
+    currentUser: Actor,
     postNumber: number,
     input: UpdatePostInput
   ): Promise<PostCreated> {
-    const isAdmin = await isWorkspaceAdmin(
+    const isAdmin = await isFeedbackAdmin(
       this.db,
-      currentUser.id,
+      currentUser,
       portal.workspaceId
     );
 
@@ -346,12 +347,12 @@ export class PostsService {
 
   async deletePost(
     portal: { workspaceId: string; productId: string },
-    currentUser: { id: string },
+    currentUser: Actor,
     postNumber: number
   ): Promise<void> {
-    const isAdmin = await isWorkspaceAdmin(
+    const isAdmin = await isFeedbackAdmin(
       this.db,
-      currentUser.id,
+      currentUser,
       portal.workspaceId
     );
 

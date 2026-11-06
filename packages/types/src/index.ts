@@ -85,6 +85,7 @@ export const API_ERROR_CODES = [
   "category_not_found",
   "reorder_failed",
   "api_key_invalid",
+  "api_key_route_forbidden",
   "api_key_expired",
   "api_key_revoked",
   "insufficient_scope",

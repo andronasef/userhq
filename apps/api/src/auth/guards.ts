@@ -117,18 +117,18 @@ export class SessionGuard implements CanActivate {
         throw new ApiException("insufficient_scope", 403, "API key lacks the required scope.");
       }
       req.apiKey = result.key;
-      const syntheticUser = {
-        id: result.key.createdByUserId ?? `apikey:${result.key.id}`,
-        name: result.key.name,
-        email: "apikey@userhq.internal",
-        image: null,
-        isApiKey: true,
+      const principal = {
+        kind: "api-key" as const,
+        keyId: result.key.id,
+        workspaceId: result.key.workspaceId,
+        scopes: result.key.scopes,
       };
-      req.user = syntheticUser;
-      req.session = {
-        user: syntheticUser,
-        session: { id: `apikey_session_${result.key.id}` },
+      req.principal = principal;
+      req.user = {
+        ...await this.apiKeyService.integrationActor(result.key),
+        apiPrincipal: principal,
       };
+      req.session = null;
       return true;
     }
 

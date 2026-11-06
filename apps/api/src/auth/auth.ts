@@ -4,6 +4,7 @@ import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { schema, type Db, user as userTable } from "@userhq/db";
 import { eq } from "drizzle-orm";
 import type { Env } from "../env.js";
+import { INTEGRATION_ACTOR_PREFIX } from "./principal.js";
 
 export const AUTH: unique symbol = Symbol.for("userhq.auth");
 
@@ -30,6 +31,12 @@ export function createAuth(
       session: {
         create: {
           async before(session) {
+            if (session.userId.startsWith(INTEGRATION_ACTOR_PREFIX)) {
+              throw APIError.from("FORBIDDEN", {
+                code: "integration_cannot_sign_in",
+                message: "Integration actors cannot sign in.",
+              });
+            }
             const [row] = await db
               .select({
                 bannedAt: userTable.bannedAt,

@@ -9,7 +9,8 @@ import type {
   DeviceInfo,
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
-import { isWorkspaceAdmin } from "./membership.js";
+import { isFeedbackAdmin } from "./membership.js";
+import type { Actor } from "../auth/principal.js";
 import { enqueueCommentEmail } from "../email/outbox.js";
 import { enqueueWebhookEvent } from "../webhooks/outbox.js";
 import { parseUserAgent } from "./device-info.js";
@@ -41,7 +42,7 @@ export class CommentsService {
 
   async createComment(
     portal: { workspaceId: string; productId: string },
-    currentUser: { id: string; name: string | null; image: string | null },
+    currentUser: Actor & { name: string | null; image: string | null },
     number: number,
     input: CreateCommentInput,
     userAgent?: string | null,
@@ -71,7 +72,7 @@ export class CommentsService {
         throw new ApiException("post_not_found", 404, "Post not found.");
       }
 
-      const isAdmin = await isWorkspaceAdmin(tx, currentUser.id, portal.workspaceId);
+      const isAdmin = await isFeedbackAdmin(tx, currentUser, portal.workspaceId);
 
       let resolvedParentId: string | null = null;
       if (input.parentId) {
@@ -197,7 +198,7 @@ export class CommentsService {
 
   async updateComment(
     portal: { workspaceId: string; productId: string },
-    currentUser: { id: string },
+    currentUser: Actor,
     commentId: string,
     input: UpdateCommentInput
   ): Promise<PublicComment> {
@@ -227,7 +228,7 @@ export class CommentsService {
       throw new ApiException("comment_not_found", 404, "Comment not found.");
     }
 
-    const isAdmin = await isWorkspaceAdmin(this.db, currentUser.id, portal.workspaceId);
+    const isAdmin = await isFeedbackAdmin(this.db, currentUser, portal.workspaceId);
     const isAuthor = row.commentAuthorId === currentUser.id;
 
     if (!isAuthor && !isAdmin) {
@@ -298,7 +299,7 @@ export class CommentsService {
 
   async deleteComment(
     portal: { workspaceId: string; productId: string },
-    currentUser: { id: string },
+    currentUser: Actor,
     commentId: string
   ): Promise<void> {
     const [row] = await this.db
@@ -324,7 +325,7 @@ export class CommentsService {
       throw new ApiException("comment_not_found", 404, "Comment not found.");
     }
 
-    const isAdmin = await isWorkspaceAdmin(this.db, currentUser.id, portal.workspaceId);
+    const isAdmin = await isFeedbackAdmin(this.db, currentUser, portal.workspaceId);
     const isAuthor = row.commentAuthorId === currentUser.id;
 
     if (!isAuthor && !isAdmin) {

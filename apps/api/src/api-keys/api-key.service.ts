@@ -1,7 +1,8 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { randomBytes, createHash } from "node:crypto";
 import { eq, and, desc } from "drizzle-orm";
-import { DB, type Db, workspaceApiKeys, type WorkspaceApiKey } from "@userhq/db";
+import { DB, type Db, workspaceApiKeys, type WorkspaceApiKey, user } from "@userhq/db";
+import { INTEGRATION_ACTOR_PREFIX } from "../auth/principal.js";
 import type {
   CreateApiKeyInput,
   ApiKeyMetadata,
@@ -23,6 +24,20 @@ export interface ValidatedApiKey {
 @Injectable()
 export class ApiKeyService {
   constructor(@Inject(DB) private readonly db: Db) {}
+
+  async integrationActor(key: ValidatedApiKey) {
+    const id = `${INTEGRATION_ACTOR_PREFIX}${key.id}`;
+    const name = `${key.name} (integration)`;
+    // Existing keys acquire their actor lazily; concurrent requests share one row.
+    await this.db.insert(user).values({
+      id,
+      name,
+      email: `${key.id}@api.userhq.invalid`,
+      emailVerified: false,
+      commentEmails: false,
+    }).onConflictDoUpdate({ target: user.id, set: { name } });
+    return { id, name, image: null };
+  }
 
   static hashToken(token: string): string {
     return createHash("sha256").update(token).digest("hex");

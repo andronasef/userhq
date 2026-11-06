@@ -330,4 +330,41 @@ describe("Bulk Feedback Export & Automation API (Plan 09-03)", () => {
 
     expect(res.status).toBe(404);
   });
+
+  it("keeps integration moderation and inbox replies working without team membership", async () => {
+    const base = `/api/v1/workspaces/${wsSlug}/products/${prodASlug}/posts`;
+    const post = await request(testApp.http).post(base)
+      .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL)
+      .send({ title: "Human submitted moderation target", description: "Human request for moderation", categoryId });
+    expect(post.status, JSON.stringify(post.body)).toBe(201);
+    const number = post.body.number;
+    const detail = await request(testApp.http).get(`${base}/${number}`)
+      .set("Authorization", `Bearer ${adminApiKey}`);
+    expect(detail.status).toBe(200);
+    const edited = await request(testApp.http).patch(`${base}/${number}`)
+      .set("Authorization", `Bearer ${writeApiKey}`)
+      .send({ title: "Integration moderated title", categoryId, version: detail.body.post.version });
+    expect(edited.status, JSON.stringify(edited.body)).toBe(200);
+    const humanComment = await request(testApp.http).post(`${base}/${number}/comments`)
+      .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL)
+      .send({ body: "A human comment" });
+    expect(humanComment.status).toBe(201);
+    const reply = await request(testApp.http)
+      .post(`/api/v1/workspaces/${wsSlug}/comments/${humanComment.body.id}/reply`)
+      .set("Authorization", `Bearer ${writeApiKey}`).send({ body: "Integration reply" });
+    expect(reply.status).toBe(201);
+    expect(reply.body.author.name).toBe("Write Key (integration)");
+    const removed = await request(testApp.http)
+      .delete(`/api/v1/workspaces/${wsSlug}/products/${prodASlug}/comments/${humanComment.body.id}`)
+      .set("Authorization", `Bearer ${writeApiKey}`);
+    expect(removed.status).toBe(204);
+    const members = await request(testApp.http).get(`/api/v1/workspaces/${wsSlug}/members`)
+      .set("Cookie", admin.cookie);
+    expect(members.status).toBe(200);
+    expect(JSON.stringify(members.body)).not.toContain("integration:");
+    expect(JSON.stringify(members.body)).not.toContain("Write Key (integration)");
+    const deleted = await request(testApp.http).delete(`${base}/${number}`)
+      .set("Authorization", `Bearer ${writeApiKey}`);
+    expect(deleted.status).toBe(204);
+  });
 });

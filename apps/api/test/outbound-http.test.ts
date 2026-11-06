@@ -1,5 +1,6 @@
 import { beforeAll, afterAll, describe, expect, it } from "vitest";
 import https from "node:https";
+import { checkServerIdentity } from "node:tls";
 import { readFileSync } from "node:fs";
 import { createServer, type AddressInfo, type Socket } from "node:net";
 import type { LookupAddress } from "node:dns";
@@ -44,10 +45,12 @@ describe("Public outbound HTTPS boundary", () => {
         expect(options.servername).toBe(url.hostname);
         expect(options.autoSelectFamily).toBe(false);
         const lookup = options.lookup as any;
-        lookup(url.hostname, {}, (_err: unknown, address: string, family: number) => {
-          expect(family).toBe(4);
-          pins.push(address);
-        });
+        for (let attempt = 0; attempt < 2; attempt++) {
+          lookup(url.hostname, {}, (_err: unknown, address: string, family: number) => {
+            expect(family).toBe(4);
+            pins.push(address);
+          });
+        }
         // Only this test's external socket adapter maps the validated address to
         // a loopback TLS receiver. Hostname verification remains enabled.
         return https.request(url, {
@@ -64,7 +67,7 @@ describe("Public outbound HTTPS boundary", () => {
     let calls = 0;
     const test = boundary(async () => [{ address: calls++ === 0 ? "8.8.8.8" : "127.0.0.1", family: 4 }]);
     expect(await test.client.post(url("/ok"), {}, "signed bytes")).toEqual({ statusCode: 200, body: "accepted" });
-    expect(test.pins).toEqual(["8.8.8.8"]);
+    expect(test.pins).toEqual(["8.8.8.8", "8.8.8.8"]);
     expect(received.at(-1)).toEqual({ host: `receiver.example.test:${port}`, path: "/ok", body: "signed bytes" });
     await expect(test.client.post(url("/private"), {}, "secret")).rejects.toThrow("Outbound destination rejected");
     expect(test.requestCount()).toBe(1);
@@ -73,6 +76,41 @@ describe("Public outbound HTTPS boundary", () => {
   it("keeps certificate hostname verification enabled", async () => {
     const test = boundary();
     await expect(test.client.post(`https://wrong.example.test:${port}/ok`, {}, "secret"))
+      .rejects.toThrow("Outbound request failed");
+  });
+
+  it("preserves IPv6 literal identity and pinned lookup at the native HTTPS boundary", async () => {
+    const pins: string[] = [];
+    const client = new OutboundHttp({
+      deadlineMs: 1000,
+      resolve: async () => { throw new Error("IP literals must not use DNS"); },
+      request: (target, options, response) => {
+        const address = target.hostname.slice(1, -1);
+        expect(options.servername).toBe("");
+        expect(options.rejectUnauthorized).toBe(true);
+        expect(options.family).toBe(6);
+        expect(options.agent).toBe(false);
+        const lookup = options.lookup as any;
+        for (let attempt = 0; attempt < 2; attempt++) {
+          lookup(address, {}, (error: unknown, pinned: string, family: number) => {
+            expect(error).toBeNull();
+            expect(family).toBe(6);
+            pins.push(pinned);
+          });
+        }
+        // Test-only socket routing retains the original literal as the identity
+        // checked against the fixture's IP SAN, including the negative case.
+        return https.request(target, {
+          ...options, hostname: "127.0.0.1", family: 4, ca,
+          checkServerIdentity: (_hostname, certificate) => checkServerIdentity(address, certificate),
+        }, response);
+      },
+    });
+    expect(await client.post(`https://[2606:4700:4700::1111]:${port}/ok`, {}, "IPv6 bytes"))
+      .toEqual({ statusCode: 200, body: "accepted" });
+    expect(pins).toEqual(["2606:4700:4700::1111", "2606:4700:4700::1111"]);
+    expect(received.at(-1)?.host).toBe(`[2606:4700:4700::1111]:${port}`);
+    await expect(client.post(`https://[2606:4700:4700::1001]:${port}/ok`, {}, "secret"))
       .rejects.toThrow("Outbound request failed");
   });
 

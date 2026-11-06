@@ -30,31 +30,42 @@ self.addEventListener("push", (event) => {
       url: payload.url || "/",
     },
   };
+  // Same tag collapses repeat events for one post into one notification. The Notifications
+  // API throws on renotify without a tag, so renotify is only ever set alongside one.
+  if (typeof payload.tag === "string" && payload.tag) {
+    options.tag = payload.tag;
+    if (payload.renotify) options.renotify = true;
+  }
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
+// Same-origin only: a foreign, protocol-relative or unparsable url falls back to the origin root.
+function resolveTarget(raw) {
+  try {
+    const url = new URL(raw || "/", self.location.origin);
+    if (url.origin === self.location.origin) return url.href;
+  } catch (e) {
+    // fall through
+  }
+  return new URL("/", self.location.origin).href;
+}
+
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const targetUrl = event.notification.data?.url || "/";
+  const target = resolveTarget(event.notification.data && event.notification.data.url);
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
-      // If a tab is already open with the URL, focus it
       for (const client of clientList) {
-        if (client.url === targetUrl && "focus" in client) {
+        if (client.url === target && "focus" in client) {
           return client.focus();
         }
       }
-      // If any tab with same origin is open, navigate and focus
-      if (clientList.length > 0 && "focus" in clientList[0]) {
-        clientList[0].navigate(targetUrl);
-        return clientList[0].focus();
-      }
-      // Otherwise open a new window
+      // Never navigate an unrelated existing tab: open the target instead.
       if (self.clients.openWindow) {
-        return self.clients.openWindow(targetUrl);
+        return self.clients.openWindow(target);
       }
     })
   );

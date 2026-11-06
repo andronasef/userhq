@@ -141,11 +141,14 @@ export class PushWorker implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
+    // One notification per post: a repeat event with the same tag replaces it and re-alerts.
+    const postId = typeof item.data?.postId === "string" ? item.data.postId : null;
     const payload = JSON.stringify({
       title: item.title,
       body: item.body,
       url: item.url ?? "/",
       data: item.data ?? {},
+      ...(postId ? { tag: `post-${postId}`, renotify: true } : {}),
     });
 
     try {

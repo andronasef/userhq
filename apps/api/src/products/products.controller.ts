@@ -317,6 +317,12 @@ export class ProductsController {
             DELETE FROM notifications WHERE product_id = ${tenant.productId!}
               AND workspace_id = ${tenant.workspaceId} AND read_at IS NULL
           `);
+          // Same intent for push: drop only derived, unsent rows (D-14). Enqueue share-locks this
+          // product row, so a racing enqueue cannot leave a surviving row.
+          await tx.execute(sql`
+            DELETE FROM push_deliveries
+            WHERE status IN ('pending', 'sending') AND data->>'productId' = ${tenant.productId!}
+          `);
         }
         });
       } catch (e) {

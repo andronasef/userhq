@@ -16,6 +16,7 @@ import {
 import { ENV, type Env } from "../env.js";
 import { getVapidKeys } from "./push.config.js";
 import { OutboundHttp } from "../common/outbound-http.js";
+import { postSlug } from "@userhq/types";
 import type {
   RegisterPushSubscriptionInput,
   PushSubscriptionResponse,
@@ -270,6 +271,26 @@ export class PushService {
     return { success: true, enqueuedCount: subs.length };
   }
 
+  /** Canonical portal post path, same shape as the web app's postHref. */
+  private postUrl(o: { workspaceSlug: string; productSlug: string; postNumber: number; postTitle: string }): string {
+    const slug = postSlug(o.postTitle);
+    return `/${o.workspaceSlug}/${o.productSlug}/p/${o.postNumber}${slug ? `-${slug}` : ""}`;
+  }
+
+  /**
+   * Share-locks the product row until the caller's transaction ends and reports whether the Board is on.
+   * A concurrent Board disable (UPDATE products) waits for this transaction, so its cleanup always sees
+   * the rows inserted here (D-14).
+   */
+  private async lockBoardEnabled(tx: DbOrTx, workspaceId: string, productId: string): Promise<boolean> {
+    const rows = await tx.execute(sql`
+      SELECT 1 FROM products
+      WHERE id = ${productId} AND workspace_id = ${workspaceId} AND board_enabled AND deleted_at IS NULL
+      FOR SHARE
+    `);
+    return (rows.rows ?? rows).length > 0;
+  }
+
   /**
    * Enqueues push deliveries for a status change.
    * Checks stakeholder preferences and product board_enabled status (D-02, D-10).
@@ -288,14 +309,7 @@ export class PushService {
       postNumber: number;
     }
   ): Promise<void> {
-    // Check product board status
-    const [prod] = await tx
-      .select({ boardEnabled: products.boardEnabled })
-      .from(products)
-      .where(eq(products.id, opts.productId))
-      .limit(1);
-
-    if (!prod || !prod.boardEnabled) return;
+    if (!(await this.lockBoardEnabled(tx, opts.workspaceId, opts.productId))) return;
 
     // Stakeholders: post author, voters, and non-deleted commenters, excluding actor
     const stakeholders = await tx.execute(sql<{ user_id: string }>`
@@ -331,7 +345,7 @@ export class PushService {
       .from(pushSubscriptions)
       .where(inArray(pushSubscriptions.userId, userIds));
 
-    const postUrl = `/${opts.workspaceSlug}/${opts.productSlug}/posts/${opts.postNumber}`;
+    const postUrl = this.postUrl(opts);
 
     for (const sub of subs) {
       const userPref = prefMap.get(sub.userId) ?? {
@@ -391,13 +405,7 @@ export class PushService {
       postNumber: number;
     }
   ): Promise<void> {
-    const [prod] = await tx
-      .select({ boardEnabled: products.boardEnabled })
-      .from(products)
-      .where(eq(products.id, opts.productId))
-      .limit(1);
-
-    if (!prod || !prod.boardEnabled) return;
+    if (!(await this.lockBoardEnabled(tx, opts.workspaceId, opts.productId))) return;
 
     // Recipient: if nested reply, author of parent comment; else author of post
     let targetUserId: string | null = null;
@@ -431,7 +439,7 @@ export class PushService {
       .from(pushSubscriptions)
       .where(eq(pushSubscriptions.userId, targetUserId));
 
-    const postUrl = `/${opts.workspaceSlug}/${opts.productSlug}/posts/${opts.postNumber}`;
+    const postUrl = this.postUrl(opts);
 
     for (const sub of subs) {
       const title = pref.includePreviews
@@ -480,13 +488,7 @@ export class PushService {
       postNumber: number;
     }
   ): Promise<void> {
-    const [prod] = await tx
-      .select({ boardEnabled: products.boardEnabled })
-      .from(products)
-      .where(eq(products.id, opts.productId))
-      .limit(1);
-
-    if (!prod || !prod.boardEnabled) return;
+    if (!(await this.lockBoardEnabled(tx, opts.workspaceId, opts.productId))) return;
 
     // Users following this product, excluding actor
     const followers = await tx
@@ -508,7 +510,7 @@ export class PushService {
       .from(pushSubscriptions)
       .where(inArray(pushSubscriptions.userId, followerUserIds));
 
-    const postUrl = `/${opts.workspaceSlug}/${opts.productSlug}/posts/${opts.postNumber}`;
+    const postUrl = this.postUrl(opts);
 
     for (const sub of subs) {
       const pref = await this.getPreferences(sub.userId);
@@ -558,13 +560,7 @@ export class PushService {
       postNumber: number;
     }
   ): Promise<void> {
-    const [prod] = await tx
-      .select({ boardEnabled: products.boardEnabled })
-      .from(products)
-      .where(eq(products.id, opts.productId))
-      .limit(1);
-
-    if (!prod || !prod.boardEnabled) return;
+    if (!(await this.lockBoardEnabled(tx, opts.workspaceId, opts.productId))) return;
 
     const followers = await tx
       .select({ userId: pushFollowedProducts.userId })
@@ -585,7 +581,7 @@ export class PushService {
       .from(pushSubscriptions)
       .where(inArray(pushSubscriptions.userId, followerUserIds));
 
-    const postUrl = `/${opts.workspaceSlug}/${opts.productSlug}/posts/${opts.postNumber}`;
+    const postUrl = this.postUrl(opts);
 
     for (const sub of subs) {
       const pref = await this.getPreferences(sub.userId);

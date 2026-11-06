@@ -164,6 +164,12 @@ export const comments = pgTable(
     index("comments_post_created").on(t.postId, t.createdAt),
     index("comments_author_idx").on(t.authorId),
     index("comments_handled_idx").on(t.handledAt),
+    // Same predicate as the workspace inbox needs-attention query and count
+    index("comments_needs_attention_idx")
+      .on(t.createdAt.desc().nullsFirst(), t.id.desc().nullsFirst())
+      .where(
+        sql`${t.isAdmin} = false AND ${t.handledAt} IS NULL AND ${t.deletedAt} IS NULL`
+      ),
   ]
 );
 

@@ -1,0 +1,1 @@
+CREATE INDEX "comments_needs_attention_idx" ON "comments" USING btree ("created_at" DESC NULLS FIRST,"id" DESC NULLS FIRST) WHERE "comments"."is_admin" = false AND "comments"."handled_at" IS NULL AND "comments"."deleted_at" IS NULL;

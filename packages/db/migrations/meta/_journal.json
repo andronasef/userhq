@@ -127,6 +127,20 @@
       "when": 1793922711014,
       "tag": "0017_browser_push",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794006662204,
+      "tag": "0018_comment_attention_index",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794006662818,
+      "tag": "0019_backfill_comment_attention",
+      "breakpoints": true
     }
   ]
 }

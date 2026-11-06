@@ -16,6 +16,7 @@ import {
 } from "@userhq/db";
 import { ENV, type Env } from "../env.js";
 import { getVapidKeys } from "./push.config.js";
+import { OutboundHttp, OutboundError } from "../common/outbound-http.js";
 
 const BACKOFF_MS = [
   5 * 1000, // 5 seconds
@@ -31,7 +32,8 @@ export class PushWorker implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     @Inject(DB) private readonly db: Db,
-    @Inject(ENV) private readonly env: Env
+    @Inject(ENV) private readonly env: Env,
+    private readonly outbound: OutboundHttp
   ) {}
 
   onModuleInit() {
@@ -147,7 +149,9 @@ export class PushWorker implements OnModuleInit, OnModuleDestroy {
     });
 
     try {
-      await webpush.sendNotification(
+      // Generate encrypted bytes locally; the shared transport owns the single
+      // DNS-to-response deadline and all network I/O.
+      const details = webpush.generateRequestDetails(
         {
           endpoint: sub.endpoint,
           keys: {
@@ -157,6 +161,10 @@ export class PushWorker implements OnModuleInit, OnModuleDestroy {
         },
         payload
       );
+      const result = await this.outbound.post(details.endpoint, details.headers, details.body ?? undefined);
+      if (result.statusCode < 200 || result.statusCode >= 300) {
+        throw Object.assign(new Error(`HTTP ${result.statusCode}`), { statusCode: result.statusCode });
+      }
 
       // Successful delivery
       await this.db
@@ -170,7 +178,8 @@ export class PushWorker implements OnModuleInit, OnModuleDestroy {
         .where(eq(pushDeliveries.id, item.id));
     } catch (err: any) {
       const statusCode = err?.statusCode;
-      const errorMessage = err?.message || String(err);
+      const errorMessage = err instanceof OutboundError ? err.message
+        : typeof statusCode === "number" ? `HTTP ${statusCode}` : "Push delivery failed";
 
       // 404 Not Found or 410 Gone means the subscription has expired or unsubscribed
       if (statusCode === 404 || statusCode === 410) {

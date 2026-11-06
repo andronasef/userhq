@@ -1,7 +1,7 @@
 import { beforeAll, afterAll, describe, expect, it } from "vitest";
 import https from "node:https";
 import { readFileSync } from "node:fs";
-import type { AddressInfo } from "node:net";
+import { createServer, type AddressInfo, type Socket } from "node:net";
 import type { LookupAddress } from "node:dns";
 import { OutboundHttp, type OutboundNetwork } from "../src/common/outbound-http.js";
 
@@ -92,6 +92,20 @@ describe("Public outbound HTTPS boundary", () => {
   it.each(["headers-stall", "body-stall"])("bounds a stalled %s exchange", async path => {
     const test = boundary(undefined, 150);
     await expect(test.client.post(url(`/${path}`), {}, "secret")).rejects.toThrow("Outbound delivery timed out");
+  });
+
+  it("bounds a TCP peer that never completes the TLS handshake", async () => {
+    const sockets = new Set<Socket>();
+    const stalled = createServer(socket => { sockets.add(socket); socket.on("close", () => sockets.delete(socket)); });
+    await new Promise<void>(resolve => stalled.listen(0, "127.0.0.1", resolve));
+    try {
+      const test = boundary(undefined, 150);
+      const target = `https://receiver.example.test:${(stalled.address() as AddressInfo).port}/tls-stall`;
+      await expect(test.client.post(target, {}, "secret")).rejects.toThrow("Outbound delivery timed out");
+    } finally {
+      for (const socket of sockets) socket.destroy();
+      await new Promise<void>(resolve => stalled.close(() => resolve()));
+    }
   });
 
   it("bounds DNS and never opens a connection after late resolution", async () => {

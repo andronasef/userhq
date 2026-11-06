@@ -322,6 +322,7 @@ describe("Signed Outbound Webhooks (Phase 10)", () => {
   describe("Event Enqueueing & Delivery Worker", () => {
     let mockReceiverServer: http.Server;
     let mockReceiverUrl: string;
+    let retryFailures = 1;
     const receivedRequests: Array<{
       headers: http.IncomingHttpHeaders;
       body: string;
@@ -336,7 +337,8 @@ describe("Signed Outbound Webhooks (Phase 10)", () => {
           });
           req.on("end", () => {
             receivedRequests.push({ headers: req.headers, body });
-            res.writeHead(200, { "Content-Type": "application/json" });
+            const status = req.url === "/retry" && retryFailures-- > 0 ? 503 : 200;
+            res.writeHead(status, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ ok: true }));
           });
         });
@@ -353,6 +355,31 @@ describe("Signed Outbound Webhooks (Phase 10)", () => {
       await new Promise<void>((resolve) => {
         mockReceiverServer.close(() => resolve());
       });
+    });
+
+    it("retains signed delivery identity across a failed attempt and successful retry", async () => {
+      const created = await request(testApp.http).post(`/api/v1/workspaces/${wsSlug}/webhooks`)
+        .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL)
+        .send({ url: mockReceiverUrl.replace("/hook", "/retry"), events: ["*"] });
+      expect(created.status).toBe(201);
+      const ping = await request(testApp.http).post(`/api/v1/workspaces/${wsSlug}/webhooks/${created.body.id}/ping`)
+        .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL).expect(201);
+      const now = new Date();
+      await webhookWorker.runOnce(now);
+      const list = () => request(testApp.http).get(`/api/v1/workspaces/${wsSlug}/webhooks/${created.body.id}/deliveries`).set("Cookie", admin.cookie);
+      const failed = await list();
+      expect(failed.body.deliveries[0]).toMatchObject({ status: "pending", attempts: 1, responseStatusCode: 503 });
+      await webhookWorker.runOnce(new Date(now.getTime() + 2 * 60_000));
+      const retried = await list();
+      expect(retried.body.deliveries[0]).toMatchObject({ status: "delivered", attempts: 2, responseStatusCode: 200 });
+      const attempts = receivedRequests.filter(item => item.headers["x-userhq-delivery"] === ping.body.deliveryId);
+      expect(attempts).toHaveLength(2);
+      expect(attempts[0].body).toBe(attempts[1].body);
+      for (const attempt of attempts) {
+        expect(verifyWebhookSignature(attempt.body, attempt.headers["x-userhq-signature"] as string, created.body.secret)).toBe(true);
+      }
+      await request(testApp.http).delete(`/api/v1/workspaces/${wsSlug}/webhooks/${created.body.id}`)
+        .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL).expect(204);
     });
 
     it("enqueues post.created event and worker signs and delivers payload successfully", async () => {

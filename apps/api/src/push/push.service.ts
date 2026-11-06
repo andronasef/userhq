@@ -15,6 +15,7 @@ import {
 } from "@userhq/db";
 import { ENV, type Env } from "../env.js";
 import { getVapidKeys } from "./push.config.js";
+import { OutboundHttp } from "../common/outbound-http.js";
 import type {
   RegisterPushSubscriptionInput,
   PushSubscriptionResponse,
@@ -31,7 +32,8 @@ type DbOrTx = Db | any;
 export class PushService {
   constructor(
     @Inject(DB) private readonly db: Db,
-    @Inject(ENV) private readonly env: Env
+    @Inject(ENV) private readonly env: Env,
+    private readonly outbound: OutboundHttp
   ) {}
 
   getVapidPublicKey(): VapidPublicKeyResponse {
@@ -43,6 +45,7 @@ export class PushService {
     userId: string,
     input: RegisterPushSubscriptionInput
   ): Promise<PushSubscriptionResponse> {
+    await this.outbound.validateTarget(input.endpoint);
     const [sub] = await this.db
       .insert(pushSubscriptions)
       .values({

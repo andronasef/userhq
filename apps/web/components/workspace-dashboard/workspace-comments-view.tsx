@@ -29,6 +29,7 @@ import {
   markCommentRead,
 } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import { applyReplyToFeed } from "@/lib/workspace-inbox";
 
 export interface WorkspaceCommentsViewProps {
   ws: string;
@@ -171,23 +172,15 @@ export function WorkspaceCommentsView({
     if (!replyBody.trim()) return;
     setIsSubmittingReply(true);
     try {
-      await replyWorkspaceComment(ws, commentId, { body: replyBody.trim() });
-      // Update the parent comment to handled in state
-      setComments((prev) =>
-        prev.map((c) =>
-          c.id === commentId
-            ? {
-                ...c,
-                handledAt: new Date().toISOString(),
-                handledBy: { name: "You", image: null, isAdmin: true, deleted: false },
-              }
-            : c
-        )
-      );
-      setNeedsAttentionCount((prev) => Math.max(0, prev - 1));
+      const reply = await replyWorkspaceComment(ws, commentId, { body: replyBody.trim() });
+      // D-04: a reply resolves the thread. Show it now; the refresh brings thread-mates resolved server-side.
+      const applied = applyReplyToFeed(comments, commentId, reply, currentAttention);
+      setComments(applied.items);
+      setNeedsAttentionCount((prev) => Math.max(0, prev + applied.needsAttentionDelta));
       setReplyingCommentId(null);
       setReplyBody("");
-      toast.success("Reply posted and marked handled");
+      toast.success("Reply posted. The thread is marked handled.");
+      router.refresh();
     } catch {
       toast.error("Failed to post reply");
     } finally {
@@ -195,12 +188,13 @@ export function WorkspaceCommentsView({
     }
   };
 
-  const handleCommentClick = (comment: WorkspaceCommentItem) => {
-    if (comment.isUnread) {
-      markCommentRead(ws, comment.id).catch(() => {});
-      setComments((prev) =>
-        prev.map((c) => (c.id === comment.id ? { ...c, isUnread: false } : c))
-      );
+  const handleMarkRead = async (commentId: string) => {
+    setComments((prev) => prev.map((c) => (c.id === commentId ? { ...c, isUnread: false } : c)));
+    try {
+      await markCommentRead(ws, commentId);
+    } catch {
+      setComments((prev) => prev.map((c) => (c.id === commentId ? { ...c, isUnread: true } : c)));
+      toast.error("Failed to mark comment as read");
     }
   };
 
@@ -307,7 +301,6 @@ export function WorkspaceCommentsView({
             return (
               <div
                 key={comment.id}
-                onClick={() => handleCommentClick(comment)}
                 className={cn(
                   "p-4 space-y-3 transition-colors",
                   comment.isUnread ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/30"
@@ -395,11 +388,13 @@ export function WorkspaceCommentsView({
                     )}
                     <span>·</span>
                     <span>{formatRelativeTime(comment.createdAt)}</span>
-                    {comment.handledAt && comment.handledBy?.name && (
+                    {comment.handledAt && comment.handledBy && (comment.handledBy.deleted || comment.handledBy.name) && (
                       <>
                         <span>·</span>
                         <span className="text-muted-foreground/80">
-                          Handled by {comment.handledBy.name}
+                          {comment.handledBy.deleted
+                            ? "Handled by a former member"
+                            : `Handled by ${comment.handledBy.name}`}
                         </span>
                       </>
                     )}
@@ -407,30 +402,37 @@ export function WorkspaceCommentsView({
 
                   {/* Action Buttons */}
                   <div className="flex items-center gap-2">
+                    {comment.isUnread && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`Mark as read: ${comment.author.name || "Customer"} on ${comment.post.title}`}
+                        onClick={() => handleMarkRead(comment.id)}
+                        className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Mark as read
+                      </Button>
+                    )}
                     {isNeedsAttention ? (
                       <Button
                         variant="ghost"
                         size="sm"
                         disabled={actionLoadingId === comment.id}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleMarkHandled(comment.id);
-                        }}
+                        onClick={() => handleMarkHandled(comment.id)}
                         className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1"
                       >
                         <CheckCircle2 className="size-3.5 text-emerald-500" />
                         <span>Mark handled</span>
                       </Button>
                     ) : (
+                      !comment.isAdmin &&
                       comment.handledAt && (
                         <Button
                           variant="ghost"
                           size="sm"
                           disabled={actionLoadingId === comment.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleReopen(comment.id);
-                          }}
+                          onClick={() => handleReopen(comment.id)}
                           className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1"
                         >
                           <RotateCcw className="size-3.5" />
@@ -442,8 +444,7 @@ export function WorkspaceCommentsView({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
+                      onClick={() => {
                         if (isReplying) {
                           setReplyingCommentId(null);
                         } else {
@@ -461,7 +462,6 @@ export function WorkspaceCommentsView({
                 {/* Inline Quick Reply Editor */}
                 {isReplying && (
                   <div
-                    onClick={(e) => e.stopPropagation()}
                     className="pt-2 pl-4 border-l-2 border-primary/40 space-y-2 mt-2"
                   >
                     <Textarea

@@ -36,3 +36,6 @@ bun.lockb
 # Playwright
 test-results/
 playwright-report/
+
+# Tools & AI Bundles
+repomix-output*

@@ -83,15 +83,6 @@ export class PushController {
     return this.pushService.getFollowedProducts(user.id);
   }
 
-  @Post("followed-products/:productId")
-  @HttpCode(200)
-  async followProduct(
-    @CurrentUser() user: { id: string },
-    @Param("productId") productId: string
-  ): Promise<{ success: boolean }> {
-    return this.pushService.followProduct(user.id, productId);
-  }
-
   @Delete("followed-products/:productId")
   @HttpCode(200)
   async unfollowProduct(

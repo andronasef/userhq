@@ -437,6 +437,12 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
       })
       .expect(201);
     await request(testApp.http)
+      .patch("/api/v1/push/preferences")
+      .set("Cookie", userC.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({ includePreviews: true })
+      .expect(200);
+    await request(testApp.http)
       .post(`/api/v1/workspaces/${wsSlug}/products/${prodSlug}/push-follow`)
       .set("Cookie", userC.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)

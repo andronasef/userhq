@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import {
   DB,
@@ -9,6 +9,7 @@ import {
   pushDeliveries,
   products,
   workspaces,
+  workspaceMembers,
   posts,
   comments,
   user,
@@ -190,6 +191,11 @@ export class PushService {
       .from(pushFollowedProducts)
       .innerJoin(products, eq(pushFollowedProducts.productId, products.id))
       .innerJoin(workspaces, eq(products.workspaceId, workspaces.id))
+      // Current members only: a removed admin must not keep seeing the product (D-11).
+      .innerJoin(
+        workspaceMembers,
+        and(eq(workspaceMembers.workspaceId, workspaces.id), eq(workspaceMembers.userId, pushFollowedProducts.userId))
+      )
       .where(
         and(
           eq(pushFollowedProducts.userId, userId),
@@ -207,17 +213,8 @@ export class PushService {
     }));
   }
 
+  /** The caller must already be authorized: productId comes from TenantGuard, never from the client. */
   async followProduct(userId: string, productId: string): Promise<{ success: boolean }> {
-    const [product] = await this.db
-      .select({ id: products.id })
-      .from(products)
-      .where(and(eq(products.id, productId), isNull(products.deletedAt)))
-      .limit(1);
-
-    if (!product) {
-      throw new NotFoundException("Product not found");
-    }
-
     await this.db
       .insert(pushFollowedProducts)
       .values({
@@ -494,6 +491,10 @@ export class PushService {
     const followers = await tx
       .select({ userId: pushFollowedProducts.userId })
       .from(pushFollowedProducts)
+      .innerJoin(
+        workspaceMembers,
+        and(eq(workspaceMembers.workspaceId, opts.workspaceId), eq(workspaceMembers.userId, pushFollowedProducts.userId))
+      )
       .where(
         and(
           eq(pushFollowedProducts.productId, opts.productId),
@@ -565,6 +566,10 @@ export class PushService {
     const followers = await tx
       .select({ userId: pushFollowedProducts.userId })
       .from(pushFollowedProducts)
+      .innerJoin(
+        workspaceMembers,
+        and(eq(workspaceMembers.workspaceId, opts.workspaceId), eq(workspaceMembers.userId, pushFollowedProducts.userId))
+      )
       .where(
         and(
           eq(pushFollowedProducts.productId, opts.productId),

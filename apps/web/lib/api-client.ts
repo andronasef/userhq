@@ -96,6 +96,8 @@ export async function fetchWorkspaceRequests(
   if (query?.statusId) params.set("statusId", query.statusId);
   if (query?.statusType) params.set("statusType", query.statusType);
   if (query?.categoryId) params.set("categoryId", query.categoryId);
+  if (query?.createdFrom) params.set("createdFrom", query.createdFrom);
+  if (query?.createdTo) params.set("createdTo", query.createdTo);
   if (query?.search) params.set("search", query.search);
   if (query?.sort) params.set("sort", query.sort);
   if (query?.cursor) params.set("cursor", query.cursor);

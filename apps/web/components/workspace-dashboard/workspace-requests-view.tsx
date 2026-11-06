@@ -10,7 +10,12 @@ import {
   X,
   SlidersHorizontal,
 } from "lucide-react";
-import type { WorkspaceRequestItem, ProductSummary } from "@userhq/types";
+import type {
+  WorkspaceRequestItem,
+  WorkspaceRequestsQuery,
+  ProductSummary,
+  Category,
+} from "@userhq/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
@@ -30,6 +35,78 @@ export interface WorkspaceRequestsViewProps {
   currentStatusType?: string;
   currentSort?: string;
   currentSearch?: string;
+  categories?: Pick<Category, "id" | "name">[];
+  currentCategoryId?: string;
+  currentCreatedFrom?: string;
+  currentCreatedTo?: string;
+}
+
+export interface RequestFilters {
+  product?: string;
+  statusType?: string;
+  categoryId?: string;
+  createdFrom?: string;
+  createdTo?: string;
+  sort?: string;
+  search?: string;
+}
+
+/** One place that turns the active filters into an API query, so load more never drops a filter. */
+export function buildRequestsQuery(
+  filters: RequestFilters,
+  cursor?: string | null
+): WorkspaceRequestsQuery {
+  const query: WorkspaceRequestsQuery = {};
+  if (filters.product) query.product = filters.product;
+  if (filters.statusType) query.statusType = filters.statusType as WorkspaceRequestsQuery["statusType"];
+  if (filters.categoryId) query.categoryId = filters.categoryId;
+  if (filters.createdFrom) query.createdFrom = filters.createdFrom;
+  if (filters.createdTo) query.createdTo = filters.createdTo;
+  if (filters.sort) query.sort = filters.sort as WorkspaceRequestsQuery["sort"];
+  if (filters.search) query.search = filters.search;
+  if (cursor) query.cursor = cursor;
+  return query;
+}
+
+export function LoadMoreFooter({
+  hasNext,
+  loading,
+  error,
+  onLoadMore,
+  onRetry,
+}: {
+  hasNext: boolean;
+  loading: boolean;
+  error: string | null;
+  onLoadMore: () => void;
+  onRetry: () => void;
+}): React.JSX.Element | null {
+  if (!hasNext && !error) return null;
+  return (
+    <div className="flex flex-col items-center gap-2 pt-2">
+      {error && (
+        <div
+          role="alert"
+          className="flex items-center gap-3 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+        >
+          <span>{error}</span>
+          <Button type="button" variant="outline" size="sm" onClick={onRetry} className="h-7 text-xs">
+            Try again
+          </Button>
+        </div>
+      )}
+      {hasNext && (
+        <Button
+          variant="outline"
+          onClick={onLoadMore}
+          disabled={loading}
+          className="w-full max-w-xs"
+        >
+          {loading ? "Loading more..." : "Load more requests"}
+        </Button>
+      )}
+    </div>
+  );
 }
 
 function formatRelativeTime(dateString: string): string {
@@ -55,6 +132,10 @@ export function WorkspaceRequestsView({
   currentStatusType = "",
   currentSort = "top",
   currentSearch = "",
+  categories = [],
+  currentCategoryId = "",
+  currentCreatedFrom = "",
+  currentCreatedTo = "",
 }: WorkspaceRequestsViewProps): React.JSX.Element {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -63,12 +144,14 @@ export function WorkspaceRequestsView({
   const [nextCursor, setNextCursor] = React.useState<string | null>(initialNextCursor);
   const [totalCount, setTotalCount] = React.useState<number>(initialTotalCount);
   const [loadingMore, setLoadingMore] = React.useState(false);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
   const [searchInput, setSearchInput] = React.useState(currentSearch);
 
   React.useEffect(() => {
     setItems(initialRequests);
     setNextCursor(initialNextCursor);
     setTotalCount(initialTotalCount);
+    setLoadError(null);
     setSearchInput(currentSearch);
   }, [initialRequests, initialNextCursor, initialTotalCount, currentSearch]);
 
@@ -100,24 +183,41 @@ export function WorkspaceRequestsView({
   const handleLoadMore = async () => {
     if (!nextCursor || loadingMore) return;
     setLoadingMore(true);
+    setLoadError(null);
     try {
-      const res = await fetchWorkspaceRequests(ws, {
-        product: currentProduct || undefined,
-        statusType: (currentStatusType as any) || undefined,
-        sort: (currentSort as any) || undefined,
-        search: currentSearch || undefined,
-        cursor: nextCursor,
-      });
+      const res = await fetchWorkspaceRequests(
+        ws,
+        buildRequestsQuery(
+          {
+            product: currentProduct,
+            statusType: currentStatusType,
+            categoryId: currentCategoryId,
+            createdFrom: currentCreatedFrom,
+            createdTo: currentCreatedTo,
+            sort: currentSort,
+            search: currentSearch,
+          },
+          nextCursor
+        )
+      );
       setItems((prev) => [...prev, ...res.items]);
       setNextCursor(res.nextCursor);
-    } catch {
-      // ignore
+    } catch (err) {
+      setLoadError(err instanceof Error && err.message ? err.message : "Failed to load more requests.");
     } finally {
       setLoadingMore(false);
     }
   };
 
-  const isFiltered = Boolean(currentProduct || currentStatusType || currentSearch || currentSort !== "top");
+  const isFiltered = Boolean(
+    currentProduct ||
+      currentStatusType ||
+      currentSearch ||
+      currentCategoryId ||
+      currentCreatedFrom ||
+      currentCreatedTo ||
+      currentSort !== "top"
+  );
 
   return (
     <div className="space-y-4">
@@ -151,7 +251,7 @@ export function WorkspaceRequestsView({
           <div className="w-40">
             <NativeSelect
               value={currentProduct}
-              onChange={(e) => updateFilters({ product: e.target.value || null })}
+              onChange={(e) => updateFilters({ product: e.target.value || null, categoryId: null })}
               aria-label="Filter by product"
             >
               <option value="">All products</option>
@@ -178,6 +278,42 @@ export function WorkspaceRequestsView({
               <option value="closed">Closed</option>
             </NativeSelect>
           </div>
+
+          {/* Category Filter (needs a product) */}
+          <div className="w-40">
+            <NativeSelect
+              value={currentCategoryId}
+              onChange={(e) => updateFilters({ categoryId: e.target.value || null })}
+              aria-label="Filter by category"
+              disabled={!currentProduct}
+              title={currentProduct ? undefined : "Select a product to filter by category"}
+            >
+              <option value="">All categories</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </NativeSelect>
+          </div>
+
+          {/* Created date range (UTC) */}
+          <Input
+            type="date"
+            value={currentCreatedFrom}
+            max={currentCreatedTo || undefined}
+            onChange={(e) => updateFilters({ createdFrom: e.target.value || null })}
+            aria-label="Created from (UTC)"
+            className="w-36"
+          />
+          <Input
+            type="date"
+            value={currentCreatedTo}
+            min={currentCreatedFrom || undefined}
+            onChange={(e) => updateFilters({ createdTo: e.target.value || null })}
+            aria-label="Created to (UTC)"
+            className="w-36"
+          />
 
           {/* Sort Filter */}
           <div className="w-36">
@@ -218,7 +354,7 @@ export function WorkspaceRequestsView({
           title="No requests match your filter"
           body={
             isFiltered
-              ? "Try adjusting your search query, status, or product filter to find what you're looking for."
+              ? "Try adjusting your search query, status, product, category, or date filter to find what you're looking for."
               : "No feedback requests have been submitted across your workspace products yet."
           }
           action={
@@ -321,19 +457,13 @@ export function WorkspaceRequestsView({
         </div>
       )}
 
-      {/* Load More Button */}
-      {nextCursor && (
-        <div className="flex justify-center pt-2">
-          <Button
-            variant="outline"
-            onClick={handleLoadMore}
-            disabled={loadingMore}
-            className="w-full max-w-xs"
-          >
-            {loadingMore ? "Loading more..." : "Load more requests"}
-          </Button>
-        </div>
-      )}
+      <LoadMoreFooter
+        hasNext={Boolean(nextCursor)}
+        loading={loadingMore}
+        error={loadError}
+        onLoadMore={handleLoadMore}
+        onRetry={handleLoadMore}
+      />
     </div>
   );
 }

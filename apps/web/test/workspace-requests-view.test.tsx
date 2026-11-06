@@ -65,14 +65,14 @@ describe("WorkspaceRequestsView filter bar", () => {
   it("disables the category select with an explanation when no product is selected", () => {
     const html = render();
     const select = html.match(/<select[^>]*aria-label="Filter by category"[^>]*>/)?.[0] ?? "";
-    expect(select).toContain("disabled");
+    expect(select).toMatch(/\sdisabled=""/);
     expect(select).toContain('title="Select a product to filter by category"');
   });
 
   it("enables the category select with All categories plus the product's categories", () => {
     const html = render({ currentProduct: "alpha", categories, currentCategoryId: categories[0].id });
     const select = html.match(/<select[^>]*aria-label="Filter by category"[^>]*>/)?.[0] ?? "";
-    expect(select).not.toContain("disabled");
+    expect(select).not.toMatch(/\sdisabled=""/);
     expect(html).toContain("All categories");
     expect(html).toContain(">Performance<");
     expect(html).toContain(">Billing<");

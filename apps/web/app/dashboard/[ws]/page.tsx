@@ -8,6 +8,7 @@ import {
   getProducts,
   getWorkspaceRequests,
   getWorkspaceComments,
+  getCategories,
 } from "../../../lib/api-server";
 import { portalHref } from "../../../lib/tenant";
 import { PageHeader } from "../../../components/page-header";
@@ -27,6 +28,9 @@ interface DashboardPageProps {
     tab?: string;
     product?: string;
     statusType?: string;
+    categoryId?: string;
+    createdFrom?: string;
+    createdTo?: string;
     search?: string;
     sort?: string;
     attention?: string;
@@ -87,15 +91,23 @@ export default async function DashboardPage({
 
   // Fetch tab-specific data
   let requestsData = null;
+  let requestCategories: { id: string; name: string }[] = [];
   if (currentTab === "requests") {
-    const res = await getWorkspaceRequests(ws, {
-      product: search.product,
-      statusType: search.statusType as any,
-      search: search.search,
-      sort: search.sort as any,
-      cursor: search.cursor,
-    });
+    const [res, categoriesRes] = await Promise.all([
+      getWorkspaceRequests(ws, {
+        product: search.product,
+        statusType: search.statusType as any,
+        categoryId: search.categoryId,
+        createdFrom: search.createdFrom,
+        createdTo: search.createdTo,
+        search: search.search,
+        sort: search.sort as any,
+        cursor: search.cursor,
+      }),
+      search.product ? getCategories(ws, search.product) : Promise.resolve(null),
+    ]);
     if (res.ok) requestsData = res.data;
+    if (categoriesRes?.ok) requestCategories = categoriesRes.data;
   }
 
   let commentsData = null;
@@ -239,6 +251,10 @@ export default async function DashboardPage({
           currentStatusType={search.statusType}
           currentSort={search.sort}
           currentSearch={search.search}
+          categories={requestCategories}
+          currentCategoryId={search.categoryId}
+          currentCreatedFrom={search.createdFrom}
+          currentCreatedTo={search.createdTo}
         />
       )}
 

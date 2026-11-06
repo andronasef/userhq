@@ -132,6 +132,35 @@ describe("Workspace Admin API Keys (Plan 09-02)", () => {
     expect(res.body.key.keyHash).toBeUndefined(); // Sensitive hash should not be exposed
   });
 
+  it("keeps personal, public, team and credential routes session-only for every key scope", async () => {
+    for (const scopes of [["requests:read"], ["admin"]]) {
+      const key = await request(testApp.http).post(`/api/v1/workspaces/${wsSlug}/api-keys`)
+        .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL)
+        .send({ name: "Route policy", scopes });
+      const paths = [
+        ["post", "/api/v1/account/delete"],
+        ["delete", `/api/v1/workspaces/${wsSlug}`],
+        ["post", `/api/v1/workspaces/${wsSlug}/invites`],
+        ["post", `/api/v1/workspaces/${wsSlug}/api-keys`],
+        ["get", `/api/v1/workspaces/${wsSlug}/api-keys`],
+        ["delete", `/api/v1/workspaces/${wsSlug}/api-keys/${key.body.key.id}`],
+        ["get", `/api/v1/portal/${wsSlug}/${prodASlug}/posts`],
+        ["post", `/api/v1/portal/${wsSlug}/${prodASlug}/posts`],
+        ["post", `/api/v1/portal/${wsSlug}/${prodASlug}/posts/1/comments`],
+        ["put", `/api/v1/portal/${wsSlug}/${prodASlug}/posts/1/vote`],
+      ] as const;
+      for (const [method, path] of paths) {
+        const res = await request(testApp.http)[method](path)
+          .set("Authorization", `Bearer ${key.body.token}`).send({});
+        expect(res.status, `${method} ${path}`).toBe(403);
+        expect(res.body.code).toBe("api_key_route_forbidden");
+      }
+    }
+    const account = await request(testApp.http).get("/api/v1/account").set("Cookie", admin.cookie);
+    expect(account.status).toBe(200);
+    expect(account.body.name).toBe("Admin Alice");
+  });
+
   it("lists API keys for workspace with metadata and prefix only", async () => {
     const res = await request(testApp.http)
       .get(`/api/v1/workspaces/${wsSlug}/api-keys`)
@@ -141,7 +170,7 @@ describe("Workspace Admin API Keys (Plan 09-02)", () => {
     expect(Array.isArray(res.body.keys)).toBe(true);
     expect(res.body.keys.length).toBeGreaterThanOrEqual(1);
 
-    const key = res.body.keys[0];
+    const key = res.body.keys.find((item: any) => item.name === "Zapier Sync");
     expect(key.name).toBe("Zapier Sync");
     expect(key.keyPrefix).toBeDefined();
     expect(key.token).toBeUndefined();
@@ -195,13 +224,13 @@ describe("Workspace Admin API Keys (Plan 09-02)", () => {
 
     // Product A should be accessible
     const resA = await request(testApp.http)
-      .get(`/api/v1/workspaces/${wsSlug}/products/${prodASlug}`)
+      .get(`/api/v1/workspaces/${wsSlug}/products/${prodASlug}/posts`)
       .set("Authorization", `Bearer ${token}`);
     expect(resA.status).toBe(200);
 
     // Product B should be rejected with 403 product_restricted
     const resB = await request(testApp.http)
-      .get(`/api/v1/workspaces/${wsSlug}/products/${prodBSlug}`)
+      .get(`/api/v1/workspaces/${wsSlug}/products/${prodBSlug}/posts`)
       .set("Authorization", `Bearer ${token}`);
     expect(resB.status).toBe(403);
     expect(resB.body.code).toBe("product_restricted");

@@ -12,6 +12,8 @@ import { AUTH, type Auth } from "./auth.js";
 import { ENV, type Env } from "../env.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { ApiKeyService } from "../api-keys/api-key.service.js";
+import { REQUIRE_SCOPES } from "../api-keys/api-key.decorator.js";
+import type { ApiKeyScope } from "@userhq/types";
 
 @Injectable()
 export class OriginGuard implements CanActivate {
@@ -74,12 +76,13 @@ export class SessionGuard implements CanActivate {
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
     const req = ctx.switchToHttp().getRequest();
     const url = req.originalUrl || req.url || req.path || "";
-    if (url.startsWith("/api/auth")) {
+    const authHeader = req.headers["authorization"];
+    const isApiKey = typeof authHeader === "string" && authHeader.startsWith("Bearer uhq_live_");
+    if (url.startsWith("/api/auth") && !isApiKey) {
       return true;
     }
 
-    const authHeader = req.headers["authorization"];
-    if (typeof authHeader === "string" && authHeader.startsWith("Bearer uhq_live_")) {
+    if (isApiKey) {
       const token = authHeader.slice(7).trim();
       const result = await this.apiKeyService.validateToken(token);
       if (!result.valid) {
@@ -104,6 +107,15 @@ export class SessionGuard implements CanActivate {
         );
       }
 
+      const requiredScopes = this.reflector.getAllAndOverride<ApiKeyScope[]>(
+        REQUIRE_SCOPES, [ctx.getHandler(), ctx.getClass()]
+      );
+      if (!requiredScopes?.length || url.startsWith("/api/auth")) {
+        throw new ApiException("api_key_route_forbidden", 403, "API keys cannot access this route.");
+      }
+      if (!result.key.scopes.includes("admin") && !requiredScopes.every(scope => result.key.scopes.includes(scope))) {
+        throw new ApiException("insufficient_scope", 403, "API key lacks the required scope.");
+      }
       req.apiKey = result.key;
       const syntheticUser = {
         id: result.key.createdByUserId ?? `apikey:${result.key.id}`,

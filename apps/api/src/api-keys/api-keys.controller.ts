@@ -10,7 +10,6 @@ import {
 } from "@nestjs/common";
 import { TenantGuard } from "../tenancy/tenant.guard.js";
 import { ApiKeyService } from "./api-key.service.js";
-import { RequireScopes } from "./api-key.decorator.js";
 import {
   createApiKeySchema,
   type CreateApiKeyInput,
@@ -24,14 +23,12 @@ export class ApiKeysController {
   constructor(private readonly apiKeyService: ApiKeyService) {}
 
   @Get()
-  @RequireScopes("admin")
   async listKeys(@Req() req: any): Promise<{ keys: ApiKeyMetadata[] }> {
     const keys = await this.apiKeyService.listKeys(req.tenant.workspaceId);
     return { keys };
   }
 
   @Post()
-  @RequireScopes("admin")
   async createKey(
     @Req() req: any,
     @Body() body: any
@@ -45,7 +42,6 @@ export class ApiKeysController {
   }
 
   @Delete(":id")
-  @RequireScopes("admin")
   async revokeKey(
     @Req() req: any,
     @Param("id") id: string

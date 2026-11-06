@@ -179,6 +179,24 @@ describe("Signed Outbound Webhooks (Phase 10)", () => {
     expect(removed.status).toBe(204);
   });
 
+  it("blocks a destination whose DNS becomes private before delivery", async () => {
+    const created = await request(testApp.http).post(`/api/v1/workspaces/${wsSlug}/webhooks`)
+      .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL)
+      .send({ url: "https://changing.example.test/hook", events: ["*"] });
+    expect(created.status).toBe(201);
+    await request(testApp.http).post(`/api/v1/workspaces/${wsSlug}/webhooks/${created.body.id}/ping`)
+      .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL).expect(201);
+    dnsAddress = "10.0.0.1";
+    await webhookWorker.runOnce();
+    const deliveries = await request(testApp.http).get(`/api/v1/workspaces/${wsSlug}/webhooks/${created.body.id}/deliveries`)
+      .set("Cookie", admin.cookie);
+    expect(deliveries.body.deliveries[0].errorMessage).toBe("Outbound destination rejected");
+    expect(deliveries.body.deliveries[0].responseBody).toBeNull();
+    dnsAddress = "8.8.8.8";
+    await request(testApp.http).delete(`/api/v1/workspaces/${wsSlug}/webhooks/${created.body.id}`)
+      .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL).expect(204);
+  });
+
   describe("HMAC Signing & Verification", () => {
     it("signs and verifies payload correctly", () => {
       const payload = JSON.stringify({ hello: "world" });
@@ -325,7 +343,7 @@ describe("Signed Outbound Webhooks (Phase 10)", () => {
 
         mockReceiverServer.listen(0, "127.0.0.1", () => {
           const addr = mockReceiverServer.address() as AddressInfo;
-          mockReceiverUrl = `http://127.0.0.1:${addr.port}/hook`;
+          mockReceiverUrl = `https://receiver.example.test:${addr.port}/hook`;
           resolve();
         });
       });

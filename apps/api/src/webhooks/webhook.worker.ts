@@ -14,6 +14,7 @@ import {
 } from "@userhq/db";
 import { ENV, type Env } from "../env.js";
 import { signWebhookPayload } from "./signature.js";
+import { OutboundHttp, OutboundError } from "../common/outbound-http.js";
 
 const BACKOFF_MINUTES = [1, 5, 30, 120, 360]; // 1m, 5m, 30m, 2h, 6h
 const MAX_ATTEMPTS = 5;
@@ -27,7 +28,8 @@ export class WebhookWorker
 
   constructor(
     @Inject(DB) private readonly db: Db,
-    @Inject(ENV) private readonly env: Env
+    @Inject(ENV) private readonly env: Env,
+    private readonly outbound: OutboundHttp
   ) {}
 
   onApplicationBootstrap(): void {
@@ -115,35 +117,25 @@ export class WebhookWorker
       let errorMsg: string | null = null;
 
       try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 10_000);
-
-        const res = await fetch(sub.url, {
-          method: "POST",
-          headers: {
+        const res = await this.outbound.post(sub.url, {
             "Content-Type": "application/json",
             "User-Agent": "UserHQ-Webhooks/1.0",
             "X-UserHQ-Event": delivery.event_type,
             "X-UserHQ-Delivery": delivery.id,
             "X-UserHQ-Timestamp": String(timestamp),
             "X-UserHQ-Signature": header,
-          },
-          body: payloadString,
-          signal: controller.signal,
-        });
-        clearTimeout(timeout);
+        }, payloadString);
 
-        statusCode = res.status;
-        const text = await res.text().catch(() => "");
-        responseBody = text.slice(0, 1000);
+        statusCode = res.statusCode;
+        responseBody = res.body.slice(0, 1000);
 
-        if (res.ok) {
+        if (statusCode >= 200 && statusCode < 300) {
           isSuccess = true;
         } else {
-          errorMsg = `HTTP ${res.status}`;
+          errorMsg = `HTTP ${statusCode}`;
         }
       } catch (err: any) {
-        errorMsg = err?.message || String(err);
+        errorMsg = err instanceof OutboundError ? err.message : "Outbound request failed";
       }
 
       const newAttempts = delivery.attempts + 1;

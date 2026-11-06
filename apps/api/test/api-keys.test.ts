@@ -161,6 +161,40 @@ describe("Workspace Admin API Keys (Plan 09-02)", () => {
     expect(account.body.name).toBe("Admin Alice");
   });
 
+  it("rejects API keys before Better Auth can use an accompanying human session", async () => {
+    const key = await request(testApp.http).post(`/api/v1/workspaces/${wsSlug}/api-keys`)
+      .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL)
+      .send({ name: "Auth boundary", scopes: ["admin"] });
+    expect(key.status).toBe(201);
+    for (const [method, path] of [["get", "get-session"], ["post", "sign-out"]] as const) {
+      const res = await request(testApp.http)[method](`/api/auth/${path}`)
+        .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL)
+        .set("Authorization", `Bearer ${key.body.token}`).send({});
+      expect(res.status, path).toBe(403);
+      expect(res.body.code).toBe("api_key_route_forbidden");
+    }
+    const account = await request(testApp.http).get("/api/v1/account").set("Cookie", admin.cookie);
+    expect(account.status).toBe(200);
+  });
+
+  it("recognizes case-insensitive Bearer schemes without falling back to human cookies", async () => {
+    const key = await request(testApp.http).post(`/api/v1/workspaces/${wsSlug}/api-keys`)
+      .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL)
+      .send({ name: "Bearer syntax", scopes: ["requests:read"] });
+    expect(key.status).toBe(201);
+    for (const scheme of ["bearer ", "BEARER   ", "BeArEr\t"]) {
+      for (const path of ["/api/v1/account", "/api/auth/get-session"]) {
+        const res = await request(testApp.http).get(path).set("Cookie", admin.cookie)
+          .set("Authorization", `${scheme}${key.body.token}`);
+        expect(res.status, `${scheme} ${path}`).toBe(403);
+        expect(res.body.code).toBe("api_key_route_forbidden");
+      }
+      const allowed = await request(testApp.http).get(`/api/v1/workspaces/${wsSlug}/requests`)
+        .set("Authorization", `${scheme}${key.body.token}`);
+      expect(allowed.status, scheme).toBe(200);
+    }
+  });
+
   it("lists API keys for workspace with metadata and prefix only", async () => {
     const res = await request(testApp.http)
       .get(`/api/v1/workspaces/${wsSlug}/api-keys`)

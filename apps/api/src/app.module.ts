@@ -34,6 +34,7 @@ import { NotificationsModule } from "./notifications/notifications.module.js";
 import { ChangelogModule } from "./changelog/changelog.module.js";
 import { FaqModule } from "./faq/faq.module.js";
 import { ApiKeysModule } from "./api-keys/api-keys.module.js";
+import { apiKeyToken } from "./api-keys/authorization.js";
 import { ExportModule } from "./export/export.module.js";
 import { WebhooksModule } from "./webhooks/webhooks.module.js";
 import { PushModule } from "./push/push.module.js";
@@ -64,6 +65,15 @@ export class AppModule {
         AuthModule.forRoot({
           auth: deps.auth,
           disableGlobalAuthGuard: true,
+          middleware: (req, res, next) => {
+            // Better Auth runs before Nest guards; keys must never fall back
+            // to a human cookie on these session-only endpoints.
+            if (apiKeyToken(req.headers.authorization) !== null) {
+              res.status(403).json({ code: "api_key_route_forbidden", message: "API keys cannot access this route." });
+              return;
+            }
+            next();
+          },
           bodyParser: {
             json: { limit: "100kb" },
           },

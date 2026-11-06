@@ -13,6 +13,7 @@ import { ENV, type Env } from "../env.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { ApiKeyService } from "../api-keys/api-key.service.js";
 import { REQUIRE_SCOPES } from "../api-keys/api-key.decorator.js";
+import { apiKeyToken } from "../api-keys/authorization.js";
 import type { ApiKeyScope } from "@userhq/types";
 
 @Injectable()
@@ -34,8 +35,7 @@ export class OriginGuard implements CanActivate {
     const req = ctx.switchToHttp().getRequest();
 
     // Skip origin check for API key bearer tokens
-    const authHeader = req.headers["authorization"];
-    if (typeof authHeader === "string" && authHeader.startsWith("Bearer uhq_live_")) {
+    if (apiKeyToken(req.headers["authorization"]) !== null) {
       return true;
     }
 
@@ -76,14 +76,12 @@ export class SessionGuard implements CanActivate {
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
     const req = ctx.switchToHttp().getRequest();
     const url = req.originalUrl || req.url || req.path || "";
-    const authHeader = req.headers["authorization"];
-    const isApiKey = typeof authHeader === "string" && authHeader.startsWith("Bearer uhq_live_");
-    if (url.startsWith("/api/auth") && !isApiKey) {
+    const token = apiKeyToken(req.headers["authorization"]);
+    if (url.startsWith("/api/auth") && token === null) {
       return true;
     }
 
-    if (isApiKey) {
-      const token = authHeader.slice(7).trim();
+    if (token !== null) {
       const result = await this.apiKeyService.validateToken(token);
       if (!result.valid) {
         if (result.error === "api_key_expired") {

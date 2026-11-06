@@ -291,6 +291,33 @@ const CROSS_TENANT_ROUTES: Record<
   "DELETE /workspaces/:ws/api-keys/:id": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/api-keys/${s.b.apiKeyId}`,
   }),
+  // Webhooks
+  "GET /workspaces/:ws/webhooks": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/webhooks`,
+  }),
+  "POST /workspaces/:ws/webhooks": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/webhooks`,
+    body: { url: "https://example.com/webhook", events: ["post.created"] },
+  }),
+  "GET /workspaces/:ws/webhooks/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/webhooks/${crypto.randomUUID()}`,
+  }),
+  "PATCH /workspaces/:ws/webhooks/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/webhooks/${crypto.randomUUID()}`,
+    body: { description: "Updated" },
+  }),
+  "DELETE /workspaces/:ws/webhooks/:id": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/webhooks/${crypto.randomUUID()}`,
+  }),
+  "GET /workspaces/:ws/webhooks/:id/deliveries": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/webhooks/${crypto.randomUUID()}/deliveries`,
+  }),
+  "POST /workspaces/:ws/webhooks/:id/deliveries/:deliveryId/redeliver": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/webhooks/${crypto.randomUUID()}/deliveries/${crypto.randomUUID()}/redeliver`,
+  }),
+  "POST /workspaces/:ws/webhooks/:id/ping": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/webhooks/${crypto.randomUUID()}/ping`,
+  }),
 };
 
 describe("Cross-tenant 404 isolation (Plan 02-03)", () => {

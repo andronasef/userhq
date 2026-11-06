@@ -9,6 +9,7 @@ import {
   Query,
   HttpCode,
   UseInterceptors,
+  SerializeOptions,
 } from "@nestjs/common";
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
 import { CurrentUser, Public } from "../auth/decorators.js";
@@ -16,6 +17,7 @@ import { PushService } from "./push.service.js";
 import {
   RegisterPushSubscriptionInputSchema,
   UpdatePushPreferencesInputSchema,
+  VapidPublicKeyResponseSchema,
   type RegisterPushSubscriptionInput,
   type UpdatePushPreferencesInput,
   type PushSubscriptionResponse,
@@ -31,6 +33,7 @@ export class PushController {
   constructor(private readonly pushService: PushService) {}
 
   @Public()
+  @SerializeOptions({ schema: VapidPublicKeyResponseSchema })
   @Get("vapid-public-key")
   getVapidPublicKey(): VapidPublicKeyResponse {
     return this.pushService.getVapidPublicKey();

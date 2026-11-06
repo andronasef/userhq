@@ -4,10 +4,10 @@ current_phase: 07
 current_phase_name: appearance
 status: planning
 stopped_at: Phase 06 complete; starting Phase 07 Appearance (dark mode)
-last_updated: "2026-11-05T22:05:00.000Z"
-last_activity: 2026-11-05
-last_activity_desc: Phase 06 verification completed; all 10 plans executed and verified
-state_head: 96be943574bc59c67f851097b8be45a5bce0f50c
+last_updated: "2026-11-06T22:00:11.160Z"
+last_activity: 2026-11-07
+last_activity_desc: Completed quick task 261106-f9k API key security hardening
+state_head: 1df7611f6bb64ee5422caeabb2a08c08cca34115
 progress:
   total_phases: 7
   completed_phases: 6
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-10-01)
 Phase: 07 (appearance) — PLANNING
 Plan: 0 of TBD complete
 Status: Phase 06 verified and closed; starting Phase 07 Appearance
-Last activity: 2026-11-05 — Phase 06 verification completed
+Last activity: 2026-11-07 — Completed quick task 261106-f9k: API key security hardening
 
 Progress: [██████████] 100% of Phase 1-6; Phase 07 queued
 
@@ -145,6 +145,7 @@ Items acknowledged and deferred at milestone close, most recent first:
 | 261020-hwa | Adapt supplied UserHQ branding across the web app | 2026-10-20 | 0078f0a | Completed | .planning/quick/261020-hwa-apply-supplied-userhq-brand-spirit-to-we |
 | 261020-ies | Apply approved Calm Teal palette and fixed navy face | 2026-10-20 | 2606273 | Completed | .planning/quick/261020-ies-apply-approved-calm-teal-palette-and-fix |
 | 261020-iiu | Add purposeful accessible app motion and portal transitions | 2026-10-20 | f27bd85 | Completed | .planning/quick/261020-iiu-add-purposeful-app-motion-and-assess-pag |
+| 261106-f9k | Harden API key routes, integration identity, and product restrictions | 2026-11-07 | 1df7611 | Verified | [261106-f9k-harden-api-key-auth-deny-by-default-key-](./quick/261106-f9k-harden-api-key-auth-deny-by-default-key-/) |
 
 ## Session Continuity
 

@@ -93,6 +93,22 @@ describe("Workspace Admin API Keys (Plan 09-02)", () => {
     await testApp?.close();
   });
 
+  it("denies API keys access to their creator's personal account even with a session cookie", async () => {
+    const key = await request(testApp.http)
+      .post(`/api/v1/workspaces/${wsSlug}/api-keys`)
+      .set("Cookie", admin.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({ name: "Limited integration", scopes: ["requests:read"] });
+    expect(key.status).toBe(201);
+
+    const res = await request(testApp.http)
+      .get("/api/v1/account")
+      .set("Cookie", admin.cookie)
+      .set("Authorization", `Bearer ${key.body.token}`);
+    expect(res.status).toBe(403);
+    expect(res.body.code).toBe("api_key_route_forbidden");
+  });
+
   it("creates an API key with scopes and product restrictions, returning token once", async () => {
     const res = await request(testApp.http)
       .post(`/api/v1/workspaces/${wsSlug}/api-keys`)

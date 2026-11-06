@@ -174,6 +174,9 @@ describe("Signed Outbound Webhooks (Phase 10)", () => {
     expect(updated.status).toBe(400);
     expect(updated.body.code).toBe("invalid_url");
     dnsAddress = "8.8.8.8";
+    const removed = await request(testApp.http).delete(`/api/v1/workspaces/${wsSlug}/webhooks/${created.body.id}`)
+      .set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL);
+    expect(removed.status).toBe(204);
   });
 
   describe("HMAC Signing & Verification", () => {

@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
+import { eq } from "drizzle-orm";
+import { schema } from "@userhq/db";
 import { ModulesContainer, MetadataScanner } from "@nestjs/core";
 import { RequestMethod } from "@nestjs/common";
 import { PATH_METADATA, METHOD_METADATA } from "@nestjs/common/constants.js";
@@ -220,17 +222,17 @@ const CROSS_TENANT_ROUTES: Record<
     url: `/api/v1/workspaces/${s.b.slug}/comments`,
   }),
   "POST /workspaces/:ws/comments/:id/handled": (s) => ({
-    url: `/api/v1/workspaces/${s.b.slug}/comments/${crypto.randomUUID()}/handled`,
+    url: `/api/v1/workspaces/${s.b.slug}/comments/${s.b.commentId}/handled`,
   }),
   "DELETE /workspaces/:ws/comments/:id/handled": (s) => ({
-    url: `/api/v1/workspaces/${s.b.slug}/comments/${crypto.randomUUID()}/handled`,
+    url: `/api/v1/workspaces/${s.b.slug}/comments/${s.b.commentId}/handled`,
   }),
   "POST /workspaces/:ws/comments/:id/reply": (s) => ({
-    url: `/api/v1/workspaces/${s.b.slug}/comments/${crypto.randomUUID()}/reply`,
+    url: `/api/v1/workspaces/${s.b.slug}/comments/${s.b.commentId}/reply`,
     body: { body: "Cross-tenant reply" },
   }),
   "POST /workspaces/:ws/comments/:id/read": (s) => ({
-    url: `/api/v1/workspaces/${s.b.slug}/comments/${crypto.randomUUID()}/read`,
+    url: `/api/v1/workspaces/${s.b.slug}/comments/${s.b.commentId}/read`,
   }),
   // FAQ
   "GET /workspaces/:ws/products/:product/faq": (s) => ({
@@ -421,6 +423,54 @@ describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
       expect(res.body.code).toBe("not_found");
     });
   }
+
+  it("tenant B's comment is untouched after the foreign-tenant route sweep", async () => {
+    const rows = await testApp.db
+      .select()
+      .from(schema.comments)
+      .where(eq(schema.comments.postId, seed.b.postId!));
+    expect(rows).toHaveLength(1);
+    expect(rows[0].id).toBe(seed.b.commentId);
+    expect(rows[0].body).toBe("Tenant B Comment 1");
+    expect(rows[0].handledAt).toBeNull();
+    expect(rows[0].handledById).toBeNull();
+    const reads = await testApp.db
+      .select()
+      .from(schema.commentReads)
+      .where(eq(schema.commentReads.commentId, seed.b.commentId!));
+    expect(reads).toHaveLength(0);
+  });
+
+  it("tenant A's own workspace cannot act on tenant B's real comment id (404 comment_not_found, no mutation)", async () => {
+    const base = `/api/v1/workspaces/${seed.a.slug}/comments/${seed.b.commentId}`;
+    const send = (method: "post" | "delete", path: string, body?: unknown) => {
+      const r = request(testApp.http)[method](`${base}${path}`).set("Cookie", seed.a.cookie).set("Origin", testApp.env.PUBLIC_URL);
+      return body ? r.send(body as any) : r;
+    };
+    const results = [
+      await send("post", "/handled"),
+      await send("delete", "/handled"),
+      await send("post", "/reply", { body: "Cross-tenant reply" }),
+      await send("post", "/read"),
+    ];
+    for (const res of results) {
+      expect(res.status).toBe(404);
+      expect(res.body.code).toBe("comment_not_found");
+    }
+
+    const rows = await testApp.db
+      .select()
+      .from(schema.comments)
+      .where(eq(schema.comments.postId, seed.b.postId!));
+    expect(rows).toHaveLength(1);
+    expect(rows[0].handledAt).toBeNull();
+    expect(rows[0].handledById).toBeNull();
+    const reads = await testApp.db
+      .select()
+      .from(schema.commentReads)
+      .where(eq(schema.commentReads.commentId, seed.b.commentId!));
+    expect(reads).toHaveLength(0);
+  });
 
   it("workspace A's slug with workspace B's product slug returns 404", async () => {
     const res = await request(testApp.http)

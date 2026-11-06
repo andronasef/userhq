@@ -180,7 +180,7 @@ export function CreateWebhookDialog({
 
         {createdSubscription ? (
           <div className="space-y-6 py-2">
-            <Alert variant="warning" className="border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20">
+            <Alert variant="neutral" className="border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="size-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
                 <div className="text-xs text-amber-900 dark:text-amber-200">
@@ -260,12 +260,12 @@ const isValid = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expec
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5 py-2">
             {errorMessage && (
-              <Alert variant="danger">
+              <Alert variant="destructive">
                 <span>{errorMessage}</span>
               </Alert>
             )}
 
-            <Field label="Payload URL" required description="Must be an HTTP or HTTPS endpoint reachable by UserHQ">
+            <Field id="webhook-payload-url" label="Payload URL" helper="Must be an HTTP or HTTPS endpoint reachable by UserHQ">
               <Input
                 type="url"
                 required
@@ -277,7 +277,7 @@ const isValid = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expec
               />
             </Field>
 
-            <Field label="Description" description="Optional note for your team (e.g. 'Slack sync bot')">
+            <Field id="webhook-description" label="Description" helper="Optional note for your team (e.g. 'Slack sync bot')">
               <Input
                 type="text"
                 placeholder="Production Zapier integration"
@@ -289,8 +289,9 @@ const isValid = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expec
 
             {products.length > 0 && (
               <Field
+                id="webhook-product-scope"
                 label="Product Scope"
-                description="Limit webhook deliveries to events occurring within a specific product"
+                helper="Limit webhook deliveries to events occurring within a specific product"
               >
                 <select
                   value={selectedProductId}

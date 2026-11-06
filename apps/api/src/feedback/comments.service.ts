@@ -1,6 +1,6 @@
-import { Injectable, Inject } from "@nestjs/common";
+import { Injectable, Inject, Optional } from "@nestjs/common";
 import { and, eq, isNull, sql } from "drizzle-orm";
-import { DB, type Db, posts, comments, user } from "@userhq/db";
+import { DB, type Db, posts, comments, user, products, workspaces } from "@userhq/db";
 import type {
   CreateCommentInput,
   UpdateCommentInput,
@@ -13,6 +13,7 @@ import { isWorkspaceAdmin } from "./membership.js";
 import { enqueueCommentEmail } from "../email/outbox.js";
 import { enqueueWebhookEvent } from "../webhooks/outbox.js";
 import { parseUserAgent } from "./device-info.js";
+import { PushService } from "../push/push.service.js";
 
 export interface CommentRowWithAuthor {
   id: string;
@@ -33,7 +34,10 @@ export interface CommentRowWithAuthor {
 
 @Injectable()
 export class CommentsService {
-  constructor(@Inject(DB) private readonly db: Db) {}
+  constructor(
+    @Inject(DB) private readonly db: Db,
+    @Optional() private readonly pushService?: PushService
+  ) {}
 
   async createComment(
     portal: { workspaceId: string; productId: string },
@@ -47,7 +51,11 @@ export class CommentsService {
 
     return this.db.transaction(async (tx) => {
       const [p] = await tx
-        .select({ id: posts.id })
+        .select({
+          id: posts.id,
+          number: posts.number,
+          title: posts.title,
+        })
         .from(posts)
         .where(
           and(
@@ -119,6 +127,54 @@ export class CommentsService {
           parentId: resolvedParentId,
         },
       });
+
+      if (this.pushService) {
+        const [prod] = await tx
+          .select({
+            name: products.name,
+            slug: products.slug,
+            workspaceSlug: workspaces.slug,
+          })
+          .from(products)
+          .innerJoin(workspaces, eq(products.workspaceId, workspaces.id))
+          .where(eq(products.id, portal.productId))
+          .limit(1);
+
+        if (prod) {
+          // Push notification for reply
+          await this.pushService.enqueueReplyPush(tx, {
+            workspaceId: portal.workspaceId,
+            productId: portal.productId,
+            postId: p.id,
+            commentId: newComment.id,
+            parentCommentId: resolvedParentId,
+            actorId: currentUser.id,
+            actorName: currentUser.name || "A user",
+            commentContent: newComment.body,
+            postTitle: p.title,
+            productSlug: prod.slug,
+            workspaceSlug: prod.workspaceSlug,
+            postNumber: p.number,
+          });
+
+          // If top-level comment, push notification to admins following the product
+          if (!resolvedParentId) {
+            await this.pushService.enqueueNewCommentPush(tx, {
+              workspaceId: portal.workspaceId,
+              productId: portal.productId,
+              postId: p.id,
+              commentId: newComment.id,
+              actorId: currentUser.id,
+              actorName: currentUser.name || "A user",
+              postTitle: p.title,
+              productName: prod.name,
+              productSlug: prod.slug,
+              workspaceSlug: prod.workspaceSlug,
+              postNumber: p.number,
+            });
+          }
+        }
+      }
 
       return {
         id: newComment.id,
@@ -250,6 +306,7 @@ export class CommentsService {
         commentId: comments.id,
         commentAuthorId: comments.authorId,
         commentDeletedAt: comments.deletedAt,
+        postId: comments.postId,
       })
       .from(comments)
       .innerJoin(posts, eq(comments.postId, posts.id))

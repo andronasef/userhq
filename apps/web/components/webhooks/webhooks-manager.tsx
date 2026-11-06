@@ -87,7 +87,7 @@ export function WorkspaceWebhooksManager({
           : "Webhook subscription paused"
       );
     } catch (err: any) {
-      toast.error(errorCopy(err, "Failed to update webhook"));
+      toast.error(errorCopy(err));
     }
   };
 
@@ -100,7 +100,7 @@ export function WorkspaceWebhooksManager({
       );
       toast.success("Test ping event enqueued for delivery");
     } catch (err: any) {
-      toast.error(errorCopy(err, "Failed to send ping"));
+      toast.error(errorCopy(err));
     } finally {
       setPingingMap((prev) => ({ ...prev, [sub.id]: false }));
     }
@@ -117,7 +117,7 @@ export function WorkspaceWebhooksManager({
       setSubscriptions((prev) => prev.filter((s) => s.id !== deleteTarget.id));
       toast.success("Webhook subscription deleted");
     } catch (err: any) {
-      toast.error(errorCopy(err, "Failed to delete webhook"));
+      toast.error(errorCopy(err));
     } finally {
       setDeleteTarget(null);
     }
@@ -207,7 +207,7 @@ export function WorkspaceWebhooksManager({
                         {sub.url}
                       </span>
                       {sub.isActive ? (
-                        <Badge variant="success" className="text-xs">
+                        <Badge variant="neutral" className="text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30">
                           Active
                         </Badge>
                       ) : (
@@ -236,7 +236,7 @@ export function WorkspaceWebhooksManager({
                         sub.productRestrictions.map((prodId) => (
                           <Badge
                             key={prodId}
-                            variant="secondary"
+                            variant="outline"
                             className="text-[11px] px-2 py-0.5 gap-1"
                           >
                             <Layers className="size-3" />
@@ -373,8 +373,10 @@ export function WorkspaceWebhooksManager({
             ? `Are you sure you want to delete the webhook for ${deleteTarget.url}? Existing delivery logs will also be permanently deleted.`
             : ""
         }
+        dismissLabel="Cancel"
         confirmLabel="Delete Webhook"
-        variant="danger"
+        confirmVariant="destructive"
+        pendingLabel="Deleting..."
         onConfirm={handleConfirmDelete}
       />
     </div>

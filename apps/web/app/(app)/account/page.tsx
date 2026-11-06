@@ -5,6 +5,7 @@ import { getAccount, getMe } from "@/lib/api-server";
 import { PageHeader } from "@/components/page-header";
 import { safeNext } from "@/lib/safe-next";
 import { EmailPreferences } from "./email-preferences";
+import { PushNotificationPreferences } from "./push-preferences";
 import { DeleteAccount } from "./delete-account";
 import { AccountBackButton } from "./back-button";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -59,6 +60,13 @@ export default async function AccountPage({
             Comment emails
           </h2>
           <EmailPreferences initialCommentEmails={account.commentEmails} />
+        </section>
+
+        <section className="rounded-lg border border-border bg-card p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-4">
+            Browser push notifications
+          </h2>
+          <PushNotificationPreferences />
         </section>
 
         <DeleteAccount

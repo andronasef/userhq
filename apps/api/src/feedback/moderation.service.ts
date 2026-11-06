@@ -23,6 +23,8 @@ import {
   user,
   roadmapItems,
   roadmapItemInternals,
+  products,
+  workspaces,
 } from "@userhq/db";
 import {
   type StatusChangeInput,
@@ -46,13 +48,15 @@ import { loadTimeline } from "./posts.service.js";
 import { CommentsService } from "./comments.service.js";
 import { NotificationsService } from "../notifications/notifications.service.js";
 import { enqueueWebhookEvent } from "../webhooks/outbox.js";
+import { PushService } from "../push/push.service.js";
 
 @Injectable()
 export class ModerationService {
   constructor(
     @Inject(DB) private readonly db: Db,
     @Optional() private readonly commentsService?: CommentsService,
-    @Optional() private readonly notificationsService?: NotificationsService
+    @Optional() private readonly notificationsService?: NotificationsService,
+    @Optional() private readonly pushService?: PushService
   ) {}
 
   async changeStatus(
@@ -65,6 +69,7 @@ export class ModerationService {
       const [post] = await tx
         .select({
           id: posts.id,
+          title: posts.title,
           statusId: posts.statusId,
           version: posts.version,
           roadmapItemId: posts.roadmapItemId,
@@ -171,6 +176,32 @@ export class ModerationService {
           postActivityId: insertedActivity.id,
           actorId: actor.id,
         });
+      }
+
+      if (this.pushService) {
+        const [prod] = await tx
+          .select({
+            slug: products.slug,
+            workspaceSlug: workspaces.slug,
+          })
+          .from(products)
+          .innerJoin(workspaces, eq(products.workspaceId, workspaces.id))
+          .where(eq(products.id, tenant.productId))
+          .limit(1);
+
+        if (prod) {
+          await this.pushService.enqueueStatusChangePush(tx, {
+            workspaceId: tenant.workspaceId,
+            productId: tenant.productId,
+            postId: post.id,
+            actorId: actor.id,
+            postTitle: post.title ?? "",
+            newStatusName: targetStatus.name,
+            productSlug: prod.slug,
+            workspaceSlug: prod.workspaceSlug,
+            postNumber,
+          });
+        }
       }
 
       await enqueueWebhookEvent(tx, {

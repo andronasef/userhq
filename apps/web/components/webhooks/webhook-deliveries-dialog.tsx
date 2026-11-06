@@ -58,7 +58,7 @@ export function WebhookDeliveriesDialog({
       setDeliveries(res.deliveries);
       setTotal(res.total);
     } catch (err: any) {
-      toast.error(errorCopy(err, "Failed to load deliveries"));
+      toast.error(errorCopy(err));
     } finally {
       setLoading(false);
     }
@@ -86,7 +86,7 @@ export function WebhookDeliveriesDialog({
         prev.map((d) => (d.id === deliveryId ? { ...d, status: "pending" } : d))
       );
     } catch (err: any) {
-      toast.error(errorCopy(err, "Failed to redeliver"));
+      toast.error(errorCopy(err));
     } finally {
       setRedeliveringId(null);
     }
@@ -96,7 +96,7 @@ export function WebhookDeliveriesDialog({
     switch (status) {
       case "delivered":
         return (
-          <Badge variant="success" className="gap-1 text-xs">
+          <Badge variant="neutral" className="gap-1 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30">
             <CheckCircle2 className="size-3" />
             <span>{statusCode ? `${statusCode} OK` : "Delivered"}</span>
           </Badge>
@@ -110,7 +110,7 @@ export function WebhookDeliveriesDialog({
         );
       case "sending":
         return (
-          <Badge variant="warning" className="gap-1 text-xs">
+          <Badge variant="neutral" className="gap-1 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30">
             <RotateCw className="size-3 animate-spin" />
             <span>Sending</span>
           </Badge>
@@ -235,10 +235,10 @@ export function WebhookDeliveriesDialog({
                             <span>{new Date(delivery.deliveredAt).toLocaleString()}</span>
                           </div>
                         )}
-                        {delivery.lastAttemptAt && (
+                        {(delivery as any).lastAttemptAt && (
                           <div>
                             <span className="font-medium text-foreground">Last attempt: </span>
-                            <span>{new Date(delivery.lastAttemptAt).toLocaleString()}</span>
+                            <span>{new Date((delivery as any).lastAttemptAt).toLocaleString()}</span>
                           </div>
                         )}
                       </div>

@@ -16,9 +16,10 @@ import { UserThrottlerGuard } from "./throttle.js";
 import { PortalGuard } from "../portal/portal.guard.js";
 import { TenantGuard } from "../tenancy/tenant.guard.js";
 import { NotificationsModule } from "../notifications/notifications.module.js";
+import { PushModule } from "../push/push.module.js";
 
 @Module({
-  imports: [NotificationsModule],
+  imports: [NotificationsModule, PushModule],
   controllers: [
     PortalPostsController,
     PortalVotesController,

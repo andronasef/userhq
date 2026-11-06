@@ -36,6 +36,12 @@ export const EnvSchema = z
         .transform((v) => v === true || v === "true")
         .optional()
     ),
+    VAPID_PUBLIC_KEY: z.preprocess(emptyToUndefined, z.string().optional()),
+    VAPID_PRIVATE_KEY: z.preprocess(emptyToUndefined, z.string().optional()),
+    VAPID_SUBJECT: z.preprocess(
+      emptyToUndefined,
+      z.string().default("mailto:notifications@userhq.com")
+    ),
   })
   .superRefine((data, ctx) => {
     if (data.SMTP_HOST && !data.SMTP_FROM) {

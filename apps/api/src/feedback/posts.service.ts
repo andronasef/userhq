@@ -1,9 +1,10 @@
-import { Injectable, Inject } from "@nestjs/common";
+import { Injectable, Inject, Optional } from "@nestjs/common";
 import { eq, and, isNull, sql, notInArray, desc, asc, getTableName } from "drizzle-orm";
 import {
   DB,
   type Db,
   products,
+  workspaces,
   statuses,
   categories,
   posts,
@@ -35,6 +36,7 @@ import { encodeBoardCursor, decodeBoardCursor } from "./cursor.js";
 import { CommentsService } from "./comments.service.js";
 import { enqueueWebhookEvent } from "../webhooks/outbox.js";
 import { parseUserAgent } from "./device-info.js";
+import { PushService } from "../push/push.service.js";
 
 export function engagedSql(postsTable: typeof posts = posts) {
   const tableName = getTableName(postsTable);
@@ -84,7 +86,8 @@ export async function assertCategory(
 export class PostsService {
   constructor(
     @Inject(DB) private readonly db: Db,
-    private readonly commentsService: CommentsService
+    private readonly commentsService: CommentsService,
+    @Optional() private readonly pushService?: PushService
   ) {}
 
   async createPost(
@@ -172,6 +175,33 @@ export class PostsService {
           statusId: def.id,
         },
       });
+
+      if (this.pushService) {
+        const [prod] = await tx
+          .select({
+            name: products.name,
+            slug: products.slug,
+            workspaceSlug: workspaces.slug,
+          })
+          .from(products)
+          .innerJoin(workspaces, eq(products.workspaceId, workspaces.id))
+          .where(eq(products.id, portal.productId))
+          .limit(1);
+
+        if (prod) {
+          await this.pushService.enqueueNewPostPush(tx, {
+            workspaceId: portal.workspaceId,
+            productId: portal.productId,
+            postId: newPost.id,
+            actorId: currentUser.id,
+            postTitle: newPost.title,
+            productName: prod.name,
+            productSlug: prod.slug,
+            workspaceSlug: prod.workspaceSlug,
+            postNumber: newPost.number,
+          });
+        }
+      }
 
       return newPost;
     });

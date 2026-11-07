@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { MotionInput } from "@/components/motion-input";
 import { ThemeProvider } from "@/components/theme-provider";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -9,21 +10,6 @@ export const metadata: Metadata = {
   description: "UserHQ feedback, roadmap, and changelog platform",
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
 };
-
-const antiFoucScript = `(function() {
-  try {
-    var stored = localStorage.getItem('userhq_theme');
-    var isDark = stored === 'dark' || ((!stored || stored === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      document.documentElement.style.colorScheme = 'dark';
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.style.colorScheme = 'light';
-    }
-    document.documentElement.dataset.theme = stored || 'system';
-  } catch (e) {}
-})();`;
 
 export default function RootLayout({
   children,
@@ -33,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: antiFoucScript }} />
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-dvh flex flex-col bg-background text-foreground font-sans antialiased">
         <ThemeProvider>

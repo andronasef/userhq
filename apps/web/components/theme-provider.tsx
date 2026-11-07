@@ -3,8 +3,8 @@
 import * as React from "react";
 import {
   applyThemeToDocument,
-  getStoredThemePreference,
-  resolveEffectiveTheme,
+  getDocumentThemePreference,
+  reapplyDocumentTheme,
   saveThemePreference,
   type ResolvedTheme,
   type ThemePreference,
@@ -26,27 +26,19 @@ export function ThemeProvider({
   const [theme, setThemeState] = React.useState<ThemePreference>("system");
   const [resolvedTheme, setResolvedTheme] = React.useState<ResolvedTheme>("light");
 
-  // Initialize theme from storage/document on client mount
-  React.useEffect(() => {
-    const stored = getStoredThemePreference();
-    setThemeState(stored);
-    const resolved = applyThemeToDocument(stored);
-    setResolvedTheme(resolved);
+  // The head script already resolved storage into the document, so the document
+  // is the source of truth. A layout effect corrects the state before first paint
+  // (server and first client render keep the defaults, which hydration requires).
+  React.useLayoutEffect(() => {
+    const preference = getDocumentThemePreference();
+    setThemeState(preference);
+    setResolvedTheme(applyThemeToDocument(preference));
   }, []);
 
-  // Listen for system theme changes
+  // System follows OS scheme changes live; explicit light/dark re-apply to themselves.
   React.useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-    const handleChange = (e: MediaQueryListEvent) => {
-      // If current preference is 'system', dynamically update the document and resolved state
-      const currentStored = getStoredThemePreference();
-      if (currentStored === "system") {
-        const resolved = resolveEffectiveTheme("system", e.matches);
-        applyThemeToDocument("system");
-        setResolvedTheme(resolved);
-      }
-    };
+    const handleChange = () => setResolvedTheme(reapplyDocumentTheme());
 
     mediaQuery.addEventListener("change", handleChange);
     return () => {

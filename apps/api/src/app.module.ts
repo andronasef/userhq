@@ -35,6 +35,7 @@ import { ChangelogModule } from "./changelog/changelog.module.js";
 import { FaqModule } from "./faq/faq.module.js";
 import { ApiKeysModule } from "./api-keys/api-keys.module.js";
 import { apiKeyToken } from "./api-keys/authorization.js";
+import { ApiKeyRateLimitGuard } from "./api-keys/api-key-rate-limit.guard.js";
 import { ExportModule } from "./export/export.module.js";
 import { WebhooksModule } from "./webhooks/webhooks.module.js";
 import { PushModule } from "./push/push.module.js";
@@ -126,6 +127,11 @@ export class AppModule {
         {
           provide: APP_GUARD,
           useClass: SessionGuard,
+        },
+        {
+          // After SessionGuard: req.apiKey is only set once the key is validated.
+          provide: APP_GUARD,
+          useClass: ApiKeyRateLimitGuard,
         },
         {
           provide: APP_PIPE,

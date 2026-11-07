@@ -42,6 +42,7 @@ const SESSION_ONLY_CONTROLLERS: Record<string, string> = {
 // Handler exceptions inside otherwise scoped controllers: "Controller.handler".
 const SESSION_ONLY_HANDLERS: Record<string, string> = {
   "WorkspaceFeedbackController.markCommentRead": "a person's own read state",
+  "WebhooksController.rotateSecret": "signing secrets are rotated by a signed-in admin only, never by a key",
 };
 
 describe("automation route inventory and docs sync (quick-261107-flq)", () => {

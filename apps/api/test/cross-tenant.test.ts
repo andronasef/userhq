@@ -326,6 +326,9 @@ const CROSS_TENANT_ROUTES: Record<
   "POST /workspaces/:ws/webhooks/:id/ping": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/webhooks/${crypto.randomUUID()}/ping`,
   }),
+  "POST /workspaces/:ws/webhooks/:id/rotate-secret": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/webhooks/${crypto.randomUUID()}/rotate-secret`,
+  }),
 };
 
 describe("Cross-tenant 404 isolation (Plan 02-03)", () => {

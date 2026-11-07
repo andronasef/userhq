@@ -16,7 +16,7 @@ import {
   type ColorPreset,
 } from "../../../../../components/color-field";
 import { Alert } from "../../../../../components/ui/alert";
-import { accentTokens, contrastRatio } from "../../../../../lib/accent";
+import { accentStyle, accentTokens, contrastRatio } from "../../../../../lib/accent";
 import { apiFetch } from "../../../../../lib/api-client";
 import { errorCopy } from "../../../../../lib/api-errors";
 import { QueryProvider } from "../../../../../lib/query-client";
@@ -136,12 +136,7 @@ function ProductBrandingFormInner({
         <div
           className="rounded-lg border border-border p-4 flex flex-col gap-3 transition-colors"
           style={
-            {
-              "--primary": tokens.primary,
-              "--primary-foreground": tokens.primaryForeground,
-              "--primary-text": tokens.primaryText,
-              "--ring": tokens.primary,
-            } as React.CSSProperties
+            accentStyle(accentColor, accentTextColor || null) as React.CSSProperties
           }
         >
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">

@@ -25,10 +25,45 @@ export function contrastRatio(hex1: string, hex2: string): number {
   return (lMax + 0.05) / (lMin + 0.05);
 }
 
+// Page background and card per theme, copied from globals.css (:root / .dark).
+// accent.test.ts parses globals.css and fails if these drift. The muted surface
+// is deliberately excluded: 4.5:1 there would flip the default accent's light
+// link text to near-black.
+export const ACCENT_SURFACES = {
+  light: { background: "#F6F8F7", card: "#FFFFFF" },
+  dark: { background: "#0B111E", card: "#131D2E" },
+} as const;
+
+const MIN_TEXT_CONTRAST = 4.5;
+
+function meetsOn(
+  hex: string,
+  surfaces: { background: string; card: string }
+): boolean {
+  return (
+    contrastRatio(hex, surfaces.background) >= MIN_TEXT_CONTRAST &&
+    contrastRatio(hex, surfaces.card) >= MIN_TEXT_CONTRAST
+  );
+}
+
+// Mix `hex` toward white by `amount` (0..1), uppercase #RRGGBB.
+function mixWithWhite(hex: string, amount: number): string {
+  const channel = (i: number) => {
+    const c = parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
+    return Math.round(c + (255 - c) * amount)
+      .toString(16)
+      .padStart(2, "0");
+  };
+  return `#${channel(0)}${channel(1)}${channel(2)}`.toUpperCase();
+}
+
 export interface AccentTokens {
   primary: string;
   primaryForeground: string;
+  /** Accent text on light surfaces. */
   primaryText: string;
+  /** Accent text on dark surfaces: the brand lightened until it reads. */
+  primaryTextDark: string;
 }
 
 export function accentTokens(
@@ -50,12 +85,19 @@ export function accentTokens(
     primaryForeground = vsWhite >= vsBlack ? "#FFFFFF" : "#000000";
   }
 
-  const primaryText = vsWhite >= 4.5 ? primary : "#171717";
+  const primaryText = meetsOn(primary, ACCENT_SURFACES.light) ? primary : "#171717";
+
+  // White always meets 4.5:1 on the dark surfaces, so the loop terminates.
+  let primaryTextDark = primary;
+  for (let step = 1; !meetsOn(primaryTextDark, ACCENT_SURFACES.dark); step++) {
+    primaryTextDark = mixWithWhite(primary, step * 0.05);
+  }
 
   return {
     primary,
     primaryForeground,
     primaryText,
+    primaryTextDark,
   };
 }
 
@@ -67,7 +109,9 @@ export function accentStyle(
   return {
     "--primary": tokens.primary,
     "--primary-foreground": tokens.primaryForeground,
-    "--primary-text": tokens.primaryText,
+    // light-dark() follows the element's used color-scheme, which the theme
+    // script and applyThemeToDocument set on <html>.
+    "--primary-text": `light-dark(${tokens.primaryText}, ${tokens.primaryTextDark})`,
     "--ring": tokens.primary,
     "--entity-accent": tokens.primary,
   };

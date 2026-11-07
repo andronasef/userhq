@@ -1,6 +1,6 @@
 # UserHQ Automation API
 
-This document is the integrator reference for driving a UserHQ workspace with an API key: authentication, scopes, product restrictions, every automation endpoint, pagination, errors, attribution and rate limits. It is kept in sync with the code by `apps/api/test/automation-routes.test.ts`, which fails when a scope, route or limit here disagrees with what the API enforces.
+This document is the integrator reference for driving a UserHQ workspace with an API key: authentication, scopes, product restrictions, every automation endpoint, pagination, errors, attribution, rate limits and webhooks. It is kept in sync with the code by `apps/api/test/automation-routes.test.ts`, which fails when a scope, route or limit here disagrees with what the API enforces.
 
 ---
 
@@ -116,7 +116,7 @@ Restrictions are stored as product ids, while URLs use product slugs. An unrestr
 | `GET` | `/api/v1/workspaces/:ws/webhooks/:id/deliveries` | `webhooks:read` | List delivery attempts for a subscription. |
 | `POST` | `/api/v1/workspaces/:ws/webhooks/:id/deliveries/:deliveryId/redeliver` | `webhooks:write` | Redeliver one event. |
 
-Not available to keys, by design or not yet: API keys, members, invites, workspace settings, products, statuses, categories and FAQ. All of these return `403 api_key_route_forbidden`. Product settings, statuses, categories and FAQ are listed as automation targets in the product spec (story 20) but have no scope yet; see the project notes.
+Not available to keys, by design or not yet: API keys, webhook secret rotation, members, invites, workspace settings, products, statuses, categories and FAQ. All of these return `403 api_key_route_forbidden`. Product settings, statuses, categories and FAQ are listed as automation targets in the product spec (story 20) but have no scope yet; see the project notes.
 
 ---
 
@@ -195,4 +195,109 @@ Every request authenticated by a key counts against that key: 120 requests per 6
 - The limit is per key. Another key, or a signed-in person using the same route, is not affected.
 - The counter lives in the memory of one API process. UserHQ runs a single API replica today, so the limit is exact; running more replicas multiplies it until a shared store is added.
 - Some routes also have a lower limit of their own: `POST /api/v1/workspaces/:ws/products/:product/posts/:number/comments` allows 10 comments per 60 seconds per key.
+- Redelivering a webhook delivery allows 10 redeliveries per 60 seconds per caller (per key for key requests).
 - Invalid tokens are rejected with `401` before any key is known, so they have no per-key counter.
+
+---
+
+## 9. Webhooks
+
+A webhook subscription sends signed `POST` requests with JSON bodies to your HTTPS endpoint when something changes in the workspace. Subscriptions are managed with the `webhooks:read` and `webhooks:write` routes in the Endpoints table, or in the workspace settings.
+
+### Subscriptions and the signing secret
+
+- `POST /api/v1/workspaces/:ws/webhooks` takes `url` (public HTTPS), `events` (names from the table below, or `*`), and optionally `productRestrictions` (product ids) and `description`. The `201` response carries the signing secret in `secret` (`whsec_` followed by random characters).
+- The secret is returned **only** by that create response and by the rotate response. List, get, update and delivery-log responses never contain it. Store it when you get it; it cannot be read again.
+- `POST /api/v1/workspaces/:ws/webhooks/:id/rotate-secret` issues a new secret and returns the subscription with it. Rotation is session-only: a signed-in workspace owner or admin does it, and every API key, including an `admin` key, gets `403 api_key_route_forbidden`.
+- Rotation is immediate. There is no overlap window: the old secret stops signing with the next attempt. Each attempt is signed when it is sent, so a delivery that fails around the swap is retried and signed with the new secret. Update your receiver, and the retry succeeds.
+- A subscription with `productRestrictions` only receives events of those products. A paused subscription (`isActive: false`) receives nothing.
+
+### Events
+
+| Event | When | `data` fields |
+|-------|------|---------------|
+| `*` | Subscribes to every event type below, including event types added in the future. | As for each event. |
+| `ping` | A test event sent to one subscription with the ping route. It has no product. | `message` |
+| `post.created` | A post is created. | `id`, `number`, `title`, `description`, `authorId`, `categoryId`, `statusId` |
+| `post.updated` | A post's title, description or category is edited. | `id`, `number`, `title`, `description`, `categoryId` |
+| `post.status_changed` | A post's status changes: an admin changes it, its roadmap item moves, or it is linked to a roadmap item in another status. Once per post whose status really changed. | `postId`, `postNumber`, `previousStatusId`, `newStatus` (`id`, `name`, `color`, `type`), `actorId`, `note` (`null` for roadmap-driven changes) |
+| `post.deleted` | A post is deleted. | `id`, `number` |
+| `post.merged` | A duplicate post is merged into another. Once per merged duplicate. | `id`, `number`, `mergedInto` (`id`, `number`), `actorId` |
+| `post.restored` | A deleted post is restored. | `id`, `number`, `actorId` |
+| `comment.created` | A comment is added, including replies from the workspace inbox. Exactly one event per comment. | `id`, `postId`, `postNumber`, `authorId`, `body`, `parentId` |
+| `comment.deleted` | A comment is deleted. | `id`, `postId` |
+| `comment.restored` | A deleted comment is restored. | `id`, `postId`, `actorId` |
+| `changelog.published` | A changelog entry becomes live: created live, edited to a past date, or published. Once per draft-to-live transition. | `id`, `title`, `summary`, `publishedAt` |
+
+- A subscription to `*` also receives `post.merged`, `post.restored` and `comment.restored`, and any event type added later.
+- `changelog.published` fires when the entry becomes live through one of those actions. An entry saved with a future `publishedAt` does not announce itself when that date arrives.
+- Editing an already-live entry, or publishing it again, sends nothing. Unpublishing and publishing again sends one more.
+- Roadmap-driven `post.status_changed` events carry the shared status and the post only. Internal roadmap titles, descriptions, notes, assignees and deadlines never appear in any payload.
+
+### Payload and headers
+
+Every request body is one JSON envelope:
+
+```json
+{
+  "id": "evt_0123456789abcdef0123456789abcdef",
+  "event": "post.created",
+  "createdAt": "2026-11-07T10:00:00.000Z",
+  "workspace": { "id": "...", "slug": "acme" },
+  "product": { "id": "...", "slug": "mobile", "name": "Mobile" },
+  "data": {}
+}
+```
+
+`product` is `null` for `ping`. The event `id` (`evt_` plus 32 hex characters) is created when the event is queued and is the same on every retry and every redelivery. Deduplicate on it.
+
+| Header | Value |
+|--------|-------|
+| `Content-Type` | `application/json` |
+| `User-Agent` | `UserHQ-Webhooks/1.0` |
+| `X-UserHQ-Event` | The event name, for example `post.created`. |
+| `X-UserHQ-Delivery` | The delivery id (the id shown in the delivery log). It identifies the delivery record, not the event. |
+| `X-UserHQ-Timestamp` | Unix seconds when this attempt was signed. |
+| `X-UserHQ-Signature` | `t={unix seconds},v1={hex}` |
+
+### Verifying the signature
+
+`v1` is the hex HMAC SHA-256 of `{t}.{raw body}`, keyed with your signing secret, where `{t}` is the timestamp in the header and the body is the exact bytes you received. Verify before parsing, reject timestamps more than 5 minutes old, and compare in constant time. Every attempt is signed afresh with a new timestamp, so a retry has a different signature than the first attempt.
+
+```js
+import { createHmac, timingSafeEqual } from "node:crypto";
+
+export function verify(rawBody, header, secret, toleranceSeconds = 300) {
+  const parts = Object.fromEntries(header.split(",").map((p) => p.split("=")));
+  const t = Number(parts.t);
+  if (!t || !parts.v1) return false;
+  if (Math.abs(Date.now() / 1000 - t) > toleranceSeconds) return false;
+  const expected = createHmac("sha256", secret).update(`${t}.${rawBody}`).digest();
+  const given = Buffer.from(parts.v1, "hex");
+  return given.length === expected.length && timingSafeEqual(given, expected);
+}
+```
+
+### Delivery, retries and backoff
+
+- Any `2xx` response is success. Any other status, a timeout or a connection error is a failed attempt.
+- Each attempt has a 10 second deadline. The response body is stored truncated to 1000 characters in the delivery log.
+- The destination must be a public HTTPS address without URL credentials. It is checked when you save it and again on every attempt.
+- A delivery gets 5 attempts in total. After a failed attempt the next one is queued after 1, 5, 30 and 120 minutes. The delivery is marked failed after the fifth failed attempt.
+- Delivery logs are visible with the deliveries route (newest first).
+
+### Redelivery
+
+`POST /api/v1/workspaces/:ws/webhooks/:id/deliveries/:deliveryId/redeliver` queues a delivery again for immediate sending, with the same event id.
+
+- Only delivered, failed or suppressed deliveries of an active endpoint can be redelivered. A paused endpoint returns `409 webhook_inactive`; a delivery that is still pending or being sent returns `409 delivery_not_final`; a deleted endpoint or another workspace's delivery returns `404 not_found`.
+- A redelivery counts toward the 5 attempts: a delivery that already used all five gets exactly one more attempt.
+- The limit is in Rate limits.
+
+### Disabled modules
+
+Events for a product whose Board (`post.*`, `comment.*`) or Changelog (`changelog.*`) module is switched off are not queued. An event already queued when the module is switched off is marked `suppressed` when its turn comes and is never sent, and switching the module back on does not revive it. Events about merged posts are still sent, because `post.merged` itself reports the merge.
+
+### Retention
+
+Delivery logs for delivered, failed and suppressed deliveries older than 30 days, measured from the last attempt (or creation if never attempted), are deleted by an hourly cleanup. Pending and in-flight deliveries are never deleted.

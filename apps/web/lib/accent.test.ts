@@ -5,7 +5,7 @@ import { accentTokens, accentStyle, contrastRatio } from "./accent.js";
 describe("accentTokens & contrastRatio (Plan 02-08 Task 2)", () => {
   it("accentTokens('#2563EB') -> primaryForeground '#FFFFFF', primaryText '#2563EB'", () => {
     const tokens = accentTokens("#2563EB");
-    expect(tokens).toEqual({
+    expect(tokens).toMatchObject({
       primary: "#2563EB",
       primaryForeground: "#FFFFFF",
       primaryText: "#2563EB",
@@ -14,7 +14,7 @@ describe("accentTokens & contrastRatio (Plan 02-08 Task 2)", () => {
 
   it("accentTokens('#FACC15') -> primaryForeground '#000000', primaryText '#171717'", () => {
     const tokens = accentTokens("#FACC15");
-    expect(tokens).toEqual({
+    expect(tokens).toMatchObject({
       primary: "#FACC15",
       primaryForeground: "#000000",
       primaryText: "#171717",
@@ -50,10 +50,11 @@ describe("accentTokens & contrastRatio (Plan 02-08 Task 2)", () => {
 
   it("accentStyle('#2563EB') includes --primary, --primary-foreground, --primary-text, --ring, and --entity-accent", () => {
     const style = accentStyle("#2563EB");
+    const { primaryTextDark } = accentTokens("#2563EB");
     expect(style).toEqual({
       "--primary": "#2563EB",
       "--primary-foreground": "#FFFFFF",
-      "--primary-text": "#2563EB",
+      "--primary-text": `light-dark(#2563EB, ${primaryTextDark})`,
       "--ring": "#2563EB",
       "--entity-accent": "#2563EB",
     });

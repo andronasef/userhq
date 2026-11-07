@@ -8,20 +8,22 @@ import {
   History,
   Trash2,
   Power,
-  Copy,
-  Check,
-  Eye,
-  EyeOff,
+  KeyRound,
   Activity,
   Layers,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { WebhookSubscription, ProductSummary } from "@userhq/types";
+import type {
+  WebhookSubscription,
+  WebhookSubscriptionWithSecret,
+  ProductSummary,
+} from "@userhq/types";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { ConfirmDialog } from "../ui/confirm-dialog";
 import { CreateWebhookDialog } from "./create-webhook-dialog";
 import { WebhookDeliveriesDialog } from "./webhook-deliveries-dialog";
+import { WebhookSecretDialog } from "./webhook-secret-dialog";
 import { apiFetch } from "../../lib/api-client";
 import { errorCopy } from "../../lib/api-errors";
 
@@ -48,9 +50,9 @@ export function WorkspaceWebhooksManager({
   const [deleteTarget, setDeleteTarget] =
     React.useState<WebhookSubscription | null>(null);
 
-  // Revealed secrets state map
-  const [revealedSecrets, setRevealedSecrets] = React.useState<Record<string, boolean>>({});
-  const [copiedMap, setCopiedMap] = React.useState<Record<string, boolean>>({});
+  // Rotate flow: confirm first, then show the new secret once
+  const [rotateTarget, setRotateTarget] = React.useState<WebhookSubscription | null>(null);
+  const [rotated, setRotated] = React.useState<{ url: string; secret: string } | null>(null);
 
   // Ping loading state map
   const [pingingMap, setPingingMap] = React.useState<Record<string, boolean>>({});
@@ -123,21 +125,13 @@ export function WorkspaceWebhooksManager({
     }
   };
 
-  const toggleRevealSecret = (id: string) => {
-    setRevealedSecrets((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const handleCopySecret = async (sub: WebhookSubscription) => {
-    try {
-      await navigator.clipboard.writeText(sub.secret);
-      setCopiedMap((prev) => ({ ...prev, [sub.id]: true }));
-      toast.success("Signing secret copied");
-      setTimeout(() => {
-        setCopiedMap((prev) => ({ ...prev, [sub.id]: false }));
-      }, 2000);
-    } catch {
-      toast.error("Failed to copy secret");
-    }
+  const handleConfirmRotate = async () => {
+    if (!rotateTarget) return;
+    const res = await apiFetch<WebhookSubscriptionWithSecret>(
+      `/api/v1/workspaces/${ws}/webhooks/${rotateTarget.id}/rotate-secret`,
+      { method: "POST" }
+    );
+    setRotated({ url: res.url, secret: res.secret });
   };
 
   return (
@@ -188,8 +182,6 @@ export function WorkspaceWebhooksManager({
       ) : (
         <div className="space-y-4">
           {subscriptions.map((sub) => {
-            const isRevealed = Boolean(revealedSecrets[sub.id]);
-            const isCopied = Boolean(copiedMap[sub.id]);
             const isPinging = Boolean(pingingMap[sub.id]);
 
             return (
@@ -249,42 +241,6 @@ export function WorkspaceWebhooksManager({
                         </Badge>
                       )}
                     </div>
-
-                    {/* Signing Secret Box */}
-                    <div className="flex items-center gap-2 pt-2 text-xs">
-                      <span className="text-muted-foreground shrink-0 font-medium">Secret:</span>
-                      <div className="flex items-center gap-1.5 bg-muted/40 border border-border/80 rounded px-2 py-1 max-w-sm">
-                        <span className="font-mono text-[11px] text-muted-foreground truncate select-all">
-                          {isRevealed
-                            ? sub.secret
-                            : `${sub.secret.slice(0, 10)}••••••••••••••••••••••••`}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => toggleRevealSecret(sub.id)}
-                          className="text-muted-foreground hover:text-foreground shrink-0 p-0.5"
-                          title={isRevealed ? "Hide secret" : "Reveal secret"}
-                        >
-                          {isRevealed ? (
-                            <EyeOff className="size-3.5" />
-                          ) : (
-                            <Eye className="size-3.5" />
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleCopySecret(sub)}
-                          className="text-muted-foreground hover:text-foreground shrink-0 p-0.5"
-                          title="Copy secret"
-                        >
-                          {isCopied ? (
-                            <Check className="size-3.5 text-emerald-500" />
-                          ) : (
-                            <Copy className="size-3.5" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
                   </div>
 
                   {/* Actions */}
@@ -310,6 +266,17 @@ export function WorkspaceWebhooksManager({
                     >
                       <History className="size-3.5" />
                       <span>Deliveries</span>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setRotateTarget(sub)}
+                      className="gap-1.5 h-8 text-xs"
+                      data-testid={`rotate-webhook-${sub.id}`}
+                    >
+                      <KeyRound className="size-3.5" />
+                      <span>Rotate secret</span>
                     </Button>
 
                     <Button
@@ -361,6 +328,31 @@ export function WorkspaceWebhooksManager({
         onOpenChange={(open) => !open && setDeliveriesTarget(null)}
         ws={ws}
         subscription={deliveriesTarget}
+      />
+
+      {/* Rotate Confirmation */}
+      <ConfirmDialog
+        open={Boolean(rotateTarget)}
+        onOpenChange={(open) => !open && setRotateTarget(null)}
+        title="Rotate signing secret"
+        description={
+          rotateTarget
+            ? `Generate a new signing secret for ${rotateTarget.url}? The old secret stops working immediately, so update your receiver right away.`
+            : ""
+        }
+        dismissLabel="Cancel"
+        confirmLabel="Rotate secret"
+        confirmVariant="destructive"
+        pendingLabel="Rotating..."
+        onConfirm={handleConfirmRotate}
+      />
+
+      {/* One-time secret display */}
+      <WebhookSecretDialog
+        open={Boolean(rotated)}
+        onOpenChange={(open) => !open && setRotated(null)}
+        url={rotated?.url ?? ""}
+        secret={rotated?.secret ?? ""}
       />
 
       {/* Delete Confirmation */}

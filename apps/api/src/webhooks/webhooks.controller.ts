@@ -21,6 +21,8 @@ import {
   type UpdateWebhookSubscriptionInput,
   webhookSubscriptionSchema,
   type WebhookSubscription,
+  webhookSubscriptionWithSecretSchema,
+  type WebhookSubscriptionWithSecret,
   webhookSubscriptionListResponseSchema,
   type WebhookSubscriptionListResponse,
   webhookDeliveryListResponseSchema,
@@ -62,13 +64,13 @@ export class WebhooksController {
   @Post()
   @RequireScopes("webhooks:write")
   @HttpCode(201)
-  @SerializeOptions({ schema: webhookSubscriptionSchema })
+  @SerializeOptions({ schema: webhookSubscriptionWithSecretSchema })
   async createSubscription(
     @CurrentTenant() tenant: Tenant,
     @CurrentUser() user: any,
     @Body({ schema: createWebhookSubscriptionSchema })
     input: CreateWebhookSubscriptionInput
-  ): Promise<WebhookSubscription> {
+  ): Promise<WebhookSubscriptionWithSecret> {
     return this.webhookService.createSubscription(
       tenant.workspaceId,
       user?.id ?? null,
@@ -122,6 +124,21 @@ export class WebhooksController {
       throw new ApiException("not_found", 404, "Webhook subscription not found.");
     }
     return this.webhookService.deleteSubscription(tenant.workspaceId, parsed.data);
+  }
+
+  // Deliberately no @RequireScopes: unscoped handlers are session-only, so no API key can rotate a secret.
+  @Post(":id/rotate-secret")
+  @HttpCode(200)
+  @SerializeOptions({ schema: webhookSubscriptionWithSecretSchema })
+  async rotateSecret(
+    @CurrentTenant() tenant: Tenant,
+    @Param("id") id: string
+  ): Promise<WebhookSubscriptionWithSecret> {
+    const parsed = uuidParamSchema.safeParse(id);
+    if (!parsed.success) {
+      throw new ApiException("not_found", 404, "Webhook subscription not found.");
+    }
+    return this.webhookService.rotateSecret(tenant.workspaceId, parsed.data);
   }
 
   @Post(":id/ping")

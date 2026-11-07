@@ -7,6 +7,7 @@ import {
   WEBHOOK_EVENTS,
   type WebhookEvent,
   type WebhookSubscription,
+  type WebhookSubscriptionWithSecret,
   type ProductSummary,
 } from "@userhq/types";
 import {
@@ -60,7 +61,7 @@ export function CreateWebhookDialog({
 
   // Success view state showing secret
   const [createdSubscription, setCreatedSubscription] =
-    React.useState<WebhookSubscription | null>(null);
+    React.useState<WebhookSubscriptionWithSecret | null>(null);
   const [copied, setCopied] = React.useState(false);
 
   const resetForm = () => {
@@ -142,13 +143,15 @@ export function CreateWebhookDialog({
           selectedProductId === "all" ? null : [selectedProductId],
       };
 
-      const res = await apiFetch<WebhookSubscription>(`/api/v1/workspaces/${ws}/webhooks`, {
+      const res = await apiFetch<WebhookSubscriptionWithSecret>(`/api/v1/workspaces/${ws}/webhooks`, {
         method: "POST",
         body: payload,
       });
 
+      // The secret lives only in this dialog's success view; the list never holds it.
+      const { secret: _secret, ...listed } = res;
       setCreatedSubscription(res);
-      onWebhookCreated(res);
+      onWebhookCreated(listed);
       toast.success("Webhook subscription created");
     } catch (err: any) {
       setErrorMessage(errorCopy(err));

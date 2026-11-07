@@ -14,9 +14,12 @@ import type {
   CreateWebhookSubscriptionInput,
   UpdateWebhookSubscriptionInput,
   WebhookSubscription,
+  WebhookSubscriptionWithSecret,
   WebhookDelivery,
   WebhookEventPayload,
 } from "@userhq/types";
+
+const newSigningSecret = (): string => `whsec_${randomBytes(24).toString("base64url")}`;
 
 @Injectable()
 export class WebhookService {
@@ -62,9 +65,9 @@ export class WebhookService {
     workspaceId: string,
     userId: string | null,
     input: CreateWebhookSubscriptionInput
-  ): Promise<WebhookSubscription> {
+  ): Promise<WebhookSubscriptionWithSecret> {
     await this.outbound.validateTarget(input.url);
-    const secret = `whsec_${randomBytes(24).toString("base64url")}`;
+    const secret = newSigningSecret();
 
     const [row] = await this.db
       .insert(webhookSubscriptions)
@@ -80,7 +83,27 @@ export class WebhookService {
       })
       .returning();
 
-    return this.formatSubscription(row);
+    return { ...this.formatSubscription(row), secret };
+  }
+
+  /** Immediate rotation: the worker signs at send time from this row, so the next attempt uses the new secret. */
+  async rotateSecret(workspaceId: string, id: string): Promise<WebhookSubscriptionWithSecret> {
+    const secret = newSigningSecret();
+    const [row] = await this.db
+      .update(webhookSubscriptions)
+      .set({ secret, updatedAt: new Date() })
+      .where(
+        and(
+          eq(webhookSubscriptions.id, id),
+          eq(webhookSubscriptions.workspaceId, workspaceId)
+        )
+      )
+      .returning();
+
+    if (!row) {
+      throw new ApiException("not_found", 404, "Webhook subscription not found.");
+    }
+    return { ...this.formatSubscription(row), secret };
   }
 
   async updateSubscription(
@@ -256,7 +279,6 @@ export class WebhookService {
       id: row.id,
       workspaceId: row.workspaceId,
       url: row.url,
-      secret: row.secret,
       events: row.events as any,
       productRestrictions: (row.productRestrictions as string[] | null) ?? null,
       description: row.description ?? null,

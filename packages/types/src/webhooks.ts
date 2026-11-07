@@ -38,7 +38,6 @@ export const webhookSubscriptionSchema = z.object({
   id: z.string().uuid(),
   workspaceId: z.string().uuid(),
   url: z.string(),
-  secret: z.string(),
   events: z.array(webhookEventSchema),
   productRestrictions: z.array(z.string().uuid()).nullable(),
   description: z.string().nullable(),
@@ -49,6 +48,13 @@ export const webhookSubscriptionSchema = z.object({
 });
 
 export type WebhookSubscription = z.infer<typeof webhookSubscriptionSchema>;
+
+/** Only create and rotate-secret return the signing secret; it is never readable afterwards. */
+export const webhookSubscriptionWithSecretSchema = webhookSubscriptionSchema.extend({
+  secret: z.string(),
+});
+
+export type WebhookSubscriptionWithSecret = z.infer<typeof webhookSubscriptionWithSecretSchema>;
 
 export const webhookSubscriptionListResponseSchema = z.object({
   subscriptions: z.array(webhookSubscriptionSchema),

@@ -86,6 +86,7 @@ export class AdminCommentsController {
   @HttpCode(204)
   async restoreComment(
     @CurrentTenant() tenant: Tenant,
+    @CurrentUser() user: any,
     @Param("id") id: string
   ): Promise<void> {
     const parsedId = uuidParamSchema.safeParse(id);
@@ -95,7 +96,8 @@ export class AdminCommentsController {
 
     return this.moderationService.restoreComment(
       { workspaceId: tenant.workspaceId, productId: tenant.productId! },
-      parsedId.data
+      parsedId.data,
+      user.id
     );
   }
 }

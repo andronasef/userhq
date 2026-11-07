@@ -166,12 +166,14 @@ export class AdminPostsController {
   @SerializeOptions({ schema: MergeResultSchema })
   async bulkMerge(
     @CurrentTenant() tenant: Tenant,
+    @CurrentUser() user: any,
     @Body({ schema: BulkMergeInputSchema }) body: BulkMergeInput
   ): Promise<MergeResult> {
     return this.moderationService.mergePosts(
       { workspaceId: tenant.workspaceId, productId: tenant.productId! },
       body.keepNumber,
-      body.mergeNumbers
+      body.mergeNumbers,
+      user.id
     );
   }
 
@@ -181,6 +183,7 @@ export class AdminPostsController {
   @SerializeOptions({ schema: MergeResultSchema })
   async mergePost(
     @CurrentTenant() tenant: Tenant,
+    @CurrentUser() user: any,
     @Param("number") number: string,
     @Body({ schema: MergeInputSchema }) body: MergeInput
   ): Promise<MergeResult> {
@@ -192,7 +195,8 @@ export class AdminPostsController {
     return this.moderationService.mergePosts(
       { workspaceId: tenant.workspaceId, productId: tenant.productId! },
       body.targetNumber,
-      [parsedNumber.data]
+      [parsedNumber.data],
+      user.id
     );
   }
 
@@ -249,6 +253,7 @@ export class AdminPostsController {
   @HttpCode(204)
   async restorePost(
     @CurrentTenant() tenant: Tenant,
+    @CurrentUser() user: any,
     @Param("number") number: string
   ): Promise<void> {
     const parsedNumber = postNumberParamSchema.safeParse(number);
@@ -262,7 +267,8 @@ export class AdminPostsController {
 
     return this.moderationService.restorePost(
       { workspaceId: tenant.workspaceId, productId: tenant.productId! },
-      parsedNumber.data
+      parsedNumber.data,
+      user.id
     );
   }
 

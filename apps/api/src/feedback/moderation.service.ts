@@ -629,7 +629,8 @@ export class ModerationService {
 
   async restorePost(
     tenant: { workspaceId: string; productId: string },
-    postNumber: number
+    postNumber: number,
+    actorId: string
   ): Promise<void> {
     await this.db.transaction(async (tx) => {
       const [post] = await tx
@@ -658,6 +659,13 @@ export class ModerationService {
           deletedById: null,
         })
         .where(eq(posts.id, post.id));
+
+      await enqueueWebhookEvent(tx, {
+        workspaceId: tenant.workspaceId,
+        productId: tenant.productId,
+        eventType: "post.restored",
+        data: { id: post.id, number: postNumber, actorId },
+      });
     });
   }
 
@@ -709,13 +717,15 @@ export class ModerationService {
 
   async restoreComment(
     tenant: { workspaceId: string; productId: string },
-    commentId: string
+    commentId: string,
+    actorId: string
   ): Promise<void> {
     await this.db.transaction(async (tx) => {
       const [row] = await tx
         .select({
           commentId: comments.id,
           commentDeletedAt: comments.deletedAt,
+          postId: posts.id,
           postDeletedAt: posts.deletedAt,
           postMergedIntoId: posts.mergedIntoId,
         })
@@ -744,13 +754,21 @@ export class ModerationService {
           deletedById: null,
         })
         .where(eq(comments.id, row.commentId));
+
+      await enqueueWebhookEvent(tx, {
+        workspaceId: tenant.workspaceId,
+        productId: tenant.productId,
+        eventType: "comment.restored",
+        data: { id: row.commentId, postId: row.postId, actorId },
+      });
     });
   }
 
   async mergePosts(
     tenant: { workspaceId: string; productId: string },
     keepNumber: number,
-    mergeNumbers: number[]
+    mergeNumbers: number[],
+    actorId: string
   ): Promise<MergeResult> {
     if (mergeNumbers.includes(keepNumber)) {
       throw new ApiException(
@@ -867,6 +885,18 @@ export class ModerationService {
             roadmapItemId: null,
           })
           .where(eq(posts.id, dupRow.id));
+
+        await enqueueWebhookEvent(tx, {
+          workspaceId: tenant.workspaceId,
+          productId: tenant.productId,
+          eventType: "post.merged",
+          data: {
+            id: dupRow.id,
+            number: dupRow.number,
+            mergedInto: { id: keepRow.id, number: keepRow.number },
+            actorId,
+          },
+        });
       }
 
       // Phase 4: a post links to at most one roadmap item — resolve links before merging (ROAD-06)

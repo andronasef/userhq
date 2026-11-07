@@ -6,8 +6,11 @@ export const WEBHOOK_EVENTS = [
   "post.updated",
   "post.status_changed",
   "post.deleted",
+  "post.merged",
+  "post.restored",
   "comment.created",
   "comment.deleted",
+  "comment.restored",
   "changelog.published",
 ] as const;
 

@@ -21,6 +21,9 @@ import { ApiException } from "../common/api-error.filter.js";
 import { isUniqueViolation } from "../common/db-errors.js";
 import { enqueueWebhookEvent } from "../webhooks/outbox.js";
 
+/** Live means published at or before now; drafts (null) and future-dated entries are not live. */
+const isLiveAt = (publishedAt: Date | null): boolean => publishedAt !== null && publishedAt.getTime() <= Date.now();
+
 @Injectable()
 export class ChangelogService {
   constructor(@Inject(DB) private readonly db: Db) {}
@@ -138,6 +141,36 @@ export class ChangelogService {
     };
   }
 
+  /** Announces an entry once, on its draft-to-live transition (live = published at or before now). */
+  private async announceIfWentLive(
+    tx: any,
+    productId: string,
+    entry: { id: string; title: string; summary: string | null; publishedAt: string | null },
+    wasLive: boolean
+  ): Promise<void> {
+    const isLive = entry.publishedAt !== null && new Date(entry.publishedAt).getTime() <= Date.now();
+    if (wasLive || !isLive) return;
+
+    const [prod] = await tx
+      .select({ workspaceId: products.workspaceId })
+      .from(products)
+      .where(eq(products.id, productId))
+      .limit(1);
+    if (!prod) return;
+
+    await enqueueWebhookEvent(tx, {
+      workspaceId: prod.workspaceId,
+      productId,
+      eventType: "changelog.published",
+      data: {
+        id: entry.id,
+        title: entry.title,
+        summary: entry.summary,
+        publishedAt: entry.publishedAt,
+      },
+    });
+  }
+
   async createEntry(
     productId: string,
     input: CreateChangelogEntryInput
@@ -183,7 +216,9 @@ export class ChangelogService {
         }
       }
 
-      return this.getEntryById(productId, created.id, tx);
+      const entry = await this.getEntryById(productId, created.id, tx);
+      await this.announceIfWentLive(tx, productId, entry, false);
+      return entry;
     });
   }
 
@@ -281,7 +316,9 @@ export class ChangelogService {
         }
       }
 
-      return this.getEntryById(productId, entryId, tx);
+      const entry = await this.getEntryById(productId, entryId, tx);
+      await this.announceIfWentLive(tx, productId, entry, isLiveAt(existing.publishedAt));
+      return entry;
     });
   }
 
@@ -292,7 +329,7 @@ export class ChangelogService {
   ): Promise<AdminChangelogEntry> {
     return this.db.transaction(async (tx) => {
       const [existing] = await tx
-        .select({ id: changelogEntries.id })
+        .select({ id: changelogEntries.id, publishedAt: changelogEntries.publishedAt })
         .from(changelogEntries)
         .where(
           and(
@@ -317,26 +354,7 @@ export class ChangelogService {
         .where(eq(changelogEntries.id, entryId));
 
       const entry = await this.getEntryById(productId, entryId, tx);
-
-      const [prod] = await tx
-        .select({ workspaceId: products.workspaceId })
-        .from(products)
-        .where(eq(products.id, productId))
-        .limit(1);
-
-      if (prod) {
-        await enqueueWebhookEvent(tx, {
-          workspaceId: prod.workspaceId,
-          productId,
-          eventType: "changelog.published",
-          data: {
-            id: entry.id,
-            title: entry.title,
-            summary: entry.summary,
-            publishedAt: publishedAt.toISOString(),
-          },
-        });
-      }
+      await this.announceIfWentLive(tx, productId, entry, isLiveAt(existing.publishedAt));
 
       return entry;
     });

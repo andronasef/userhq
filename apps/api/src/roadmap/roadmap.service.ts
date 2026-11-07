@@ -23,6 +23,7 @@ import {
 import { ApiException } from "../common/api-error.filter.js";
 import { type Actor, actorApiKeyId } from "../auth/principal.js";
 import { escapeLike } from "../platform/platform.controller.js";
+import { enqueueWebhookEvent } from "../webhooks/outbox.js";
 
 @Injectable()
 export class RoadmapService {
@@ -677,9 +678,22 @@ export class RoadmapService {
     status: { id: string; name: string; color: string },
     linked: { id: string; statusId: string; version: number }[]
   ): Promise<void> {
-    for (const post of linked) {
-      if (post.statusId === status.id) continue;
+    const changed = linked.filter((p) => p.statusId !== status.id);
+    if (changed.length === 0) return;
 
+    // Webhook payload: the shared status row and post numbers only, never anything from the roadmap item.
+    const [statusRow] = await tx
+      .select({ type: statuses.type })
+      .from(statuses)
+      .where(and(eq(statuses.id, status.id), eq(statuses.productId, tenant.productId)))
+      .limit(1);
+    const numberRows: { id: string; number: number }[] = await tx
+      .select({ id: posts.id, number: posts.number })
+      .from(posts)
+      .where(and(inArray(posts.id, changed.map((p) => p.id)), eq(posts.productId, tenant.productId)));
+    const numbers = new Map(numberRows.map((r) => [r.id, r.number]));
+
+    for (const post of changed) {
       await tx
         .update(posts)
         .set({ statusId: status.id, version: post.version + 1 })
@@ -705,6 +719,20 @@ export class RoadmapService {
         postId: post.id,
         postActivityId: act.id,
         actorId: actor.id,
+      });
+
+      await enqueueWebhookEvent(tx, {
+        workspaceId: tenant.workspaceId,
+        productId: tenant.productId,
+        eventType: "post.status_changed",
+        data: {
+          postId: post.id,
+          postNumber: numbers.get(post.id) ?? null,
+          previousStatusId: post.statusId,
+          newStatus: { id: status.id, name: status.name, color: status.color, type: statusRow?.type ?? null },
+          actorId: actor.id,
+          note: null,
+        },
       });
     }
   }

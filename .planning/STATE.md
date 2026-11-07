@@ -4,10 +4,10 @@ current_phase: 07
 current_phase_name: appearance
 status: planning
 stopped_at: Phase 06 complete; starting Phase 07 Appearance (dark mode)
-last_updated: "2026-11-07T09:13:55.954Z"
+last_updated: "2026-11-07T18:17:14.008Z"
 last_activity: 2026-11-07
 last_activity_desc: Completed quick task 261107-052 outbound URL security hardening
-state_head: 02e23fe343d4ee56e8278645f1e9d95b6699fe5f
+state_head: 9079667101a9f7b87dfc3e7d5542d50df24798fe
 progress:
   total_phases: 7
   completed_phases: 6
@@ -149,6 +149,7 @@ Items acknowledged and deferred at milestone close, most recent first:
 | 261107-052 | Secure webhook and push destinations with pinned public HTTPS and bounded delivery | 2026-11-07 | 845180e | Verified | [261107-052-secure-outbound-webhook-and-push-urls-ht](./quick/261107-052-secure-outbound-webhook-and-push-urls-ht/) |
 | 261107-1xs | Fix browser push review defects | 2026-11-07 | 4b2845b | — | [261107-1xs-fix-browser-push-slice-8-review-defects-](./quick/261107-1xs-fix-browser-push-slice-8-review-defects-/) |
 | 261107-2el | Fix dark-mode accent contrast and theme first paint | 2026-11-07 | 02e23fe | — | [261107-2el-fix-dark-mode-accent-contrast-and-theme-](./quick/261107-2el-fix-dark-mode-accent-contrast-and-theme-/) |
+| 261107-flq | API key lockout, integration attribution, per-key rate limit, automation docs | 2026-11-07 | 9079667 | — | [261107-flq-api-key-management-lockout-integration-a](./quick/261107-flq-api-key-management-lockout-integration-a/) |
 
 ## Session Continuity
 

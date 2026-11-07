@@ -26,3 +26,13 @@ export function actorSource(actor: Actor) {
     ? { kind: "integration" as const, name: actor.apiPrincipal.keyName }
     : null;
 }
+
+/** Public source for a joined key row (id and name); null when no key made it. */
+export function keySource(id: string | null | undefined, name: string | null | undefined) {
+  return id ? { kind: "integration" as const, name: name ?? "" } : null;
+}
+
+/** Admin source: the public shape plus the key id. Never use on anonymous responses. */
+export function adminKeySource(id: string | null | undefined, name: string | null | undefined) {
+  return id ? { ...keySource(id, name)!, apiKeyId: id } : null;
+}

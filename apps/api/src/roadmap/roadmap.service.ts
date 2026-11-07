@@ -21,6 +21,7 @@ import {
   type RoadmapPostLinkSearchResult,
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
+import { type Actor, actorApiKeyId } from "../auth/principal.js";
 import { escapeLike } from "../platform/platform.controller.js";
 
 @Injectable()
@@ -140,7 +141,7 @@ export class RoadmapService {
 
   async createItem(
     tenant: { workspaceId: string; productId: string },
-    adminUser: { id: string },
+    adminUser: Actor,
     input: CreateRoadmapItemInput
   ): Promise<AdminRoadmapItem> {
     return this.db.transaction(async (tx) => {
@@ -270,7 +271,7 @@ export class RoadmapService {
           .update(posts)
           .set({ roadmapItemId: newItem.id })
           .where(inArray(posts.id, input.postIds));
-        await this.followItemStatus(tx, tenant, adminUser.id, statusRow, postsToLink);
+        await this.followItemStatus(tx, tenant, adminUser, statusRow, postsToLink);
       }
 
       return this.getItemById(tenant, newItem.id, tx);
@@ -279,7 +280,7 @@ export class RoadmapService {
 
   async updateItem(
     tenant: { workspaceId: string; productId: string },
-    adminUser: { id: string },
+    adminUser: Actor,
     itemId: string,
     input: UpdateRoadmapItemInput
   ): Promise<AdminRoadmapItem> {
@@ -401,7 +402,7 @@ export class RoadmapService {
         await this.followItemStatus(
           tx,
           tenant,
-          adminUser.id,
+          adminUser,
           targetStatus,
           await this.lockLinkedPosts(tx, tenant.productId, itemId)
         );
@@ -413,7 +414,7 @@ export class RoadmapService {
 
   async moveItem(
     tenant: { workspaceId: string; productId: string },
-    adminUser: { id: string },
+    adminUser: Actor,
     itemId: string,
     input: MoveRoadmapItemInput
   ): Promise<AdminRoadmapItem> {
@@ -471,7 +472,7 @@ export class RoadmapService {
         await this.followItemStatus(
           tx,
           tenant,
-          adminUser.id,
+          adminUser,
           targetStatus,
           await this.lockLinkedPosts(tx, tenant.productId, itemId)
         );
@@ -502,7 +503,7 @@ export class RoadmapService {
 
   async linkPost(
     tenant: { workspaceId: string; productId: string },
-    adminUser: { id: string },
+    adminUser: Actor,
     itemId: string,
     postId: string
   ): Promise<{ success: true; linkedPostCount: number }> {
@@ -560,7 +561,7 @@ export class RoadmapService {
         .update(posts)
         .set({ roadmapItemId: item.id })
         .where(eq(posts.id, post.id));
-      await this.followItemStatus(tx, tenant, adminUser.id, item.status, [post]);
+      await this.followItemStatus(tx, tenant, adminUser, item.status, [post]);
 
       const [countRow] = await tx
         .select({ count: sql<number>`count(*)::int` })
@@ -672,7 +673,7 @@ export class RoadmapService {
   private async followItemStatus(
     tx: any,
     tenant: { workspaceId: string; productId: string },
-    actorId: string,
+    actor: Actor,
     status: { id: string; name: string; color: string },
     linked: { id: string; statusId: string; version: number }[]
   ): Promise<void> {
@@ -688,7 +689,8 @@ export class RoadmapService {
         .insert(postActivity)
         .values({
           postId: post.id,
-          actorId,
+          actorId: actor.id,
+          apiKeyId: actorApiKeyId(actor),
           kind: "status_changed",
           toStatusId: status.id,
           statusName: status.name,
@@ -702,7 +704,7 @@ export class RoadmapService {
         productId: tenant.productId,
         postId: post.id,
         postActivityId: act.id,
-        actorId,
+        actorId: actor.id,
       });
     }
   }

@@ -25,6 +25,7 @@ import {
   roadmapItemInternals,
   products,
   workspaces,
+  workspaceApiKeys,
 } from "@userhq/db";
 import {
   type StatusChangeInput,
@@ -42,7 +43,7 @@ import {
   postSlug,
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
-import { type Actor, actorApiKeyId, actorSource } from "../auth/principal.js";
+import { type Actor, actorApiKeyId, actorSource, adminKeySource, keySource } from "../auth/principal.js";
 import { prefixTsQuery } from "./search.js";
 import { encodeBoardCursor, decodeBoardCursor } from "./cursor.js";
 import { loadTimeline } from "./posts.service.js";
@@ -298,11 +299,14 @@ export class ModerationService {
         categoryId: categories.id,
         categoryName: categories.name,
         deviceInfo: posts.deviceInfo,
+        createdByApiKeyId: posts.createdByApiKeyId,
+        apiKeyName: workspaceApiKeys.name,
         commentCount: sql<number>`(SELECT count(*)::int FROM ${comments} c WHERE c.post_id = ${posts.id} AND c.deleted_at IS NULL)`,
       })
       .from(posts)
       .innerJoin(statuses, eq(posts.statusId, statuses.id))
       .leftJoin(categories, eq(posts.categoryId, categories.id))
+      .leftJoin(workspaceApiKeys, eq(posts.createdByApiKeyId, workspaceApiKeys.id))
       .where(
         and(
           eq(posts.productId, tenant.productId),
@@ -342,6 +346,7 @@ export class ModerationService {
         commentCount: Number(r.commentCount),
         createdAt: r.createdAt.toISOString(),
         deviceInfo: r.deviceInfo ?? null,
+        source: adminKeySource(r.createdByApiKeyId, r.apiKeyName),
       })),
       nextCursor,
     };
@@ -378,11 +383,14 @@ export class ModerationService {
         authorDeletedAt: user.deletedAt,
         roadmapItemId: posts.roadmapItemId,
         roadmapItemTitle: sql<string | null>`coalesce(${roadmapItems.publicTitle}, ${roadmapItemInternals.internalTitle})`,
+        createdByApiKeyId: posts.createdByApiKeyId,
+        apiKeyName: workspaceApiKeys.name,
       })
       .from(posts)
       .innerJoin(statuses, eq(posts.statusId, statuses.id))
       .leftJoin(categories, eq(posts.categoryId, categories.id))
       .innerJoin(user, eq(posts.authorId, user.id))
+      .leftJoin(workspaceApiKeys, eq(posts.createdByApiKeyId, workspaceApiKeys.id))
       .leftJoin(roadmapItems, eq(posts.roadmapItemId, roadmapItems.id))
       .leftJoin(roadmapItemInternals, eq(roadmapItems.id, roadmapItemInternals.itemId))
       .where(
@@ -509,6 +517,7 @@ export class ModerationService {
             }
           : null,
         deviceInfo: row.deviceInfo ?? null,
+        source: keySource(row.createdByApiKeyId, row.apiKeyName),
       },
       deleted: row.deletedAt !== null,
       timeline,

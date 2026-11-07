@@ -1,6 +1,6 @@
 import { Injectable, Inject, Optional } from "@nestjs/common";
 import { and, eq, isNull, or, sql } from "drizzle-orm";
-import { DB, type Db, posts, comments, user, products, workspaces } from "@userhq/db";
+import { DB, type Db, posts, comments, user, products, workspaces, workspaceApiKeys } from "@userhq/db";
 import type {
   CreateCommentInput,
   UpdateCommentInput,
@@ -10,7 +10,7 @@ import type {
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
 import { isFeedbackAdmin } from "./membership.js";
-import type { Actor } from "../auth/principal.js";
+import { type Actor, actorSource, keySource } from "../auth/principal.js";
 import { enqueueCommentEmail } from "../email/outbox.js";
 import { enqueueWebhookEvent } from "../webhooks/outbox.js";
 import { parseUserAgent } from "./device-info.js";
@@ -28,6 +28,8 @@ export interface CommentRowWithAuthor {
   deletedAt: Date | null;
   createdAt: Date;
   deviceInfo?: DeviceInfo | null;
+  createdByApiKeyId?: string | null;
+  apiKeyName?: string | null;
   authorName: string | null;
   authorImage: string | null;
   authorDeletedAt: Date | null;
@@ -209,6 +211,7 @@ export class CommentsService {
         canEdit: true,
         canDelete: true,
         deviceInfo: isAdmin ? (newComment.deviceInfo ?? null) : null,
+        source: actorSource(currentUser),
       };
     });
   }
@@ -293,6 +296,13 @@ export class CommentsService {
       .limit(1);
 
     const isDeletedUser = Boolean(authorUser?.deletedAt);
+    const [keyRow] = updated.createdByApiKeyId
+      ? await this.db
+          .select({ name: workspaceApiKeys.name })
+          .from(workspaceApiKeys)
+          .where(eq(workspaceApiKeys.id, updated.createdByApiKeyId))
+          .limit(1)
+      : [];
 
     return {
       id: updated.id,
@@ -311,6 +321,7 @@ export class CommentsService {
       canEdit: true,
       canDelete: true,
       deviceInfo: isAdmin ? (updated.deviceInfo ?? null) : null,
+      source: keySource(updated.createdByApiKeyId, keyRow?.name),
     };
   }
 
@@ -416,6 +427,7 @@ export class CommentsService {
         canEdit: canManage && !row.deletedAt,
         canDelete: canManage && !row.deletedAt,
         deviceInfo: viewer.isAdmin ? (row.deviceInfo ?? null) : null,
+        source: keySource(row.createdByApiKeyId, row.apiKeyName),
       };
     };
 

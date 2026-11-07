@@ -11,6 +11,7 @@ import {
   commentReads,
   uploads,
   user,
+  workspaceApiKeys,
 } from "@userhq/db";
 import type {
   WorkspaceRequestItem,
@@ -25,7 +26,7 @@ import { ApiException } from "../common/api-error.filter.js";
 import { prefixTsQuery } from "./search.js";
 import { encodeKeysetCursor, decodeKeysetCursor, type KeysetKind } from "./cursor.js";
 import { postSlug } from "@userhq/types";
-import type { Actor } from "../auth/principal.js";
+import { type Actor, adminKeySource } from "../auth/principal.js";
 import { CommentsService } from "./comments.service.js";
 
 @Injectable()
@@ -142,6 +143,8 @@ export class WorkspaceFeedbackService {
         statusType: statuses.type,
         categoryId: categories.id,
         categoryName: categories.name,
+        createdByApiKeyId: posts.createdByApiKeyId,
+        apiKeyName: workspaceApiKeys.name,
         commentCount: sql<number>`(SELECT count(*)::int FROM ${comments} c WHERE c.post_id = ${posts.id} AND c.deleted_at IS NULL)`,
       })
       .from(posts)
@@ -150,6 +153,7 @@ export class WorkspaceFeedbackService {
       .leftJoin(categories, eq(posts.categoryId, categories.id))
       .leftJoin(uploads, eq(products.logoUploadId, uploads.id))
       .leftJoin(user, eq(posts.authorId, user.id))
+      .leftJoin(workspaceApiKeys, eq(posts.createdByApiKeyId, workspaceApiKeys.id))
       .where(and(effectiveWhere, cursorWhere))
       .orderBy(...orderClauses)
       .limit(limit + 1);
@@ -189,6 +193,7 @@ export class WorkspaceFeedbackService {
             deleted: false,
           },
       commentCount: r.commentCount,
+      source: adminKeySource(r.createdByApiKeyId, r.apiKeyName),
     }));
 
     // ponytail: votes or comments changing between page loads can move a row across the cursor; snapshot the sort key if that matters
@@ -276,12 +281,15 @@ export class WorkspaceFeedbackService {
         productLogoKey: uploads.storageKey,
         productAccentColor: products.accentColor,
         isRead: isNotNull(commentReads.readAt),
+        createdByApiKeyId: comments.createdByApiKeyId,
+        apiKeyName: workspaceApiKeys.name,
       })
       .from(comments)
       .innerJoin(posts, eq(comments.postId, posts.id))
       .innerJoin(products, eq(posts.productId, products.id))
       .leftJoin(uploads, eq(products.logoUploadId, uploads.id))
       .leftJoin(user, eq(comments.authorId, user.id))
+      .leftJoin(workspaceApiKeys, eq(comments.createdByApiKeyId, workspaceApiKeys.id))
       .leftJoin(
         commentReads,
         and(eq(commentReads.commentId, comments.id), eq(commentReads.userId, viewer.id))
@@ -349,6 +357,7 @@ export class WorkspaceFeedbackService {
               isAdmin: r.isAdmin,
               deleted: false,
             },
+        source: adminKeySource(r.createdByApiKeyId, r.apiKeyName),
       };
     });
 
@@ -496,6 +505,9 @@ export class WorkspaceFeedbackService {
         accentColor: parent.productAccentColor,
       },
       author: created.author,
+      source: created.source
+        ? adminKeySource(apiKeyId ?? viewer.apiPrincipal?.keyId, created.source.name)
+        : null,
     };
   }
 

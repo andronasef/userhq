@@ -1,6 +1,6 @@
 import { PostRoadmapItemRefSchema } from "./roadmap.js";
 import { z } from "zod";
-import { IntegrationSourceSchema } from "./api-keys.js";
+import { IntegrationSourceSchema, AdminIntegrationSourceSchema } from "./api-keys.js";
 import { slugify } from "./slugs.js";
 import { STATUS_TYPES } from "./palette.js";
 
@@ -156,6 +156,7 @@ export const AdminPostRowSchema = z.object({
   commentCount: z.number().int(),
   createdAt: z.string(),
   deviceInfo: DeviceInfoSchema.nullable().optional(),
+  source: AdminIntegrationSourceSchema.nullable().optional(),
 });
 export type AdminPostRow = z.infer<typeof AdminPostRowSchema>;
 
@@ -253,6 +254,7 @@ export const PublicPostDetailSchema = z.object({
   author: PublicAuthorSchema,
   roadmapItem: PostRoadmapItemRefSchema.nullable().optional(),
   deviceInfo: DeviceInfoSchema.nullable().optional(),
+  source: IntegrationSourceSchema.nullable().optional(),
 });
 export type PublicPostDetail = z.infer<typeof PublicPostDetailSchema>;
 
@@ -288,6 +290,7 @@ export const PublicCommentSchema = z.object({
   canEdit: z.boolean(),
   canDelete: z.boolean(),
   deviceInfo: DeviceInfoSchema.nullable().optional(),
+  source: IntegrationSourceSchema.nullable().optional(),
 });
 export type PublicComment = z.infer<typeof PublicCommentSchema>;
 
@@ -433,6 +436,7 @@ export const WorkspaceRequestItemSchema = z.object({
   category: z.object({ id: z.string().uuid(), name: z.string() }).nullable(),
   author: PublicAuthorSchema,
   commentCount: z.number().int().nonnegative(),
+  source: AdminIntegrationSourceSchema.nullable().optional(),
 });
 export type WorkspaceRequestItem = z.infer<typeof WorkspaceRequestItemSchema>;
 
@@ -491,6 +495,7 @@ export const WorkspaceCommentItemSchema = z.object({
   }),
   product: WorkspaceProductRefSchema,
   author: PublicAuthorSchema,
+  source: AdminIntegrationSourceSchema.nullable().optional(),
 });
 export type WorkspaceCommentItem = z.infer<typeof WorkspaceCommentItemSchema>;
 

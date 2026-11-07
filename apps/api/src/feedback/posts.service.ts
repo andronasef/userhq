@@ -14,6 +14,7 @@ import {
   postActivity,
   user,
   roadmapItems,
+  workspaceApiKeys,
 } from "@userhq/db";
 import {
   type CreatePostInput,
@@ -31,7 +32,7 @@ import {
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
 import { isWorkspaceAdmin, isFeedbackAdmin } from "./membership.js";
-import type { Actor } from "../auth/principal.js";
+import { type Actor, keySource } from "../auth/principal.js";
 import { prefixTsQuery } from "./search.js";
 import { encodeBoardCursor, decodeBoardCursor } from "./cursor.js";
 import { CommentsService } from "./comments.service.js";
@@ -567,11 +568,14 @@ export class PostsService {
         authorDeletedAt: user.deletedAt,
         roadmapItemId: posts.roadmapItemId,
         publicRoadmapTitle: roadmapItems.publicTitle,
+        createdByApiKeyId: posts.createdByApiKeyId,
+        apiKeyName: workspaceApiKeys.name,
       })
       .from(posts)
       .innerJoin(statuses, eq(posts.statusId, statuses.id))
       .leftJoin(categories, eq(posts.categoryId, categories.id))
       .innerJoin(user, eq(posts.authorId, user.id))
+      .leftJoin(workspaceApiKeys, eq(posts.createdByApiKeyId, workspaceApiKeys.id))
       .leftJoin(
         roadmapItems,
         and(
@@ -737,6 +741,7 @@ export class PostsService {
             }
           : null,
         deviceInfo: viewer.isAdmin ? (row.deviceInfo ?? null) : null,
+        source: keySource(row.createdByApiKeyId, row.apiKeyName),
       },
       viewer,
       timeline,
@@ -764,12 +769,15 @@ export async function loadTimeline(
       deletedAt: comments.deletedAt,
       createdAt: comments.createdAt,
       deviceInfo: comments.deviceInfo,
+      createdByApiKeyId: comments.createdByApiKeyId,
+      apiKeyName: workspaceApiKeys.name,
       authorName: user.name,
       authorImage: user.image,
       authorDeletedAt: user.deletedAt,
     })
     .from(comments)
     .leftJoin(user, eq(comments.authorId, user.id))
+    .leftJoin(workspaceApiKeys, eq(comments.createdByApiKeyId, workspaceApiKeys.id))
     .where(eq(comments.postId, postId))
     .orderBy(asc(comments.createdAt), asc(comments.id));
 
@@ -785,12 +793,15 @@ export async function loadTimeline(
       statusColor: postActivity.statusColor,
       note: postActivity.note,
       createdAt: postActivity.createdAt,
+      apiKeyId: postActivity.apiKeyId,
+      apiKeyName: workspaceApiKeys.name,
       actorName: user.name,
       actorImage: user.image,
       actorDeletedAt: user.deletedAt,
     })
     .from(postActivity)
     .leftJoin(user, eq(postActivity.actorId, user.id))
+    .leftJoin(workspaceApiKeys, eq(postActivity.apiKeyId, workspaceApiKeys.id))
     .where(eq(postActivity.postId, postId))
     .orderBy(asc(postActivity.createdAt), asc(postActivity.id));
 
@@ -811,6 +822,7 @@ export async function loadTimeline(
           statusName: r.statusName,
           statusColor: r.statusColor,
           note: r.note,
+          source: keySource(r.apiKeyId, r.apiKeyName),
           createdAt: r.createdAt.toISOString(),
         },
       },

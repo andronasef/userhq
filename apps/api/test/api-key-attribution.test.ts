@@ -305,7 +305,8 @@ describe("integration source across DTOs (quick-261107-flq)", () => {
     expect(k.status).toBe(200);
     expect(k.body.post.source).toEqual(publicSource);
     expect(k.body.post.author.name).toBe("Source Key (integration)");
-    expect(JSON.stringify(k.body)).not.toContain("Source Admin");
+    // The human status change on this post legitimately names the admin; the key-made post and comment must not.
+    expect(JSON.stringify([k.body.post, findComment(k.body.timeline, keyCommentId)])).not.toContain("Source Admin");
 
     const h = seen(await request(testApp.http).get(`${base()}/${humanPostNumber}`).set(asAdmin()));
     expect(h.body.post.source).toBeNull();

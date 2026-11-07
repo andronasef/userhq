@@ -36,7 +36,6 @@ describe("webhook worker against a local receiver (quick-261107-s6l)", () => {
   let authorId: string;
 
   const db = () => testApp.db;
-  const base = () => `/api/v1/workspaces/${wsSlug}/webhooks`;
   const as = (who: { cookie: string }, r: request.Test) => r.set("Cookie", who.cookie).set("Origin", testApp.env.PUBLIC_URL);
 
   const seedSub = async (over: Partial<typeof schema.webhookSubscriptions.$inferInsert> = {}) => {

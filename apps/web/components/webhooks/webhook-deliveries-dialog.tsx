@@ -115,6 +115,13 @@ export function WebhookDeliveriesDialog({
             <span>Sending</span>
           </Badge>
         );
+      case "suppressed":
+        return (
+          <Badge variant="neutral" className="gap-1 text-xs">
+            <XCircle className="size-3" />
+            <span>Suppressed</span>
+          </Badge>
+        );
       case "pending":
       default:
         return (

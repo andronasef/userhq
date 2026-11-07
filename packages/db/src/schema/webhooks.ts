@@ -53,7 +53,7 @@ export const webhookDeliveries = pgTable(
     eventType: text("event_type").notNull(),
     payload: jsonb("payload").$type<Record<string, any>>().notNull(),
     status: text("status")
-      .$type<"pending" | "sending" | "delivered" | "failed">()
+      .$type<"pending" | "sending" | "delivered" | "failed" | "suppressed">()
       .notNull()
       .default("pending"),
     attempts: integer("attempts").notNull().default(0),

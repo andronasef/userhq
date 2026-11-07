@@ -1,5 +1,5 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, inArray, sql } from "drizzle-orm";
 import {
   DB,
   type Db,
@@ -10,6 +10,7 @@ import {
 import { randomBytes } from "node:crypto";
 import { ApiException } from "../common/api-error.filter.js";
 import { OutboundHttp } from "../common/outbound-http.js";
+import { WEBHOOK_MAX_ATTEMPTS } from "./webhook.worker.js";
 import type {
   CreateWebhookSubscriptionInput,
   UpdateWebhookSubscriptionInput,
@@ -243,10 +244,35 @@ export class WebhookService {
     subscriptionId: string,
     deliveryId: string
   ): Promise<WebhookDelivery> {
-    await this.getSubscription(workspaceId, subscriptionId);
+    const sub = await this.getSubscription(workspaceId, subscriptionId);
+    if (!sub.isActive) {
+      throw new ApiException("webhook_inactive", 409, "This webhook is paused. Activate it before redelivering.");
+    }
 
-    const [delivery] = await this.db
-      .select()
+    // One conditional UPDATE: only a final delivery can be re-queued, so two callers or a worker claim cannot both win.
+    // Attempts are not reset; the cap keeps at least one attempt available (LEAST) so a redelivery always sends once more.
+    const [updated] = await this.db
+      .update(webhookDeliveries)
+      .set({
+        status: "pending",
+        nextAttemptAt: new Date(),
+        errorMessage: null,
+        attempts: sql`LEAST(${webhookDeliveries.attempts}, ${WEBHOOK_MAX_ATTEMPTS - 1})`,
+      })
+      .where(
+        and(
+          eq(webhookDeliveries.id, deliveryId),
+          eq(webhookDeliveries.subscriptionId, subscriptionId),
+          eq(webhookDeliveries.workspaceId, workspaceId),
+          inArray(webhookDeliveries.status, ["delivered", "failed", "suppressed"])
+        )
+      )
+      .returning();
+
+    if (updated) return this.formatDelivery(updated);
+
+    const [exists] = await this.db
+      .select({ id: webhookDeliveries.id })
       .from(webhookDeliveries)
       .where(
         and(
@@ -256,22 +282,8 @@ export class WebhookService {
         )
       )
       .limit(1);
-
-    if (!delivery) {
-      throw new ApiException("not_found", 404, "Delivery record not found.");
-    }
-
-    const [updated] = await this.db
-      .update(webhookDeliveries)
-      .set({
-        status: "pending",
-        nextAttemptAt: new Date(),
-        errorMessage: null,
-      })
-      .where(eq(webhookDeliveries.id, deliveryId))
-      .returning();
-
-    return this.formatDelivery(updated);
+    if (!exists) throw new ApiException("not_found", 404, "Delivery record not found.");
+    throw new ApiException("delivery_not_final", 409, "That delivery is still in progress.");
   }
 
   private formatSubscription(row: any): WebhookSubscription {

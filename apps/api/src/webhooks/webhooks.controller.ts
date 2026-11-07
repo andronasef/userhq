@@ -36,6 +36,8 @@ import { CurrentUser } from "../auth/decorators.js";
 import { RequireScopes } from "../api-keys/api-key.decorator.js";
 import { WebhookService } from "./webhook.service.js";
 import { ApiException } from "../common/api-error.filter.js";
+import { Throttle } from "@nestjs/throttler";
+import { UserThrottlerGuard } from "../feedback/throttle.js";
 
 const uuidParamSchema = z.string().uuid();
 const paginationQuerySchema = z.object({
@@ -178,6 +180,8 @@ export class WebhooksController {
   @Post(":id/deliveries/:deliveryId/redeliver")
   @HttpCode(200)
   @RequireScopes("webhooks:write")
+  @UseGuards(UserThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @SerializeOptions({ schema: webhookDeliverySchema })
   async redeliver(
     @CurrentTenant() tenant: Tenant,

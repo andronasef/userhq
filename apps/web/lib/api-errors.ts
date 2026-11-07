@@ -43,6 +43,9 @@ export const API_ERROR_COPY: Record<string, string> = {
   move_failed: "Couldn't move item. Check your connection and try again.",
   edit_conflict:
     "Someone edited this while you were looking at it. Refresh to see the latest version.",
+  webhook_inactive: "This webhook is paused. Activate it before redelivering.",
+  delivery_not_final:
+    "That delivery is still in progress. Wait for it to finish before redelivering.",
   rate_limited:
     "You're doing that a bit too fast. Wait a moment and try again.",
   comment_parent_mismatch: "You can only reply to a comment on this post.",

@@ -90,6 +90,8 @@ export const API_ERROR_CODES = [
   "api_key_revoked",
   "insufficient_scope",
   "product_restricted",
+  "webhook_inactive",
+  "delivery_not_final",
 ] as const;
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];
 

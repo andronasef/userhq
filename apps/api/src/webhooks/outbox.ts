@@ -8,6 +8,14 @@ import {
 } from "@userhq/db";
 import { randomBytes } from "node:crypto";
 import type { WebhookEvent, WebhookEventPayload } from "@userhq/types";
+import { featureEnabled, productFeatureColumns, pickFeatures } from "../portal/product-features.js";
+
+/** The product module an event type belongs to; pings and unknown types belong to none. One mapping for enqueue and delivery. */
+export function webhookEventModule(eventType: string): "board" | "changelog" | null {
+  if (eventType.startsWith("post.") || eventType.startsWith("comment.")) return "board";
+  if (eventType.startsWith("changelog.")) return "changelog";
+  return null;
+}
 
 export async function enqueueWebhookEvent(
   tx: Db | any,
@@ -45,10 +53,13 @@ export async function enqueueWebhookEvent(
   let productInfo: { id: string; slug: string; name: string } | null = null;
   if (opts.productId) {
     const [prod] = await tx
-      .select({ id: products.id, slug: products.slug, name: products.name })
+      .select({ id: products.id, slug: products.slug, name: products.name, ...productFeatureColumns })
       .from(products)
-      .where(eq(products.id, opts.productId))
+      .where(and(eq(products.id, opts.productId), eq(products.workspaceId, opts.workspaceId)))
       .limit(1);
+    // D-08/D-10: a disabled module's events never enter the outbox.
+    const eventModule = webhookEventModule(opts.eventType);
+    if (prod && eventModule && !featureEnabled(pickFeatures(prod), eventModule)) return 0;
     if (prod) {
       productInfo = { id: prod.id, slug: prod.slug, name: prod.name };
     }

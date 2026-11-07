@@ -69,6 +69,7 @@ export const webhookDeliveryStatusSchema = z.enum([
   "sending",
   "delivered",
   "failed",
+  "suppressed",
 ]);
 
 export type WebhookDeliveryStatus = z.infer<typeof webhookDeliveryStatusSchema>;

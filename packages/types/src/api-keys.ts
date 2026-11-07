@@ -82,3 +82,6 @@ export const AdminIntegrationSourceSchema = IntegrationSourceSchema.extend({
   apiKeyId: z.string().uuid(),
 });
 export type AdminIntegrationSource = z.infer<typeof AdminIntegrationSourceSchema>;
+
+/** Sliding-window limit applied to every request authenticated by one API key. */
+export const API_KEY_RATE_LIMIT = { limit: 120, windowSeconds: 60 } as const;

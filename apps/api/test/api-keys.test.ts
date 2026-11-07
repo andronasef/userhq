@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
+import { eq } from "drizzle-orm";
+import { ThrottlerStorage } from "@nestjs/throttler";
 import { schema } from "@userhq/db";
+import { API_KEY_SCOPES, API_KEY_RATE_LIMIT } from "@userhq/types";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
 
 describe("Workspace Admin API Keys (Plan 09-02)", () => {
@@ -379,5 +382,115 @@ describe("Workspace Admin API Keys (Plan 09-02)", () => {
       .get(`/api/v1/workspaces/${wsSlug}/comments`)
       .set("Authorization", `Bearer ${adminToken}`);
     expect(adminAccessRes.status).toBe(200);
+  });
+});
+
+describe("API key traffic policy (quick-261107-flq)", () => {
+  let testApp: Awaited<ReturnType<typeof createTestApp>>;
+  let admin: { cookie: string; userId: string };
+  let wsSlug: string;
+  let wsId: string;
+
+  const asAdmin = () => ({ Cookie: admin.cookie, Origin: testApp.env.PUBLIC_URL });
+  const mint = async (name: string, scopes: readonly string[]) => {
+    const res = await request(testApp.http)
+      .post(`/api/v1/workspaces/${wsSlug}/api-keys`)
+      .set(asAdmin())
+      .send({ name, scopes });
+    expect(res.status, JSON.stringify(res.body)).toBe(201);
+    return { token: res.body.token as string, id: res.body.key.id as string };
+  };
+  const keyCount = async () =>
+    (await testApp.db.select().from(schema.workspaceApiKeys).where(eq(schema.workspaceApiKeys.workspaceId, wsId))).length;
+
+  beforeAll(async () => {
+    testApp = await createTestApp();
+    admin = await signedInCookie(testApp.test, {
+      name: "Policy Admin",
+      email: `policy-admin-${Date.now()}@userhq.test`,
+      emailVerified: true,
+    });
+    wsSlug = `ws-policy-${Date.now()}`;
+    const [ws] = await testApp.db
+      .insert(schema.workspaces)
+      .values({ name: "Policy Workspace", slug: wsSlug })
+      .returning();
+    wsId = ws.id;
+    await testApp.db
+      .insert(schema.workspaceMembers)
+      .values({ workspaceId: wsId, userId: admin.userId, role: "owner" });
+  });
+
+  afterAll(async () => {
+    await testApp?.close();
+  });
+
+  it("a key holding every scope, and an admin-only key, cannot list, create or revoke keys", async () => {
+    const victim = await mint("Victim", ["requests:read"]);
+    const attackers = [
+      await mint("All scopes", API_KEY_SCOPES),
+      await mint("Admin only", ["admin"]),
+    ];
+    const before = await keyCount();
+    const responses: string[] = [];
+    for (const attacker of attackers) {
+      const auth = { Authorization: `Bearer ${attacker.token}` };
+      const base = `/api/v1/workspaces/${wsSlug}/api-keys`;
+      const calls = [
+        await request(testApp.http).get(base).set(auth),
+        await request(testApp.http).post(base).set(auth).send({ name: "Minted", scopes: ["admin"] }),
+        await request(testApp.http).delete(`${base}/${victim.id}`).set(auth),
+      ];
+      for (const res of calls) {
+        expect(res.status, JSON.stringify(res.body)).toBe(403);
+        expect(res.body.code).toBe("api_key_route_forbidden");
+        responses.push(JSON.stringify(res.body));
+      }
+    }
+    expect(await keyCount()).toBe(before);
+    const [row] = await testApp.db.select().from(schema.workspaceApiKeys).where(eq(schema.workspaceApiKeys.id, victim.id));
+    expect(row.revokedAt).toBeNull();
+    const read = await request(testApp.http)
+      .get(`/api/v1/workspaces/${wsSlug}/requests`)
+      .set("Authorization", `Bearer ${victim.token}`);
+    expect(read.status).toBe(200);
+    for (const body of responses) {
+      expect(body).not.toContain(row.keyHash);
+      expect(body).not.toContain("uhq_live_");
+      expect(body).not.toContain("token");
+    }
+  });
+
+  it("limits each key to API_KEY_RATE_LIMIT with a numeric Retry-After, independent of other keys and humans", async () => {
+    const a = await mint("Limited A", ["requests:read"]);
+    const b = await mint("Limited B", ["requests:read"]);
+    const url = `/api/v1/workspaces/${wsSlug}/requests?limit=1`;
+    for (let i = 0; i < API_KEY_RATE_LIMIT.limit; i++) {
+      const res = await request(testApp.http).get(url).set("Authorization", `Bearer ${a.token}`);
+      expect(res.status, `request ${i + 1}`).toBe(200);
+    }
+    const blocked = await request(testApp.http).get(url).set("Authorization", `Bearer ${a.token}`);
+    expect(blocked.status).toBe(429);
+    expect(blocked.body.code).toBe("rate_limited");
+    expect(blocked.headers["retry-after"]).toMatch(/^\d+$/);
+    const retry = Number(blocked.headers["retry-after"]);
+    expect(retry).toBeGreaterThanOrEqual(1);
+    expect(retry).toBeLessThanOrEqual(API_KEY_RATE_LIMIT.windowSeconds);
+
+    const other = await request(testApp.http).get(url).set("Authorization", `Bearer ${b.token}`);
+    expect(other.status).toBe(200);
+    const human = await request(testApp.http).get(url).set("Cookie", admin.cookie);
+    expect(human.status).toBe(200);
+  });
+
+  it("an invalid token is 401 and creates no limiter bucket", async () => {
+    const storage = testApp.app.get(ThrottlerStorage) as unknown as { storage: Map<string, unknown> };
+    const before = [...storage.storage.keys()].sort();
+    const res = await request(testApp.http)
+      .get(`/api/v1/workspaces/${wsSlug}/requests`)
+      .set("Authorization", "Bearer uhq_live_definitelynotarealkey0000000000");
+    expect(res.status).toBe(401);
+    expect(res.body.code).toBe("api_key_invalid");
+    expect([...storage.storage.keys()].sort()).toEqual(before);
   });
 });

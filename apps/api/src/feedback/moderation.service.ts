@@ -42,6 +42,7 @@ import {
   postSlug,
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
+import { type Actor, actorApiKeyId, actorSource } from "../auth/principal.js";
 import { prefixTsQuery } from "./search.js";
 import { encodeBoardCursor, decodeBoardCursor } from "./cursor.js";
 import { loadTimeline } from "./posts.service.js";
@@ -61,7 +62,7 @@ export class ModerationService {
 
   async changeStatus(
     tenant: { workspaceId: string; productId: string },
-    actor: { id: string; name?: string | null; image?: string | null },
+    actor: Actor & { name?: string | null; image?: string | null },
     postNumber: number,
     input: StatusChangeInput
   ): Promise<StatusChangeResult> {
@@ -162,6 +163,7 @@ export class ModerationService {
           statusName: targetStatus.name,
           statusColor: targetStatus.color,
           note: trimmedNote,
+          apiKeyId: actorApiKeyId(actor),
         })
         .returning({
           id: postActivity.id,
@@ -242,6 +244,7 @@ export class ModerationService {
           statusName: targetStatus.name,
           statusColor: targetStatus.color,
           note: trimmedNote,
+          source: actorSource(actor),
           createdAt: insertedActivity.createdAt.toISOString(),
         },
       };

@@ -205,6 +205,7 @@ export const postActivity = pgTable(
     statusName: text("status_name").notNull(), // snapshot (UI-SPEC ActivityItem)
     statusColor: text("status_color").notNull(),
     note: text("note"),
+    apiKeyId: uuid("api_key_id").references(() => workspaceApiKeys.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [index("post_activity_post_created").on(t.postId, t.createdAt)]

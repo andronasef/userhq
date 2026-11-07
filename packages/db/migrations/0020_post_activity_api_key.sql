@@ -1,0 +1,2 @@
+ALTER TABLE "post_activity" ADD COLUMN "api_key_id" uuid;--> statement-breakpoint
+ALTER TABLE "post_activity" ADD CONSTRAINT "post_activity_api_key_id_workspace_api_keys_id_fk" FOREIGN KEY ("api_key_id") REFERENCES "public"."workspace_api_keys"("id") ON DELETE set null ON UPDATE no action;

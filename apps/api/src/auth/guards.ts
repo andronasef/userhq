@@ -118,6 +118,7 @@ export class SessionGuard implements CanActivate {
       const principal = {
         kind: "api-key" as const,
         keyId: result.key.id,
+        keyName: result.key.name,
         workspaceId: result.key.workspaceId,
         scopes: result.key.scopes,
       };

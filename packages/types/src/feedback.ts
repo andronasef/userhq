@@ -1,5 +1,6 @@
 import { PostRoadmapItemRefSchema } from "./roadmap.js";
 import { z } from "zod";
+import { IntegrationSourceSchema } from "./api-keys.js";
 import { slugify } from "./slugs.js";
 import { STATUS_TYPES } from "./palette.js";
 
@@ -326,6 +327,7 @@ export const ActivityEntrySchema = z.object({
   statusName: z.string(),
   statusColor: z.string(),
   note: z.string().nullable(),
+  source: IntegrationSourceSchema.nullable().optional(),
   createdAt: z.string(),
 });
 export type ActivityEntry = z.infer<typeof ActivityEntrySchema>;

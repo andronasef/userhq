@@ -69,3 +69,16 @@ export const apiKeyListResponseSchema = z.object({
 });
 
 export type ApiKeyListResponse = z.infer<typeof apiKeyListResponseSchema>;
+
+/** Public shape of "which integration made this": never carries the key id. */
+export const IntegrationSourceSchema = z.object({
+  kind: z.literal("integration"),
+  name: z.string(),
+});
+export type IntegrationSource = z.infer<typeof IntegrationSourceSchema>;
+
+/** Admin-only shape: adds the key id. */
+export const AdminIntegrationSourceSchema = IntegrationSourceSchema.extend({
+  apiKeyId: z.string().uuid(),
+});
+export type AdminIntegrationSource = z.infer<typeof AdminIntegrationSourceSchema>;

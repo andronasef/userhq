@@ -141,6 +141,13 @@
       "when": 1794006662818,
       "tag": "0019_backfill_comment_attention",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794043509227,
+      "tag": "0020_post_activity_api_key",
+      "breakpoints": true
     }
   ]
 }

@@ -2,7 +2,13 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
 import { readFileSync } from "node:fs";
 import { schema } from "@userhq/db";
-import { API_KEY_SCOPES, API_KEY_RATE_LIMIT } from "@userhq/types";
+import { API_KEY_SCOPES, API_KEY_RATE_LIMIT, WEBHOOK_EVENTS } from "@userhq/types";
+import {
+  WEBHOOK_MAX_ATTEMPTS,
+  WEBHOOK_RETENTION_DAYS,
+  backoffMinutes,
+} from "../src/webhooks/webhook.worker.js";
+import { REDELIVER_THROTTLE } from "../src/webhooks/webhooks.controller.js";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
 import { discoverRoutes, type DiscoveredRoute } from "./support/routes.js";
 
@@ -131,6 +137,27 @@ describe("automation route inventory and docs sync (quick-261107-flq)", () => {
   it("the docs state the rate limit with the constant's numbers", () => {
     expect(section("Rate limits")).toContain(
       `${API_KEY_RATE_LIMIT.limit} requests per ${API_KEY_RATE_LIMIT.windowSeconds} seconds per key`
+    );
+  });
+
+  it("the docs Webhooks event table equals WEBHOOK_EVENTS plus ping", () => {
+    const webhooks = section("Webhooks");
+    const table = webhooks.slice(webhooks.indexOf("### Events"), webhooks.indexOf("### Payload"));
+    const documented = rows(table).map((c) => unquote(c[0]));
+    expect(documented.sort()).toEqual([...WEBHOOK_EVENTS, "ping"].sort());
+  });
+
+  it("the docs state the webhook attempt count, backoff schedule and retention from the worker constants", () => {
+    const webhooks = section("Webhooks");
+    const [a, b, c, d] = [1, 2, 3, 4].map(backoffMinutes);
+    expect(webhooks).toContain(`${WEBHOOK_MAX_ATTEMPTS} attempts in total`);
+    expect(webhooks).toContain(`${a}, ${b}, ${c} and ${d} minutes`);
+    expect(webhooks).toContain(`older than ${WEBHOOK_RETENTION_DAYS} days`);
+  });
+
+  it("the docs state the redeliver limit in Rate limits", () => {
+    expect(section("Rate limits")).toContain(
+      `${REDELIVER_THROTTLE.limit} redeliveries per ${REDELIVER_THROTTLE.ttl / 1000} seconds per caller`
     );
   });
 });

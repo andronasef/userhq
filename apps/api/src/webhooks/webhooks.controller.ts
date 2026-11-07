@@ -39,6 +39,9 @@ import { ApiException } from "../common/api-error.filter.js";
 import { Throttle } from "@nestjs/throttler";
 import { UserThrottlerGuard } from "../feedback/throttle.js";
 
+/** Redeliver limit per caller (per key for key requests); the docs state it from this constant. */
+export const REDELIVER_THROTTLE = { limit: 10, ttl: 60_000 } as const;
+
 const uuidParamSchema = z.string().uuid();
 const paginationQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -181,7 +184,7 @@ export class WebhooksController {
   @HttpCode(200)
   @RequireScopes("webhooks:write")
   @UseGuards(UserThrottlerGuard)
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle({ default: REDELIVER_THROTTLE })
   @SerializeOptions({ schema: webhookDeliverySchema })
   async redeliver(
     @CurrentTenant() tenant: Tenant,

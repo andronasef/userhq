@@ -135,6 +135,30 @@ describe("Workspace Admin API Keys (Plan 09-02)", () => {
     expect(res.body.key.keyHash).toBeUndefined(); // Sensitive hash should not be exposed
   });
 
+  describe("createKey input validation (quick-261108-bzd)", () => {
+    const invalidBodies: Array<[string, Record<string, unknown>]> = [
+      ["an unknown scope", { name: "Bad scope", scopes: ["not:a:scope"] }],
+      ["an empty scope list", { name: "No scopes", scopes: [] }],
+      ["scopes given as a string", { name: "String scopes", scopes: "requests:read" }],
+      ["a missing name", { scopes: ["requests:read"] }],
+      ["expiresInDays above ten years", { name: "Too long", scopes: ["requests:read"], expiresInDays: 4000 }],
+    ];
+
+    it.each(invalidBodies)("returns 400 validation_failed for %s and creates no key", async (_label, body) => {
+      const before = await testApp.db.select().from(schema.workspaceApiKeys);
+      const res = await request(testApp.http)
+        .post(`/api/v1/workspaces/${wsSlug}/api-keys`)
+        .set("Cookie", admin.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send(body);
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe("validation_failed");
+      expect(typeof res.body.message).toBe("string");
+      const after = await testApp.db.select().from(schema.workspaceApiKeys);
+      expect(after.length).toBe(before.length);
+    });
+  });
+
   it("keeps personal, public, team and credential routes session-only for every key scope", async () => {
     for (const scopes of [["requests:read"], ["admin"]]) {
       const key = await request(testApp.http).post(`/api/v1/workspaces/${wsSlug}/api-keys`)

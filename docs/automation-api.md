@@ -255,10 +255,11 @@ A webhook subscription sends signed `POST` requests with JSON bodies to your HTT
 | `comment.created` | A comment is added, including replies from the workspace inbox. Exactly one event per comment. | `id`, `postId`, `postNumber`, `authorId`, `body`, `parentId` |
 | `comment.deleted` | A comment is deleted. | `id`, `postId` |
 | `comment.restored` | A deleted comment is restored. | `id`, `postId`, `actorId` |
-| `changelog.published` | A changelog entry becomes live: created live, edited to a past date, or published. Once per draft-to-live transition. | `id`, `title`, `summary`, `publishedAt` |
+| `changelog.published` | A changelog entry becomes live: created live, edited to a past date, published, or its scheduled date arrives. Once per draft-to-live transition. | `id`, `title`, `summary`, `publishedAt` |
 
 - A subscription to `*` also receives `post.merged`, `post.restored` and `comment.restored`, and any event type added later.
-- `changelog.published` fires when the entry becomes live through one of those actions. An entry saved with a future `publishedAt` does not announce itself when that date arrives.
+- `changelog.published` also fires for a future `publishedAt` when that date arrives. A background job checks every 60 seconds, so the announcement is normally queued within about a minute, followed by the webhook queue's own delivery interval. One tick processes at most 100 due entries; a larger backlog takes additional ticks.
+- An entry whose due event is processed while the product's Changelog is off sends nothing and is never replayed on re-enable. Unpublishing or rescheduling it to a future date re-arms the next live transition.
 - Editing an already-live entry, or publishing it again, sends nothing. Unpublishing and publishing again sends one more.
 - Roadmap-driven `post.status_changed` events carry the shared status and the post only. Internal roadmap titles, descriptions, notes, assignees and deadlines never appear in any payload.
 

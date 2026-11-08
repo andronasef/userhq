@@ -38,11 +38,6 @@ const SESSION_ONLY_CONTROLLERS: Record<string, string> = {
   TeamInvitesController: "team invites",
   WorkspaceController: "workspace settings and deletion",
   PushFollowController: "a person's own browser push subscription",
-  // Story 20 lists FAQ and product settings as automation targets, but these routes carry no scope today.
-  // Pinned deliberately as a known gap, not silently: give them scopes and move them to the docs to close it.
-  FaqController: "story-20 gap: FAQ has no scope yet",
-  StatusesController: "story-20 gap: product status settings have no scope yet",
-  CategoriesController: "story-20 gap: product category settings have no scope yet",
 };
 // Handler exceptions inside otherwise scoped controllers: "Controller.handler".
 const SESSION_ONLY_HANDLERS: Record<string, string> = {

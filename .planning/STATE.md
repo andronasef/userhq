@@ -4,10 +4,10 @@ current_phase: 07
 current_phase_name: appearance
 status: planning
 stopped_at: Phase 06 complete; starting Phase 07 Appearance (dark mode)
-last_updated: "2026-11-08T06:37:39.398Z"
+last_updated: "2026-11-08T15:42:26.151Z"
 last_activity: 2026-11-07
 last_activity_desc: Completed quick task 261107-052 outbound URL security hardening
-state_head: 7a30e62d75be9ca9b76379d70e93f5f0f627fcba
+state_head: 5177eafe77fbf31889a632c1f18e9f286c71dcdb
 progress:
   total_phases: 7
   completed_phases: 6
@@ -152,6 +152,7 @@ Items acknowledged and deferred at milestone close, most recent first:
 | 261107-flq | API key lockout, integration attribution, per-key rate limit, automation docs | 2026-11-07 | 9079667 | — | [261107-flq-api-key-management-lockout-integration-a](./quick/261107-flq-api-key-management-lockout-integration-a/) |
 | 261107-s6l | Webhook secret rotation, missing events, worker hardening, docs | 2026-11-07 | c0aff80 | — | [261107-s6l-webhook-secret-rotation-missing-events-w](./quick/261107-s6l-webhook-secret-rotation-missing-events-w/) |
 | 261108-b3i | Phase 6 review findings and API-key scopes for settings, statuses, categories, FAQ | 2026-11-08 | 7a30e62 | — | [261108-b3i-phase-6-review-findings-and-api-key-scop](./quick/261108-b3i-phase-6-review-findings-and-api-key-scop/) |
+| 261108-bzd | Flaky API suite root cause, scheduled changelog announce, contrast sweep, browser specs | 2026-11-08 | 5177eaf | — | [261108-bzd-flaky-api-suite-root-cause-scheduled-cha](./quick/261108-bzd-flaky-api-suite-root-cause-scheduled-cha/) |
 
 ## Session Continuity
 

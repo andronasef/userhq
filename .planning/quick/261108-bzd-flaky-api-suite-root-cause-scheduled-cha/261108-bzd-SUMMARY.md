@@ -3,11 +3,9 @@ phase: quick-261108-bzd
 plan: 01
 subsystem: testing
 tags: [postgresql, supertest, vitest, api-keys]
-status: in-progress
+status: complete
 tasks-completed: 4
 tasks-total: 4
-checkpoint: TASK-4-REVIEW
-checkpoint-date: 2026-11-08
 duration: multi-session (per-task validation times below)
 actuals:
   tasks: 4
@@ -37,13 +35,13 @@ key-files:
 requirements-completed: []
 ---
 
-# Quick 261108-bzd: Tasks 1–4 verified, final review pending
+# Quick 261108-bzd: Tasks 1–4 complete
 
 **Reliable integration listeners and PostgreSQL teardown, scheduled changelog event claims, readable theme accents, and browser coverage for webhook secrets, following and push-click routing.**
 
 ## Scope and status
 
-Tasks 1–3 passed the parent's two-axis reviews with no material findings; Task 2's processing-time suppression qualification was recorded. All four tasks are implemented and their gates pass. Task 4 now stops for its final review; this summary deliberately remains `in-progress` until the parent completes that review and final state bookkeeping.
+Tasks 1–3 passed the parent's two-axis reviews with no material findings; Task 2's processing-time suppression qualification was recorded. All four tasks are implemented and their gates pass. Task 4 now stops for its final review; final verification (3 consecutive default-parallelism `ci:check` runs, exit 0, API 788, web 280) was re-run by the orchestrator on bdb16c9.
 
 The original random status-code/parse failures came from supertest creating wildcard listeners on ephemeral ports already held by unrelated loopback-specific services: requests to `127.0.0.1` then reached those services instead of the test app. Owning one loopback listener per app removes that mechanism. A separate proven PostgreSQL teardown race required waiting for real client termination before forced database deletion. Full evidence, failed attempts, timing measurements and final five-API/three-CI reliability tables are in [DIAGNOSIS.md](./261108-bzd-DIAGNOSIS.md). Residual risk remains from a foreign wildcard listener using address reuse; no Vitest worker cap was added, and the old unexplained hook override was replaced by an explicitly measured integration-hook budget.
 

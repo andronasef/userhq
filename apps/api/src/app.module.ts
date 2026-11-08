@@ -39,6 +39,7 @@ import { ApiKeyRateLimitGuard } from "./api-keys/api-key-rate-limit.guard.js";
 import { ExportModule } from "./export/export.module.js";
 import { WebhooksModule } from "./webhooks/webhooks.module.js";
 import { PushModule } from "./push/push.module.js";
+import { PostgresThrottlerStorage } from "./common/postgres-throttler-storage.js";
 import { OutboundHttp, OUTBOUND_NETWORK, systemOutboundNetwork } from "./common/outbound-http.js";
 
 const DB_POOL = Symbol.for("@userhq/api/db-pool");
@@ -80,7 +81,10 @@ export class AppModule {
             json: { limit: "100kb" },
           },
         }),
-        ThrottlerModule.forRoot([{ name: "default", ttl: 60_000, limit: 60 }]),
+        ThrottlerModule.forRoot({
+          throttlers: [{ name: "default", ttl: 60_000, limit: 60 }],
+          storage: new PostgresThrottlerStorage(deps.pool),
+        }),
         UploadsModule,
         PortalModule,
         WorkspacesModule,

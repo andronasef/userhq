@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
 import { eq } from "drizzle-orm";
-import { ThrottlerStorage } from "@nestjs/throttler";
 import { schema } from "@userhq/db";
 import { API_KEY_SCOPES, API_KEY_RATE_LIMIT } from "@userhq/types";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
@@ -508,13 +507,13 @@ describe("API key traffic policy (quick-261107-flq)", () => {
   });
 
   it("an invalid token is 401 and creates no limiter bucket", async () => {
-    const storage = testApp.app.get(ThrottlerStorage) as unknown as { storage: Map<string, unknown> };
-    const before = [...storage.storage.keys()].sort();
+    const keys = async () => (await testApp.db.select({ key: schema.rateLimitHits.key }).from(schema.rateLimitHits)).map((r) => r.key).sort();
+    const before = await keys();
     const res = await request(testApp.http)
       .get(`/api/v1/workspaces/${wsSlug}/requests`)
       .set("Authorization", "Bearer uhq_live_definitelynotarealkey0000000000");
     expect(res.status).toBe(401);
     expect(res.body.code).toBe("api_key_invalid");
-    expect([...storage.storage.keys()].sort()).toEqual(before);
+    expect(await keys()).toEqual(before);
   });
 });

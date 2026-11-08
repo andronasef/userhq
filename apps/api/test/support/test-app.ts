@@ -61,7 +61,10 @@ export async function createTestApp(
   env: Env;
   close(): Promise<void>;
 }> {
-  const testDb = await createTestDatabase();
+  // An explicit DATABASE_URL joins a database another instance created; its creator owns the drop.
+  const testDb = overrides?.DATABASE_URL
+    ? { url: overrides.DATABASE_URL, drop: async () => {} }
+    : await createTestDatabase();
   const env: Env = {
     NODE_ENV: "test",
     PORT: 3999,

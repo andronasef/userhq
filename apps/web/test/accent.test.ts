@@ -124,8 +124,20 @@ describe("accentStyle", () => {
     expect(s["--primary-text"]).toBe(`light-dark(${t.primaryText}, ${t.primaryTextDark})`);
     expect(s["--primary"]).toBe(t.primary);
     expect(s["--primary-foreground"]).toBe(t.primaryForeground);
-    expect(s["--ring"]).toBe(t.primary);
+    expect(s["--ring"]).toBe(s["--primary-text"]);
     expect(s["--entity-accent"]).toBe(t.primary);
+  });
+});
+
+describe("static theme text and focus tokens", () => {
+  it.each(["light", "dark"] as const)("%s text clears 4.5:1 on page, card and muted, and focus uses the readable accent", (theme) => {
+    const source = block(theme === "light" ? ":root" : ".dark");
+    for (const name of ["--muted-foreground", "--foreground", "--primary-text"]) {
+      for (const surface of Object.values(palette[theme])) {
+        expect(contrastRatio(token(source, name), surface), `${theme} ${name} on ${surface}`).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+    expect(token(source, "--ring")).toBe(token(source, "--primary-text"));
   });
 });
 

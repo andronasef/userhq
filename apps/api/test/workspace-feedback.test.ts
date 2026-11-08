@@ -193,9 +193,14 @@ describe("Workspace Feedback Inbox API (Plan 08-02)", () => {
       expect(res.body.items[0].product.slug).toBe(prodASlug);
       expect(res.body.items[0].category.name).toBe("Performance");
       expect(res.body.items[0].commentCount).toBe(1);
+      expect(res.body.items[0].author.name).toBe("Customer Bob");
+      expect(res.body.items[0].author.email).toBe("bob@ws-feedback.test");
+      expect(res.body.items[0].author).toHaveProperty("location");
 
       expect(res.body.items[1].title).toBe("Add export to CSV");
       expect(res.body.items[1].product.slug).toBe(prodBSlug);
+      expect(res.body.items[1].author.email).toBe("bob@ws-feedback.test");
+      expect(res.body.items[1].author).toHaveProperty("location");
     });
 
     it("filters requests by product", async () => {
@@ -251,6 +256,9 @@ describe("Workspace Feedback Inbox API (Plan 08-02)", () => {
       expect(res.body.items[0].product.name).toBe("Alpha Product");
       expect(res.body.items[0].handledAt).toBeNull();
       expect(res.body.items[0].isUnread).toBe(true);
+      expect(res.body.items[0].author.name).toBe("Customer Bob");
+      expect(res.body.items[0].author.email).toBe("bob@ws-feedback.test");
+      expect(res.body.items[0].author).toHaveProperty("location");
     });
   });
 
@@ -769,7 +777,7 @@ describe("Inbox shared handled state (quick-261107-1a5)", () => {
     await t.db.update(schema.user).set({ deletedAt: new Date() }).where(eq(schema.user.id, adminGone.userId));
 
     const item = (await list(adminA.cookie, "handled")).body.items.find((i: any) => i.id === c.id);
-    expect(item.handledBy).toEqual({ name: null, image: null, isAdmin: false, deleted: true });
+    expect(item.handledBy).toEqual({ name: null, image: null, isAdmin: false, deleted: true, email: null, location: null });
   });
 
   it("story 16: a new customer reply in a handled thread is itself Needs attention", async () => {

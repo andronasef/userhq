@@ -8,7 +8,9 @@ import {
   ChevronUp,
   Search,
   X,
-  SlidersHorizontal,
+  ExternalLink,
+  Mail,
+  MapPin,
 } from "lucide-react";
 import type {
   WorkspaceRequestItem,
@@ -23,7 +25,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { EntityLogo } from "@/components/entity-logo";
 import { EmptyState } from "@/components/empty-state";
 import { fetchWorkspaceRequests } from "@/lib/api-client";
-import { cn } from "@/lib/utils";
+import { postHref, dashboardPostHref } from "@/lib/tenant";
 
 export interface WorkspaceRequestsViewProps {
   ws: string;
@@ -140,6 +142,9 @@ export function WorkspaceRequestsView({
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const boardEnabled = new Set(
+    products.filter((p) => p.features?.board).map((p) => p.slug)
+  );
   const [items, setItems] = React.useState<WorkspaceRequestItem[]>(initialRequests);
   const [nextCursor, setNextCursor] = React.useState<string | null>(initialNextCursor);
   const [totalCount, setTotalCount] = React.useState<number>(initialTotalCount);
@@ -222,30 +227,60 @@ export function WorkspaceRequestsView({
   return (
     <div className="space-y-4">
       {/* Filter and Search Bar */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-        <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" aria-hidden="true" />
-          <Input
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search all feedback requests..."
-            className="pl-9 pr-9"
-          />
-          {searchInput && (
-            <button
-              type="button"
-              onClick={() => {
-                setSearchInput("");
-                updateFilters({ search: null });
-              }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              aria-label="Clear search"
-            >
-              <X className="size-4" />
-            </button>
-          )}
-        </form>
+      <div className="flex flex-col gap-3">
+        {/* Top row: Search input + Sort + Reset */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <form onSubmit={handleSearchSubmit} className="relative flex-1 min-w-0 sm:max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" aria-hidden="true" />
+            <Input
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Search all feedback requests..."
+              className="pl-9 pr-9"
+            />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchInput("");
+                  updateFilters({ search: null });
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label="Clear search"
+              >
+                <X className="size-4" />
+              </button>
+            )}
+          </form>
 
+          <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+            {/* Sort Filter */}
+            <div className="w-40">
+              <NativeSelect
+                value={currentSort}
+                onChange={(e) => updateFilters({ sort: e.target.value })}
+                aria-label="Sort requests"
+              >
+                <option value="top">Top (votes)</option>
+                <option value="new">Newest</option>
+                <option value="activity">Recent activity</option>
+              </NativeSelect>
+            </div>
+
+            {isFiltered && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClearFilters}
+                className="text-xs h-9 px-2 text-muted-foreground hover:text-foreground"
+              >
+                Reset
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Secondary filters row */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Product Filter */}
           <div className="w-40">
@@ -298,46 +333,28 @@ export function WorkspaceRequestsView({
           </div>
 
           {/* Created date range (UTC) */}
-          <Input
-            type="date"
-            value={currentCreatedFrom}
-            max={currentCreatedTo || undefined}
-            onChange={(e) => updateFilters({ createdFrom: e.target.value || null })}
-            aria-label="Created from (UTC)"
-            className="w-36"
-          />
-          <Input
-            type="date"
-            value={currentCreatedTo}
-            min={currentCreatedFrom || undefined}
-            onChange={(e) => updateFilters({ createdTo: e.target.value || null })}
-            aria-label="Created to (UTC)"
-            className="w-36"
-          />
-
-          {/* Sort Filter */}
-          <div className="w-36">
-            <NativeSelect
-              value={currentSort}
-              onChange={(e) => updateFilters({ sort: e.target.value })}
-              aria-label="Sort requests"
-            >
-              <option value="top">Top (votes)</option>
-              <option value="new">Newest</option>
-              <option value="activity">Recent activity</option>
-            </NativeSelect>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="font-medium shrink-0">From</span>
+            <Input
+              type="date"
+              value={currentCreatedFrom}
+              max={currentCreatedTo || undefined}
+              onChange={(e) => updateFilters({ createdFrom: e.target.value || null })}
+              aria-label="Created from (UTC)"
+              className="w-36"
+            />
           </div>
-
-          {isFiltered && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClearFilters}
-              className="text-xs h-9 px-2 text-muted-foreground hover:text-foreground"
-            >
-              Reset
-            </Button>
-          )}
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="font-medium shrink-0">To</span>
+            <Input
+              type="date"
+              value={currentCreatedTo}
+              min={currentCreatedFrom || undefined}
+              onChange={(e) => updateFilters({ createdTo: e.target.value || null })}
+              aria-label="Created to (UTC)"
+              className="w-36"
+            />
+          </div>
         </div>
       </div>
 
@@ -380,16 +397,44 @@ export function WorkspaceRequestsView({
 
               {/* Request Details */}
               <div className="flex-1 min-w-0 space-y-1.5">
-                <div className="flex items-baseline gap-2 flex-wrap">
-                  <Link
-                    href={`/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(req.product.slug)}/posts/${req.number}`}
-                    className="text-sm font-semibold text-foreground hover:underline"
-                  >
-                    {req.title}
-                  </Link>
-                  <span className="text-xs text-muted-foreground font-mono">
-                    #{req.number}
-                  </span>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-baseline gap-2 flex-wrap min-w-0">
+                    <Link
+                      href={dashboardPostHref(ws, req.product.slug, req.number)}
+                      className="text-sm font-semibold text-foreground hover:underline"
+                    >
+                      {req.title}
+                    </Link>
+                    <span className="text-xs text-muted-foreground font-mono">
+                      #{req.number}
+                    </span>
+                  </div>
+
+                  {/* Actions / Links: Dashboard & Public portal */}
+                  <div className="flex items-center gap-2 text-xs">
+                    <Link
+                      href={dashboardPostHref(ws, req.product.slug, req.number)}
+                      className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground font-medium transition-colors"
+                      title="Open in platform dashboard"
+                    >
+                      <span>Dashboard</span>
+                    </Link>
+                    {boardEnabled.has(req.product.slug) && (
+                      <>
+                    <span className="text-muted-foreground/40">·</span>
+                    <a
+                      href={postHref(ws, req.product.slug, req.number, req.slug)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground font-medium transition-colors"
+                      title="Open public portal post"
+                    >
+                      <span>Public portal</span>
+                      <ExternalLink className="size-3" aria-hidden="true" />
+                    </a>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 {req.description && (
@@ -432,12 +477,34 @@ export function WorkspaceRequestsView({
 
                   <span className="text-muted-foreground/60">·</span>
 
-                  {/* Author & Timestamp */}
-                  <span>
+                  {/* Author, Contact & Location */}
+                  <span className="font-medium text-foreground">
                     {req.author.deleted
                       ? "Deleted user"
                       : req.author.name || "Anonymous"}
                   </span>
+
+                  {req.author.email && (
+                    <a
+                      href={`mailto:${req.author.email}`}
+                      className="inline-flex items-center gap-1 hover:underline text-muted-foreground hover:text-foreground font-mono text-[11px] transition-colors"
+                      title={`Email ${req.author.email}`}
+                    >
+                      <Mail className="size-3 shrink-0" aria-hidden="true" />
+                      <span>{req.author.email}</span>
+                    </a>
+                  )}
+
+                  {req.author.location && (req.author.location.country || req.author.location.city) && (
+                    <span
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-[11px]"
+                      title={[req.author.location.city, req.author.location.country].filter(Boolean).join(", ")}
+                    >
+                      <MapPin className="size-3 shrink-0 text-muted-foreground/80" aria-hidden="true" />
+                      <span>{req.author.location.country ?? req.author.location.city}</span>
+                    </span>
+                  )}
+
                   <span>{formatRelativeTime(req.createdAt)}</span>
 
                   {/* Comment Count */}

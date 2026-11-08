@@ -11,6 +11,7 @@ import {
   commentReads,
   uploads,
   user,
+  session,
   workspaceApiKeys,
 } from "@userhq/db";
 import type {
@@ -23,6 +24,7 @@ import type {
   ReplyWorkspaceCommentInput,
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
+import { resolveLocationFromIp } from "./geo.util.js";
 import { prefixTsQuery } from "./search.js";
 import { encodeKeysetCursor, decodeKeysetCursor, type KeysetKind } from "./cursor.js";
 import { postSlug } from "@userhq/types";
@@ -38,7 +40,8 @@ export class WorkspaceFeedbackService {
 
   async listRequests(
     tenant: { workspaceId: string },
-    query: WorkspaceRequestsQuery
+    query: WorkspaceRequestsQuery,
+    includePii = false
   ): Promise<WorkspaceRequestsResponse> {
     const limit = typeof query.limit === "number" ? query.limit : (Number(query.limit) || 20);
     const sort = query.sort ?? "top";
@@ -130,8 +133,10 @@ export class WorkspaceFeedbackService {
         authorId: posts.authorId,
         authorIsAdmin: posts.authorIsAdmin,
         authorName: user.name,
+        authorEmail: user.email,
         authorImage: user.image,
         authorDeletedAt: user.deletedAt,
+        authorLatestIp: sql<string | null>`(SELECT s.ip_address FROM ${session} s WHERE s.user_id = ${posts.authorId} ORDER BY s.created_at DESC LIMIT 1)`,
         productId: products.id,
         productSlug: products.slug,
         productName: products.name,
@@ -185,12 +190,14 @@ export class WorkspaceFeedbackService {
       },
       category: r.categoryId && r.categoryName ? { id: r.categoryId, name: r.categoryName } : null,
       author: r.authorDeletedAt
-        ? { name: null, image: null, isAdmin: false, deleted: true }
+        ? { name: null, image: null, isAdmin: false, deleted: true, email: null, location: null }
         : {
             name: r.authorName,
             image: r.authorImage,
             isAdmin: r.authorIsAdmin,
             deleted: false,
+            email: includePii ? (r.authorEmail ?? null) : null,
+            location: includePii ? resolveLocationFromIp(r.authorLatestIp) : null,
           },
       commentCount: r.commentCount,
       source: adminKeySource(r.createdByApiKeyId, r.apiKeyName),
@@ -210,7 +217,8 @@ export class WorkspaceFeedbackService {
   async listComments(
     tenant: { workspaceId: string },
     viewer: { id: string },
-    query: WorkspaceCommentsQuery
+    query: WorkspaceCommentsQuery,
+    includePii = false
   ): Promise<WorkspaceCommentsResponse> {
     const limit = typeof query.limit === "number" ? query.limit : (Number(query.limit) || 20);
     const position = query.cursor ? decodeKeysetCursor("comments", query.cursor) : null;
@@ -270,8 +278,10 @@ export class WorkspaceFeedbackService {
         handledById: comments.handledById,
         authorId: comments.authorId,
         authorName: user.name,
+        authorEmail: user.email,
         authorImage: user.image,
         authorDeletedAt: user.deletedAt,
+        authorLatestIp: sql<string | null>`(SELECT s.ip_address FROM ${session} s WHERE s.user_id = ${comments.authorId} ORDER BY s.created_at DESC LIMIT 1)`,
         postId: posts.id,
         postNumber: posts.number,
         postTitle: posts.title,
@@ -309,15 +319,20 @@ export class WorkspaceFeedbackService {
 
     const handledUsersMap = new Map<
       string,
-      { name: string | null; image: string | null; deleted: boolean }
+      { name: string | null; email: string | null; image: string | null; deleted: boolean }
     >();
     if (handledByIds.length > 0) {
       const handledUsers = await this.db
-        .select({ id: user.id, name: user.name, image: user.image, deletedAt: user.deletedAt })
+        .select({ id: user.id, name: user.name, email: user.email, image: user.image, deletedAt: user.deletedAt })
         .from(user)
         .where(inArray(user.id, handledByIds));
       for (const u of handledUsers) {
-        handledUsersMap.set(u.id, { name: u.name, image: u.image, deleted: Boolean(u.deletedAt) });
+        handledUsersMap.set(u.id, {
+          name: u.name,
+          email: u.email,
+          image: u.image,
+          deleted: Boolean(u.deletedAt),
+        });
       }
     }
 
@@ -332,8 +347,8 @@ export class WorkspaceFeedbackService {
         handledAt: r.handledAt ? r.handledAt.toISOString() : null,
         handledBy: handledUser
           ? handledUser.deleted
-            ? { name: null, image: null, isAdmin: false, deleted: true }
-            : { name: handledUser.name, image: handledUser.image, isAdmin: true, deleted: false }
+            ? { name: null, image: null, isAdmin: false, deleted: true, email: null, location: null }
+            : { name: handledUser.name, image: handledUser.image, isAdmin: true, deleted: false, email: includePii ? (handledUser.email ?? null) : null, location: null }
           : null,
         isUnread: !r.isRead && r.authorId !== viewer.id,
         post: {
@@ -350,12 +365,14 @@ export class WorkspaceFeedbackService {
           accentColor: r.productAccentColor,
         },
         author: r.authorDeletedAt
-          ? { name: null, image: null, isAdmin: false, deleted: true }
+          ? { name: null, image: null, isAdmin: false, deleted: true, email: null, location: null }
           : {
               name: r.authorName,
               image: r.authorImage,
               isAdmin: r.isAdmin,
               deleted: false,
+              email: includePii ? (r.authorEmail ?? null) : null,
+              location: includePii ? resolveLocationFromIp(r.authorLatestIp) : null,
             },
         source: adminKeySource(r.createdByApiKeyId, r.apiKeyName),
       };

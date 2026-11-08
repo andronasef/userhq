@@ -12,7 +12,6 @@ import {
   getPushFollowedProducts,
 } from "../../../lib/api-server";
 import { portalHref } from "../../../lib/tenant";
-import { PageHeader } from "../../../components/page-header";
 import { EmptyState } from "../../../components/empty-state";
 import { Button } from "../../../components/ui/button";
 import { EntityLogo } from "../../../components/entity-logo";
@@ -51,11 +50,11 @@ export async function generateMetadata({
     return { title: "Dashboard · UserHQ" };
   }
   const tabName =
-    search.tab === "requests"
-      ? "Requests"
+    search.tab === "products"
+      ? "Products"
       : search.tab === "comments"
         ? "Comments"
-        : "Products";
+        : "Requests";
   return {
     title: `${tabName} · ${result.data.name}`,
   };
@@ -69,9 +68,9 @@ export default async function DashboardPage({
   const search = await searchParams;
 
   const currentTab =
-    search.tab === "requests" || search.tab === "comments"
+    search.tab === "products" || search.tab === "comments"
       ? search.tab
-      : "products";
+      : "requests";
 
   const [wsResult, productsResult, initialCommentsResult, followedResult] = await Promise.all([
     getWorkspace(ws),
@@ -131,12 +130,6 @@ export default async function DashboardPage({
 
   const tabs: DashboardTab[] = [
     {
-      id: "products",
-      label: "Products",
-      count: products.length,
-      href: `/dashboard/${encodeURIComponent(ws)}?tab=products`,
-    },
-    {
       id: "requests",
       label: "Requests (All Boards)",
       href: `/dashboard/${encodeURIComponent(ws)}?tab=requests`,
@@ -146,6 +139,12 @@ export default async function DashboardPage({
       label: "Comments",
       badge: needsAttentionCount,
       href: `/dashboard/${encodeURIComponent(ws)}?tab=comments`,
+    },
+    {
+      id: "products",
+      label: "Products",
+      count: products.length,
+      href: `/dashboard/${encodeURIComponent(ws)}?tab=products`,
     },
   ];
 
@@ -175,7 +174,44 @@ export default async function DashboardPage({
       {/* Workspace Dashboard Tabs */}
       <WorkspaceDashboardTabs tabs={tabs} activeTab={currentTab} />
 
-      {/* Tab 1: Products */}
+      {/* Tab 1: Requests (All Boards) */}
+      {currentTab === "requests" && (
+        <WorkspaceRequestsView
+          ws={ws}
+          products={products}
+          initialRequests={requestsData?.items ?? []}
+          initialNextCursor={requestsData?.nextCursor ?? null}
+          initialTotalCount={requestsData?.totalCount ?? 0}
+          currentProduct={search.product}
+          currentStatusType={search.statusType}
+          currentSort={search.sort}
+          currentSearch={search.search}
+          categories={requestCategories}
+          currentCategoryId={search.categoryId}
+          currentCreatedFrom={search.createdFrom}
+          currentCreatedTo={search.createdTo}
+        />
+      )}
+
+      {/* Tab 2: Comments */}
+      {currentTab === "comments" && (
+        <WorkspaceCommentsView
+          ws={ws}
+          products={products}
+          initialComments={commentsData?.items ?? []}
+          initialNextCursor={commentsData?.nextCursor ?? null}
+          initialNeedsAttentionCount={
+            commentsData?.needsAttentionCount ?? needsAttentionCount
+          }
+          currentProduct={search.product}
+          currentAttention={
+            (search.attention as "needs_attention" | "handled" | "all") ||
+            "needs_attention"
+          }
+        />
+      )}
+
+      {/* Tab 3: Products */}
       {currentTab === "products" && (
         <div className="space-y-4">
           {products.length === 0 ? (
@@ -252,43 +288,6 @@ export default async function DashboardPage({
             </div>
           )}
         </div>
-      )}
-
-      {/* Tab 2: Requests (All Boards) */}
-      {currentTab === "requests" && (
-        <WorkspaceRequestsView
-          ws={ws}
-          products={products}
-          initialRequests={requestsData?.items ?? []}
-          initialNextCursor={requestsData?.nextCursor ?? null}
-          initialTotalCount={requestsData?.totalCount ?? 0}
-          currentProduct={search.product}
-          currentStatusType={search.statusType}
-          currentSort={search.sort}
-          currentSearch={search.search}
-          categories={requestCategories}
-          currentCategoryId={search.categoryId}
-          currentCreatedFrom={search.createdFrom}
-          currentCreatedTo={search.createdTo}
-        />
-      )}
-
-      {/* Tab 3: Comments */}
-      {currentTab === "comments" && (
-        <WorkspaceCommentsView
-          ws={ws}
-          products={products}
-          initialComments={commentsData?.items ?? []}
-          initialNextCursor={commentsData?.nextCursor ?? null}
-          initialNeedsAttentionCount={
-            commentsData?.needsAttentionCount ?? needsAttentionCount
-          }
-          currentProduct={search.product}
-          currentAttention={
-            (search.attention as "needs_attention" | "handled" | "all") ||
-            "needs_attention"
-          }
-        />
       )}
     </div>
   );

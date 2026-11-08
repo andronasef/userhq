@@ -8,10 +8,11 @@ import {
   RotateCcw,
   Reply,
   Send,
-  Sparkles,
   Inbox,
   AlertCircle,
   ExternalLink,
+  Mail,
+  MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { WorkspaceCommentItem, ProductSummary } from "@userhq/types";
@@ -28,6 +29,7 @@ import {
   replyWorkspaceComment,
   markCommentRead,
 } from "@/lib/api-client";
+import { postHref, dashboardPostHref } from "@/lib/tenant";
 import { cn } from "@/lib/utils";
 import { applyReplyToFeed } from "@/lib/workspace-inbox";
 
@@ -66,6 +68,9 @@ export function WorkspaceCommentsView({
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const boardEnabled = new Set(
+    products.filter((p) => p.features?.board).map((p) => p.slug)
+  );
   const [comments, setComments] = React.useState<WorkspaceCommentItem[]>(initialComments);
   const [nextCursor, setNextCursor] = React.useState<string | null>(initialNextCursor);
   const [needsAttentionCount, setNeedsAttentionCount] = React.useState<number>(initialNeedsAttentionCount);
@@ -337,14 +342,40 @@ export function WorkspaceCommentsView({
                     {/* Post Title */}
                     <span className="text-muted-foreground font-mono">on</span>
                     <Link
-                      href={`/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(comment.product.slug)}/posts/${comment.post.number}`}
-                      className="font-semibold text-foreground hover:underline truncate max-w-sm"
+                      href={dashboardPostHref(ws, comment.product.slug, comment.post.number)}
+                      className="font-semibold text-foreground hover:underline truncate max-w-xs sm:max-w-sm"
                     >
                       {comment.post.title}
                     </Link>
                     <span className="text-muted-foreground font-mono">
                       #{comment.post.number}
                     </span>
+
+                    {/* Actions / Links: Dashboard & Public portal */}
+                    <div className="inline-flex items-center gap-1.5 ml-1">
+                      <Link
+                        href={dashboardPostHref(ws, comment.product.slug, comment.post.number)}
+                        className="text-xs text-muted-foreground hover:text-foreground font-medium transition-colors"
+                        title="Open in platform dashboard"
+                      >
+                        Dashboard
+                      </Link>
+                      {boardEnabled.has(comment.product.slug) && (
+                        <>
+                      <span className="text-muted-foreground/40">·</span>
+                      <a
+                        href={postHref(ws, comment.product.slug, comment.post.number, comment.post.slug)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground font-medium transition-colors"
+                        title="Open public portal post"
+                      >
+                        <span>Public portal</span>
+                        <ExternalLink className="size-3" aria-hidden="true" />
+                      </a>
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   {/* Status Indicator */}
@@ -384,6 +415,25 @@ export function WorkspaceCommentsView({
                     {comment.author.isAdmin && (
                       <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-primary/10 text-[var(--primary-text)]">
                         Admin
+                      </span>
+                    )}
+                    {comment.author.email && (
+                      <a
+                        href={`mailto:${comment.author.email}`}
+                        className="inline-flex items-center gap-1 hover:underline text-muted-foreground hover:text-foreground font-mono text-[11px] transition-colors"
+                        title={`Email ${comment.author.email}`}
+                      >
+                        <Mail className="size-3 shrink-0" aria-hidden="true" />
+                        <span>{comment.author.email}</span>
+                      </a>
+                    )}
+                    {comment.author.location && (comment.author.location.country || comment.author.location.city) && (
+                      <span
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-[11px]"
+                        title={[comment.author.location.city, comment.author.location.country].filter(Boolean).join(", ")}
+                      >
+                        <MapPin className="size-3 shrink-0 text-muted-foreground/80" aria-hidden="true" />
+                        <span>{comment.author.location.country ?? comment.author.location.city}</span>
                       </span>
                     )}
                     <span>·</span>

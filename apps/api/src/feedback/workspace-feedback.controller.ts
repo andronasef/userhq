@@ -50,11 +50,14 @@ export class WorkspaceFeedbackController {
   @SerializeOptions({ schema: WorkspaceRequestsResponseSchema })
   async listRequests(
     @CurrentTenant() tenant: Tenant,
+    @Req() req: any,
     @Query({ schema: WorkspaceRequestsQuerySchema }) query: WorkspaceRequestsQuery
   ): Promise<WorkspaceRequestsResponse> {
+    // Author email/location are for signed-in admins only, never API keys.
     return this.workspaceFeedbackService.listRequests(
       { workspaceId: tenant.workspaceId },
-      query
+      query,
+      !req.apiKey
     );
   }
 
@@ -64,12 +67,14 @@ export class WorkspaceFeedbackController {
   async listComments(
     @CurrentTenant() tenant: Tenant,
     @CurrentUser() user: any,
+    @Req() req: any,
     @Query({ schema: WorkspaceCommentsQuerySchema }) query: WorkspaceCommentsQuery
   ): Promise<WorkspaceCommentsResponse> {
     return this.workspaceFeedbackService.listComments(
       { workspaceId: tenant.workspaceId },
       user,
-      query
+      query,
+      !req.apiKey
     );
   }
 

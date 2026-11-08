@@ -95,6 +95,19 @@ export const PublicAuthorSchema = z.object({
 });
 export type PublicAuthor = z.infer<typeof PublicAuthorSchema>;
 
+export const AuthorLocationSchema = z.object({
+  country: z.string().nullable().optional(),
+  countryCode: z.string().nullable().optional(),
+  city: z.string().nullable().optional(),
+});
+export type AuthorLocation = z.infer<typeof AuthorLocationSchema>;
+
+export const WorkspaceAuthorSchema = PublicAuthorSchema.extend({
+  email: z.string().email().nullable().optional(),
+  location: AuthorLocationSchema.nullable().optional(),
+});
+export type WorkspaceAuthor = z.infer<typeof WorkspaceAuthorSchema>;
+
 export const PostStatusSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
@@ -434,7 +447,7 @@ export const WorkspaceRequestItemSchema = z.object({
   product: WorkspaceProductRefSchema,
   status: PostStatusSchema,
   category: z.object({ id: z.string().uuid(), name: z.string() }).nullable(),
-  author: PublicAuthorSchema,
+  author: WorkspaceAuthorSchema,
   commentCount: z.number().int().nonnegative(),
   source: AdminIntegrationSourceSchema.nullable().optional(),
 });
@@ -485,7 +498,7 @@ export const WorkspaceCommentItemSchema = z.object({
   createdAt: z.string(),
   editedAt: z.string().nullable(),
   handledAt: z.string().nullable(),
-  handledBy: PublicAuthorSchema.nullable(),
+  handledBy: WorkspaceAuthorSchema.nullable(),
   isUnread: z.boolean(),
   post: z.object({
     id: z.string().uuid(),
@@ -494,7 +507,7 @@ export const WorkspaceCommentItemSchema = z.object({
     title: z.string(),
   }),
   product: WorkspaceProductRefSchema,
-  author: PublicAuthorSchema,
+  author: WorkspaceAuthorSchema,
   source: AdminIntegrationSourceSchema.nullable().optional(),
 });
 export type WorkspaceCommentItem = z.infer<typeof WorkspaceCommentItemSchema>;

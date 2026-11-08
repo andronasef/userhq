@@ -1,7 +1,7 @@
 import * as React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { ProductSummary } from "@userhq/types";
+import type { ProductSummary, WorkspaceRequestItem } from "@userhq/types";
 import {
   WorkspaceRequestsView,
   LoadMoreFooter,
@@ -172,3 +172,75 @@ describe("fetchWorkspaceRequests", () => {
     expect(url.searchParams.get("categoryId")).toBe(categories[0].id);
   });
 });
+
+describe("WorkspaceRequestsView post links", () => {
+  const req: WorkspaceRequestItem = {
+    id: "r1",
+    number: 2,
+    slug: "soundboard-enhancement",
+    title: "Soundboard Enhancement",
+    description: "More audio formats",
+    voteCount: 5,
+    createdAt: "2026-05-01T10:00:00.000Z",
+    product: {
+      id: "p1",
+      slug: "soundboard-maker",
+      name: "Soundboard Maker",
+      logoUrl: null,
+      accentColor: "#2563EB",
+    },
+    status: { id: "s1", name: "In Progress", color: "#3B82F6", type: "active" },
+    category: { id: "c1", name: "Audio" },
+    author: { name: "Alice", image: null, isAdmin: false, deleted: false },
+    commentCount: 2,
+  };
+
+  it("hides the public portal link when the product's board is disabled or unknown", () => {
+    const html = render({ initialRequests: [req], initialTotalCount: 1 });
+    expect(html).toContain('href="/dashboard/work/soundboard-maker/board/2"');
+    expect(html).not.toContain("Public portal");
+  });
+
+  it("renders both platform dashboard and public portal post links, without legacy /posts/ url", () => {
+    const html = render({
+      initialRequests: [req],
+      initialTotalCount: 1,
+      products: [
+        { ...product, slug: "soundboard-maker" } as ProductSummary,
+      ],
+    });
+    // Title and Dashboard link point to dashboard board route
+    expect(html).toContain('href="/dashboard/work/soundboard-maker/board/2"');
+    // Public portal link points to portal post route
+    expect(html).toContain('href="/work/soundboard-maker/p/2-soundboard-enhancement"');
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain("Public portal");
+    // Does not use the broken /posts/ link
+    expect(html).not.toContain("/posts/2");
+  });
+
+  it("renders author email mailto link and location badge when provided", () => {
+    const itemWithGeo: WorkspaceRequestItem = {
+      ...req,
+      author: {
+        name: "Alice",
+        image: null,
+        isAdmin: false,
+        deleted: false,
+        email: "alice@example.com",
+        location: {
+          country: "United States",
+          countryCode: "US",
+          city: "San Francisco",
+        },
+      },
+    };
+    const html = render({ initialRequests: [itemWithGeo], initialTotalCount: 1 });
+    expect(html).toContain('href="mailto:alice@example.com"');
+    expect(html).toContain("alice@example.com");
+    expect(html).toContain("United States");
+    expect(html).toContain('title="San Francisco, United States"');
+  });
+});
+
+

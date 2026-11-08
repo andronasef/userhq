@@ -222,28 +222,24 @@ test.describe("Workspace Dashboard Specs (Plan 08-04)", () => {
   test("workspace dashboard shows products, cross-product requests feed, and comments inbox", async ({
     page,
   }) => {
-    // 1. Visit root workspace dashboard
+    // 1. Visit root workspace dashboard (default Requests tab)
     await page.goto(`/dashboard/${wsSlug}`);
 
-    // Verify workspace title and default Products tab
+    // Verify workspace title
     await expect(page.getByRole("heading", { name: "Acme Multi-Product Workspace" })).toBeVisible();
-    await expect(page.getByRole("main").getByRole("link", { name: "Alpha App" })).toBeVisible();
-    await expect(page.getByRole("main").getByRole("link", { name: "Beta Suite" })).toBeVisible();
 
     // Verify Tab bar exists
     const requestsTab = page.getByRole("link", { name: /Requests \(All Boards\)/i });
     const commentsTab = page.getByRole("link", { name: /Comments/i });
+    const productsTab = page.getByRole("link", { name: /Products/i });
     await expect(requestsTab).toBeVisible();
     await expect(commentsTab).toBeVisible();
+    await expect(productsTab).toBeVisible();
 
     // Verify attention count badge on comments tab (should be >= 1)
     await expect(commentsTab).toContainText("1");
 
-    // 2. Switch to Requests (All Boards) Tab
-    await requestsTab.click();
-    await expect(page).toHaveURL(new RegExp(`/dashboard/${wsSlug}\\?tab=requests`));
-
-    // Verify cross-product requests from both Alpha and Beta are displayed
+    // Verify cross-product requests from both Alpha and Beta are displayed on default Requests tab
     await expect(page.getByText("Dark mode support for Alpha")).toBeVisible();
     await expect(page.getByText("Webhook exports for Beta")).toBeVisible();
     const requestList = page.locator(".divide-y");
@@ -268,7 +264,7 @@ test.describe("Workspace Dashboard Specs (Plan 08-04)", () => {
     await expect(page.getByText("Webhook exports for Beta")).toBeVisible();
     await expect(page.getByText("Dark mode support for Alpha")).not.toBeVisible();
 
-    // 3. Switch to Comments Tab
+    // 2. Switch to Comments Tab
     await commentsTab.click();
     await expect(page).toHaveURL(new RegExp(`/dashboard/${wsSlug}\\?tab=comments`));
 
@@ -277,7 +273,7 @@ test.describe("Workspace Dashboard Specs (Plan 08-04)", () => {
     await expect(page.getByText("Customer Charlie")).toBeVisible();
     await expect(page.getByText("Needs attention").first()).toBeVisible();
 
-    // 4. Mark handled action
+    // Mark handled action
     const markHandledButton = page.getByRole("button", { name: /Mark handled/i }).first();
     await markHandledButton.click();
 
@@ -303,5 +299,11 @@ test.describe("Workspace Dashboard Specs (Plan 08-04)", () => {
     await sendReplyButton.click();
 
     await expect(page.getByText("Reply posted and marked handled")).toBeVisible();
+
+    // 7. Switch to Products Tab
+    await productsTab.click();
+    await expect(page).toHaveURL(new RegExp(`/dashboard/${wsSlug}\\?tab=products`));
+    await expect(page.getByRole("main").getByRole("link", { name: "Alpha App" })).toBeVisible();
+    await expect(page.getByRole("main").getByRole("link", { name: "Beta Suite" })).toBeVisible();
   });
 });

@@ -44,11 +44,19 @@ function comment(id: string, extra: Partial<WorkspaceCommentItem> = {}): Workspa
   };
 }
 
-function render(items: WorkspaceCommentItem[]): string {
+function render(items: WorkspaceCommentItem[], boardEnabled = true): string {
   return renderToStaticMarkup(
     <WorkspaceCommentsView
       ws="work"
-      products={[]}
+      products={[
+        {
+          slug: "prod",
+          name: "Prod",
+          logoUrl: null,
+          accentColor: "#2563EB",
+          features: { board: boardEnabled, roadmap: true, changelog: true, faq: true },
+        },
+      ]}
       initialComments={items}
       initialNextCursor={null}
       initialNeedsAttentionCount={items.length}
@@ -102,5 +110,42 @@ describe("WorkspaceCommentsView", () => {
       }),
     ]);
     expect(html).toContain("Handled by a former member");
+  });
+
+  it("renders both platform dashboard and public portal post links, without legacy /posts/ url", () => {
+    const html = render([comment("c1")]);
+    expect(html).toContain('href="/dashboard/work/prod/board/7"');
+    expect(html).toContain('href="/work/prod/p/7-dark-mode"');
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain("Public portal");
+    expect(html).not.toContain("/posts/7");
+  });
+
+  it("hides the public portal link when the product's board is disabled", () => {
+    const html = render([comment("c1")], false);
+    expect(html).toContain('href="/dashboard/work/prod/board/7"');
+    expect(html).not.toContain("Public portal");
+  });
+
+  it("renders comment author email mailto link and location badge when provided", () => {
+    const c = comment("c-geo", {
+      author: {
+        name: "Cy Customer",
+        image: null,
+        isAdmin: false,
+        deleted: false,
+        email: "cy@example.com",
+        location: {
+          country: "Egypt",
+          countryCode: "EG",
+          city: "Cairo",
+        },
+      },
+    });
+    const html = render([c]);
+    expect(html).toContain('href="mailto:cy@example.com"');
+    expect(html).toContain("cy@example.com");
+    expect(html).toContain("Egypt");
+    expect(html).toContain('title="Cairo, Egypt"');
   });
 });

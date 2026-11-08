@@ -62,6 +62,14 @@ A key may be restricted to a list of products at creation. A restricted key can 
 - a product the key is not allowed to use;
 - every workspace-wide route: `requests`, `comments`, `export`, `webhooks` and the product list.
 
+`productRestrictions` is optional when you create a key:
+
+- Omitted or `null` means the key reaches every live product in its workspace.
+- Otherwise it is a non-empty list of product ids, and every id must be a live product of the same workspace. Duplicate ids are stored once.
+- An empty list is rejected with `400 validation_failed`, because it is neither "all products" nor "no products".
+- An unknown id, an id of another workspace and the id of a deleted product are rejected the same way, with one message that does not say which case it was.
+- Keys created before this rule with an empty list were unrestricted, and are now stored as unrestricted. A stored value that is neither `null` nor a list of product ids reaches no product.
+
 Restrictions are stored as product ids, while URLs use product slugs. An unrestricted key reaches every product in its own workspace. A key never reaches another workspace: a foreign or unknown workspace or product returns `404 not_found`.
 
 ---
@@ -189,6 +197,7 @@ Branch on `code`, not on `message`.
 
 | Status | Code | When |
 |--------|------|------|
+| 400 | `validation_failed` | The body is invalid, for example an empty `productRestrictions` list or a product id outside the workspace. |
 | 401 | `api_key_invalid` | Unknown or malformed key. |
 | 401 | `api_key_expired` | The key is past its expiry. |
 | 401 | `api_key_revoked` | The key was revoked. |
@@ -239,7 +248,8 @@ A webhook subscription sends signed `POST` requests with JSON bodies to your HTT
 - The secret is returned **only** by that create response and by the rotate response. List, get, update and delivery-log responses never contain it. Store it when you get it; it cannot be read again.
 - `POST /api/v1/workspaces/:ws/webhooks/:id/rotate-secret` issues a new secret and returns the subscription with it. Rotation is session-only: a signed-in workspace owner or admin does it, and every API key, including an `admin` key, gets `403 api_key_route_forbidden`.
 - Rotation is immediate. There is no overlap window: the old secret stops signing with the next attempt. Each attempt is signed when it is sent, so a delivery that fails around the swap is retried and signed with the new secret. Update your receiver, and the retry succeeds.
-- A subscription with `productRestrictions` only receives events of those products. A paused subscription (`isActive: false`) receives nothing.
+- `productRestrictions` follows the rule in Product restrictions, on `POST` and on `PATCH`: omitted or `null` means all products, otherwise a non-empty list of live product ids of the workspace. `PATCH` with `null` removes the restriction, and `PATCH` with an empty list or an id outside the workspace returns `400 validation_failed`.
+- A subscription with `productRestrictions` only receives events of the listed products. A paused subscription (`isActive: false`) receives nothing.
 
 ### Events
 

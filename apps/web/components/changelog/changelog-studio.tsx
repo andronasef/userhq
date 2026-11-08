@@ -174,7 +174,7 @@ export function ChangelogStudio({
                   <TD className="font-medium text-foreground">
                     <Link
                       href={`/dashboard/${ws}/${product}/changelog/${entry.id}`}
-                      className="hover:underline hover:text-primary transition-colors block"
+                      className="hover:underline hover:text-[var(--primary-text)] transition-colors block"
                     >
                       {entry.title}
                     </Link>

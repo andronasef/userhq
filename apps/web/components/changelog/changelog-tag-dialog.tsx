@@ -190,7 +190,7 @@ export function ChangelogTagDialog({
                 className={cn(
                   "size-5 rounded-full border border-black/10 transition-transform",
                   tagColor.toUpperCase() === p.hex.toUpperCase()
-                    ? "ring-2 ring-primary ring-offset-1 scale-110"
+                    ? "ring-2 ring-[var(--primary-text)] ring-offset-1 scale-110"
                     : "hover:scale-105"
                 )}
                 style={{ backgroundColor: p.hex }}

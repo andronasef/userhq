@@ -168,7 +168,7 @@ export function CreateWebhookDialog({
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+            <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-[var(--primary-text)]">
               <Webhook className="size-4" aria-hidden="true" />
             </div>
             <div>
@@ -244,7 +244,7 @@ export function CreateWebhookDialog({
 
             <div className="rounded-md border border-border p-3 bg-muted/20 text-xs space-y-1 text-muted-foreground">
               <p className="font-medium text-foreground flex items-center gap-1.5">
-                <ShieldCheck className="size-3.5 text-primary" />
+                <ShieldCheck className="size-3.5 text-[var(--primary-text)]" />
                 Signature Verification Example:
               </p>
               <pre className="font-mono text-[11px] p-2 rounded bg-background border border-border overflow-x-auto">
@@ -321,14 +321,14 @@ const isValid = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expec
                 <button
                   type="button"
                   onClick={() => toggleEvent("*")}
-                  className="text-xs text-primary hover:underline font-medium"
+                  className="text-xs text-[var(--primary-text)] hover:underline font-medium"
                 >
                   {selectedEvents.includes("*") ? "Select Individual Events" : "Send All Events (*)"}
                 </button>
               </div>
 
               {selectedEvents.includes("*") ? (
-                <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 text-xs text-primary flex items-center justify-between">
+                <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 text-xs text-[var(--primary-text)] flex items-center justify-between">
                   <span>Subscribed to all current and future workspace events (wildcard).</span>
                 </div>
               ) : (
@@ -344,7 +344,7 @@ const isValid = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expec
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => toggleEvent(ev)}
-                          className="mt-0.5 rounded border-border text-primary focus:ring-primary"
+                          className="mt-0.5 rounded border-border text-primary focus:ring-[var(--primary-text)]"
                         />
                         <div className="space-y-0.5 text-xs">
                           <p className="font-mono font-medium text-foreground">{ev}</p>

@@ -24,7 +24,7 @@ export function HighlightText({ text, query }: HighlightTextProps): React.JSX.El
     <>
       {parts.map((part, i) =>
         testRegex.test(part) ? (
-          <mark key={i} className="bg-primary/20 text-primary font-medium px-0.5 rounded">
+          <mark key={i} className="bg-primary/20 text-[var(--primary-text)] font-medium px-0.5 rounded">
             {part}
           </mark>
         ) : (

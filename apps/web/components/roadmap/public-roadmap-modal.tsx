@@ -125,7 +125,7 @@ export function PublicRoadmapModal({
                           <ArrowBigUp className="size-3.5 text-muted-foreground" />
                           <span>{post.voteCount}</span>
                         </div>
-                        <span className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
+                        <span className="text-sm font-medium text-foreground truncate group-hover:text-[var(--primary-text)] transition-colors">
                           {post.title}
                         </span>
                       </div>

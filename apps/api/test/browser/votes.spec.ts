@@ -340,12 +340,12 @@ test.describe("Votes Browser Backstops (Plan 03-06)", () => {
       await expect(oceanVoteBtn).toHaveAttribute("aria-pressed", "false");
     }
 
-    // Unvoted count color is blue rgb(37, 99, 235)
+    // #1E4FBC is pinned by apps/web/test/accent.test.ts for muted surfaces and 20% brand tints.
     await expect
       .poll(async () =>
         oceanVoteBtn.evaluate((el) => getComputedStyle(el).color)
       )
-      .toBe("rgb(37, 99, 235)");
+      .toBe("rgb(30, 79, 188)");
 
     // Vote it
     await oceanVoteBtn.click();

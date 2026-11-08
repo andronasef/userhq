@@ -107,7 +107,7 @@ export function ThemeToggle({
                 <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                 <span>{opt.label}</span>
               </span>
-              {isSelected && <Check className="size-3.5 text-primary shrink-0" aria-hidden="true" />}
+              {isSelected && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
             </DropdownMenuItem>
           );
         })}

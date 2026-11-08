@@ -60,7 +60,7 @@ export function NotificationItem({
 
       <div className="flex-1 min-w-0 flex flex-col gap-1">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-xs font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+          <span className="text-xs font-semibold text-foreground truncate group-hover:text-[var(--primary-text)] transition-colors">
             {post.title}
           </span>
           <span className="text-[11px] text-muted-foreground shrink-0">

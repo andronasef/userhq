@@ -49,7 +49,7 @@ export function FaqSidebarNav({
             className={cn(
               "flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors",
               isActive
-                ? "bg-primary/10 text-primary font-semibold"
+                ? "bg-primary/10 text-[var(--primary-text)] font-semibold"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
             )}
           >

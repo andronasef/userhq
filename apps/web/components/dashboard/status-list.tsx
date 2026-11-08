@@ -107,7 +107,7 @@ function StatusRow({
       )}
 
       {status.isPublicRoadmap && (
-        <Badge variant="outline" className="shrink-0 text-primary border-primary/30">
+        <Badge variant="outline" className="shrink-0 text-[var(--primary-text)] border-primary/30">
           Public
         </Badge>
       )}

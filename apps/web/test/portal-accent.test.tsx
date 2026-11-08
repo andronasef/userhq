@@ -55,7 +55,7 @@ describe("Portal Accent Context & Radix Portals", () => {
     );
 
     expect(html).toContain("--primary:#2563EB");
-    expect(html).toContain("--ring:#2563EB");
+    expect(html).toContain("--ring:light-dark(#1E4FBC, #719AF2)");
     expect(html).toContain("--primary-foreground:#FFFFFF");
   });
 
@@ -72,7 +72,7 @@ describe("Portal Accent Context & Radix Portals", () => {
     );
 
     expect(html).toContain("--primary:#F59E0B");
-    expect(html).toContain("--ring:#F59E0B");
+    expect(html).toContain("--ring:light-dark(#171717, #F59E0B)");
   });
 
   it("renders normally without portal accent when outside provider", () => {

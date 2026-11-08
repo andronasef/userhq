@@ -382,7 +382,7 @@ export function WorkspaceCommentsView({
                         : comment.author.name || "Anonymous"}
                     </span>
                     {comment.author.isAdmin && (
-                      <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-primary/10 text-primary">
+                      <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-primary/10 text-[var(--primary-text)]">
                         Admin
                       </span>
                     )}

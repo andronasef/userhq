@@ -68,7 +68,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
               <span>Already invited?</span>
               <Link
                 href="/login"
-                className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary)] transition-colors"
+                className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary-text)] transition-colors"
               >
                 Sign in
               </Link>
@@ -109,11 +109,11 @@ export default async function HomePage(): Promise<React.JSX.Element> {
                 </p>
                 <div className="mt-1 flex flex-col gap-1.5 text-xs text-foreground font-medium">
                   <div className="flex items-center gap-2">
-                    <Check className="size-4 text-[var(--primary)] shrink-0" aria-hidden="true" />
+                    <Check className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
                     <span>Single sign-on via Google & GitHub for authentic user votes</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Check className="size-4 text-[var(--primary)] shrink-0" aria-hidden="true" />
+                    <Check className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
                     <span>Custom categories to segment requests by product area</span>
                   </div>
                 </div>
@@ -147,11 +147,11 @@ export default async function HomePage(): Promise<React.JSX.Element> {
                 </p>
                 <div className="mt-1 flex flex-col gap-1.5 text-xs text-foreground font-medium">
                   <div className="flex items-center gap-2">
-                    <Check className="size-4 text-[var(--primary)] shrink-0" aria-hidden="true" />
+                    <Check className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
                     <span>Kanban lanes configured to match your development cycle</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Check className="size-4 text-[var(--primary)] shrink-0" aria-hidden="true" />
+                    <Check className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
                     <span>Public roadmaps stay sanitized while internal discussions remain private</span>
                   </div>
                 </div>
@@ -188,11 +188,11 @@ export default async function HomePage(): Promise<React.JSX.Element> {
                 </p>
                 <div className="mt-1 flex flex-col gap-1.5 text-xs text-foreground font-medium">
                   <div className="flex items-center gap-2">
-                    <Check className="size-4 text-[var(--primary)] shrink-0" aria-hidden="true" />
+                    <Check className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
                     <span>Rich-text release notes with image attachments</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Check className="size-4 text-[var(--primary)] shrink-0" aria-hidden="true" />
+                    <Check className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
                     <span>Automated email notifications to release subscribers</span>
                   </div>
                 </div>
@@ -236,7 +236,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="rounded-2xl border border-border bg-card p-6 sm:p-7 flex flex-col gap-3">
               <div className="flex items-center gap-3">
-                <div className="flex size-9 items-center justify-center rounded-lg bg-muted text-[var(--primary)]">
+                <div className="flex size-9 items-center justify-center rounded-lg bg-muted text-[var(--primary-text)]">
                   <Palette className="size-4" aria-hidden="true" />
                 </div>
                 <h3 className="text-base font-semibold text-foreground">
@@ -250,7 +250,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
 
             <div className="rounded-2xl border border-border bg-card p-6 sm:p-7 flex flex-col gap-3">
               <div className="flex items-center gap-3">
-                <div className="flex size-9 items-center justify-center rounded-lg bg-muted text-[var(--primary)]">
+                <div className="flex size-9 items-center justify-center rounded-lg bg-muted text-[var(--primary-text)]">
                   <ShieldCheck className="size-4" aria-hidden="true" />
                 </div>
                 <h3 className="text-base font-semibold text-foreground">
@@ -282,14 +282,14 @@ export default async function HomePage(): Promise<React.JSX.Element> {
                 href="https://increasinglabs.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-semibold text-foreground underline underline-offset-4 hover:text-[var(--primary)] transition-colors"
+                className="font-semibold text-foreground underline underline-offset-4 hover:text-[var(--primary-text)] transition-colors"
               >
                 Increasing Labs
               </a>
               . Have an invite link? Sign in to get started. Want access for your team? Contact{" "}
               <a
                 href="mailto:hello@increasinglab.com?subject=UserHQ%20Access%20Request"
-                className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary)] transition-colors"
+                className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary-text)] transition-colors"
               >
                 hello@increasinglab.com
               </a>.
@@ -324,7 +324,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
                 href="https://increasinglabs.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary)] transition-colors"
+                className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary-text)] transition-colors"
               >
                 Increasing Labs
               </a>
@@ -336,7 +336,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
               href="mailto:hello@increasinglab.com?subject=UserHQ%20Access%20Request"
               className="hover:text-foreground transition-colors inline-flex items-center gap-1"
             >
-              <Mail className="size-3 text-[var(--primary)]" aria-hidden="true" />
+              <Mail className="size-3 text-[var(--primary-text)]" aria-hidden="true" />
               hello@increasinglab.com
             </a>
             <Link href="/privacy" className="hover:text-foreground transition-colors">
@@ -403,7 +403,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
                   href="https://increasinglabs.com/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary)] transition-colors"
+                  className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary-text)] transition-colors"
                 >
                   Increasing Labs
                 </a>{" "}
@@ -412,7 +412,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
             </div>
             <Button variant="outline" size="sm" asChild>
               <a href="mailto:hello@increasinglab.com?subject=UserHQ%20Access%20Request">
-                <Mail className="size-3.5 mr-1.5 text-[var(--primary)]" aria-hidden="true" />
+                <Mail className="size-3.5 mr-1.5 text-[var(--primary-text)]" aria-hidden="true" />
                 hello@increasinglab.com
               </a>
             </Button>

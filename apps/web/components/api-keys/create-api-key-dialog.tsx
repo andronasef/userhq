@@ -226,7 +226,7 @@ export function CreateApiKeyDialog({
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <KeyRound className="size-5 text-primary" aria-hidden="true" />
+            <KeyRound className="size-5 text-[var(--primary-text)]" aria-hidden="true" />
             <span>{generatedToken ? "Save your API key" : "Create workspace API key"}</span>
           </DialogTitle>
           <DialogDescription>

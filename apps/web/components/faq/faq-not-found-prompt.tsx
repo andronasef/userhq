@@ -40,7 +40,7 @@ export function FaqNotFoundPrompt({
         className
       )}
     >
-      <MessageSquarePlus className="size-8 text-primary" aria-hidden="true" />
+      <MessageSquarePlus className="size-8 text-[var(--primary-text)]" aria-hidden="true" />
       <div>
         <h3 className="text-base font-semibold text-foreground">
           Didn&apos;t find what you were looking for?

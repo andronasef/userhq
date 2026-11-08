@@ -177,7 +177,8 @@ test.describe("Portal Branding Backstop (Plan 02-10)", () => {
     const oceanLinkColor = await oceanBackLink.evaluate(
       (el) => getComputedStyle(el).color
     );
-    expect(oceanLinkColor).toBe("rgb(37, 99, 235)");
+    // #1E4FBC is pinned by apps/web/test/accent.test.ts for muted surfaces and 20% brand tints.
+    expect(oceanLinkColor).toBe("rgb(30, 79, 188)");
   });
 
   test("OG and favicon metadata backstop", async ({ page }) => {

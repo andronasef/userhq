@@ -3,12 +3,12 @@ import { PALETTE, DEFAULT_ACCENT } from "@userhq/types";
 import { accentTokens, accentStyle, contrastRatio } from "./accent.js";
 
 describe("accentTokens & contrastRatio (Plan 02-08 Task 2)", () => {
-  it("accentTokens('#2563EB') -> primaryForeground '#FFFFFF', primaryText '#2563EB'", () => {
+  it("accentTokens('#2563EB') -> primaryForeground '#FFFFFF', readable primaryText '#1E4FBC'", () => {
     const tokens = accentTokens("#2563EB");
     expect(tokens).toMatchObject({
       primary: "#2563EB",
       primaryForeground: "#FFFFFF",
-      primaryText: "#2563EB",
+      primaryText: "#1E4FBC",
     });
   });
 
@@ -54,8 +54,8 @@ describe("accentTokens & contrastRatio (Plan 02-08 Task 2)", () => {
     expect(style).toEqual({
       "--primary": "#2563EB",
       "--primary-foreground": "#FFFFFF",
-      "--primary-text": `light-dark(#2563EB, ${primaryTextDark})`,
-      "--ring": "#2563EB",
+      "--primary-text": `light-dark(#1E4FBC, ${primaryTextDark})`,
+      "--ring": `light-dark(#1E4FBC, ${primaryTextDark})`,
       "--entity-accent": "#2563EB",
     });
   });

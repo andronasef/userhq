@@ -51,7 +51,7 @@ export function WorkspaceDashboardTabs({
                 className={cn(
                   "text-xs px-1.5 py-0.5 rounded-full font-medium",
                   isActive
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-primary/10 text-[var(--primary-text)]"
                     : "bg-muted text-muted-foreground"
                 )}
               >

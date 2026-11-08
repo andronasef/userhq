@@ -319,7 +319,7 @@ export function RoadmapItemModal({
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     {isPublic ? (
-                      <Globe className="size-4 text-primary" aria-hidden="true" />
+                      <Globe className="size-4 text-[var(--primary-text)]" aria-hidden="true" />
                     ) : (
                       <Lock className="size-4 text-muted-foreground" aria-hidden="true" />
                     )}
@@ -346,7 +346,7 @@ export function RoadmapItemModal({
               {/* Public Fields (conditional on isPublic) */}
               {isPublic && (
                 <div className="p-4 rounded-lg border border-primary/20 bg-primary/5 space-y-4">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-primary">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--primary-text)]">
                     Public Details (Customer Visible)
                   </h4>
                   <Field

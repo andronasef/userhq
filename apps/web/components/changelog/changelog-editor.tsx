@@ -506,7 +506,7 @@ export function ChangelogEditor({
                   setIsSlugManual(false);
                   setIsDirty(true);
                 }}
-                className="text-xs text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                className="text-xs text-[var(--primary-text)] hover:underline flex items-center gap-1 cursor-pointer"
                 title="Re-sync from title"
               >
                 <RotateCcw className="size-3" /> Re-sync
@@ -551,7 +551,7 @@ export function ChangelogEditor({
             <button
               type="button"
               onClick={() => setTagDialogOpen(true)}
-              className="text-xs font-medium text-primary hover:underline flex items-center gap-1 cursor-pointer"
+              className="text-xs font-medium text-[var(--primary-text)] hover:underline flex items-center gap-1 cursor-pointer"
             >
               <Plus className="size-3" /> Manage tags
             </button>
@@ -573,7 +573,7 @@ export function ChangelogEditor({
                     className={cn(
                       "inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full text-xs font-semibold transition-all border cursor-pointer",
                       selected
-                        ? cn(getChangelogTagClasses(tag.name), "ring-2 ring-primary ring-offset-1")
+                        ? cn(getChangelogTagClasses(tag.name), "ring-2 ring-[var(--primary-text)] ring-offset-1")
                         : "bg-muted text-muted-foreground border-border hover:bg-muted/80 opacity-70"
                     )}
                   >

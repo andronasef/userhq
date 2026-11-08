@@ -220,7 +220,7 @@ export function UserMenu({
                 <Monitor className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                 <span>System</span>
               </span>
-              {theme === "system" && <Check className="size-3.5 text-primary shrink-0" aria-hidden="true" />}
+              {theme === "system" && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => setTheme("light")}
@@ -230,7 +230,7 @@ export function UserMenu({
                 <Sun className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                 <span>Light</span>
               </span>
-              {theme === "light" && <Check className="size-3.5 text-primary shrink-0" aria-hidden="true" />}
+              {theme === "light" && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => setTheme("dark")}
@@ -240,7 +240,7 @@ export function UserMenu({
                 <Moon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                 <span>Dark</span>
               </span>
-              {theme === "dark" && <Check className="size-3.5 text-primary shrink-0" aria-hidden="true" />}
+              {theme === "dark" && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>

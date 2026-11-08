@@ -132,7 +132,7 @@ const FAQ_ITEMS: { question: string; answer: React.ReactNode }[] = [
           href="https://increasinglabs.com/"
           target="_blank"
           rel="noopener noreferrer"
-          className="font-medium text-foreground underline underline-offset-2 hover:text-[var(--primary)] transition-colors"
+          className="font-medium text-foreground underline underline-offset-2 hover:text-[var(--primary-text)] transition-colors"
         >
           Increasing Labs
         </a>{" "}
@@ -530,7 +530,7 @@ export function ProductShowcase(): React.JSX.Element {
                       <ChevronDown
                         className={cn(
                           "size-4 shrink-0 text-muted-foreground transition-transform duration-200",
-                          isOpen && "rotate-180 text-[var(--primary)]",
+                          isOpen && "rotate-180 text-[var(--primary-text)]",
                         )}
                         aria-hidden="true"
                       />

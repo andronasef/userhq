@@ -92,7 +92,7 @@ describe("FAQ Portal Components & Client Logic", () => {
       );
 
       expect(html).toContain(
-        '<mark class="bg-primary/20 text-primary font-medium px-0.5 rounded">password</mark>'
+        '<mark class="bg-primary/20 text-[var(--primary-text)] font-medium px-0.5 rounded">password</mark>'
       );
       expect(html).toContain("How do I reset my ");
       expect(html).toContain(" securely?");
@@ -104,7 +104,7 @@ describe("FAQ Portal Components & Client Logic", () => {
       );
 
       expect(html).toContain(
-        '<mark class="bg-primary/20 text-primary font-medium px-0.5 rounded">Invoices</mark>'
+        '<mark class="bg-primary/20 text-[var(--primary-text)] font-medium px-0.5 rounded">Invoices</mark>'
       );
     });
 

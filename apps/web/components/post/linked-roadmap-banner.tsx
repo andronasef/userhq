@@ -30,7 +30,7 @@ export function LinkedRoadmapBanner({
     return (
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-lg border border-primary/25 bg-primary/5 text-sm">
         <div className="flex items-center gap-2.5 min-w-0">
-          <Kanban className="size-4 text-primary shrink-0" aria-hidden="true" />
+          <Kanban className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
           <div className="flex flex-wrap items-center gap-2 min-w-0">
             <span className="text-foreground">
               Linked to roadmap item:{" "}
@@ -56,7 +56,7 @@ export function LinkedRoadmapBanner({
           variant="ghost"
           size="sm"
           asChild
-          className="shrink-0 text-primary hover:text-primary gap-1 -ml-2 sm:ml-0 w-fit"
+          className="shrink-0 text-[var(--primary-text)] hover:text-[var(--primary-text)] gap-1 -ml-2 sm:ml-0 w-fit"
         >
           <Link
             href={`/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap?item=${encodeURIComponent(roadmapItem.id)}`}
@@ -72,7 +72,7 @@ export function LinkedRoadmapBanner({
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-lg border border-border bg-muted/40 text-sm">
       <div className="flex items-center gap-2.5 min-w-0">
-        <Kanban className="size-4 text-primary shrink-0" aria-hidden="true" />
+        <Kanban className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
         <span className="text-foreground">
           This idea is on our roadmap:{" "}
           <strong className="font-semibold text-foreground">
@@ -85,7 +85,7 @@ export function LinkedRoadmapBanner({
         variant="ghost"
         size="sm"
         asChild
-        className="shrink-0 text-primary hover:text-primary gap-1 -ml-2 sm:ml-0 w-fit"
+        className="shrink-0 text-[var(--primary-text)] hover:text-[var(--primary-text)] gap-1 -ml-2 sm:ml-0 w-fit"
       >
         <Link href={`/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap`}>
           <span>View public roadmap</span>

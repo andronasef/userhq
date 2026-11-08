@@ -108,7 +108,7 @@ export function ActivityFeed({
 
               <Link
                 href={href}
-                className="text-base font-semibold text-foreground group-hover:text-primary transition-colors truncate"
+                className="text-base font-semibold text-foreground group-hover:text-[var(--primary-text)] transition-colors truncate"
               >
                 {post.title}
               </Link>

@@ -129,7 +129,7 @@ export function ChangelogTimelineItem({
       <h2 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight mb-3">
         <Link
           href={`/${ws}/${product}/changelog/${entry.slug}`}
-          className="hover:underline hover:text-primary transition-colors"
+          className="hover:underline hover:text-[var(--primary-text)] transition-colors"
         >
           {entry.title}
         </Link>
@@ -149,7 +149,7 @@ export function ChangelogTimelineItem({
           <button
             type="button"
             onClick={() => setExpanded(!expanded)}
-            className="text-sm font-semibold text-primary hover:underline flex items-center gap-1 mt-2 cursor-pointer"
+            className="text-sm font-semibold text-[var(--primary-text)] hover:underline flex items-center gap-1 mt-2 cursor-pointer"
           >
             {expanded ? "Show less ↑" : "Read more ↓"}
           </button>

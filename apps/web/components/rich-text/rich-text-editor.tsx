@@ -33,7 +33,7 @@ export function RichTextEditor({
           HTMLAttributes: {
             target: "_blank",
             rel: "noopener noreferrer nofollow",
-            class: "text-primary underline hover:opacity-80 transition-opacity",
+            class: "text-[var(--primary-text)] underline hover:opacity-80 transition-opacity",
           },
         },
       }),

@@ -50,7 +50,7 @@ export function WebhookSecretDialog({
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <KeyRound className="size-5 text-primary" aria-hidden="true" />
+            <KeyRound className="size-5 text-[var(--primary-text)]" aria-hidden="true" />
             <span>New signing secret</span>
           </DialogTitle>
           <DialogDescription>

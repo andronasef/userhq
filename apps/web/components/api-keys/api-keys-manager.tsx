@@ -142,7 +142,7 @@ export function WorkspaceApiKeysManager({
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1 max-w-xs">
                           {k.scopes.includes("admin") ? (
-                            <Badge variant="outline" className="text-[11px] border-primary/40 text-primary">
+                            <Badge variant="outline" className="text-[11px] border-primary/40 text-[var(--primary-text)]">
                               admin
                             </Badge>
                           ) : (

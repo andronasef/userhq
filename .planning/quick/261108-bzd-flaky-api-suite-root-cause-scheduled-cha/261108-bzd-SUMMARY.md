@@ -4,17 +4,17 @@ plan: 01
 subsystem: testing
 tags: [postgresql, supertest, vitest, api-keys]
 status: in-progress
-tasks-completed: 1
+tasks-completed: 2
 tasks-total: 4
-checkpoint: SPLIT-1
+checkpoint: TASK-2-REVIEW
 checkpoint-date: 2026-11-08
 duration: 26 min continuation
 actuals:
-  tokens: 25117
-  tasks: 1
-  commits: 11
+  tasks: 2
+  commits: 20
 plan_head_before: 0a497d47451394b59658114af25520c24beea276
-plan_head_after: daa4fea75c29c77ec68a1a5bd44182063e6cc132
+plan_head_after: 5063ed05d291af7a6f1b2dd6ad2180a80dd3bfc4
+task2_review_base: 6a3aebc
 requires:
   - phase: quick-261108-b3i
     provides: Existing workspace automation endpoints and review fixes
@@ -22,6 +22,7 @@ provides:
   - Loopback-bound integration test servers
   - Graceful PostgreSQL test connection shutdown before database deletion
   - HTTP 400 validation errors for invalid API-key creation input
+  - Durable scheduled changelog claims and atomic webhook enqueue
 affects: [integration-testing, workspace-automation]
 tech-stack:
   added: []
@@ -32,13 +33,13 @@ key-files:
 requirements-completed: []
 ---
 
-# Quick 261108-bzd: Task 1 checkpoint
+# Quick 261108-bzd: Tasks 1–2 checkpoint
 
 **The integration harness now binds one loopback listener per app and closes PostgreSQL clients before dropping each test database; invalid API-key bodies return standard HTTP 400 errors.**
 
 ## Scope and status
 
-Only Task 1 was executed in this continuation. Tasks 2–4 (scheduled changelog events, the contrast sweep, and browser specifications) have not started. The plan remains in progress and stops here for the parent's two-axis review before Task 2.
+Task 1 passed the parent's two-axis review with no findings. Task 2 is implemented and verified, and stops here for its own review. Tasks 3–4 (the contrast sweep and browser specifications) have not started; the overall plan remains in progress.
 
 ## Changes
 
@@ -67,7 +68,7 @@ This continuation:
 - `ae236cd` — Apply the measured integration-hook budget and evidence.
 - `daa4fea` — Record five passing API and three consecutive passing full CI runs.
 
-The checkpoint actuals measure the committed diff through `daa4fea` (100467 characters / 4, rounded up) and `git rev-list --count 0a497d4..daa4fea` (11 commits), before this summary metadata commit. They are partial-plan measurements, not a claim that Tasks 2–4 are complete.
+The commit count is measured by `git rev-list --count 0a497d4..5063ed0` (20 commits), before this summary metadata update. It is a partial-plan count including review/documentation commits. No actual token-usage measurement is available, so the previous diff-size estimate has been removed from `actuals`.
 
 ## TDD and verification
 
@@ -85,10 +86,41 @@ Three consecutive complete `bun run ci:check` runs passed in **79.2, 122.0 and 9
 - **Receiver observation limit:** original raw logs identifying unsolicited GETs did not survive interruption. The new fixture contract and HTTP assertions are verified, but this continuation does not claim attribution to a particular local process.
 - No production deployment, push, dependency addition, schema change, or STATE/ROADMAP update was made. No new application stub was introduced.
 
+## Task 2: Scheduled changelog announcements
+
+- Generated migration `0021_changelog_announced_at.sql` adds one nullable private timestamp column; custom migration `0022_backfill_changelog_announced.sql` idempotently marks already-live entries so historical releases never replay. No applied migration was changed, and no `device_info` statement was generated.
+- A registered 60-second job claims at most 100 due entries per tick, using the supplied clock, entry row locks and `SKIP LOCKED`. The durable claim and webhook outbox insert commit in one transaction. Failed enqueue rolls the claim back for retry; overlapping calls on one instance return null.
+- Request-driven publication shares the same durable marker and entry lock. Moving back to a draft or future date clears the marker. An ordinary live edit does not announce again.
+- The claim excludes deleted products/workspaces and routes each entry through its own workspace. When the job processes an entry while Changelog is disabled, it keeps the claim but queues no event, preventing later replay of that processed event.
+- Explicit admin/public DTO allowlists exclude the marker. Automation documentation now describes scheduled timing, the 100-entry batch ceiling, suppression and re-arming.
+
+### Task 2 commits and TDD
+
+Review base: `6a3aebc`; implementation head: `5063ed05d291af7a6f1b2dd6ad2180a80dd3bfc4`.
+
+- `540fef1` — First due-date test: the real HTTP future entry produces no immediate outbox event; RED occurred at the missing scheduler boundary, as anticipated by the plan. This is boundary-absence evidence, not a pre-existing scheduler predicate failure.
+- `2b09d21` — Schema/migrations and transactional due-date scheduler; first behavior GREEN.
+- `dede1f4` → `0a046b9` — Genuine behavioral RED (worker claimed an already-inline-announced entry, expected zero), then shared request-path marker GREEN.
+- `8546d2e` → `415ca7f` — Genuine behavioral RED (rescheduled entry was not claimed), then re-arming GREEN.
+- `5063ed0` — Existing security/concurrency behavior characterized through real HTTP/DB/job-clock/outbox seams; documentation updated.
+
+No internal service mocks were used. Rollback is tested with a real PostgreSQL trigger rejecting outbox insertion, followed by a successful retry. A test-fixture cleanup ordering failure was corrected to delete products before their restricted parent workspace; it was not an application failure.
+
+### Task 2 verification
+
+- New scheduler suite: **12/12 passing** (2.35 seconds), including controlled far-future time, drafts/live entries, separate-instance and same-instance races, HTTP publication race, re-arming, disabled processing/no replay, tenant routing, deleted tenants, actual SQL backfill run twice, response privacy, batch ceiling and rollback/retry.
+- Required focused gate: **9 files, 181 tests passing** (14.87 seconds), including changelog/public visibility, existing webhook events/worker/module gates, product-feature delivery, automation documentation and cross-tenant suites.
+- Package build, API typecheck, migration check, no-drift migration generation and lint passed. Existing unrelated lint warnings remain. Logs: `/tmp/bzd-task2-focused.log`, `/tmp/bzd-task2-typecheck.log`, `/tmp/bzd-task2-dbcheck.log`, `/tmp/bzd-scheduler-no-drift.log`, `/tmp/bzd-task2-lint.log`.
+- Full CI was not repeated for this checkpoint; Task 1's three passes remain historical evidence, and the plan calls for another full gate after Task 4.
+
+### Task 2 timing limitation for review
+
+Suppression is evaluated when the job processes the due entry, matching the plan's explicit test sequence (disable, tick, re-enable, tick). If Changelog is disabled when a date passes but re-enabled before any job tick, this implementation can still announce that entry. There is no historical feature-state timestamp to infer the state at the exact arrival time. The docs deliberately describe processing-time suppression and do not claim that stronger between-ticks guarantee. The parent requested this truthful checkpoint for review instead of expanding into feature-toggle history/lock-order changes.
+
 ## Next action
 
-Task 1 verification is complete. Return this checkpoint to the parent for two-axis review; Tasks 2–4 remain unexecuted. Do not begin Task 2 automatically from this executor.
+Return Task 2 to the parent for two-axis review. Tasks 3–4 remain unexecuted; do not begin Task 3 automatically from this executor.
 
 ## Self-Check: PASSED
 
-The plan, diagnosis, summary and new isolation test exist. Prior RED/fix commits and the new teardown/budget commits are ancestors of HEAD. `git diff --check` passes. The only unrelated untracked directory is `.planning/ui-reviews/`, which was preserved. Parent review and state bookkeeping remain pending.
+The plan, diagnosis, summary, scheduler, new integration test and both new migration files exist. Task 1 and Task 2 commits are ancestors of HEAD. `git diff --check` passes. The only unrelated untracked directory is `.planning/ui-reviews/`, which was preserved. Task 2 review and state bookkeeping remain pending.

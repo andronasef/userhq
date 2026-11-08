@@ -5,6 +5,7 @@ import { eq, sql } from "drizzle-orm";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
 import { NotificationsService } from "../src/notifications/notifications.service.js";
 import { enqueueCommentEmail } from "../src/email/outbox.js";
+import { enqueueWebhookEvent } from "../src/webhooks/outbox.js";
 
 const latch = () => {
   let release!: () => void;
@@ -24,7 +25,7 @@ describe("Board disable serializes with in-flight customer delivery", () => {
   });
   afterAll(async () => { await app?.close(); });
 
-  it.each(["notification", "email"] as const)("does not revive an in-flight %s after disable and re-enable", async (kind) => {
+  it.each(["notification", "email", "webhook"] as const)("does not revive an in-flight %s after disable and re-enable", async (kind) => {
     const slug = `delivery-race-${kind}`;
     const [ws] = await app.db.insert(schema.workspaces).values({ name: slug, slug }).returning();
     await app.db.insert(schema.workspaceMembers).values({ workspaceId: ws.id, userId: owner.userId, role: "owner" });
@@ -33,6 +34,7 @@ describe("Board disable serializes with in-flight customer delivery", () => {
     const [post] = await app.db.insert(schema.posts).values({ productId: product.id, number: 1, title: slug, authorId: customer.userId, statusId: status.id }).returning();
     const [activity] = await app.db.insert(schema.postActivity).values({ postId: post.id, actorId: owner.userId, kind: "status_changed", statusName: "Review", statusColor: "#123456" }).returning();
     const [comment] = await app.db.insert(schema.comments).values({ postId: post.id, authorId: owner.userId, body: "In-flight comment" }).returning();
+    await app.db.insert(schema.webhookSubscriptions).values({ workspaceId: ws.id, url: "https://hooks.example.test/in", secret: "whsec_race", events: ["*"], isActive: true });
     const toggle = (board: boolean) => request(app.http).patch(`/api/v1/workspaces/${slug}/products/app`)
       .set("Cookie", owner.cookie).set("Origin", app.env.PUBLIC_URL).send({ features: { board } });
 
@@ -44,6 +46,8 @@ describe("Board disable serializes with in-flight customer delivery", () => {
           workspaceId: ws.id, productId: product.id, postId: post.id,
           postActivityId: activity.id, actorId: owner.userId,
         });
+      } else if (kind === "webhook") {
+        await enqueueWebhookEvent(tx, { workspaceId: ws.id, productId: product.id, eventType: "post.created", data: { id: post.id } });
       } else {
         await enqueueCommentEmail(tx, { workspaceId: ws.id, postId: post.id, commentId: comment.id, actorId: owner.userId });
       }
@@ -76,6 +80,10 @@ describe("Board disable serializes with in-flight customer delivery", () => {
         const visible = await request(app.http).get("/api/v1/notifications").set("Cookie", customer.cookie);
         expect(visible.status).toBe(200);
         expect(visible.body.notifications.filter((n: any) => n.post.workspaceSlug === slug)).toHaveLength(0);
+      } else if (kind === "webhook") {
+        const deliveries = await app.db.select({ status: schema.webhookDeliveries.status, errorMessage: schema.webhookDeliveries.errorMessage })
+          .from(schema.webhookDeliveries).where(eq(schema.webhookDeliveries.workspaceId, ws.id));
+        expect(deliveries).toEqual([{ status: "suppressed", errorMessage: "board_unavailable" }]);
       } else {
         const queued = await app.db.select({ id: schema.commentEmailItems.commentId })
           .from(schema.commentEmailItems).where(eq(schema.commentEmailItems.commentId, comment.id));

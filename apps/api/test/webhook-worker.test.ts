@@ -409,6 +409,83 @@ describe("webhook worker against a local receiver (quick-261107-s6l)", () => {
       expect(receiver.requests).toHaveLength(0);
     });
 
+    describe("suppression in the disable transaction (AF-01, D-14)", () => {
+      const patchProduct = (features: object, extra: object = {}) =>
+        as(owner, request(testApp.http).patch(`/api/v1/workspaces/${wsSlug}/products/p-one`)).send({ features, ...extra });
+      const statusOf = async (id: string) => {
+        const row = await getDelivery(id);
+        return { status: row.status, errorMessage: row.errorMessage };
+      };
+      const pendingOf = async (...ids: string[]) =>
+        Object.fromEntries(await Promise.all(ids.map(async (id) => [id, await statusOf(id)] as const)));
+
+      it("board off suppresses pending and sending post and comment deliveries at once; re-enabling delivers only the rest", async () => {
+        const sub = await seedSub();
+        const mk = (event: string, status: "pending" | "sending") =>
+          seedDelivery(sub.id, { status, payload: payloadFor(event, { id: productId }) });
+        const post = await mk("post.created", "pending");
+        const comment = await mk("comment.created", "pending");
+        const sending = await mk("post.updated", "sending");
+        const changelog = await mk("changelog.published", "pending");
+
+        expect((await patchProduct({ board: false })).status).toBe(200);
+        expect(await statusOf(post.id)).toEqual({ status: "suppressed", errorMessage: "board_unavailable" });
+        expect(await statusOf(comment.id)).toEqual({ status: "suppressed", errorMessage: "board_unavailable" });
+        expect(await statusOf(sending.id)).toEqual({ status: "suppressed", errorMessage: "board_unavailable" });
+        expect(await statusOf(changelog.id)).toEqual({ status: "pending", errorMessage: null });
+
+        expect((await patchProduct({ board: true })).status).toBe(200);
+        await worker.runOnce(new Date());
+        expect(receiver.requests.map((r) => r.headers["x-userhq-event"])).toEqual(["changelog.published"]);
+        expect((await statusOf(post.id)).status).toBe("suppressed");
+        expect((await statusOf(changelog.id)).status).toBe("delivered");
+      });
+
+      it("changelog off suppresses changelog deliveries and leaves board deliveries pending", async () => {
+        const sub = await seedSub();
+        const changelog = await seedDelivery(sub.id, { payload: payloadFor("changelog.published", { id: productId }) });
+        const board = await seedDelivery(sub.id, { payload: payloadFor("post.created", { id: productId }) });
+        expect((await patchProduct({ changelog: false })).status).toBe(200);
+        expect(await pendingOf(changelog.id, board.id)).toEqual({
+          [changelog.id]: { status: "suppressed", errorMessage: "changelog_unavailable" },
+          [board.id]: { status: "pending", errorMessage: null },
+        });
+      });
+
+      it("leaves finished deliveries, pings, other products and other workspaces untouched", async () => {
+        const sub = await seedSub();
+        const [ws2] = await db().select().from(schema.workspaces).where(eq(schema.workspaces.slug, otherSlug));
+        const [sub2] = await db()
+          .insert(schema.webhookSubscriptions)
+          .values({ workspaceId: ws2.id, url: receiver.url, secret: SECRET, events: ["*"], isActive: true })
+          .returning();
+        const p1 = { id: productId };
+        const delivered = await seedDelivery(sub.id, { status: "delivered", payload: payloadFor("post.created", p1) });
+        const failed = await seedDelivery(sub.id, { status: "failed", errorMessage: "boom", payload: payloadFor("post.created", p1) });
+        const ping = await seedDelivery(sub.id, { payload: payloadFor("ping") });
+        const otherProduct = await seedDelivery(sub.id, { payload: payloadFor("post.created", { id: product2Id }) });
+        const otherWorkspace = await seedDelivery(sub2.id, { workspaceId: ws2.id, payload: payloadFor("post.created", p1) });
+
+        expect((await patchProduct({ board: false })).status).toBe(200);
+        expect(await pendingOf(delivered.id, failed.id, ping.id, otherProduct.id, otherWorkspace.id)).toEqual({
+          [delivered.id]: { status: "delivered", errorMessage: null },
+          [failed.id]: { status: "failed", errorMessage: "boom" },
+          [ping.id]: { status: "pending", errorMessage: null },
+          [otherProduct.id]: { status: "pending", errorMessage: null },
+          [otherWorkspace.id]: { status: "pending", errorMessage: null },
+        });
+      });
+
+      it("a profile-only save or turning Board on suppresses nothing", async () => {
+        const sub = await seedSub();
+        const post = await seedDelivery(sub.id, { payload: payloadFor("post.created", { id: productId }) });
+        expect((await patchProduct({}, { tagline: "profile only" })).status).toBe(200);
+        expect((await patchProduct({ board: true, changelog: true })).status).toBe(200);
+        expect(await statusOf(post.id)).toEqual({ status: "pending", errorMessage: null });
+        await db().update(schema.products).set({ tagline: null }).where(eq(schema.products.id, productId));
+      });
+    });
+
     it("still delivers pings and events of other products", async () => {
       const sub = await seedSub();
       await db().update(schema.products).set({ boardEnabled: false }).where(eq(schema.products.id, productId));

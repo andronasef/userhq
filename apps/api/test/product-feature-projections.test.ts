@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import request from "supertest";
 import { schema } from "@userhq/db";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
+import { PostsService } from "../src/feedback/posts.service.js";
 
 describe("Disabled module public projections", () => {
   let app: Awaited<ReturnType<typeof createTestApp>>;
@@ -107,5 +108,17 @@ describe("Disabled module public projections", () => {
     expect(boardOnly.body.statuses.every((s: { isPublicRoadmap: boolean }) => !s.isPublicRoadmap)).toBe(true);
     await change({ roadmap: true });
     expect((await get(portal)).body).toEqual(before.body);
+  });
+
+  // AF-02: the projection is required; a forgotten argument must never fall back to the admin view.
+  it("getPostPage rejects when the projection argument is omitted", async () => {
+    await change({ roadmap: false });
+    const [product] = await app.db.select({ id: schema.products.id, workspaceId: schema.products.workspaceId }).from(schema.products);
+    const service = app.app.get(PostsService);
+    const omitted = (service.getPostPage as (...a: unknown[]) => Promise<unknown>).call(
+      service, { workspaceId: product.workspaceId, productId: product.id }, null, 1,
+    );
+    await expect(omitted).rejects.toThrow();
+    await change({ roadmap: true });
   });
 });

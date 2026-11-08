@@ -221,7 +221,8 @@ The export carries `createdByApiKeyId` on posts and comments. Status changes are
 Every request authenticated by a key counts against that key: 120 requests per 60 seconds per key, as a sliding window. The request after the limit returns `429` with code `rate_limited` and a `Retry-After` header holding a whole number of seconds to wait.
 
 - The limit is per key. Another key, or a signed-in person using the same route, is not affected.
-- The counter lives in the memory of one API process. UserHQ runs a single API replica today, so the limit is exact; running more replicas multiplies it until a shared store is added.
+- Counters are kept in PostgreSQL, so every API replica counts against the same limit and a restart does not reset it. Each keyed request costs one small database write, and a route with its own limit costs one more.
+- If the counter store is unavailable, the request is allowed and a warning is logged: rate limits fail open, while authentication does not depend on them.
 - Some routes also have a lower limit of their own: `POST /api/v1/workspaces/:ws/products/:product/posts/:number/comments` allows 10 comments per 60 seconds per key.
 - Redelivering a webhook delivery allows 10 redeliveries per 60 seconds per caller (per key for key requests).
 - Invalid tokens are rejected with `401` before any key is known, so they have no per-key counter.

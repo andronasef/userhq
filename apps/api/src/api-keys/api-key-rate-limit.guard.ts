@@ -12,8 +12,9 @@ import { ApiException } from "../common/api-error.filter.js";
  * directly instead of a named ThrottlerGuard throttler because that would emit
  * `Retry-After-api-key`, not `Retry-After`.
  *
- * ponytail: storage is in memory per API process, which is exact with the single
- * replica deployed today. Before running more than one, swap in a shared store.
+ * Counters live in PostgreSQL through the shared throttler storage, so the limit is exact across
+ * any number of API instances and survives restarts. One upsert per keyed request. If the store
+ * fails the request is allowed and a warning is logged (fail open, see PostgresThrottlerStorage).
  */
 @Injectable()
 export class ApiKeyRateLimitGuard implements CanActivate {

@@ -58,9 +58,9 @@ created: "2026-11-07"
 
 | ID | Sev | Finding | Resolution |
 |----|-----|---------|------------|
-| AF-01 | Low | Pending `webhook_deliveries` are not suppressed in the Board/Changelog disable transaction, so a delivery that survives disable then re-enable is sent (diverges from D-14) | Fix scheduled in a follow-up quick task |
-| AF-02 | Low | `PostsService.getPostPage` projection argument defaults to `admin` (fails open if a future caller omits it) | Fix scheduled: make the parameter required |
-| AF-03 | Info | `webhookEventModule` returns null (ungated) for unknown event prefixes | Fix scheduled: exhaustiveness test over `WEBHOOK_EVENTS` |
+| AF-01 | Low | Pending `webhook_deliveries` are not suppressed in the Board/Changelog disable transaction, so a delivery that survives disable then re-enable is sent (diverges from D-14) | Fixed in quick-261108-b3i (tests c07a0c3, fix 5edda00) |
+| AF-02 | Low | `PostsService.getPostPage` projection argument defaults to `admin` (fails open if a future caller omits it) | Fixed in quick-261108-b3i (tests c07a0c3, fix 5edda00) |
+| AF-03 | Info | `webhookEventModule` returns null (ungated) for unknown event prefixes | Fixed in quick-261108-b3i (tests c07a0c3, fix 5edda00) |
 | AF-04 | Info | Static uploads not module-scoped | Accepted, see AR-06-01 |
 
 Verified honouring disabled-module rules: webhook enqueue and worker recheck, all four push enqueue paths and worker, inbox replies via `CommentsService`, API-key default-deny on unscoped routes.

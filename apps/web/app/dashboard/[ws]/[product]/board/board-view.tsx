@@ -94,15 +94,18 @@ export function BoardView({
             title="No posts yet"
             body="When customers share ideas on your portal, they show up here."
             action={
-              <Button variant="outline" asChild>
-                <a
-                  href={portalHref(ws, product)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View portal
-                </a>
-              </Button>
+              // U6: a hidden Board has no public page to link to.
+              boardEnabled ? (
+                <Button variant="outline" asChild>
+                  <a
+                    href={portalHref(ws, product)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View portal
+                  </a>
+                </Button>
+              ) : undefined
             }
           />
         )

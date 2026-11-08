@@ -41,10 +41,12 @@ const palette = {
   light: {
     background: token(block(":root"), "--background"),
     card: token(block(":root"), "--card"),
+    muted: token(block(":root"), "--muted"),
   },
   dark: {
     background: token(block(".dark"), "--background"),
     card: token(block(".dark"), "--card"),
+    muted: token(block(".dark"), "--muted"),
   },
 };
 
@@ -57,6 +59,22 @@ describe("accent tokens: text on the accent", () => {
 });
 
 describe("accent tokens: accent text on page surfaces", () => {
+  const tint = (brand: string, surface: string): string => `#${[1, 3, 5].map((at) => {
+    const ink = Number.parseInt(brand.slice(at, at + 2), 16);
+    const background = Number.parseInt(surface.slice(at, at + 2), 16);
+    return Math.round(ink * 0.2 + background * 0.8).toString(16).padStart(2, "0");
+  }).join("")}`;
+
+  it.each(BRANDS)("%s reads at 4.5:1 on all three surfaces and their 20 percent accent tints in both themes", (brand) => {
+    const tokens = accentTokens(brand);
+    for (const theme of ["light", "dark"] as const) {
+      const text = theme === "light" ? tokens.primaryText : tokens.primaryTextDark;
+      for (const surface of Object.values(palette[theme])) {
+        expect(contrastRatio(text, surface), `${brand} ${theme} on ${surface}`).toBeGreaterThanOrEqual(4.5);
+        expect(contrastRatio(text, tint(brand, surface)), `${brand} ${theme} on tinted ${surface}`).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
   it.each(BRANDS)("light value for %s is at least 4.5:1 on both light surfaces", (brand) => {
     const t = accentTokens(brand);
     expect(contrastRatio(t.primaryText, palette.light.background)).toBeGreaterThanOrEqual(4.5);
@@ -72,10 +90,9 @@ describe("accent tokens: accent text on page surfaces", () => {
 
   it("keeps the brand in dark when already readable", () => {
     expect(accentTokens("#FACC15").primaryTextDark).toBe("#FACC15");
-    expect(accentTokens("#14B8A6").primaryTextDark).toBe("#14B8A6");
   });
 
-  it.each(["#1E3A8A", "#2563EB", "#000000"])("lightens %s in dark", (brand) => {
+  it.each(["#1E3A8A", "#2563EB", "#000000", "#14B8A6"])("lightens %s in dark", (brand) => {
     const t = accentTokens(brand);
     expect(t.primaryTextDark).not.toBe(brand);
     expect(contrastRatio(t.primaryTextDark, "#000000")).toBeGreaterThan(
@@ -83,8 +100,10 @@ describe("accent tokens: accent text on page surfaces", () => {
     );
   });
 
-  it("preserves light behaviour", () => {
-    expect(accentTokens("#2563EB").primaryText).toBe("#2563EB");
+  it("keeps readable hues and preserves the existing fallback on light surfaces", () => {
+    // Worked 20%-tint example: #1F54C8 reaches only 4.417:1 on tinted muted; #1E4FBC reaches 4.814:1.
+    expect(accentTokens("#2563EB").primaryText).toBe("#1E4FBC");
+    expect(accentTokens("#087F75").primaryText).toMatch(/^#0[0-9A-F][0-9A-F]{4}$/);
     expect(accentTokens("#FACC15").primaryText).toBe("#171717");
     expect(accentTokens("#FFFFFF").primaryText).toBe("#171717");
   });
@@ -111,10 +130,11 @@ describe("accentStyle", () => {
 });
 
 describe("ACCENT_SURFACES drift guard", () => {
-  it("matches --background and --card in globals.css", () => {
-    const norm = (s: { background: string; card: string }) => ({
+  it("matches --background, --card and --muted in globals.css", () => {
+    const norm = (s: { background: string; card: string; muted: string }) => ({
       background: s.background.toUpperCase(),
       card: s.card.toUpperCase(),
+      muted: s.muted.toUpperCase(),
     });
     expect(norm(ACCENT_SURFACES.light)).toEqual(palette.light);
     expect(norm(ACCENT_SURFACES.dark)).toEqual(palette.dark);

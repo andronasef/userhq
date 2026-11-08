@@ -31,13 +31,12 @@ export class ApiKeysController {
   @Post()
   async createKey(
     @Req() req: any,
-    @Body() body: any
+    @Body({ schema: createApiKeySchema }) input: CreateApiKeyInput
   ): Promise<CreatedApiKeyResponse> {
-    const parsed = createApiKeySchema.parse(body);
     return this.apiKeyService.createKey(
       req.tenant.workspaceId,
       req.user.id,
-      parsed
+      input
     );
   }
 

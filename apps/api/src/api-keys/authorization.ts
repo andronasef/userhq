@@ -1,5 +1,6 @@
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { products, type Db } from "@userhq/db";
+import { productRestrictionsInputSchema } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
 
 /** Classify key credentials before considering any accompanying session cookie. */
@@ -15,7 +16,8 @@ export function apiKeyToken(authorization: unknown): string | null {
  */
 export function isProductAllowed(restrictions: unknown, productId: string | null | undefined): boolean {
   if (restrictions === null || restrictions === undefined) return true;
-  return Array.isArray(restrictions) && !!productId && restrictions.includes(productId);
+  const parsed = productRestrictionsInputSchema.safeParse(restrictions);
+  return parsed.success && !!productId && parsed.data?.includes(productId) === true;
 }
 
 /**

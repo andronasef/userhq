@@ -148,6 +148,20 @@
       "when": 1794043509227,
       "tag": "0020_post_activity_api_key",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794149793184,
+      "tag": "0021_changelog_announced_at",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794149850690,
+      "tag": "0022_backfill_changelog_announced",
+      "breakpoints": true
     }
   ]
 }

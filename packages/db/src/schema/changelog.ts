@@ -26,6 +26,7 @@ export const changelogEntries = pgTable(
     summary: text("summary"), // Optional short snippet for timeline excerpt and OpenGraph description
     content: jsonb("content").notNull(), // ProseMirror JSON AST
     publishedAt: timestamp("published_at", { withTimezone: true }), // null = draft (CHLG-04)
+    announcedAt: timestamp("announced_at", { withTimezone: true }), // null = not yet announced for this live transition
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },

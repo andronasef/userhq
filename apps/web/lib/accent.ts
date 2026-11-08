@@ -25,25 +25,28 @@ export function contrastRatio(hex1: string, hex2: string): number {
   return (lMax + 0.05) / (lMin + 0.05);
 }
 
-// Page background and card per theme, copied from globals.css (:root / .dark).
-// accent.test.ts parses globals.css and fails if these drift. The muted surface
-// is deliberately excluded: 4.5:1 there would flip the default accent's light
-// link text to near-black.
+// Page, card and muted surfaces per theme. accent.test.ts checks these against globals.css.
 export const ACCENT_SURFACES = {
-  light: { background: "#F6F8F7", card: "#FFFFFF" },
-  dark: { background: "#0B111E", card: "#131D2E" },
+  light: { background: "#F6F8F7", card: "#FFFFFF", muted: "#EAF0ED" },
+  dark: { background: "#0B111E", card: "#131D2E", muted: "#1A2638" },
 } as const;
 
 const MIN_TEXT_CONTRAST = 4.5;
 
 function meetsOn(
   hex: string,
-  surfaces: { background: string; card: string }
+  surfaces: readonly string[]
 ): boolean {
-  return (
-    contrastRatio(hex, surfaces.background) >= MIN_TEXT_CONTRAST &&
-    contrastRatio(hex, surfaces.card) >= MIN_TEXT_CONTRAST
-  );
+  return surfaces.every((surface) => contrastRatio(hex, surface) >= MIN_TEXT_CONTRAST);
+}
+
+function tintedSurfaces(brand: string, surfaces: Record<string, string>): string[] {
+  const base = Object.values(surfaces);
+  return [...base, ...base.map((surface) => `#${[1, 3, 5].map((at) => {
+    const ink = parseInt(brand.slice(at, at + 2), 16);
+    const background = parseInt(surface.slice(at, at + 2), 16);
+    return Math.round(ink * 0.2 + background * 0.8).toString(16).padStart(2, "0");
+  }).join("")}`)];
 }
 
 // Mix `hex` toward white by `amount` (0..1), uppercase #RRGGBB.
@@ -55,6 +58,11 @@ function mixWithWhite(hex: string, amount: number): string {
       .padStart(2, "0");
   };
   return `#${channel(0)}${channel(1)}${channel(2)}`.toUpperCase();
+}
+
+function mixWithBlack(hex: string, amount: number): string {
+  return `#${[1, 3, 5].map((at) => Math.round(parseInt(hex.slice(at, at + 2), 16) * (1 - amount))
+    .toString(16).padStart(2, "0")).join("")}`.toUpperCase();
 }
 
 export interface AccentTokens {
@@ -85,11 +93,17 @@ export function accentTokens(
     primaryForeground = vsWhite >= vsBlack ? "#FFFFFF" : "#000000";
   }
 
-  const primaryText = meetsOn(primary, ACCENT_SURFACES.light) ? primary : "#171717";
+  const lightSurfaces = tintedSurfaces(primary, ACCENT_SURFACES.light);
+  const darkSurfaces = tintedSurfaces(primary, ACCENT_SURFACES.dark);
+  // Keep the established fallback for brands that already fail on page/card. Otherwise retain the hue.
+  let primaryText = meetsOn(primary, [ACCENT_SURFACES.light.background, ACCENT_SURFACES.light.card]) ? primary : "#171717";
+  for (let step = 1; !meetsOn(primaryText, lightSurfaces); step++) {
+    primaryText = mixWithBlack(primary, step * 0.05);
+  }
 
   // White always meets 4.5:1 on the dark surfaces, so the loop terminates.
   let primaryTextDark = primary;
-  for (let step = 1; !meetsOn(primaryTextDark, ACCENT_SURFACES.dark); step++) {
+  for (let step = 1; !meetsOn(primaryTextDark, darkSurfaces); step++) {
     primaryTextDark = mixWithWhite(primary, step * 0.05);
   }
 

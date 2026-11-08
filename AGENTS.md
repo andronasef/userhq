@@ -282,3 +282,17 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 > Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
 > This section is managed by `generate-Codex-profile` -- do not edit manually.
 <!-- GSD:profile-end -->
+
+## Documentation and release tags
+
+Keep documentation current alongside implementation. For changes to visible workflows, permissions, API routes or payloads, errors, pagination, notification behavior, product switches, privacy boundaries, environment requirements or migrations, update the affected guides in the same change. This applies to documentation-impacting work in every version, including major behavior changes made before a release.
+
+Before creating **any** release tag (major, minor, patch or prerelease):
+
+1. Review the diff since the previous release tag. Add an accurate version/date entry to `CHANGELOG.md`, including user-visible changes, compatibility changes, required environment variables, migration steps and upgrade caveats. Do not claim planned features have shipped.
+2. Review [the documentation index](docs/README.md), [user guide](docs/user-guide.md), [API quickstart](docs/api-quickstart.md), [canonical API reference](docs/automation-api.md), [LLM guide](docs/llm-guide.md), [LLM index](llms.txt), `README.md` and [deployment runbook](docs/deploy.md). Update every affected document; if a document needs no change, record that review in the release task summary. Check version labels and links.
+3. Validate documented UI labels, routes, scopes, identifiers, request/response examples and security claims against the implementation. Run the existing API docs-sync checks when API docs change, resolve local documentation links, and run implementation checks appropriate to any code changes. Never add prose-mirroring tests merely to claim documentation coverage.
+4. Check production prerequisites before an authorized deployment, including stable VAPID keys, OAuth configuration and committed migrations. Document required operator actions before tagging; do not expose secrets or invent successful deployment checks.
+5. Commit the documentation and implementation before creating the tag. Create the tag on the intended verified commit and report whether the branch/tag was pushed. Tagging and pushing remain separate actions requiring user authorization. Do not move or force-push an already published tag to repair missing docs; add a corrective commit and, when authorized, a new release version.
+
+Use GSD for documentation work as for code. Keep this policy outside the generated `GSD:*` blocks so regeneration preserves it.

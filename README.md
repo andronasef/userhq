@@ -31,6 +31,14 @@ Behind the scenes, your product and engineering team manages ideas privately wit
 
 ---
 
+## Documentation
+
+- [Documentation index](docs/README.md): choose a guide by role or task.
+- [User guide](docs/user-guide.md): customer and workspace-admin workflows.
+- [API quickstart](docs/api-quickstart.md) and [automation API reference](docs/automation-api.md): credentials, examples, scopes and endpoints.
+- [LLM guide](docs/llm-guide.md) and [llms.txt](llms.txt): integration context and a repository documentation index for assistants.
+- [Deployment runbook](docs/deploy.md) and [changelog](CHANGELOG.md): configuration, upgrade requirements and release history.
+
 ## ✨ Key Features
 
 ### 🗳️ Customer Feedback Board
@@ -63,6 +71,12 @@ User (Global platform account via OAuth)
 ```
 - **Global User Accounts**: End users sign in once with Google or GitHub and can interact with any product portal across workspaces.
 - **Multiple Products per Company**: One workspace can manage multiple distinct app portals with independent branding, boards, and roadmaps.
+
+### Workspace Operations and Automation
+- **Workspace Inbox**: Review requests and comments across products; shared attention state and personal read state serve different workflows.
+- **Per-Product Modules**: Enable Board, Roadmap, Changelog and FAQ independently without deleting their stored content.
+- **Appearance and Notifications**: Light, dark and system themes, browser push preferences and product following.
+- **API and Webhooks**: Scoped integration keys, product restrictions, feedback exports, signed event delivery and delivery logs.
 
 ---
 
@@ -194,16 +208,7 @@ UserHQ is designed to run affordably on any VPS or self-hosted Docker platform (
 
 ## 🗺️ Roadmap
 
-- [x] **Phase 1: Architecture & Walking Skeleton**
-  - Bun workspace monorepo foundation
-  - NestJS 12 API with Better Auth integration
-  - Next.js 16 + vinext standalone setup
-  - PostgreSQL 18 & Drizzle ORM schema
-- [ ] **Phase 2: Multi-Tenant Workspace & Product Management**
-- [ ] **Phase 3: Feedback Board & Upvoting Engine**
-- [ ] **Phase 4: Dual-Layer Kanban Roadmap & Status Sync**
-- [ ] **Phase 5: Changelog Engine with Tiptap & WebP Uploads**
-- [ ] **Phase 6: Self-Serve FAQ & Public Search**
+Implemented capabilities include workspace/product management, feedback and votes, the private/public roadmap, changelog and FAQ, workspace inbox, per-product module controls, themes, browser push and scoped automation. See the [changelog](CHANGELOG.md) for shipped versions and the [user guide](docs/user-guide.md) for using them. Planning artifacts under `.planning/` are implementation history, not a promise that an unimplemented capability is available.
 
 ---
 

@@ -16,7 +16,7 @@ This document is the operator runbook for deploying and managing UserHQ across e
 
 ## 2. Dokploy Settings per Application
 
-UserHQ runs on Dokploy as Docker Compose services. Both environments run on the same physical VPS and **MUST** maintain complete process, network, and storage isolation.
+UserHQ runs on Dokploy as Docker Compose services. Production tracks `main`. If staging is also configured on the same VPS, keep its processes, network and storage isolated from production.
 
 ### Critical Setting: Isolated Deployments
 > [!IMPORTANT]
@@ -25,12 +25,12 @@ UserHQ runs on Dokploy as Docker Compose services. Both environments run on the 
 
 ### Dokploy Compose App Configuration
 
-- **App Names:** `userhq-staging` and `userhq-prod`
+- **App Names:** `userhq-prod`, plus `userhq-staging` if used
 - **Compose Path:** `./compose.yaml`
 - **Auto Deploy:** Enabled (`ON`) for both
 - **Branch:**
   - `userhq-staging`: `main`
-  - `userhq-prod`: `release` (pointer branch updated only on tag release)
+  - `userhq-prod`: `main` (there is no release pointer branch)
 
 ### Traefik Domain Routing (Domains Tab)
 
@@ -70,11 +70,43 @@ Secrets must never be committed to git, printed in CI logs, or shared in chat. C
 | `SMTP_PASS` | *(unset)* | `<brevo-smtp-key>` | Brevo SMTP key (not the API key; prod only) |
 | `SMTP_FROM` | `notifications@userhq.test` | `notifications@increasinglabs.com` | Sender address on an authenticated domain (DKIM/SPF verified in Brevo) |
 | `SMTP_REQUIRE_TLS` | `false` | `true` | Enforce TLS (STARTTLS/SSL) for outgoing SMTP connections |
+| `VAPID_PUBLIC_KEY` | `<persistent-staging-public-key>` | `<persistent-prod-public-key>` | Required whenever `NODE_ENV=production`, including a production-mode staging container |
+| `VAPID_PRIVATE_KEY` | `<persistent-staging-private-key>` | `<persistent-prod-private-key>` | Required with the matching public key; preserve the pair across deployments |
+| `VAPID_SUBJECT` | `https://${STAGING_DOMAIN}` | `https://${PROD_DOMAIN}` | Optional contact URL or `mailto:` address; the server has a default when omitted |
 
 Recorded Brevo port: smtp-relay.brevo.com:587 (confirmed 2026-10-03 from the prod API container)
 
 > [!NOTE]
 > Rotating `BETTER_AUTH_SECRET` invalidates every unsubscribe and mute link already emailed; recipients then see the "This link isn't valid" page and can use account settings.
+
+### Browser push VAPID startup requirement
+
+Since `v0.3.0`, production startup validation requires both VAPID keys even if nobody has opted in to push yet. Missing keys stop the API container, affecting sign-in and all API-backed operations while the web container may still display the login page. Do not bypass validation or generate a fresh pair on every boot.
+
+Generate one pair per environment from the installed API workspace, on a trusted machine. This command creates a private file rather than printing the keys:
+
+```bash
+cd apps/api
+node --input-type=module - <<'JS'
+import webpush from 'web-push';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
+const { publicKey, privateKey } = webpush.generateVAPIDKeys();
+const dir = join(homedir(), '.config', 'userhq');
+mkdirSync(dir, { recursive: true, mode: 0o700 });
+writeFileSync(join(dir, 'vapid.env'), `VAPID_PUBLIC_KEY=${publicKey}\nVAPID_PRIVATE_KEY=${privateKey}\n`, {
+  mode: 0o600,
+  flag: 'wx',
+});
+JS
+```
+
+The file is `~/.config/userhq/vapid.env`, outside the repository. Copy both values into the Dokploy Compose application's environment settings, optionally set `VAPID_SUBJECT`, save and redeploy. Store the pair securely for subsequent deployments, then remove the temporary file when a secure backup exists; never commit it. `flag: 'wx'` refuses to overwrite an existing file. Rotating the pair can invalidate existing browser subscriptions; coordinate re-subscription when rotation is necessary.
+
+For local smoke verification, pass a throwaway pair through the environment of `bun run stack:up`; never reuse that disposable pair for production. Normal development/test mode can generate ephemeral keys, which are not a production persistence mechanism.
+
+After deployment, check `GET /api/v1/health` on the app origin returns success and the API container is healthy; check `GET /api/auth/get-session` returns JSON (often `null` without a session), not an HTML 404 or gateway error. Then verify an authorized user's OAuth flow. If startup reports `Failing keys: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY`, correct Dokploy environment settings and redeploy the API before investigating OAuth credentials.
 
 ---
 
@@ -109,35 +141,27 @@ Google and GitHub require explicit redirect callback URLs.
 
 ## 5. Tag-Driven Release Workflow
 
-Releases are strictly managed through semver git tags:
+Tags identify releases; production deployment and GitHub release publication are separate operations:
 
-1. Changes merge into `main` after passing GitHub Actions CI.
-2. When ready for a release, the operator creates and pushes an annotated semver git tag:
+1. Complete the [documentation and tag checklist](../AGENTS.md#documentation-and-release-tags): update the changelog, review user/API/LLM docs, document environment and migration requirements, and commit the verified changes.
+2. With authorization, push `main`. Dokploy is configured to deploy pushes to `main`; do not assume a later tag's CI blocks that deployment. Verify environment prerequisites before the branch push.
+3. With authorization, create an annotated semver tag on the intended verified commit. Use the next version appropriate to the change (major, minor, patch or prerelease), and do not overwrite an existing published tag:
    ```bash
-   git tag -a v0.1.0 -m "Release v0.1.0"
-   git push origin v0.1.0
+   git tag -a <next-version> <verified-commit> -m "Release <next-version>"
+   git push origin <next-version>
    ```
-3. GitHub Actions `release.yml` triggers on `v*`:
+4. GitHub Actions `release.yml` triggers on `v*`:
    - Runs `jobs.ci` using `.github/workflows/ci.yml` (the exact CI checks).
    - Once CI passes, it automatically creates an official GitHub Release with release notes.
-4. Dokploy deploys the released version directly.
+5. Confirm the workflow outcome and that the GitHub Release exists. The workflow currently tolerates `gh release create` errors, so a green job alone does not prove publication. It contains no Dokploy deployment job and does not update a release branch.
+
+The `v0.3.0` changelog entry was added retrospectively. Its published tag remains on the original release commit; documentation corrections are subsequent commits, not a rewritten release.
 
 ### Rollback Procedure
-If a production issue requires rolling back to a previously known good commit, simply tag that commit with the next patch tag:
-```bash
-git tag -a v0.1.1 <known-good-commit-sha> -m "Rollback to <sha>"
-git push origin v0.1.1
-```
+Use Dokploy's deployment controls to deploy a known-good revision, after checking its compatibility with the current database migrations and stored uploads. Preserve backups; older application code may not work with a newer schema. A tag by itself does not change the `main` revision Dokploy builds. For a durable source rollback, prepare and verify a revert on `main`, update the changelog/docs as needed, and obtain push authorization. Never move published tags to perform a rollback.
 
-### Dokploy API Fallback (Webhook Alternative)
-If Dokploy's Git webhook does not automatically fire on GITHUB_TOKEN-authored branch pushes, use the Dokploy API deploy fallback:
-1. Generate an API Key in Dokploy (**Dokploy → Settings → API Keys**).
-2. Set the repository secret `DOKPLOY_API_KEY` in GitHub:
-   ```bash
-   gh secret set DOKPLOY_API_KEY
-   ```
-3. Call the Dokploy Compose Deploy endpoint:
-   `POST https://<DOKPLOY_HOST>/api/compose.deploy` with header `x-api-key: $DOKPLOY_API_KEY`.
+### Manual redeploy
+If the configured Git webhook misses a branch push, use Dokploy's deployment controls to redeploy the intended `main` revision and check container health and application sign-in. This repository's release workflow does not consume a `DOKPLOY_API_KEY` or implement an automatic fallback deploy.
 
 ---
 

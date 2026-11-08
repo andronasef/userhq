@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.0] - 2026-11-08
+
+### Added
+
+- **Workspace feedback dashboard**: Review requests and comments across products, filter and paginate the inbox, reply to customers, and manage shared Needs attention state separately from personal read state.
+- **Product feature controls**: Workspace owners and admins can enable Board, Roadmap, Changelog and FAQ independently for each product. Disabled modules are hidden from public navigation and blocked by public API gates while admin management retains the data.
+- **Themes**: Light, dark and system appearance across the dashboard and public portals, with readable brand text and focus indicators on normal, muted and tinted surfaces.
+- **Browser push**: Notification preferences, product following and same-origin notification click targets, with queued delivery and stale-subscription cleanup.
+- **Workspace automation API**: Scoped API keys, product restrictions, integration attribution, feedback exports, and automation for requests, comments, roadmap, changelog, FAQ and product settings.
+- **Signed webhooks**: Product-filtered subscriptions, one-time signing secrets, secret rotation, delivery logs, retries, manual redelivery and scheduled changelog publication events.
+
+### Fixed
+
+- API keys deny unclassified routes, cannot impersonate their creators, and enforce tenant and product boundaries. Empty restriction inputs are rejected; malformed stored restrictions deny access.
+- Webhook and push delivery validate public HTTPS destinations, pin validated DNS results, reject redirects and bound request duration and response size.
+- Push registration rejects endpoint takeover attempts. Account switching with matching browser keys replaces the subscription and discards the previous owner's queued deliveries.
+- Inbox replies share the comment pipeline; attention handling, reply visibility and historical attention backfill are consistent across entry points.
+- API-key rate limits use shared PostgreSQL storage across API instances. Concurrent integration-actor initialization handles both identity uniqueness constraints.
+- Integration tests use owned loopback listeners and wait for PostgreSQL clients to close before deleting temporary databases.
+
+### Upgrade requirements
+
+- **Configure persistent `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` before deploying to production.** The API refuses to start without both; API-backed sign-in will fail while it is unavailable. Reuse the same pair across redeployments. See [deployment configuration](docs/deploy.md#browser-push-vapid-startup-requirement).
+- Apply the committed database migrations through the API container's normal startup migration step. Back up the database and uploads before upgrading. Legacy empty product-restriction lists are normalized to unrestricted (`null`) to preserve their previous behavior.
+
+These release notes were added after the published tag; `v0.3.0` continues to identify its original commit.
+
 ## [v0.2.2] - 2026-10-26
 
 ### Fixed

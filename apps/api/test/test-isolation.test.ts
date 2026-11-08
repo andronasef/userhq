@@ -2,8 +2,10 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import http from "node:http";
 import request from "supertest";
 import { createTestApp } from "./support/test-app.js";
+import { startReceiver } from "./support/webhook-receiver.js";
 
 // Every socket a test opens must be bound to 127.0.0.1. supertest starts its own wildcard listener on an
 // ephemeral port for any app that is not already listening; the kernel then may hand it a port that another
@@ -58,5 +60,34 @@ describe("test servers listen on 127.0.0.1 only", () => {
     }
     expect(sites).toBeGreaterThanOrEqual(6);
     expect(offenders).toEqual([]);
+  });
+});
+
+// A receiver counts webhook POST attempts, including malformed ones, but not unrelated HTTP probes.
+describe("webhook receiver records deliveries only", () => {
+  const send = (port: number, headers: Record<string, string>, method: string) =>
+    new Promise<number>((resolve, reject) => {
+      const req = http.request({ host: "127.0.0.1", port, path: "/hook", method, headers, agent: false }, (res) => {
+        res.resume();
+        res.on("end", () => resolve(res.statusCode ?? 0));
+      });
+      req.on("error", reject);
+      req.end(method === "POST" ? "{}" : undefined);
+    });
+
+  it("ignores GET probes while keeping malformed POST attempts observable", async () => {
+    const receiver = await startReceiver();
+    try {
+      await send(receiver.port, { "user-agent": "node" }, "GET");
+      expect(receiver.requests).toHaveLength(0);
+      await send(receiver.port, {}, "POST");
+      expect(receiver.requests).toHaveLength(1);
+      expect(receiver.requests[0].deliveryId).toBe("");
+      await send(receiver.port, { "x-userhq-delivery": "d1", "x-userhq-event": "ping" }, "POST");
+      expect(receiver.requests).toHaveLength(2);
+      expect(receiver.requests[1].deliveryId).toBe("d1");
+    } finally {
+      await receiver.close();
+    }
   });
 });

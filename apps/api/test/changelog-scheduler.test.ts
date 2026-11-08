@@ -57,4 +57,14 @@ describe("scheduled changelog announcements", () => {
     const [stored] = await app.db.select().from(schema.changelogEntries).where(eq(schema.changelogEntries.id, entry.id));
     expect(stored.announcedAt?.toISOString()).toBe(DUE.toISOString());
   });
+
+  it("does not re-announce an entry created live or claim a draft", async () => {
+    const live = await create({ publishedAt: "2020-01-01T00:00:00.000Z" });
+    await create({ title: "Draft release" });
+    expect(await deliveries()).toHaveLength(1);
+    expect(await (await scheduler()).tick(DUE)).toBe(0);
+    expect(await deliveries()).toHaveLength(1);
+    const [stored] = await app.db.select().from(schema.changelogEntries).where(eq(schema.changelogEntries.id, live.id));
+    expect(stored.announcedAt).not.toBeNull();
+  });
 });

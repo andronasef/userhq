@@ -19,7 +19,6 @@ describe("Board disable serializes with in-flight customer delivery", () => {
   let customer: { cookie: string; userId: string };
   beforeAll(async () => {
     app = await createTestApp();
-    await app.app.listen(0, "127.0.0.1");
     owner = await signedInCookie(app.test, { name: "Owner", email: "race-owner@test.local", emailVerified: true });
     customer = await signedInCookie(app.test, { name: "Customer", email: "race-customer@test.local", emailVerified: true });
   });

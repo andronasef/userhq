@@ -643,7 +643,6 @@ describe("Push notification path: canonical URL, tag, Board lock and cleanup (D-
 
   beforeAll(async () => {
     testApp = await createTestApp();
-    await testApp.app.listen(0, "127.0.0.1");
     pushService = testApp.app.get(PushService);
     worker = testApp.app.get(PushWorker);
     owner = await signedInCookie(testApp.test, { name: "Path Owner", email: "path-owner@push.test", emailVerified: true });

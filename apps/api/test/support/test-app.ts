@@ -104,6 +104,11 @@ export async function createTestApp(
     });
   configureApp(app, env);
   await app.init();
+  // Invariant: every listener in the suite binds 127.0.0.1. supertest only starts its own wildcard listener
+  // when the server is not already listening, and a wildcard ephemeral port can be handed a port that another
+  // process holds on 127.0.0.1, so a request would be answered by that process. A loopback bind is
+  // conflict-aware, so the kernel never picks a port that is taken. See quick-261108-bzd DIAGNOSIS.md.
+  await app.listen(0, "127.0.0.1");
 
   const http = app.getHttpServer();
 

@@ -17,7 +17,5 @@ export default defineConfig({
     exclude: ["test/e2e/**"],
     pool: "forks",
     testTimeout: 30000,
-    // beforeAll/afterAll create and drop a temporary database; the 10s default can be exceeded under full-suite load.
-    hookTimeout: 30000,
   },
 });

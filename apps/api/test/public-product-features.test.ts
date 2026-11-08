@@ -44,9 +44,6 @@ describe("Independent public product modules (CAP-03, D-07..D-11)", () => {
 
   beforeAll(async () => {
     app = await createTestApp();
-    // This matrix makes hundreds of requests. Own one listener for the fixture
-    // instead of asking SuperTest to repeatedly start/close the same server.
-    await app.app.listen(0, "127.0.0.1");
     owner = await signedInCookie(app.test, { name: "Owner", email: "owner@module-controls.test", emailVerified: true });
     admin = await signedInCookie(app.test, { name: "Admin", email: "admin@module-controls.test", emailVerified: true });
     customer = await signedInCookie(app.test, { name: "Customer", email: "customer@module-controls.test", emailVerified: true });

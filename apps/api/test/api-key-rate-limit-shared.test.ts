@@ -1,7 +1,11 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
+import { randomUUID } from "node:crypto";
+import { Logger } from "@nestjs/common";
+import pg from "pg";
 import request from "supertest";
 import { schema } from "@userhq/db";
 import { API_KEY_RATE_LIMIT } from "@userhq/types";
+import { REDELIVER_THROTTLE } from "../src/webhooks/webhooks.controller.js";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
 
 type TestApp = Awaited<ReturnType<typeof createTestApp>>;
@@ -83,5 +87,55 @@ describe("rate limits are shared across API instances", () => {
     const statuses = results.map((r) => r.status);
     expect(statuses.filter((s) => s === 200)).toHaveLength(API_KEY_RATE_LIMIT.limit);
     expect(statuses.filter((s) => s === 429)).toHaveLength(130 - API_KEY_RATE_LIMIT.limit);
+  });
+
+  it("shares the redeliver limit (REDELIVER_THROTTLE) across two instances", async () => {
+    const who = await signedInCookie(a.test, { name: "Redeliverer", email: "redeliver@shared-limit.test", emailVerified: true });
+    const [ws] = await a.db.select().from(schema.workspaces).limit(1);
+    await a.db.insert(schema.workspaceMembers).values({ workspaceId: ws.id, userId: who.userId, role: "admin" });
+    const apps = [a, b];
+    const post = (app: TestApp) =>
+      request(app.http)
+        .post(`/api/v1/workspaces/${wsSlug}/webhooks/${randomUUID()}/deliveries/${randomUUID()}/redeliver`)
+        .set("Cookie", who.cookie)
+        .set("Origin", app.env.PUBLIC_URL);
+    for (let i = 0; i < REDELIVER_THROTTLE.limit; i++) {
+      expect((await post(apps[i % 2])).status, `call ${i + 1}`).not.toBe(429);
+    }
+    for (const app of apps) {
+      const res = await post(app);
+      expect(res.status).toBe(429);
+      expect(res.body.code).toBe("rate_limited");
+      expect(res.headers["retry-after"]).toMatch(/^\d+$/);
+    }
+  });
+
+  it("shares another @Throttle route (account preferences, 30 per minute) across two instances", async () => {
+    const who = await signedInCookie(a.test, { name: "Prefs", email: "prefs@shared-limit.test", emailVerified: true });
+    const apps = [a, b];
+    const patch = (app: TestApp) =>
+      request(app.http).patch("/api/v1/account/preferences").set("Cookie", who.cookie).set("Origin", app.env.PUBLIC_URL).send({ commentEmails: true });
+    for (let i = 0; i < 30; i++) expect((await patch(apps[i % 2])).status, `call ${i + 1}`).toBe(200);
+    expect((await patch(a)).status).toBe(429);
+    expect((await patch(b)).status).toBe(429);
+  });
+
+  it("fails open with a logged warning when the counter store is unavailable, and resumes after", async () => {
+    const token = await mint("Fail open");
+    const admin2 = new pg.Client({ connectionString: a.env.DATABASE_URL });
+    await admin2.connect();
+    const warn = vi.spyOn(Logger.prototype, "warn").mockImplementation(() => {});
+    try {
+      await admin2.query("ALTER TABLE rate_limit_hits RENAME TO rate_limit_hits_away");
+      const res = await hit(a, token);
+      expect(res.status).toBe(200);
+      expect(warn.mock.calls.some((c) => String(c[0]).includes("fail open"))).toBe(true);
+    } finally {
+      await admin2.query("ALTER TABLE IF EXISTS rate_limit_hits_away RENAME TO rate_limit_hits");
+      await admin2.end();
+      warn.mockRestore();
+    }
+    for (let i = 0; i < API_KEY_RATE_LIMIT.limit; i++) expect((await hit(a, token)).status).toBe(200);
+    expect((await hit(b, token)).status).toBe(429);
   });
 });

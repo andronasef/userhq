@@ -25,7 +25,7 @@ export interface ReceiverReply {
 
 export type ReceiverHandler = (req: ReceivedRequest) => ReceiverReply | Promise<ReceiverReply>;
 
-/** A local http receiver on 127.0.0.1 that records every request and lets the caller script each answer. */
+/** A local http receiver on 127.0.0.1 that records every webhook POST and lets the caller script each answer. */
 export async function startReceiver(onRequest: ReceiverHandler = () => ({ status: 200 })) {
   const requests: ReceivedRequest[] = [];
   const sockets = new Set<Socket>();
@@ -33,6 +33,12 @@ export async function startReceiver(onRequest: ReceiverHandler = () => ({ status
   const state = { inFlightPeak: 0 };
 
   const server = http.createServer((req, res) => {
+    // Ignore unrelated HTTP probes, but record malformed POSTs so missing webhook headers still fail tests.
+    if (req.method !== "POST") {
+      req.resume();
+      res.writeHead(405, { Allow: "POST" }).end();
+      return;
+    }
     let body = "";
     req.on("data", (chunk) => (body += chunk));
     req.on("end", async () => {

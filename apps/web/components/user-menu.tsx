@@ -16,6 +16,8 @@ import {
   Moon,
   Monitor,
   Check,
+  Contrast,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar } from "./ui/avatar";
@@ -41,6 +43,7 @@ export interface UserMenuProps {
   devUploadEnabled: boolean;
   hasWorkspaces?: boolean;
   isPlatformOwner?: boolean;
+  isWorkspaceOwner?: boolean;
 }
 
 export function UserMenu({
@@ -48,6 +51,7 @@ export function UserMenu({
   devUploadEnabled,
   hasWorkspaces = false,
   isPlatformOwner = false,
+  isWorkspaceOwner = false,
 }: UserMenuProps): React.JSX.Element {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [isPending, setIsPending] = React.useState(false);
@@ -59,6 +63,8 @@ export function UserMenu({
   const ThemeIcon =
     theme === "system"
       ? Monitor
+      : resolvedTheme === "charcoal"
+      ? Contrast
       : resolvedTheme === "dark"
       ? Moon
       : Sun;
@@ -242,8 +248,27 @@ export function UserMenu({
               </span>
               {theme === "dark" && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
             </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => setTheme("charcoal")}
+              className="flex items-center justify-between cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                <Contrast className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <span>Charcoal</span>
+              </span>
+              {theme === "charcoal" && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
+            </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
+
+        {(isWorkspaceOwner || isPlatformOwner) && (
+          <DropdownMenuItem asChild>
+            <Link href="/guide" className="flex items-center gap-2 w-full cursor-pointer">
+              <BookOpen className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+              <span>User guide</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
 
         <DropdownMenuItem asChild>
           <Link href={accountHref} className="flex items-center gap-2 w-full">

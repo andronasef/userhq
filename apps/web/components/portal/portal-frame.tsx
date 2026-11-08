@@ -79,6 +79,7 @@ export function PortalFrame({
                   <ArrowUpRight className="size-3.5" aria-hidden="true" />
                 </a>
               )}
+              <ThemeToggle variant="dropdown" />
               {right}
             </div>
           </div>

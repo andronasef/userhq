@@ -15,6 +15,7 @@ import {
   Megaphone,
   HelpCircle,
   EyeOff,
+  BookOpen,
 } from "lucide-react";
 import type { ProductSummary } from "@userhq/types";
 import { cn } from "../../lib/utils";
@@ -26,12 +27,14 @@ export interface DashboardSidebarProps {
   ws: string;
   products?: ProductSummary[];
   className?: string;
+  isWorkspaceOwner?: boolean;
 }
 
 export function DashboardSidebar({
   ws,
   products = [],
   className,
+  isWorkspaceOwner = false,
 }: DashboardSidebarProps): React.JSX.Element {
   const pathname = usePathname();
 
@@ -288,6 +291,18 @@ export function DashboardSidebar({
           </div>
         )}
       </nav>
+
+      {isWorkspaceOwner && (
+        <nav aria-label="Help and resources" className="mt-auto pt-4 border-t border-border flex flex-col gap-1">
+          <Link
+            href="/guide"
+            className="flex items-center gap-2 h-9 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+          >
+            <BookOpen className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <span className="truncate">User Guide</span>
+          </Link>
+        </nav>
+      )}
     </aside>
   );
 }

@@ -128,6 +128,9 @@ export default async function PortalLayout({
   const { workspace, product: p } = result.data;
   const productAccentStyle = accentStyle(p.accentColor, p.accentTextColor) as React.CSSProperties;
 
+  const isWorkspaceOwner =
+    me.isPlatformOwner || me.workspaces.some((w) => w.slug === ws && w.role === "owner");
+
   const right = me.user ? (
     <div className="flex items-center gap-2">
       <NotificationBell />
@@ -136,6 +139,7 @@ export default async function PortalLayout({
         devUploadEnabled={devUploadEnabled}
         hasWorkspaces={me.workspaces.length > 0}
         isPlatformOwner={me.isPlatformOwner}
+        isWorkspaceOwner={isWorkspaceOwner}
       />
       <SessionKeepAlive />
     </div>

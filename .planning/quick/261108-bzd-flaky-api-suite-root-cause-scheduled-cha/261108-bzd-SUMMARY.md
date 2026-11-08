@@ -4,18 +4,19 @@ plan: 01
 subsystem: testing
 tags: [postgresql, supertest, vitest, api-keys]
 status: in-progress
-tasks-completed: 3
+tasks-completed: 4
 tasks-total: 4
-checkpoint: SPLIT-2
+checkpoint: TASK-4-REVIEW
 checkpoint-date: 2026-11-08
 duration: multi-session (per-task validation times below)
 actuals:
-  tasks: 3
-  commits: 28
+  tasks: 4
+  commits: 31
 plan_head_before: 0a497d47451394b59658114af25520c24beea276
-plan_head_after: dbb1051855a58535d9fda614a285be0770f29af5
+plan_head_after: bdb16c9a5d12515f00e6df29aaf0b3047d007f04
 task2_review_base: 6a3aebc
 task3_review_base: 6b6b446
+task4_review_base: dffd7ac
 requires:
   - phase: quick-261108-b3i
     provides: Existing workspace automation endpoints and review fixes
@@ -25,23 +26,26 @@ provides:
   - HTTP 400 validation errors for invalid API-key creation input
   - Durable scheduled changelog claims and atomic webhook enqueue
   - Readable accent text and focus colors across theme surfaces and tinted chips
+  - Real-browser signing-secret rotation, follow persistence/rollback and synthetic push-click checks
 affects: [integration-testing, workspace-automation]
 tech-stack:
   added: []
   patterns: [Explicit loopback test listeners, await public PostgreSQL client end events]
 key-files:
-  created: [apps/api/test/test-isolation.test.ts]
+  created: [apps/api/test/test-isolation.test.ts, apps/api/src/changelog/changelog.scheduler.ts, apps/api/test/changelog-scheduler.test.ts, apps/web/test/contrast-sweep.test.ts, apps/api/test/browser/push-follow.spec.ts]
   modified: [apps/api/test/support/test-app.ts, apps/api/test/support/webhook-receiver.ts, apps/api/vitest.config.ts, apps/api/src/api-keys/api-keys.controller.ts]
 requirements-completed: []
 ---
 
-# Quick 261108-bzd: Tasks 1–3 checkpoint
+# Quick 261108-bzd: Tasks 1–4 verified, final review pending
 
-**The integration harness now binds one loopback listener per app and closes PostgreSQL clients before dropping each test database; invalid API-key bodies return standard HTTP 400 errors.**
+**Reliable integration listeners and PostgreSQL teardown, scheduled changelog event claims, readable theme accents, and browser coverage for webhook secrets, following and push-click routing.**
 
 ## Scope and status
 
-Tasks 1–2 passed the parent's two-axis reviews with no material findings; Task 2's processing-time suppression qualification was recorded. Task 3 is implemented and verified, and stops here for review. Task 4 (browser specifications and the final full gate) has not started; the overall plan remains in progress.
+Tasks 1–3 passed the parent's two-axis reviews with no material findings; Task 2's processing-time suppression qualification was recorded. All four tasks are implemented and their gates pass. Task 4 now stops for its final review; this summary deliberately remains `in-progress` until the parent completes that review and final state bookkeeping.
+
+The original random status-code/parse failures came from supertest creating wildcard listeners on ephemeral ports already held by unrelated loopback-specific services: requests to `127.0.0.1` then reached those services instead of the test app. Owning one loopback listener per app removes that mechanism. A separate proven PostgreSQL teardown race required waiting for real client termination before forced database deletion. Full evidence, failed attempts, timing measurements and final five-API/three-CI reliability tables are in [DIAGNOSIS.md](./261108-bzd-DIAGNOSIS.md). Residual risk remains from a foreign wildcard listener using address reuse; no Vitest worker cap was added, and the old unexplained hook override was replaced by an explicitly measured integration-hook budget.
 
 ## Changes
 
@@ -70,7 +74,7 @@ This continuation:
 - `ae236cd` — Apply the measured integration-hook budget and evidence.
 - `daa4fea` — Record five passing API and three consecutive passing full CI runs.
 
-The commit count is measured by `git rev-list --count 0a497d4..dbb1051` (28 commits), before this summary metadata update. It is a partial-plan count including review/documentation commits. No actual token-usage measurement is available, so no diff-size estimate is presented as actual token usage.
+The commit count is measured by `git rev-list --count 0a497d4..bdb16c9` (31 commits), before this summary metadata update. It includes review/documentation commits. No actual token-usage measurement is available, so no diff-size estimate is presented as actual token usage.
 
 ## TDD and verification
 
@@ -152,10 +156,43 @@ Review base: `6b6b446`; implementation head: `dbb1051855a58535d9fda614a285be0770
 
 No fills, border colors, native checkbox fill colors, `--primary`, `--primary-foreground` or `--entity-accent` changed. The discovered fourth native checkbox exception is the only Task 3 plan adjustment.
 
+## Task 4: Rebuilt-stack browser verification and final gate
+
+Review base: `dffd7ac`; implementation head: `bdb16c9a5d12515f00e6df29aaf0b3047d007f04`.
+
+- Rebuilt the existing local Docker stack successfully (27.3 seconds) with a throwaway VAPID pair generated into the build process environment. No key was printed or written to a file; `.env.docker` was not directly read, printed or edited. Existing stack/config scripts consumed their normal configuration. No database drift repair was needed.
+- The first browser launch attempt had **0 passed, 27 failed, 0 skipped**, all before browser execution with the same missing `chromium_headless_shell-1243` executable error. Installed the browser binary using the already-installed official Playwright CLI; no package, lockfile or dependency changed. This was environment setup, not an application failure. Log: `/tmp/bzd-browser-launch-failure.log`.
+- **Real baseline before Task 4 spec edits: 27 passed, 0 failed, 0 skipped (47.2 seconds)** against the rebuilt stack. Both previously suspected stale specs (`portal-branding` and `dashboard-header`) passed; their locators/expectations were left unchanged in Task 4. Task 3's browser color pins passed.
+- Extended the webhook lifecycle to verify the original secret disappears from DOM markup/input values and list responses after reload; rotation displays a different secret with one-time wording, stores the replacement and removes the old value, then both values are absent after another reload. Ping, deliveries and deletion remain covered. Secret comparisons use booleans so assertion failures do not print secret material.
+- Added Follow-button browser coverage for initial off state, optimistic follow, real database persistence, reload, unfollow/database removal, and a controlled 500 that rolls the UI back and shows its error toast.
+- The real registered `/sw.js` worker handles synthetic `notificationclick` events in headless Chromium. Its external clients methods are recorded while the real handler runs, verifying the canonical post URL becomes the same-origin absolute target and a foreign URL falls back to the origin root. This covers worker routing, not a physical OS notification click; no case was skipped or left as a placeholder.
+- All new fixtures clean up their own rows. The local stack was already running and remains running. No production service was deployed or changed.
+
+### Task 4 browser results and coordination correction
+
+| Run | Passed | Failed | Skipped | Duration |
+|---|---:|---:|---:|---|
+| Real full baseline | 27 | 0 | 0 | 47.2s |
+| Extended webhook spec alone | 1 | 0 | 0 | 5.5s |
+| New push/follow spec alone, corrected sequential run | 3 | 0 | 0 | 3.2s |
+| Portal branding spec alone | 2 | 0 | 0 | 4.8s |
+| Votes spec alone | 2 | 0 | 0 | 6.3s |
+| Final full browser suite | 30 | 0 | 0 | 47.2s |
+
+One earlier focused push run had **2 passed / 1 failed**: its synthetic-click test reached `browserContext.close: ENOENT ...test-results/.playwright-artifacts-0/traces/...network` because two Playwright CLI invocations shared the same output directory concurrently. This was an executor coordination mistake; it was corrected by running the specs sequentially. There was no service-worker registration or application assertion failure, and the sequential focused and full runs passed. No production code or test assertion was weakened to address it. Log: `/tmp/bzd-push-follow-focused.log`.
+
+Baseline and final application-assertion failures: **none**. There are no failed specs to classify as pre-existing or new in the actual baseline/final runs. Full logs: `/tmp/bzd-browser-before.log`, `/tmp/bzd-browser-after.log`. Focused logs: `/tmp/bzd-webhooks-focused.log`, `/tmp/bzd-push-follow-focused-2.log`, `/tmp/bzd-portal-branding-focused.log`, `/tmp/bzd-votes-focused.log`.
+
+### Final validation and commit
+
+`bdb16c9` commits the Task 4 browser specifications. After that commit, `bun run build:packages` followed by **`bun run ci:check` passed at default Vitest parallelism**, with no worker override or diagnostic preload, in 79.6 seconds including the package pre-build. The gate includes **788 API tests, 280 web tests, 32 type tests and 6 database tests**, lint/typechecks, package/API builds, vinext standalone/Next fallback builds and migration checks. Log: `/tmp/bzd-final-ci.log`. No extra repetitions were added after these gates passed.
+
+All four implementation tasks are verified, subject to the recorded accepted qualifications: historical diagnosis commit provenance, the measured integration-hook budget, and processing-time Changelog suppression rather than reconstructing feature state between ticks. The final two-axis review and parent-owned STATE/ROADMAP bookkeeping remain outstanding. Nothing was pushed or deployed.
+
 ## Next action
 
-Return Task 3 to the parent for two-axis review. Task 4 remains unexecuted; do not begin it automatically from this executor.
+Return Task 4 to the parent for its final two-axis review, then let the parent mark this summary complete and record the quick task in project state. No further implementation or verification is running.
 
 ## Self-Check: PASSED
 
-The plan, diagnosis, summary, scheduler, new integration test, both new migrations and the contrast source guard exist. Task 1–3 commits are ancestors of HEAD. `git diff --check` passes. The only unrelated untracked directory is `.planning/ui-reviews/`, which was preserved. Task 3 review and final state bookkeeping remain pending.
+The plan, diagnosis, summary, scheduler, integration tests, both new migrations, contrast guard and push/follow browser spec exist. Task 1–4 commits are ancestors of HEAD. `git diff --check` passes. No commit of this quick task touches STATE.md or ROADMAP.md. The only unrelated untracked directory is `.planning/ui-reviews/`, which was preserved. Final review and state bookkeeping remain pending.

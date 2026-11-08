@@ -88,6 +88,14 @@ export async function createTestApp(
   };
 
   const { db, pool } = createDb(env.DATABASE_URL);
+  // pg-pool resolves end() before the underlying clients emit end. Wait for those terminal events
+  // before DROP ... FORCE, or PostgreSQL can kill a socket still completing its graceful shutdown.
+  const clientEnds = new Set<Promise<void>>();
+  pool.on("connect", (client) => {
+    const ended = new Promise<void>((resolve) => client.once("end", resolve));
+    clientEnds.add(ended);
+    void ended.then(() => clientEnds.delete(ended));
+  });
   const auth = createAuth(db, env, [testUtils()]);
   const ctx = await (auth as any).$context;
   const test: TestHelpers = ctx.test;
@@ -115,6 +123,7 @@ export async function createTestApp(
   const close = async () => {
     await app.close();
     await pool.end().catch(() => {});
+    await Promise.all(clientEnds);
     await testDb.drop();
   };
 

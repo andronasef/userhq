@@ -45,14 +45,17 @@ describe("test servers listen on 127.0.0.1 only", () => {
     const closingApp = await createTestApp();
     const pool = closingApp.db.$client;
     const errors: Error[] = [];
-    const ended: Promise<void>[] = [];
+    let connected = 0;
+    let ended = 0;
     pool.on("error", (error) => errors.push(error));
     pool.on("connect", (client) => {
-      ended.push(new Promise<void>((resolve) => client.once("end", resolve)));
+      connected++;
+      client.once("end", () => ended++);
     });
     await Promise.all(Array.from({ length: 10 }, () => pool.query("SELECT pg_sleep(0.01)")));
     await closingApp.close();
-    await Promise.all(ended);
+    expect(connected).toBeGreaterThan(0);
+    expect(ended).toBe(connected);
     expect(errors.map((error) => error.message)).toEqual([]);
   });
 

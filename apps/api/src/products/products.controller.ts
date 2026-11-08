@@ -44,6 +44,7 @@ import { CurrentUser } from "../auth/decorators.js";
 import { RequireScopes } from "../api-keys/api-key.decorator.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { isUniqueViolation } from "../common/db-errors.js";
+import { suppressQueuedWebhooks } from "../webhooks/outbox.js";
 import { pickFeatures, productFeatureColumns } from "../portal/product-features.js";
 
 @Controller("workspaces/:ws/products")
@@ -328,6 +329,10 @@ export class ProductsController {
             DELETE FROM push_deliveries
             WHERE status IN ('pending', 'sending') AND data->>'productId' = ${tenant.productId!}
           `);
+          await suppressQueuedWebhooks(tx, { workspaceId: tenant.workspaceId, productId: tenant.productId!, module: "board" });
+        }
+        if (input.features?.changelog === false) {
+          await suppressQueuedWebhooks(tx, { workspaceId: tenant.workspaceId, productId: tenant.productId!, module: "changelog" });
         }
         });
       } catch (e) {

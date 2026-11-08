@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, or, like, inArray, sql } from "drizzle-orm";
 import {
   type Db,
   webhookSubscriptions,
@@ -10,11 +10,41 @@ import { randomBytes } from "node:crypto";
 import type { WebhookEvent, WebhookEventPayload } from "@userhq/types";
 import { featureEnabled, productFeatureColumns, pickFeatures } from "../portal/product-features.js";
 
+/** Event-type prefixes per product module: the single source for enqueue, delivery and suppression. */
+export const WEBHOOK_MODULE_PREFIXES = {
+  board: ["post.", "comment."],
+  changelog: ["changelog."],
+} as const;
+export type WebhookModule = keyof typeof WEBHOOK_MODULE_PREFIXES;
+
 /** The product module an event type belongs to; pings and unknown types belong to none. One mapping for enqueue and delivery. */
-export function webhookEventModule(eventType: string): "board" | "changelog" | null {
-  if (eventType.startsWith("post.") || eventType.startsWith("comment.")) return "board";
-  if (eventType.startsWith("changelog.")) return "changelog";
+export function webhookEventModule(eventType: string): WebhookModule | null {
+  for (const [module, prefixes] of Object.entries(WEBHOOK_MODULE_PREFIXES)) {
+    if (prefixes.some((p) => eventType.startsWith(p))) return module as WebhookModule;
+  }
   return null;
+}
+
+/**
+ * D-14: when a module is switched off, its queued deliveries for that product are marked suppressed
+ * in the same transaction as the switch, so re-enabling can never send them. Finished deliveries,
+ * pings, other products, other workspaces and the other module's events are untouched.
+ */
+export async function suppressQueuedWebhooks(
+  tx: Db | any,
+  opts: { workspaceId: string; productId: string; module: WebhookModule }
+): Promise<void> {
+  await tx
+    .update(webhookDeliveries)
+    .set({ status: "suppressed", errorMessage: `${opts.module}_unavailable` })
+    .where(
+      and(
+        eq(webhookDeliveries.workspaceId, opts.workspaceId),
+        inArray(webhookDeliveries.status, ["pending", "sending"]),
+        sql`${webhookDeliveries.payload}->'product'->>'id' = ${opts.productId}`,
+        or(...WEBHOOK_MODULE_PREFIXES[opts.module].map((p) => like(webhookDeliveries.eventType, `${p}%`)))
+      )
+    );
 }
 
 export async function enqueueWebhookEvent(
@@ -52,11 +82,14 @@ export async function enqueueWebhookEvent(
 
   let productInfo: { id: string; slug: string; name: string } | null = null;
   if (opts.productId) {
+    // Share-lock the product row until the caller's transaction ends: a concurrent Board or Changelog
+    // disable (UPDATE products) waits for this enqueue, so its suppression always sees the delivery (D-14).
     const [prod] = await tx
       .select({ id: products.id, slug: products.slug, name: products.name, ...productFeatureColumns })
       .from(products)
       .where(and(eq(products.id, opts.productId), eq(products.workspaceId, opts.workspaceId)))
-      .limit(1);
+      .limit(1)
+      .for("share");
     // D-08/D-10: a disabled module's events never enter the outbox.
     const eventModule = webhookEventModule(opts.eventType);
     if (prod && eventModule && !featureEnabled(pickFeatures(prod), eventModule)) return 0;

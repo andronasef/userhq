@@ -360,27 +360,30 @@ export class CommentsService {
       throw new ApiException("not_allowed", 403, "Not allowed.");
     }
 
-    const [deleted] = await this.db
-      .update(comments)
-      .set({
-        deletedAt: sql`now()`,
-        deletedById: currentUser.id,
-      })
-      .where(and(eq(comments.id, commentId), isNull(comments.deletedAt)))
-      .returning({ id: comments.id });
+    // One transaction: the webhook enqueue share-locks the product row, and the lock must outlive the insert (D-14).
+    await this.db.transaction(async (tx) => {
+      const [deleted] = await tx
+        .update(comments)
+        .set({
+          deletedAt: sql`now()`,
+          deletedById: currentUser.id,
+        })
+        .where(and(eq(comments.id, commentId), isNull(comments.deletedAt)))
+        .returning({ id: comments.id });
 
-    if (!deleted) {
-      throw new ApiException("comment_not_found", 404, "Comment not found.");
-    }
+      if (!deleted) {
+        throw new ApiException("comment_not_found", 404, "Comment not found.");
+      }
 
-    await enqueueWebhookEvent(this.db, {
-      workspaceId: portal.workspaceId,
-      productId: portal.productId,
-      eventType: "comment.deleted",
-      data: {
-        id: commentId,
-        postId: row.postId,
-      },
+      await enqueueWebhookEvent(tx, {
+        workspaceId: portal.workspaceId,
+        productId: portal.productId,
+        eventType: "comment.deleted",
+        data: {
+          id: commentId,
+          postId: row.postId,
+        },
+      });
     });
   }
 

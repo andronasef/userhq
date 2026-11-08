@@ -301,7 +301,7 @@ export function verify(rawBody, header, secret, toleranceSeconds = 300) {
 
 ### Disabled modules
 
-Events for a product whose Board (`post.*`, `comment.*`) or Changelog (`changelog.*`) module is switched off are not queued. An event already queued when the module is switched off is marked `suppressed` when its turn comes and is never sent, and switching the module back on does not revive it. Events about merged posts are still sent, because `post.merged` itself reports the merge.
+Events for a product whose Board (`post.*`, `comment.*`) or Changelog (`changelog.*`) module is switched off are not queued. An event already queued (pending or being sent) when the module is switched off is marked `suppressed` immediately, in the same save that switches the module off, and is never sent; switching the module back on does not revive it. The send-time check stays as a second guard. Events about merged posts are still sent, because `post.merged` itself reports the merge.
 
 ### Retention
 

@@ -537,9 +537,8 @@ export class PostsService {
     portal: { workspaceId: string; productId: string },
     viewerId: string | null,
     postNumber: number,
-    projection:
-      | { kind: "admin" }
-      | { kind: "public"; features: ProductFeatures } = { kind: "admin" }
+    // Required: a forgotten projection must be a compile error, never a silent admin view (AF-02).
+    projection: { kind: "admin" } | { kind: "public"; features: ProductFeatures }
   ): Promise<PublicPostPage> {
     const includeRoadmap =
       projection.kind === "admin" || projection.features.roadmap;

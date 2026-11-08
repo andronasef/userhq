@@ -41,6 +41,21 @@ describe("test servers listen on 127.0.0.1 only", () => {
     expect(testApp.http.address()).toEqual(before);
   });
 
+  it("closes PostgreSQL connections gracefully before dropping the test database", async () => {
+    const closingApp = await createTestApp();
+    const pool = closingApp.db.$client;
+    const errors: Error[] = [];
+    const ended: Promise<void>[] = [];
+    pool.on("error", (error) => errors.push(error));
+    pool.on("connect", (client) => {
+      ended.push(new Promise<void>((resolve) => client.once("end", resolve)));
+    });
+    await Promise.all(Array.from({ length: 10 }, () => pool.query("SELECT pg_sleep(0.01)")));
+    await closingApp.close();
+    await Promise.all(ended);
+    expect(errors.map((error) => error.message)).toEqual([]);
+  });
+
   it("no test file listens on another address or listens a createTestApp app", () => {
     const offenders: string[] = [];
     let sites = 0;

@@ -470,13 +470,13 @@ describe("Workspace Admin API Keys (Plan 09-02)", () => {
       expect(dup.body.key.productRestrictions).toEqual([prodAId]);
     });
 
-    it("denies a key whose stored list was forced to [] on product and workspace-wide routes", async () => {
+    it.each(["empty", "mixed", "object"])("denies a key whose stored restrictions are %s on product and workspace-wide routes", async (kind) => {
       const forced = await create({});
       const open = await create({});
       expect(forced.status).toBe(201);
       await testApp.db
         .update(schema.workspaceApiKeys)
-        .set({ productRestrictions: [] })
+        .set({ productRestrictions: (kind === "empty" ? [] : kind === "mixed" ? [prodAId, null] : { product: prodAId }) as any })
         .where(eq(schema.workspaceApiKeys.id, forced.body.key.id));
 
       for (const path of [`/products/${prodASlug}/posts`, "/comments"]) {

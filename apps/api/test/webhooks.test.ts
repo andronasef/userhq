@@ -688,6 +688,7 @@ describe("Signed Outbound Webhooks (Phase 10)", () => {
       const open = await createOk();
       const forcedEmpty = await createOk();
       const forcedBad = await createOk();
+      const forcedMixed = await createOk();
       await testApp.db
         .update(schema.webhookSubscriptions)
         .set({ productRestrictions: [] })
@@ -696,12 +697,17 @@ describe("Signed Outbound Webhooks (Phase 10)", () => {
         .update(schema.webhookSubscriptions)
         .set({ productRestrictions: "oops" as any })
         .where(eq(schema.webhookSubscriptions.id, forcedBad));
+      await testApp.db
+        .update(schema.webhookSubscriptions)
+        .set({ productRestrictions: [prodAId, null] as any })
+        .where(eq(schema.webhookSubscriptions.id, forcedMixed));
 
       await postIn(prodASlug, categoryId, "Forced empty restriction");
 
       expect(await deliveryCount(open)).toBe(1);
       expect(await deliveryCount(forcedEmpty)).toBe(0);
       expect(await deliveryCount(forcedBad)).toBe(0);
+      expect(await deliveryCount(forcedMixed)).toBe(0);
     });
   });
 });

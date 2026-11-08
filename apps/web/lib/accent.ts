@@ -126,7 +126,7 @@ export function accentStyle(
     // light-dark() follows the element's used color-scheme, which the theme
     // script and applyThemeToDocument set on <html>.
     "--primary-text": `light-dark(${tokens.primaryText}, ${tokens.primaryTextDark})`,
-    "--ring": tokens.primary,
+    "--ring": `light-dark(${tokens.primaryText}, ${tokens.primaryTextDark})`,
     "--entity-accent": tokens.primary,
   };
 }

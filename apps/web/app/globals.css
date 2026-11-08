@@ -31,7 +31,7 @@
   --input: #bdcdc6;
   --primary: #087f75;
   --primary-foreground: #ffffff;
-  --ring: #087f75;
+  --ring: #066a62;
   --destructive: oklch(0.505 0.213 27.518);
   --destructive-foreground: oklch(0.985 0 0);
   --primary-text: #066a62;
@@ -59,7 +59,7 @@
   --input: #24354f;
   --primary: #14b8a6;
   --primary-foreground: #042f2e;
-  --ring: #14b8a6;
+  --ring: #2dd4bf;
   --destructive: oklch(0.65 0.22 27.518);
   --destructive-foreground: oklch(0.985 0 0);
   --primary-text: #2dd4bf;

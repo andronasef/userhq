@@ -1,0 +1,18 @@
+# UserHQ
+
+> Customer feedback, private/public roadmaps, release notes and FAQ for multi-product workspaces. This repository index points LLM assistants to the implemented v0.3.0 platform and automation contract. Links are repository-relative; adding this file does not create a served HTTP documentation endpoint.
+
+## Start here
+
+- [LLM operating guide](docs/llm-guide.md): Source priority, task-to-route mapping, permissions, privacy and safe write/recovery rules.
+- [User guide](docs/user-guide.md): Customer and workspace administrator workflows in the UI.
+- [API quickstart](docs/api-quickstart.md): Credential bootstrap, source-checked request examples and integration workflow.
+- [Automation API reference](docs/automation-api.md): Canonical endpoints, scopes, pagination, errors, rate limits and webhook protocol.
+
+## Project and operations
+
+- [Documentation index](docs/README.md): Guides by audience.
+- [Project README](README.md): Product overview, development setup and architecture.
+- [Deployment runbook](docs/deploy.md): Docker/Dokploy, OAuth and persistent environment configuration, including VAPID.
+- [Changelog](CHANGELOG.md): Release history and upgrade notes.
+- [Repository agent rules](AGENTS.md): Required development and release documentation workflow for agents editing the project.

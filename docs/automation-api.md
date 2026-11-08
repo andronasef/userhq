@@ -2,6 +2,8 @@
 
 This document is the integrator reference for driving a UserHQ workspace with an API key: authentication, scopes, product restrictions, every automation endpoint, pagination, errors, attribution, rate limits and webhooks. It is kept in sync with the code by `apps/api/test/automation-routes.test.ts`, which fails when a scope, route or limit here disagrees with what the API enforces.
 
+New to the API? Start with the [API quickstart](api-quickstart.md). For UI workflows read the [user guide](user-guide.md); assistants should also read the [LLM guide](llm-guide.md). These are repository guides, not new application endpoints.
+
 ---
 
 ## 1. Authentication
@@ -270,7 +272,7 @@ A webhook subscription sends signed `POST` requests with JSON bodies to your HTT
 
 - A subscription to `*` also receives `post.merged`, `post.restored` and `comment.restored`, and any event type added later.
 - `changelog.published` also fires for a future `publishedAt` when that date arrives. A background job checks every 60 seconds, so the announcement is normally queued within about a minute, followed by the webhook queue's own delivery interval. One tick processes at most 100 due entries; a larger backlog takes additional ticks.
-- An entry whose due event is processed while the product's Changelog is off sends nothing and is never replayed on re-enable. Unpublishing or rescheduling it to a future date re-arms the next live transition.
+- An entry whose due event is processed while the product's Changelog is off sends nothing and is never replayed on re-enable. Feature state is evaluated at processing time; an off/on cycle entirely between scheduler ticks is not reconstructed. Unpublishing or rescheduling it to a future date re-arms the next live transition.
 - Editing an already-live entry, or publishing it again, sends nothing. Unpublishing and publishing again sends one more.
 - Roadmap-driven `post.status_changed` events carry the shared status and the post only. Internal roadmap titles, descriptions, notes, assignees and deadlines never appear in any payload.
 

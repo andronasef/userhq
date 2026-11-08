@@ -75,7 +75,7 @@ User (Global platform account via OAuth)
 ### Workspace Operations and Automation
 - **Workspace Inbox**: Review requests and comments across products; shared attention state and personal read state serve different workflows.
 - **Per-Product Modules**: Enable Board, Roadmap, Changelog and FAQ independently without deleting their stored content.
-- **Appearance and Notifications**: Light, dark and system themes, browser push preferences and product following.
+- **Appearance and Notifications**: System, Light, navy Dark and neutral Charcoal themes, a public-header theme icon, browser push preferences and product following. Check [Unreleased](CHANGELOG.md#unreleased) for post-release additions awaiting deployment.
 - **API and Webhooks**: Scoped integration keys, product restrictions, feedback exports, signed event delivery and delivery logs.
 
 ---

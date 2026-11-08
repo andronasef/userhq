@@ -1,6 +1,6 @@
 # Using UserHQ
 
-This guide covers the platform workflows shipped in **v0.3.0** and documented on the current `main` branch. You do not need to install or build UserHQ to use a hosted instance.
+This guide covers **v0.3.0** and changes on the current `main` branch. Charcoal, the public-header theme icon and the corrected dual post links are post-release changes listed under [Unreleased](../CHANGELOG.md#unreleased); they become available on a hosted instance when its operator deploys that revision. You do not need to install or build UserHQ to use a hosted instance.
 
 UserHQ connects customer feedback to a team's roadmap, release notes and FAQ. A workspace represents a team or company; each product has its own customer portal and content.
 
@@ -85,17 +85,23 @@ Administrators can manage workspace products and content. Ownership does not fol
 
 The workspace dashboard has three tabs:
 
-- **Products**: manage each product, open its portal and choose which products you personally follow.
-- **Requests (All Boards)**: review feedback from across the workspace's products.
+- **Requests (All Boards)**: review feedback from across the workspace's products (the primary landing view).
 - **Comments**: work through customer discussions that need a team response.
+- **Products**: manage each product, open its portal and choose which products you personally follow.
 
 ### Review requests
 
-1. Select **Requests (All Boards)**.
+1. The dashboard opens directly on **Requests (All Boards)**, or select it from the tab bar.
 2. Search across requests, or filter by product and status type. The category filter becomes available after selecting a product.
 3. Use the created-date range when you need a reporting period; those date filters are labeled UTC.
 4. Choose **Top (votes)**, **Newest** or **Recent activity**. Open the relevant request to read its discussion and take product-specific actions.
-5. Select **Load more requests** for additional results. Filters stay in the URL, so you can copy the current dashboard view for a teammate.
+5. Select **Load more requests** for additional results. Keyset pagination fetches 20 requests per page; filters stay in the URL so you can copy the current view for a teammate.
+
+Each request and comment offers **Dashboard** to open the administrator post page and **Public portal** to open the customer-facing post in a new tab. The public action is unavailable when that product's Feedback board is disabled. Older dashboard `/posts` links redirect to the corresponding `/board` page.
+
+### Author contact and geographic location
+
+Requests and comments in the workspace dashboard display the author's verified contact email (with a quick 1-click mailto action) and their approximate geographic location badge (e.g. `London, United Kingdom [GB]`). This provides private customer context for workspace administrators to follow up directly, verify customer details, and spot regional feedback patterns. Author emails and locations are strictly private to workspace administrators and are never exposed on public customer portals.
 
 The shared dashboard summarizes demand; a request's product and configured status are still the source of context. Lists can change as customers vote or comment, so loading more is not a frozen reporting snapshot.
 
@@ -168,9 +174,11 @@ Feature switches are publication controls, not deletion or file-access revocatio
 
 ## Personal appearance and notifications
 
-### Light, dark or system appearance
+### Light, dark, charcoal or system appearance
 
-Open **Account** (`/account`) → **Appearance**, or the theme menu where available. Choose **Light**, **Dark** or **System**. System follows your device's color preference. This is your device's preference, not a workspace setting that changes everybody's theme.
+Open **Account** (`/account`) → **Appearance**, or the theme menu where available. Choose **Light**, **Dark**, **Charcoal** or **System**. System follows your device's color preference. Dark provides a rich deep-navy palette, while Charcoal provides a neutral near-black palette. This is your device's preference, not a workspace setting that changes everybody's theme.
+
+On a customer portal, use the theme icon in the header beside the sign-in/account controls, or the selector in the footer. The icon menu is available without signing in, also works on mobile, and shares the same saved preference with the footer and dashboard.
 
 ### Browser push
 
@@ -195,6 +203,10 @@ Workspace **Settings** contains **API keys** and **Webhooks**. An owner or admin
 Webhook signing secrets are shown only when creating or rotating the secret. Save the new value in your receiver before using it; normal list and detail screens cannot reveal it later. Receiver URLs must use public HTTPS.
 
 Start with the [API guide](api-quickstart.md) for authentication and examples, then use the [automation API reference](automation-api.md) for routes, scopes, restrictions, exports and webhook verification. Browser push preferences and team/account administration are not general API-key capabilities.
+
+## In-App Guide and Interactive API Explorer
+
+Workspace owners and administrators can access the interactive in-app guide at `/guide` (accessible from the user dropdown and sidebar navigation). The guide includes Rubix-style documentation covering workspace structure, roles and permissions, triage workflows, portal branding, and an embedded OpenAPI 3.1 Swagger Explorer for testing endpoints and copying code snippets.
 
 ## Example: close the feedback loop
 

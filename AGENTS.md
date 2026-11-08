@@ -294,5 +294,37 @@ Before creating **any** release tag (major, minor, patch or prerelease):
 3. Validate documented UI labels, routes, scopes, identifiers, request/response examples and security claims against the implementation. Run the existing API docs-sync checks when API docs change, resolve local documentation links, and run implementation checks appropriate to any code changes. Never add prose-mirroring tests merely to claim documentation coverage.
 4. Check production prerequisites before an authorized deployment, including stable VAPID keys, OAuth configuration and committed migrations. Document required operator actions before tagging; do not expose secrets or invent successful deployment checks.
 5. Commit the documentation and implementation before creating the tag. Create the tag on the intended verified commit and report whether the branch/tag was pushed. Tagging and pushing remain separate actions requiring user authorization. Do not move or force-push an already published tag to repair missing docs; add a corrective commit and, when authorized, a new release version.
+6. **Synchronize Global Agent Skill**: If any API endpoints, payloads, query parameters, authentication scopes, or automation behaviors changed, update the global `userhq` skill and its references in `~/.skills-manager/skills/userhq` (and re-sync across agents) according to the *Global UserHQ Agent Skill Synchronization* section below.
 
 Use GSD for documentation work as for code. Keep this policy outside the generated `GSD:*` blocks so regeneration preserves it.
+
+## Global UserHQ Agent Skill Synchronization
+
+The workspace maintains a global agent skill `userhq` (located at `~/.skills-manager/skills/userhq`) used across AI agents (Antigravity, Claude Code, Codex, Cursor, Gemini CLI, OpenCode, Amp, Cline) to triage customer feedback, update statuses, manage roadmaps, and publish changelogs for Increasing Labs products.
+
+Whenever the UserHQ API, authentication, endpoints, schemas, or documentation (`docs/llm-guide.md`, `docs/automation-api.md`, `docs/api-quickstart.md`, `docs/user-guide.md`) are updated or added in the future:
+
+1. **Update Reference Docs in Skill**:
+   Sync changes from `docs/` into `~/.skills-manager/skills/userhq/references/`:
+   - `docs/llm-guide.md` -> `~/.skills-manager/skills/userhq/references/llm-guide.md`
+   - `docs/automation-api.md` -> `~/.skills-manager/skills/userhq/references/automation-api.md`
+   - `docs/api-quickstart.md` -> `~/.skills-manager/skills/userhq/references/api-quickstart.md`
+   - `docs/user-guide.md` -> `~/.skills-manager/skills/userhq/references/user-guide.md`
+
+2. **Update Skill Instructions & Schema**:
+   Update `~/.skills-manager/skills/userhq/SKILL.md` if routes, query parameters, payloads, error responses, or LLM operating procedures changed.
+
+3. **Update Helper CLI Tooling**:
+   Update `~/.skills-manager/skills/userhq/scripts/uhq` (Python) and `~/.skills-manager/skills/userhq/scripts/uhq.sh` (Bash) if new endpoints, filters, or subcommands should be exposed to agents.
+
+4. **Verify Deployment Across Agents**:
+   Ensure the skill remains deployed to all active agent skill targets:
+   ```bash
+   skills-manager-cli skills deploy --agent antigravity userhq
+   skills-manager-cli skills deploy --agent claude_code userhq
+   skills-manager-cli skills deploy --agent codex userhq
+   skills-manager-cli skills deploy --agent cursor userhq
+   skills-manager-cli skills deploy --agent gemini_cli userhq
+   skills-manager-cli skills deploy --agent opencode userhq
+   skills-manager-cli skills deploy --agent amp userhq
+   ```

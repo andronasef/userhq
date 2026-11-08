@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.1] - 2026-11-09
+
+### Added
+
+- **Author Contact & Geolocation in Feedback Triage**: Requests and comments in the workspace dashboard now display the author's verified contact email (with 1-click mailto) and IP-based geographic location (country/city badge) for private workspace admin context.
+- **Platform User Guide & Interactive Swagger Explorer**: Dedicated `/guide` route restricted to workspace owners and admins, featuring comprehensive guidance for workspace setup, feedback triage, portal management, and an interactive OpenAPI 3.1 Swagger explorer with cURL, TypeScript, and Python code snippets.
+- **Workspace overview tabs**: Requests (All Boards) is now the primary landing tab on `/dashboard/[ws]`, followed by Comments, then Products.
+- **Charcoal appearance**: A neutral near-black fourth theme alongside System, Light and the existing navy Dark theme, with saved device preference and readable product accents.
+- **Public header theme menu**: Visitors and signed-in customers can choose all four themes from the same compact icon menu used in the dashboard. The footer selector remains available and stays synchronized.
+
+### Fixed
+
+- **Post navigation**: Workspace requests and comments link to the correct dashboard post route and offer a separate public-portal action. Admin board rows and post details also provide public links when Feedback is enabled; old dashboard `/posts` URLs redirect to `/board`.
+
 ## [v0.3.0] - 2026-11-08
 
 ### Added

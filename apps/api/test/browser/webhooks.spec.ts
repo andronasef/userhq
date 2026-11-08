@@ -105,10 +105,21 @@ test.describe("Workspace Outbound Webhooks UI Specs (Phase 10)", () => {
     await page.context().addCookies(cookiesToAdd);
   });
 
-  test("Webhook subscription complete lifecycle: view empty state, create webhook, ping, view deliveries, and delete", async ({
+  test("Webhook lifecycle shows signing secrets once, rotates them, pings, lists deliveries and deletes", async ({
     page,
     baseURL,
   }) => {
+    const assertSecretAbsent = async (secret: string) => {
+      // Boolean comparisons avoid putting signing secrets into assertion failure output.
+      expect((await page.content()).includes(secret), "signing secret leaked in DOM markup").toBe(false);
+      const inputLeak = await page.locator("input").evaluateAll((inputs, value) => inputs.some((input) => input.value === value), secret);
+      expect(inputLeak, "signing secret leaked in an input value").toBe(false);
+      const listed = await page.request.get(`/api/v1/workspaces/${wsSlug}/webhooks`);
+      expect(listed.status()).toBe(200);
+      const json = JSON.stringify(await listed.json());
+      expect(json.includes(secret), "list response contains a signing secret").toBe(false);
+      expect(/"secret"\s*:/.test(json), "list response contains a secret field").toBe(false);
+    };
     // 1. Navigate to Webhooks settings and view empty state
     await page.goto(`/dashboard/${wsSlug}/settings/webhooks`);
 
@@ -149,6 +160,32 @@ test.describe("Workspace Outbound Webhooks UI Specs (Phase 10)", () => {
     await expect(page.getByText("https://example.com/webhooks/incoming")).toBeVisible();
     await expect(page.getByText("Production Slack Notification Relay")).toBeVisible();
     await expect(page.getByText("Active")).toBeVisible();
+
+    await page.reload();
+    await expect(page.getByText("https://example.com/webhooks/incoming")).toBeVisible();
+    await assertSecretAbsent(secretVal);
+
+    const [stored] = await stack.db.select({ id: schema.webhookSubscriptions.id }).from(schema.webhookSubscriptions)
+      .where(eq(schema.webhookSubscriptions.workspaceId, workspaceId));
+    const row = page.getByTestId(`webhook-row-${stored.id}`);
+    await row.getByTestId(`rotate-webhook-${stored.id}`).click();
+    const confirmation = page.getByRole("alertdialog", { name: "Rotate signing secret" });
+    await expect(confirmation).toBeVisible();
+    await confirmation.getByRole("button", { name: "Rotate secret", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "New signing secret" })).toBeVisible();
+    await expect(page.getByText("Copy this secret now. It will not be shown again.")).toBeVisible();
+    const rotatedSecret = await page.getByTestId("rotated-webhook-secret").inputValue();
+    expect(rotatedSecret.startsWith("whsec_")).toBe(true);
+    expect(rotatedSecret === secretVal, "rotation must replace the signing secret").toBe(false);
+    await page.getByTestId("webhook-secret-done-btn").click();
+    await page.reload();
+    await expect(row).toBeVisible();
+    await assertSecretAbsent(secretVal);
+    await assertSecretAbsent(rotatedSecret);
+    const [afterRotation] = await stack.db.select({ secret: schema.webhookSubscriptions.secret }).from(schema.webhookSubscriptions)
+      .where(eq(schema.webhookSubscriptions.id, stored.id));
+    expect(afterRotation.secret === rotatedSecret, "database must store the rotated secret").toBe(true);
+    expect(afterRotation.secret === secretVal, "database must no longer store the original secret").toBe(false);
 
     // 4. Send ping
     const pingBtn = page.getByRole("button", { name: "Send Ping" });

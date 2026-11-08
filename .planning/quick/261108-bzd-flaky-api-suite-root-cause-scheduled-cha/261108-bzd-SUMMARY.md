@@ -4,17 +4,18 @@ plan: 01
 subsystem: testing
 tags: [postgresql, supertest, vitest, api-keys]
 status: in-progress
-tasks-completed: 2
+tasks-completed: 3
 tasks-total: 4
-checkpoint: TASK-2-REVIEW
+checkpoint: SPLIT-2
 checkpoint-date: 2026-11-08
-duration: 26 min continuation
+duration: multi-session (per-task validation times below)
 actuals:
-  tasks: 2
-  commits: 20
+  tasks: 3
+  commits: 28
 plan_head_before: 0a497d47451394b59658114af25520c24beea276
-plan_head_after: 5063ed05d291af7a6f1b2dd6ad2180a80dd3bfc4
+plan_head_after: dbb1051855a58535d9fda614a285be0770f29af5
 task2_review_base: 6a3aebc
+task3_review_base: 6b6b446
 requires:
   - phase: quick-261108-b3i
     provides: Existing workspace automation endpoints and review fixes
@@ -23,6 +24,7 @@ provides:
   - Graceful PostgreSQL test connection shutdown before database deletion
   - HTTP 400 validation errors for invalid API-key creation input
   - Durable scheduled changelog claims and atomic webhook enqueue
+  - Readable accent text and focus colors across theme surfaces and tinted chips
 affects: [integration-testing, workspace-automation]
 tech-stack:
   added: []
@@ -33,13 +35,13 @@ key-files:
 requirements-completed: []
 ---
 
-# Quick 261108-bzd: Tasks 1–2 checkpoint
+# Quick 261108-bzd: Tasks 1–3 checkpoint
 
 **The integration harness now binds one loopback listener per app and closes PostgreSQL clients before dropping each test database; invalid API-key bodies return standard HTTP 400 errors.**
 
 ## Scope and status
 
-Task 1 passed the parent's two-axis review with no findings. Task 2 is implemented and verified, and stops here for its own review. Tasks 3–4 (the contrast sweep and browser specifications) have not started; the overall plan remains in progress.
+Tasks 1–2 passed the parent's two-axis reviews with no material findings; Task 2's processing-time suppression qualification was recorded. Task 3 is implemented and verified, and stops here for review. Task 4 (browser specifications and the final full gate) has not started; the overall plan remains in progress.
 
 ## Changes
 
@@ -68,7 +70,7 @@ This continuation:
 - `ae236cd` — Apply the measured integration-hook budget and evidence.
 - `daa4fea` — Record five passing API and three consecutive passing full CI runs.
 
-The commit count is measured by `git rev-list --count 0a497d4..5063ed0` (20 commits), before this summary metadata update. It is a partial-plan count including review/documentation commits. No actual token-usage measurement is available, so the previous diff-size estimate has been removed from `actuals`.
+The commit count is measured by `git rev-list --count 0a497d4..dbb1051` (28 commits), before this summary metadata update. It is a partial-plan count including review/documentation commits. No actual token-usage measurement is available, so no diff-size estimate is presented as actual token usage.
 
 ## TDD and verification
 
@@ -117,10 +119,43 @@ No internal service mocks were used. Rollback is tested with a real PostgreSQL t
 
 Suppression is evaluated when the job processes the due entry, matching the plan's explicit test sequence (disable, tick, re-enable, tick). If Changelog is disabled when a date passes but re-enabled before any job tick, this implementation can still announce that entry. There is no historical feature-state timestamp to infer the state at the exact arrival time. The docs deliberately describe processing-time suppression and do not claim that stronger between-ticks guarantee. The parent requested this truthful checkpoint for review instead of expanding into feature-toggle history/lock-order changes.
 
+## Task 3: Accent contrast and source sweep
+
+- The accent policy now includes page, card and muted surfaces plus the 20-percent brand tint of each, in both themes. Brands that already failed on light page/card keep the established `#171717` fallback. Other light values darken by small steps until readable, preserving their hue; dark values lighten until readable.
+- Static foreground, muted foreground and accent text are checked against all three base surfaces at 4.5:1. Static focus rings use the readable accent text color; product focus rings use the same light/dark pair as product accent text.
+- One codemod, driven by the failing guard's file list, replaced **55 text/solid-ring utilities across 25 app/component files**. It preserves brand fills, borders, foregrounds and translucent drag/drop rings.
+- The new source guard scans **195 TSX files**, checks native-checkbox exceptions remain present, and rejects raw primary text/arbitrary primary text/solid primary rings. Four native checkbox fills exist, rather than the plan's estimated three; all four are explicitly documented exceptions. The webhook checkbox's focus ring was converted while its native checked-control fill stayed unchanged.
+
+### Task 3 TDD and verification
+
+Review base: `6b6b446`; implementation head: `dbb1051855a58535d9fda614a285be0770f29af5`.
+
+- `f5b5cc5` → `88d5e9e`: six-surface color policy RED (11 assertions failed), then GREEN (57 accent assertions).
+- `f89d9d1` → `44aa343`: static/product focus policy RED (3 failed), then GREEN (59 accent assertions).
+- `98907c4` → `dbb1051`: source guard RED (55 offenders), then codemod/render-pin GREEN. The first full web run exposed six stale expected values in the existing accent, FAQ markup and portal style tests; these were updated to the new contract without relaxing contrast thresholds.
+- Full web suite: **280/280 passing in 31 files** (2.55 seconds); web typecheck and lint passed. No full CI run was added at this checkpoint.
+- The protected fill inventory is byte-identical before/after: **195 files, 46 utilities**, recorded in `/tmp/bzd-task3-fills-before.json` and `/tmp/bzd-task3-fills-after.json`. It includes brand backgrounds, borders, native accents, translucent rings and arbitrary primary fills. CSS fill/foreground tokens also remain unchanged; only static ring tokens changed in globals.css.
+- A deliberate mutation restored `text-primary` in `faq-highlight.tsx`; the guard failed and named that exact line. The original rewritten source was restored in `finally`, then the final full web suite passed. Log: `/tmp/bzd-task3-guard-mutation.log`.
+- Logs: `/tmp/bzd-task3-color-red.log`, `/tmp/bzd-task3-color-green.log`, `/tmp/bzd-task3-focus-red.log`, `/tmp/bzd-task3-focus-green.log`, `/tmp/bzd-task3-sweep-red.log`, `/tmp/bzd-task3-sweep-green.log`, `/tmp/bzd-task3-web-green.log`, `/tmp/bzd-task3-typecheck.log`, `/tmp/bzd-task3-lint.log`.
+
+### Task 3 changed expected values
+
+| Pin / contract | Previous | New | Reason |
+|---|---|---|---|
+| Blue accent text in both accent test files | `#2563EB` | `#1E4FBC` | The old blue fails tinted muted. The preceding darkening step `#1F54C8` reaches only 4.417:1; the selected value reaches 4.814:1. |
+| Dark teal retention assertion | `#14B8A6` retained unchanged | Lightens to `#20BCAA`, covered by lightening and six-surface assertions | The unchanged teal fails dark muted's 20-percent tint. Yellow remains unchanged when already readable. |
+| Blue inline style / portal ring expectation | `#2563EB` | `light-dark(#1E4FBC, #719AF2)` | Focus uses the same readable theme pair as accent text. |
+| Amber portal ring expectation | `#F59E0B` | `light-dark(#171717, #F59E0B)` | Preserves the existing light-text fallback and readable dark amber. |
+| Static ring values | Light `#087F75`, dark `#14B8A6` | Light `#066A62`, dark `#2DD4BF` | Matches each existing static readable accent text token. |
+| Two FAQ highlight markup assertions | `text-primary` | `text-[var(--primary-text)]` | Uses the readable token while preserving `bg-primary/20`. |
+| Portal branding and vote browser color constants | `rgb(37, 99, 235)` | `rgb(30, 79, 188)` | RGB form of the new `#1E4FBC` unit-test pin, cited in both specs. These browser specs run in Task 4. |
+
+No fills, border colors, native checkbox fill colors, `--primary`, `--primary-foreground` or `--entity-accent` changed. The discovered fourth native checkbox exception is the only Task 3 plan adjustment.
+
 ## Next action
 
-Return Task 2 to the parent for two-axis review. Tasks 3–4 remain unexecuted; do not begin Task 3 automatically from this executor.
+Return Task 3 to the parent for two-axis review. Task 4 remains unexecuted; do not begin it automatically from this executor.
 
 ## Self-Check: PASSED
 
-The plan, diagnosis, summary, scheduler, new integration test and both new migration files exist. Task 1 and Task 2 commits are ancestors of HEAD. `git diff --check` passes. The only unrelated untracked directory is `.planning/ui-reviews/`, which was preserved. Task 2 review and state bookkeeping remain pending.
+The plan, diagnosis, summary, scheduler, new integration test, both new migrations and the contrast source guard exist. Task 1–3 commits are ancestors of HEAD. `git diff --check` passes. The only unrelated untracked directory is `.planning/ui-reviews/`, which was preserved. Task 3 review and final state bookkeeping remain pending.

@@ -248,7 +248,7 @@ A webhook subscription sends signed `POST` requests with JSON bodies to your HTT
 - The secret is returned **only** by that create response and by the rotate response. List, get, update and delivery-log responses never contain it. Store it when you get it; it cannot be read again.
 - `POST /api/v1/workspaces/:ws/webhooks/:id/rotate-secret` issues a new secret and returns the subscription with it. Rotation is session-only: a signed-in workspace owner or admin does it, and every API key, including an `admin` key, gets `403 api_key_route_forbidden`.
 - Rotation is immediate. There is no overlap window: the old secret stops signing with the next attempt. Each attempt is signed when it is sent, so a delivery that fails around the swap is retried and signed with the new secret. Update your receiver, and the retry succeeds.
-- `productRestrictions` follows the rule in Product restrictions, on `POST` and on `PATCH`: omitted or `null` means all products, otherwise a non-empty list of live product ids of the workspace. `PATCH` with `null` removes the restriction, and `PATCH` with an empty list or an id outside the workspace returns `400 validation_failed`.
+- `productRestrictions` follows the rule in Product restrictions: on `POST`, omitted or `null` means all products; otherwise supply a non-empty list of live product ids of the workspace. On `PATCH`, omitting the field preserves the existing restriction, while `null` removes it. `PATCH` with an empty list or an id outside the workspace returns `400 validation_failed`.
 - A subscription with `productRestrictions` only receives events of the listed products. A paused subscription (`isActive: false`) receives nothing.
 
 ### Events

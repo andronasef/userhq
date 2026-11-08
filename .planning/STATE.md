@@ -4,10 +4,10 @@ current_phase: 07
 current_phase_name: appearance
 status: planning
 stopped_at: Phase 06 complete; starting Phase 07 Appearance (dark mode)
-last_updated: "2026-11-08T19:56:27.977Z"
-last_activity: 2026-11-07
-last_activity_desc: Completed quick task 261107-052 outbound URL security hardening
-state_head: 390772b94151ac5cdb1b7b0433568f7d1e2f217c
+last_updated: "2026-11-08T20:43:51.187Z"
+last_activity: 2026-11-08
+last_activity_desc: Verified quick task 261108-unx product restrictions and push ownership fixes
+state_head: e2ef5c1fc56d9eaf0e840ece8fbff98a9870808c
 progress:
   total_phases: 7
   completed_phases: 6
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-10-01)
 Phase: 07 (appearance) — PLANNING
 Plan: 0 of TBD complete
 Status: Phase 06 verified and closed; starting Phase 07 Appearance
-Last activity: 2026-11-07 — Completed quick task 261107-052: outbound URL security hardening
+Last activity: 2026-11-08 — Verified quick task 261108-unx: product restrictions and push ownership fixes
 
 Progress: [██████████] 100% of Phase 1-6; Phase 07 queued
 
@@ -154,6 +154,7 @@ Items acknowledged and deferred at milestone close, most recent first:
 | 261108-b3i | Phase 6 review findings and API-key scopes for settings, statuses, categories, FAQ | 2026-11-08 | 7a30e62 | — | [261108-b3i-phase-6-review-findings-and-api-key-scop](./quick/261108-b3i-phase-6-review-findings-and-api-key-scop/) |
 | 261108-bzd | Flaky API suite root cause, scheduled changelog announce, contrast sweep, browser specs | 2026-11-08 | 5177eaf | — | [261108-bzd-flaky-api-suite-root-cause-scheduled-cha](./quick/261108-bzd-flaky-api-suite-root-cause-scheduled-cha/) |
 | 261108-qrv | Shared Postgres store for API-key and route rate limits (multi-replica safe) | 2026-11-08 | 390772b | — | [261108-qrv-shared-postgres-store-for-api-key-and-re](./quick/261108-qrv-shared-postgres-store-for-api-key-and-re/) |
+| 261108-unx | Clarify product restrictions and secure push endpoint ownership | 2026-11-08 | e2ef5c1 | Verified | [261108-unx-unambiguous-productrestrictions-and-push](./quick/261108-unx-unambiguous-productrestrictions-and-push/) |
 
 ## Session Continuity
 

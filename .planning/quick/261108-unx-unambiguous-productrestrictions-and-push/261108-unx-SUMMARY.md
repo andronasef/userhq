@@ -3,8 +3,8 @@ phase: quick-261108-unx
 plan: 01
 subsystem: security
 tags: [api-keys, webhooks, browser-push, tenant-isolation]
-status: in-progress
-checkpoint: parent-review
+status: complete
+checkpoint: verified
 tasks-completed: 3
 tasks-total: 3
 completed-date: 2026-11-08
@@ -34,7 +34,7 @@ requirements-completed: [D-05, D-11]
 
 **Empty product restrictions are rejected, stored restrictions fail closed, and cross-account push registration requires both stored browser keys and replaces the previous owner's subscription rather than reassigning its queue.**
 
-Implementation and verification are complete. Parent two-axis review and STATE bookkeeping remain pending at this checkpoint.
+Implementation, verification and independent two-axis review are complete. Standards and security/specification reviews found no actionable issues. Review clarified the documentation: webhook PATCH omission preserves restrictions, while null removes them.
 
 ## Changes
 
@@ -102,4 +102,4 @@ The measured implementation count is 11 commits from `ffec020` through `7da6763`
 
 ## Self-Check: PASSED
 
-The plan, migration SQL/snapshot, changed tests and summary exist. All listed commits are ancestors of HEAD. The final CI exit code was observed directly. The working tree was clean before this summary file; no unrelated changes were staged. Parent review remains the final completion step.
+The plan, migration SQL/snapshot, changed tests and summary exist. All listed commits are ancestors of HEAD. The final CI exit code was observed directly. Both review axes passed; the documentation clarification was checked with the existing docs-sync suite. No unrelated changes were staged. Nothing was pushed or deployed.

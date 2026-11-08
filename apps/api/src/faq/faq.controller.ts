@@ -38,6 +38,7 @@ import {
 } from "@userhq/types";
 import { TenantGuard, type Tenant } from "../tenancy/tenant.guard.js";
 import { CurrentTenant } from "../tenancy/current-tenant.decorator.js";
+import { RequireScopes } from "../api-keys/api-key.decorator.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { FaqService } from "./faq.service.js";
 
@@ -50,6 +51,7 @@ export class FaqController {
   constructor(private readonly faqService: FaqService) {}
 
   @Get()
+  @RequireScopes("faq:read")
   @SerializeOptions({ schema: AdminFaqResponseSchema })
   async getAdminTree(
     @CurrentTenant() tenant: Tenant
@@ -60,6 +62,7 @@ export class FaqController {
   // --- Categories Endpoints ---
 
   @Get("categories")
+  @RequireScopes("faq:read")
   @SerializeOptions({ schema: AdminFaqCategorySchema })
   async listCategories(
     @CurrentTenant() tenant: Tenant
@@ -69,6 +72,7 @@ export class FaqController {
   }
 
   @Post("categories")
+  @RequireScopes("faq:write")
   @HttpCode(HttpStatus.CREATED)
   @SerializeOptions({ schema: AdminFaqCategorySchema })
   async createCategory(
@@ -79,6 +83,7 @@ export class FaqController {
   }
 
   @Patch("categories/:id/reorder")
+  @RequireScopes("faq:write")
   @HttpCode(HttpStatus.OK)
   @SerializeOptions({ schema: MoveFaqCategoryResponseSchema })
   async reorderCategory(
@@ -94,6 +99,7 @@ export class FaqController {
   }
 
   @Patch("categories/:id")
+  @RequireScopes("faq:write")
   @SerializeOptions({ schema: AdminFaqCategorySchema })
   async updateCategory(
     @CurrentTenant() tenant: Tenant,
@@ -108,6 +114,7 @@ export class FaqController {
   }
 
   @Delete("categories/:id")
+  @RequireScopes("faq:write")
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteCategory(
     @CurrentTenant() tenant: Tenant,
@@ -123,6 +130,7 @@ export class FaqController {
   // --- Questions Endpoints ---
 
   @Post("questions")
+  @RequireScopes("faq:write")
   @HttpCode(HttpStatus.CREATED)
   @SerializeOptions({ schema: AdminFaqQuestionSchema })
   async createQuestion(
@@ -133,6 +141,7 @@ export class FaqController {
   }
 
   @Patch("questions/:id/reorder")
+  @RequireScopes("faq:write")
   @HttpCode(HttpStatus.OK)
   @SerializeOptions({ schema: MoveFaqQuestionResponseSchema })
   async reorderQuestion(
@@ -148,6 +157,7 @@ export class FaqController {
   }
 
   @Patch("questions/:id")
+  @RequireScopes("faq:write")
   @SerializeOptions({ schema: AdminFaqQuestionSchema })
   async updateQuestion(
     @CurrentTenant() tenant: Tenant,
@@ -162,6 +172,7 @@ export class FaqController {
   }
 
   @Delete("questions/:id")
+  @RequireScopes("faq:write")
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteQuestion(
     @CurrentTenant() tenant: Tenant,

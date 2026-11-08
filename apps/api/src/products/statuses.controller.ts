@@ -31,6 +31,7 @@ import {
 } from "@userhq/types";
 import { TenantGuard, type Tenant } from "../tenancy/tenant.guard.js";
 import { CurrentTenant } from "../tenancy/current-tenant.decorator.js";
+import { RequireScopes } from "../api-keys/api-key.decorator.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { isUniqueViolation } from "../common/db-errors.js";
 
@@ -43,6 +44,7 @@ export class StatusesController {
   constructor(@Inject(DB) private readonly db: Db) {}
 
   @Get()
+  @RequireScopes("settings:read")
   @SerializeOptions({ schema: StatusSchema })
   async listStatuses(
     @CurrentTenant() tenant: Tenant
@@ -65,6 +67,7 @@ export class StatusesController {
   }
 
   @Post()
+  @RequireScopes("settings:write")
   @HttpCode(HttpStatus.CREATED)
   @SerializeOptions({ schema: StatusSchema })
   async createStatus(
@@ -118,6 +121,7 @@ export class StatusesController {
   }
 
   @Patch(":statusId")
+  @RequireScopes("settings:write")
   @SerializeOptions({ schema: StatusSchema })
   async updateStatus(
     @CurrentTenant() tenant: Tenant,
@@ -200,6 +204,7 @@ export class StatusesController {
   }
 
   @Put(":statusId/default")
+  @RequireScopes("settings:write")
   @SerializeOptions({ schema: StatusSchema })
   async setDefaultStatus(
     @CurrentTenant() tenant: Tenant,
@@ -242,6 +247,7 @@ export class StatusesController {
   }
 
   @Put("order")
+  @RequireScopes("settings:write")
   @SerializeOptions({ schema: StatusSchema })
   async reorderStatuses(
     @CurrentTenant() tenant: Tenant,
@@ -297,6 +303,7 @@ export class StatusesController {
   }
 
   @Delete(":statusId")
+  @RequireScopes("settings:write")
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteStatus(
     @CurrentTenant() tenant: Tenant,

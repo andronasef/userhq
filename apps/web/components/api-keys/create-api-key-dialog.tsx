@@ -88,6 +88,14 @@ const SCOPE_LABELS: Record<ApiKeyScope, { title: string; description: string }> 
     title: "Manage Settings (settings:write)",
     description: "Update product settings and feature switches, and manage statuses and categories",
   },
+  "faq:read": {
+    title: "Read FAQ (faq:read)",
+    description: "View FAQ categories and questions, including those of a hidden FAQ module",
+  },
+  "faq:write": {
+    title: "Manage FAQ (faq:write)",
+    description: "Create, edit, reorder, and delete FAQ categories and questions",
+  },
 };
 
 export function CreateApiKeyDialog({

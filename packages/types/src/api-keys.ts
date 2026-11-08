@@ -15,6 +15,8 @@ export const API_KEY_SCOPES = [
   "webhooks:write",
   "settings:read",
   "settings:write",
+  "faq:read",
+  "faq:write",
 ] as const;
 
 export type ApiKeyScope = (typeof API_KEY_SCOPES)[number];

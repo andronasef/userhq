@@ -36,7 +36,7 @@ Each key carries one or more scopes. Every endpoint requires exactly one scope. 
 
 | Scope | Description |
 |-------|-------------|
-| `admin` | Every scope below. It never opens session-only routes (API keys, members, invites, workspace settings, product creation and deletion). |
+| `admin` | Every scope below, including the settings and FAQ scopes, so an `admin` key can change product settings, statuses, categories and FAQ. It never opens session-only routes (API keys, members, invites, workspace settings, product creation and deletion). |
 | `requests:read` | View feedback requests, votes, and status. |
 | `requests:write` | Create posts headlessly, update status, and manage requests. |
 | `comments:read` | View discussions and comments across all posts. |
@@ -48,8 +48,10 @@ Each key carries one or more scopes. Every endpoint requires exactly one scope. 
 | `export:read` | Export all posts, feedback items, and comments in bulk. |
 | `webhooks:read` | View webhook subscriptions and delivery logs. |
 | `webhooks:write` | Create, update, and delete webhook subscriptions and redeliver events. |
-| `settings:read` | View product settings and the product list. |
-| `settings:write` | Change a product's feature switches (Board, Roadmap, Changelog, FAQ) and profile fields. |
+| `settings:read` | View the product list and product settings, statuses and categories. |
+| `settings:write` | Change a product's feature switches (Board, Roadmap, Changelog, FAQ) and profile fields, and manage its statuses and categories. Statuses decide which ones appear on the public roadmap, so this scope changes what customers see. |
+| `faq:read` | View FAQ categories and questions, including those of a product whose FAQ module is switched off. |
+| `faq:write` | Create, edit, reorder and delete FAQ categories and questions. |
 
 ---
 
@@ -112,6 +114,26 @@ Restrictions are stored as product ids, while URLs use product slugs. An unrestr
 | `GET` | `/api/v1/workspaces/:ws/products` | `settings:read` | List the workspace's products with their feature switches. |
 | `GET` | `/api/v1/workspaces/:ws/products/:product` | `settings:read` | Get one product's settings: feature switches, name, slug, tagline, website and accent colors. |
 | `PATCH` | `/api/v1/workspaces/:ws/products/:product` | `settings:write` | Update the four feature switches (`features.board`, `roadmap`, `changelog`, `faq`) and the profile fields (name, slug, tagline, website, accent colors). A key can clear the logo (`logoUploadId: null`) but not set one, because keys cannot upload files. |
+| `GET` | `/api/v1/workspaces/:ws/products/:product/statuses` | `settings:read` | List the product's statuses in order. |
+| `POST` | `/api/v1/workspaces/:ws/products/:product/statuses` | `settings:write` | Create a status (`name`, `type`, `color`, optional `isPublicRoadmap`). |
+| `PATCH` | `/api/v1/workspaces/:ws/products/:product/statuses/:statusId` | `settings:write` | Edit a status. |
+| `PUT` | `/api/v1/workspaces/:ws/products/:product/statuses/:statusId/default` | `settings:write` | Make a status the default for new posts. |
+| `PUT` | `/api/v1/workspaces/:ws/products/:product/statuses/order` | `settings:write` | Reorder statuses; send every status id in the new order (`ids`). |
+| `DELETE` | `/api/v1/workspaces/:ws/products/:product/statuses/:statusId` | `settings:write` | Delete a status; `moveTo` (another status id) is required and receives its posts and roadmap items. The default status cannot be deleted. |
+| `GET` | `/api/v1/workspaces/:ws/products/:product/categories` | `settings:read` | List categories with their post counts. |
+| `POST` | `/api/v1/workspaces/:ws/products/:product/categories` | `settings:write` | Create a category. |
+| `PATCH` | `/api/v1/workspaces/:ws/products/:product/categories/:id` | `settings:write` | Rename a category. |
+| `DELETE` | `/api/v1/workspaces/:ws/products/:product/categories/:id` | `settings:write` | Delete a category; its posts end up without a category. |
+| `GET` | `/api/v1/workspaces/:ws/products/:product/faq` | `faq:read` | Get the FAQ tree: categories with their questions. |
+| `GET` | `/api/v1/workspaces/:ws/products/:product/faq/categories` | `faq:read` | List FAQ categories. |
+| `POST` | `/api/v1/workspaces/:ws/products/:product/faq/categories` | `faq:write` | Create a FAQ category. |
+| `PATCH` | `/api/v1/workspaces/:ws/products/:product/faq/categories/:id/reorder` | `faq:write` | Move a FAQ category (`targetRank`). |
+| `PATCH` | `/api/v1/workspaces/:ws/products/:product/faq/categories/:id` | `faq:write` | Rename a FAQ category. |
+| `DELETE` | `/api/v1/workspaces/:ws/products/:product/faq/categories/:id` | `faq:write` | Delete a FAQ category and its questions. |
+| `POST` | `/api/v1/workspaces/:ws/products/:product/faq/questions` | `faq:write` | Create a FAQ question (`categoryId`, `question`, rich-text `answer`). |
+| `PATCH` | `/api/v1/workspaces/:ws/products/:product/faq/questions/:id/reorder` | `faq:write` | Move a FAQ question (`targetRank`, optionally `targetCategoryId`). |
+| `PATCH` | `/api/v1/workspaces/:ws/products/:product/faq/questions/:id` | `faq:write` | Edit a FAQ question. |
+| `DELETE` | `/api/v1/workspaces/:ws/products/:product/faq/questions/:id` | `faq:write` | Delete a FAQ question. |
 | `GET` | `/api/v1/workspaces/:ws/webhooks` | `webhooks:read` | List webhook subscriptions. |
 | `POST` | `/api/v1/workspaces/:ws/webhooks` | `webhooks:write` | Create a webhook subscription. |
 | `GET` | `/api/v1/workspaces/:ws/webhooks/:id` | `webhooks:read` | Get one subscription. |
@@ -121,7 +143,7 @@ Restrictions are stored as product ids, while URLs use product slugs. An unrestr
 | `GET` | `/api/v1/workspaces/:ws/webhooks/:id/deliveries` | `webhooks:read` | List delivery attempts for a subscription. |
 | `POST` | `/api/v1/workspaces/:ws/webhooks/:id/deliveries/:deliveryId/redeliver` | `webhooks:write` | Redeliver one event. |
 
-Not available to keys: API keys, webhook secret rotation, members, invites, workspace settings, product creation and deletion, statuses, categories and FAQ. All of these return `403 api_key_route_forbidden`.
+Not available to keys: API keys, webhook secret rotation, members, invites, workspace settings, product creation and deletion, and the account and portal routes. All of these return `403 api_key_route_forbidden`.
 
 ---
 
@@ -138,6 +160,7 @@ Every list route returns at most one page and, where it paginates, a `nextCursor
 | Workspace comments (`/comments`) | `product` (slug), `attention` (`all`, `needs_attention`, `handled`; default `needs_attention`), `cursor`, `limit` (1 to 50, default 20). | `{ items, nextCursor, needsAttentionCount }` |
 | Webhook deliveries (`.../deliveries`) | `page` (from 1, default 1), `limit` (1 to 100, default 20). Page-number pagination, no cursor. | `{ deliveries, total }` |
 | Roadmap, changelog, webhook subscriptions | Not paginated; the full list is returned. | `{ items }`, `{ entries, tags }`, `{ subscriptions }` |
+| Products, statuses, categories, FAQ | Not paginated; the full list is returned. | An array of products, an array of statuses, an array of categories (each with `postCount`), `{ categories }` for the FAQ tree (each category with its questions), and an array of FAQ categories |
 
 ### Export
 

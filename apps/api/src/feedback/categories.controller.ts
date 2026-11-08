@@ -25,6 +25,7 @@ import {
 } from "@userhq/types";
 import { TenantGuard, type Tenant } from "../tenancy/tenant.guard.js";
 import { CurrentTenant } from "../tenancy/current-tenant.decorator.js";
+import { RequireScopes } from "../api-keys/api-key.decorator.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { isUniqueViolation } from "../common/db-errors.js";
 
@@ -37,6 +38,7 @@ export class CategoriesController {
   constructor(@Inject(DB) private readonly db: Db) {}
 
   @Get()
+  @RequireScopes("settings:read")
   @SerializeOptions({ schema: CategorySchema })
   async listCategories(
     @CurrentTenant() tenant: Tenant
@@ -68,6 +70,7 @@ export class CategoriesController {
   }
 
   @Post()
+  @RequireScopes("settings:write")
   @HttpCode(HttpStatus.CREATED)
   @SerializeOptions({ schema: CategorySchema })
   async createCategory(
@@ -104,6 +107,7 @@ export class CategoriesController {
   }
 
   @Patch(":id")
+  @RequireScopes("settings:write")
   @SerializeOptions({ schema: CategorySchema })
   async updateCategory(
     @CurrentTenant() tenant: Tenant,
@@ -167,6 +171,7 @@ export class CategoriesController {
   }
 
   @Delete(":id")
+  @RequireScopes("settings:write")
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteCategory(
     @CurrentTenant() tenant: Tenant,

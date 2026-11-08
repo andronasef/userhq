@@ -35,8 +35,8 @@ export const RichTextMarkSchema = z.object({
           { message: "Invalid link protocol" }
         )
         .optional(),
-      target: z.string().optional(),
-      rel: z.string().optional(),
+      target: z.string().nullish(),
+      rel: z.string().nullish(),
     })
     .passthrough()
     .optional(),
@@ -75,6 +75,8 @@ export const RichTextNodeSchema: z.ZodType<RichTextNode> = z.lazy(() =>
           .string()
           .refine(
             (url) => {
+              // Own uploads are stored as relative paths (see UPLOAD_URL_PATTERN in index.ts).
+              if (/^\/uploads\/[a-z0-9/-]+\.webp$/.test(url)) return true;
               try {
                 const parsed = new URL(url);
                 return ["http:", "https:"].includes(parsed.protocol);
@@ -85,8 +87,9 @@ export const RichTextNodeSchema: z.ZodType<RichTextNode> = z.lazy(() =>
             { message: "Images must use http or https URLs" }
           )
           .optional(),
-        alt: z.string().max(200).optional(),
-        title: z.string().max(200).optional(),
+        // Tiptap serializes unset attrs as null.
+        alt: z.string().max(200).nullish(),
+        title: z.string().max(200).nullish(),
       })
       .passthrough()
       .optional(),

@@ -320,6 +320,96 @@ describe("Migration Runner Properties (Plan 01-09)", () => {
       await tempDb.drop();
     }
   });
+  it("converts stored empty productRestrictions lists to NULL and nothing else, idempotently", async () => {
+    const tempDb = await createTempDb();
+    const folder = fs.mkdtempSync(
+      path.join(os.tmpdir(), "userhq-restrictions-migrations-"),
+    );
+    try {
+      fs.cpSync(path.resolve(packageRoot, "migrations"), folder, {
+        recursive: true,
+      });
+      const idx = journal.entries.findIndex((entry: { tag: string }) =>
+        entry.tag.endsWith("_unambiguous_product_restrictions"),
+      );
+      expect(idx, "restrictions migration must be in the journal").toBeGreaterThan(0);
+      fs.writeFileSync(
+        path.join(folder, "meta/_journal.json"),
+        JSON.stringify({ ...journal, entries: journal.entries.slice(0, idx) }),
+      );
+      expect(
+        (await runMigrateCli({ DATABASE_URL: tempDb.url, MIGRATIONS_FOLDER: folder })).code,
+      ).toBe(0);
+
+      const client = new Client({ connectionString: tempDb.url });
+      await client.connect();
+      try {
+        const ws = await client.query(
+          "INSERT INTO workspaces (name, slug) VALUES ('Restrictions', 'restrictions') RETURNING id",
+        );
+        const wsId = ws.rows[0].id as string;
+        const productId = crypto.randomUUID();
+        const old = "2020-01-01T00:00:00Z";
+        const shapes: Array<[string, string | null]> = [
+          ["empty", "[]"],
+          ["list", JSON.stringify([productId])],
+          ["null", null],
+        ];
+        for (const [label, value] of shapes) {
+          await client.query(
+            `INSERT INTO workspace_api_keys (workspace_id, name, key_prefix, key_hash, scopes, product_restrictions, updated_at)
+             VALUES ($1, $2, 'uhq_live_x', $3, '["admin"]', $4::jsonb, $5)`,
+            [wsId, label, `hash-${label}`, value, old],
+          );
+          await client.query(
+            `INSERT INTO webhook_subscriptions (workspace_id, url, secret, events, description, product_restrictions, updated_at)
+             VALUES ($1, 'https://example.com/h', 'whsec_x', '["*"]', $2, $3::jsonb, $4)`,
+            [wsId, label, value, old],
+          );
+        }
+
+        const snapshot = async () => ({
+          keys: (
+            await client.query(
+              "SELECT name, product_restrictions, product_restrictions IS NULL AS sql_null, updated_at FROM workspace_api_keys ORDER BY name",
+            )
+          ).rows,
+          hooks: (
+            await client.query(
+              "SELECT description AS name, product_restrictions, product_restrictions IS NULL AS sql_null, updated_at FROM webhook_subscriptions ORDER BY description",
+            )
+          ).rows,
+        });
+        const before = await snapshot();
+
+        expect((await runMigrateCli({ DATABASE_URL: tempDb.url })).code).toBe(0);
+        const after = await snapshot();
+        for (const table of ["keys", "hooks"] as const) {
+          const byName = Object.fromEntries(after[table].map((r) => [r.name, r]));
+          const was = Object.fromEntries(before[table].map((r) => [r.name, r]));
+          expect(byName.empty.sql_null, `${table} empty list becomes SQL NULL`).toBe(true);
+          expect(byName.empty.updated_at).toEqual(was.empty.updated_at);
+          expect(byName.list).toEqual(was.list);
+          expect(byName.list.product_restrictions).toEqual([productId]);
+          expect(byName.null).toEqual(was.null);
+        }
+
+        const file = path.resolve(packageRoot, "migrations", `${journal.entries[idx].tag}.sql`);
+        for (const statement of fs
+          .readFileSync(file, "utf-8")
+          .split("--> statement-breakpoint")
+          .filter((part) => part.trim())) {
+          await client.query(statement);
+        }
+        expect(await snapshot()).toEqual(after);
+      } finally {
+        await client.end();
+      }
+    } finally {
+      fs.rmSync(folder, { recursive: true, force: true });
+      await tempDb.drop();
+    }
+  });
   it("concurrent start: two racing migrate processes apply migrations once without crash", async () => {
     const tempDb = await createTempDb();
     try {

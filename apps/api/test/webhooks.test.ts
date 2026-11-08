@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
+import { eq } from "drizzle-orm";
 import { schema } from "@userhq/db";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
 import {
@@ -557,6 +558,150 @@ describe("Signed Outbound Webhooks (Phase 10)", () => {
         .set("Origin", testApp.env.PUBLIC_URL);
 
       expect(getRes.status).toBe(404);
+    });
+  });
+
+  describe("unambiguous productRestrictions (quick-261108-unx, D-05, D-11)", () => {
+    const UNKNOWN = "00000000-0000-4000-8000-000000000000";
+    let foreignProdId: string;
+    let deletedProdId: string;
+    let categoryBId: string;
+    const made: string[] = [];
+    const hooksUrl = () => `/api/v1/workspaces/${wsSlug}/webhooks`;
+    const admin$ = (r: request.Test) => r.set("Cookie", admin.cookie).set("Origin", testApp.env.PUBLIC_URL);
+    const create = (body: Record<string, unknown>) =>
+      admin$(request(testApp.http).post(hooksUrl())).send({
+        url: "https://example.com/restriction-receiver",
+        events: ["post.created"],
+        ...body,
+      });
+    const createOk = async (body: Record<string, unknown> = {}) => {
+      const res = await create(body);
+      expect(res.status).toBe(201);
+      made.push(res.body.id);
+      return res.body.id as string;
+    };
+    const patch = (id: string, body: Record<string, unknown>) =>
+      admin$(request(testApp.http).patch(`${hooksUrl()}/${id}`)).send(body);
+    const stored = async (id: string) =>
+      (await testApp.db.select().from(schema.webhookSubscriptions).where(eq(schema.webhookSubscriptions.id, id)))[0];
+    const deliveryCount = async (id: string) =>
+      (await testApp.db.select().from(schema.webhookDeliveries).where(eq(schema.webhookDeliveries.subscriptionId, id))).length;
+    const subCount = async () =>
+      (await testApp.db.select().from(schema.webhookSubscriptions).where(eq(schema.webhookSubscriptions.workspaceId, wsId))).length;
+    const postIn = async (slug: string, categoryId_: string, title: string) => {
+      const res = await admin$(request(testApp.http).post(`/api/v1/workspaces/${wsSlug}/products/${slug}/posts`)).send({
+        title,
+        categoryId: categoryId_,
+      });
+      expect(res.status).toBe(201);
+    };
+
+    beforeAll(async () => {
+      const [foreign] = await testApp.db
+        .insert(schema.products)
+        .values({ workspaceId: otherWsId, name: "Foreign", slug: `foreign-${Date.now()}` })
+        .returning();
+      foreignProdId = foreign.id;
+      const [deleted] = await testApp.db
+        .insert(schema.products)
+        .values({ workspaceId: wsId, name: "Gone", slug: `gone-${Date.now()}`, deletedAt: new Date() })
+        .returning();
+      deletedProdId = deleted.id;
+      const [catB] = await testApp.db
+        .insert(schema.categories)
+        .values({ productId: prodBId, name: "Ideas" })
+        .returning();
+      categoryBId = catB.id;
+      await testApp.db.insert(schema.statuses).values({
+        productId: prodBId,
+        name: "Open",
+        color: "#3B82F6",
+        type: "review",
+        isDefault: true,
+        position: 0,
+      });
+    });
+
+    afterAll(async () => {
+      for (const id of made) {
+        await testApp.db.delete(schema.webhookSubscriptions).where(eq(schema.webhookSubscriptions.id, id));
+      }
+    });
+
+    const rejected: Array<[string, () => unknown]> = [
+      ["an empty list", () => []],
+      ["a product of another workspace", () => [foreignProdId]],
+      ["a valid and a foreign product", () => [prodAId, foreignProdId]],
+      ["a soft-deleted product", () => [deletedProdId]],
+      ["an unknown uuid", () => [UNKNOWN]],
+    ];
+
+    it.each(rejected)("POST with %s returns 400 validation_failed and stores nothing", async (_l, ids) => {
+      const before = await subCount();
+      const res = await create({ productRestrictions: ids() });
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe("validation_failed");
+      expect(await subCount()).toBe(before);
+    });
+
+    it("gives foreign, deleted and unknown ids the same message", async () => {
+      const messages = new Set<string>();
+      for (const id of [foreignProdId, deletedProdId, UNKNOWN]) {
+        const res = await create({ productRestrictions: [id] });
+        expect(res.status).toBe(400);
+        messages.add(res.body.message);
+      }
+      expect(messages.size).toBe(1);
+    });
+
+    it("treats omitted and null as unrestricted and stores duplicate ids once", async () => {
+      expect((await stored(await createOk())).productRestrictions).toBeNull();
+      expect((await stored(await createOk({ productRestrictions: null }))).productRestrictions).toBeNull();
+      expect((await stored(await createOk({ productRestrictions: [prodAId, prodAId] }))).productRestrictions).toEqual([prodAId]);
+    });
+
+    it("PATCH rejects [] and foreign ids, accepts null and a valid list", async () => {
+      const id = await createOk({ productRestrictions: [prodAId] });
+
+      for (const ids of [[], [foreignProdId], [deletedProdId]]) {
+        const res = await patch(id, { productRestrictions: ids });
+        expect(res.status).toBe(400);
+        expect(res.body.code).toBe("validation_failed");
+        expect((await stored(id)).productRestrictions).toEqual([prodAId]);
+      }
+
+      const toB = await patch(id, { productRestrictions: [prodBId] });
+      expect(toB.status).toBe(200);
+      expect(toB.body.productRestrictions).toEqual([prodBId]);
+
+      const cleared = await patch(id, { productRestrictions: null });
+      expect(cleared.status).toBe(200);
+      expect(cleared.body.productRestrictions).toBeNull();
+
+      await postIn(prodASlug, categoryId, "Cleared restriction, product A");
+      await postIn(prodBSlug, categoryBId, "Cleared restriction, product B");
+      expect(await deliveryCount(id)).toBe(2);
+    });
+
+    it("denies a subscription whose stored value is [] or malformed, on the same rule as keys", async () => {
+      const open = await createOk();
+      const forcedEmpty = await createOk();
+      const forcedBad = await createOk();
+      await testApp.db
+        .update(schema.webhookSubscriptions)
+        .set({ productRestrictions: [] })
+        .where(eq(schema.webhookSubscriptions.id, forcedEmpty));
+      await testApp.db
+        .update(schema.webhookSubscriptions)
+        .set({ productRestrictions: "oops" as any })
+        .where(eq(schema.webhookSubscriptions.id, forcedBad));
+
+      await postIn(prodASlug, categoryId, "Forced empty restriction");
+
+      expect(await deliveryCount(open)).toBe(1);
+      expect(await deliveryCount(forcedEmpty)).toBe(0);
+      expect(await deliveryCount(forcedBad)).toBe(0);
     });
   });
 });

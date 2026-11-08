@@ -406,6 +406,93 @@ describe("Workspace Admin API Keys (Plan 09-02)", () => {
       .set("Authorization", `Bearer ${adminToken}`);
     expect(adminAccessRes.status).toBe(200);
   });
+
+  describe("unambiguous productRestrictions (quick-261108-unx, D-05, D-11)", () => {
+    let foreignProdId: string;
+    let deletedProdId: string;
+    const keysUrl = () => `/api/v1/workspaces/${wsSlug}/api-keys`;
+    const create = (body: Record<string, unknown>) =>
+      request(testApp.http)
+        .post(keysUrl())
+        .set("Cookie", admin.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ name: "Restriction key", scopes: ["admin"], ...body });
+
+    beforeAll(async () => {
+      const [foreign] = await testApp.db
+        .insert(schema.products)
+        .values({ workspaceId: otherWsId, name: "Foreign", slug: `foreign-${Date.now()}` })
+        .returning();
+      foreignProdId = foreign.id;
+      const [deleted] = await testApp.db
+        .insert(schema.products)
+        .values({ workspaceId: wsId, name: "Gone", slug: `gone-${Date.now()}`, deletedAt: new Date() })
+        .returning();
+      deletedProdId = deleted.id;
+    });
+
+    const rejected: Array<[string, () => unknown]> = [
+      ["an empty list", () => []],
+      ["a product of another workspace", () => [foreignProdId]],
+      ["a valid and a foreign product", () => [prodAId, foreignProdId]],
+      ["a soft-deleted product", () => [deletedProdId]],
+      ["an unknown uuid", () => ["00000000-0000-4000-8000-000000000000"]],
+    ];
+
+    it.each(rejected)("returns 400 validation_failed for %s and stores no key", async (_label, ids) => {
+      const before = await testApp.db.select().from(schema.workspaceApiKeys);
+      const res = await create({ productRestrictions: ids() });
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe("validation_failed");
+      const after = await testApp.db.select().from(schema.workspaceApiKeys);
+      expect(after.length).toBe(before.length);
+    });
+
+    it("gives foreign, deleted and unknown ids the same message", async () => {
+      const messages = new Set<string>();
+      for (const id of [foreignProdId, deletedProdId, "00000000-0000-4000-8000-000000000000"]) {
+        const res = await create({ productRestrictions: [id] });
+        expect(res.status).toBe(400);
+        messages.add(res.body.message);
+      }
+      expect(messages.size).toBe(1);
+    });
+
+    it("treats omitted and null as unrestricted and stores duplicate ids once", async () => {
+      const omitted = await create({});
+      expect(omitted.status).toBe(201);
+      expect(omitted.body.key.productRestrictions).toBeNull();
+      const nulled = await create({ productRestrictions: null });
+      expect(nulled.status).toBe(201);
+      expect(nulled.body.key.productRestrictions).toBeNull();
+      const dup = await create({ productRestrictions: [prodAId, prodAId] });
+      expect(dup.status).toBe(201);
+      expect(dup.body.key.productRestrictions).toEqual([prodAId]);
+    });
+
+    it("denies a key whose stored list was forced to [] on product and workspace-wide routes", async () => {
+      const forced = await create({});
+      const open = await create({});
+      expect(forced.status).toBe(201);
+      await testApp.db
+        .update(schema.workspaceApiKeys)
+        .set({ productRestrictions: [] })
+        .where(eq(schema.workspaceApiKeys.id, forced.body.key.id));
+
+      for (const path of [`/products/${prodASlug}/posts`, "/comments"]) {
+        const denied = await request(testApp.http)
+          .get(`/api/v1/workspaces/${wsSlug}${path}`)
+          .set("Authorization", `Bearer ${forced.body.token}`);
+        expect(denied.status).toBe(403);
+        expect(denied.body.code).toBe("product_restricted");
+
+        const allowed = await request(testApp.http)
+          .get(`/api/v1/workspaces/${wsSlug}${path}`)
+          .set("Authorization", `Bearer ${open.body.token}`);
+        expect(allowed.status).toBe(200);
+      }
+    });
+  });
 });
 
 describe("API key traffic policy (quick-261107-flq)", () => {

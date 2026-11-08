@@ -71,10 +71,10 @@ describe("scheduled changelog announcements", () => {
   it("re-arms an announced entry when rescheduled or unpublished and published later", async () => {
     const entry = await create({ publishedAt: "2020-01-01T00:00:00.000Z" });
     const job = await scheduler();
+    await asOwner(request(app.http).patch(`${path()}/${entry.id}`)).send({ title: "Edited while live" }).expect(200);
+    expect(await deliveries()).toHaveLength(1);
     await asOwner(request(app.http).patch(`${path()}/${entry.id}`)).send({ publishedAt: DUE.toISOString() }).expect(200);
     expect(await job.tick(DUE)).toBe(1);
-    expect(await deliveries()).toHaveLength(2);
-    await asOwner(request(app.http).patch(`${path()}/${entry.id}`)).send({ title: "Edited while live" }).expect(200);
     expect(await deliveries()).toHaveLength(2);
     await asOwner(request(app.http).post(`${path()}/${entry.id}/unpublish`)).send({}).expect(200);
     const [unpublished] = await app.db.select().from(schema.changelogEntries).where(eq(schema.changelogEntries.id, entry.id));

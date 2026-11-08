@@ -271,6 +271,9 @@ export class ChangelogService {
       if (input.publishedAt !== undefined) {
         updates.publishedAt = input.publishedAt ? new Date(input.publishedAt) : null;
       }
+      if (!isLiveAt(input.publishedAt === undefined ? existing.publishedAt : updates.publishedAt)) {
+        updates.announcedAt = null;
+      }
 
       // Slug deduplication: if slug explicitly passed, use it; else if title changed on draft, re-derive
       if (input.slug !== undefined) {
@@ -357,6 +360,7 @@ export class ChangelogService {
         .set({
           publishedAt,
           updatedAt: new Date(),
+          ...(!isLiveAt(publishedAt) ? { announcedAt: null } : {}),
         })
         .where(eq(changelogEntries.id, entryId));
 
@@ -391,6 +395,7 @@ export class ChangelogService {
         .update(changelogEntries)
         .set({
           publishedAt: null,
+          announcedAt: null,
           updatedAt: new Date(),
         })
         .where(eq(changelogEntries.id, entryId));

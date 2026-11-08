@@ -10,6 +10,7 @@ import {
 import { randomBytes } from "node:crypto";
 import { ApiException } from "../common/api-error.filter.js";
 import { OutboundHttp } from "../common/outbound-http.js";
+import { resolveProductRestrictions } from "../api-keys/authorization.js";
 import { WEBHOOK_MAX_ATTEMPTS } from "./webhook.worker.js";
 import type {
   CreateWebhookSubscriptionInput,
@@ -68,6 +69,7 @@ export class WebhookService {
     input: CreateWebhookSubscriptionInput
   ): Promise<WebhookSubscriptionWithSecret> {
     await this.outbound.validateTarget(input.url);
+    const productRestrictions = await resolveProductRestrictions(this.db, workspaceId, input.productRestrictions);
     const secret = newSigningSecret();
 
     const [row] = await this.db
@@ -77,7 +79,7 @@ export class WebhookService {
         url: input.url,
         secret,
         events: input.events,
-        productRestrictions: input.productRestrictions ?? null,
+        productRestrictions,
         description: input.description ?? null,
         isActive: true,
         createdByUserId: userId,
@@ -122,7 +124,7 @@ export class WebhookService {
     if (input.url !== undefined) updates.url = input.url;
     if (input.events !== undefined) updates.events = input.events;
     if (input.productRestrictions !== undefined)
-      updates.productRestrictions = input.productRestrictions;
+      updates.productRestrictions = await resolveProductRestrictions(this.db, workspaceId, input.productRestrictions);
     if (input.description !== undefined) updates.description = input.description;
     if (input.isActive !== undefined) updates.isActive = input.isActive;
 

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { productRestrictionsInputSchema } from "./api-keys.js";
 
 export const WEBHOOK_EVENTS = [
   "*",
@@ -21,7 +22,7 @@ export const webhookEventSchema = z.enum(WEBHOOK_EVENTS);
 export const createWebhookSubscriptionSchema = z.object({
   url: z.string().url("Must be a valid URL").max(2000, "URL must be 2000 characters or fewer"),
   events: z.array(webhookEventSchema).min(1, "Select at least one event type"),
-  productRestrictions: z.array(z.string().uuid()).nullable().optional(),
+  productRestrictions: productRestrictionsInputSchema,
   description: z.string().trim().max(200, "Description must be 200 characters or fewer").nullable().optional(),
 });
 
@@ -30,7 +31,7 @@ export type CreateWebhookSubscriptionInput = z.infer<typeof createWebhookSubscri
 export const updateWebhookSubscriptionSchema = z.object({
   url: z.string().url("Must be a valid URL").max(2000).optional(),
   events: z.array(webhookEventSchema).min(1, "Select at least one event type").optional(),
-  productRestrictions: z.array(z.string().uuid()).nullable().optional(),
+  productRestrictions: productRestrictionsInputSchema,
   description: z.string().trim().max(200).nullable().optional(),
   isActive: z.boolean().optional(),
 });

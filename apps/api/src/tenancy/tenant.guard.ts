@@ -16,6 +16,7 @@ import {
 import type { ApiKeyScope } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
 import { REQUIRE_SCOPES } from "../api-keys/api-key.decorator.js";
+import { isProductAllowed } from "../api-keys/authorization.js";
 
 export interface Tenant {
   workspaceId: string;
@@ -120,14 +121,12 @@ export class TenantGuard implements CanActivate {
 
     // Workspace-wide handlers cannot prove product isolation. Restricted keys
     // must address an allowed product explicitly, even when they have admin scope.
-    if (req.apiKey?.productRestrictions && req.apiKey.productRestrictions.length > 0) {
-      if (!productId || !req.apiKey.productRestrictions.includes(productId)) {
-        throw new ApiException(
-          "product_restricted",
-          403,
-          "API key is not authorized for this product."
-        );
-      }
+    if (req.apiKey && !isProductAllowed(req.apiKey.productRestrictions, productId)) {
+      throw new ApiException(
+        "product_restricted",
+        403,
+        "API key is not authorized for this product."
+      );
     }
 
     // Check required scopes for API keys

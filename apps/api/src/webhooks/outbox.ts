@@ -8,6 +8,7 @@ import {
 } from "@userhq/db";
 import { randomBytes } from "node:crypto";
 import type { WebhookEvent, WebhookEventPayload } from "@userhq/types";
+import { isProductAllowed } from "../api-keys/authorization.js";
 import { featureEnabled, productFeatureColumns, pickFeatures } from "../portal/product-features.js";
 
 /** Event-type prefixes per product module: the single source for enqueue, delivery and suppression. */
@@ -105,10 +106,8 @@ export async function enqueueWebhookEvent(
       continue;
     }
 
-    if (opts.productId && sub.productRestrictions && sub.productRestrictions.length > 0) {
-      if (!sub.productRestrictions.includes(opts.productId)) {
-        continue;
-      }
+    if (opts.productId && !isProductAllowed(sub.productRestrictions, opts.productId)) {
+      continue;
     }
 
     const eventId = `evt_${randomBytes(16).toString("hex")}`;

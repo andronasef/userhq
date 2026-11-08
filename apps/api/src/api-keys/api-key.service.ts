@@ -10,6 +10,7 @@ import type {
   ApiKeyScope,
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
+import { resolveProductRestrictions } from "./authorization.js";
 
 export interface ValidatedApiKey {
   id: string;
@@ -53,6 +54,7 @@ export class ApiKeyService {
     const keyPrefix = `uhq_live_${random.slice(0, 8)}`;
     const keyHash = ApiKeyService.hashToken(token);
 
+    const productRestrictions = await resolveProductRestrictions(this.db, workspaceId, dto.productRestrictions);
     const expiresAt = dto.expiresInDays
       ? new Date(Date.now() + dto.expiresInDays * 86_400_000)
       : null;
@@ -65,7 +67,7 @@ export class ApiKeyService {
         keyPrefix,
         keyHash,
         scopes: dto.scopes,
-        productRestrictions: dto.productRestrictions ?? null,
+        productRestrictions,
         createdByUserId: userId,
         expiresAt,
       })

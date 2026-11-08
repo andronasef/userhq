@@ -23,6 +23,13 @@ export type ApiKeyScope = (typeof API_KEY_SCOPES)[number];
 
 export const apiKeyScopeSchema = z.enum(API_KEY_SCOPES);
 
+/** Omitted or null means every product; otherwise a non-empty list. An empty list is neither "all" nor "none", so it is rejected. */
+export const productRestrictionsInputSchema = z
+  .array(z.string().uuid())
+  .min(1, "Select at least one product, or leave the restriction off for all products")
+  .nullable()
+  .optional();
+
 export const createApiKeySchema = z.object({
   name: z
     .string()
@@ -32,7 +39,7 @@ export const createApiKeySchema = z.object({
   scopes: z
     .array(apiKeyScopeSchema)
     .min(1, "At least one scope must be selected"),
-  productRestrictions: z.array(z.string().uuid()).nullable().optional(),
+  productRestrictions: productRestrictionsInputSchema,
   expiresInDays: z
     .number()
     .int()

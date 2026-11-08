@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, Monitor, Moon, Sun } from "lucide-react";
+import { Check, Contrast, Monitor, Moon, Sun } from "lucide-react";
 import { cn } from "../lib/utils";
 import { type ThemePreference } from "../lib/theme";
 import { useTheme } from "./theme-provider";
@@ -27,6 +27,7 @@ const THEME_OPTIONS: Array<{
   { value: "system", label: "System", icon: Monitor },
   { value: "light", label: "Light", icon: Sun },
   { value: "dark", label: "Dark", icon: Moon },
+  { value: "charcoal", label: "Charcoal", icon: Contrast },
 ];
 
 export function ThemeToggle({
@@ -40,6 +41,8 @@ export function ThemeToggle({
   const ActiveIcon =
     theme === "system"
       ? Monitor
+      : resolvedTheme === "charcoal"
+      ? Contrast
       : resolvedTheme === "dark"
       ? Moon
       : Sun;

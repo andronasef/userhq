@@ -50,7 +50,7 @@ export default async function AccountPage({
             Appearance
           </h2>
           <p className="text-sm text-muted-foreground mb-4">
-            Customize how UserHQ looks on your device. Choose between system settings, light mode, or dark mode.
+            Customize how UserHQ looks on your device. Choose between system settings, light mode, dark mode, or charcoal.
           </p>
           <ThemeToggle variant="segmented" />
         </section>

@@ -90,10 +90,12 @@ test.describe("Appearance & Dark Mode (Slice 1 / Phase 07)", () => {
     await expect(segmentedGroup).toBeVisible();
 
     const darkOption = segmentedGroup.locator('button[role="radio"]:has-text("Dark")');
+    const charcoalOption = segmentedGroup.locator('button[role="radio"]:has-text("Charcoal")');
     const lightOption = segmentedGroup.locator('button[role="radio"]:has-text("Light")');
     const systemOption = segmentedGroup.locator('button[role="radio"]:has-text("System")');
 
     await expect(darkOption).toBeVisible();
+    await expect(charcoalOption).toBeVisible();
     await expect(lightOption).toBeVisible();
     await expect(systemOption).toBeVisible();
 
@@ -117,35 +119,97 @@ test.describe("Appearance & Dark Mode (Slice 1 / Phase 07)", () => {
     );
     expect(darkBg).toBe("rgb(11, 17, 30)");
 
-    // 3. Verify anti-FOUC persistence across reload
+    // 3. Select Charcoal
+    await charcoalOption.click();
+
+    const hasCharcoalClasses = await page.evaluate(() => ({
+      dark: document.documentElement.classList.contains("dark"),
+      charcoal: document.documentElement.classList.contains("charcoal"),
+      theme: document.documentElement.dataset.theme,
+      bg: getComputedStyle(document.body).backgroundColor,
+    }));
+    expect(hasCharcoalClasses.dark).toBe(true);
+    expect(hasCharcoalClasses.charcoal).toBe(true);
+    expect(hasCharcoalClasses.theme).toBe("charcoal");
+    expect(hasCharcoalClasses.bg).toBe("rgb(13, 13, 18)");
+
+    // 4. Verify anti-FOUC persistence across reload for Charcoal
     await page.reload();
     await page.waitForLoadState("domcontentloaded");
 
-    const reloadedHasDark = await page.evaluate(() =>
-      document.documentElement.classList.contains("dark")
-    );
-    expect(reloadedHasDark).toBe(true);
+    const reloadedCharcoal = await page.evaluate(() => ({
+      dark: document.documentElement.classList.contains("dark"),
+      charcoal: document.documentElement.classList.contains("charcoal"),
+      theme: document.documentElement.dataset.theme,
+      bg: getComputedStyle(document.body).backgroundColor,
+    }));
+    expect(reloadedCharcoal.dark).toBe(true);
+    expect(reloadedCharcoal.charcoal).toBe(true);
+    expect(reloadedCharcoal.theme).toBe("charcoal");
+    expect(reloadedCharcoal.bg).toBe("rgb(13, 13, 18)");
 
-    // 4. Switch back to Light
+    // 5. Switch back to Light
     const lightOptionAfterReload = page.locator(
       'div[role="radiogroup"][aria-label="Appearance preference"] button[role="radio"]:has-text("Light")'
     );
     await lightOptionAfterReload.click();
 
     const hasNoDarkClass = await page.evaluate(() =>
-      document.documentElement.classList.contains("dark")
+      document.documentElement.classList.contains("dark") ||
+      document.documentElement.classList.contains("charcoal")
     );
     expect(hasNoDarkClass).toBe(false);
 
-    // 5. Reload to verify light persists
+    // 6. Reload to verify light persists
     await page.reload();
     await page.waitForLoadState("domcontentloaded");
 
     const reloadedHasLight = await page.evaluate(() =>
-      document.documentElement.classList.contains("dark")
+      document.documentElement.classList.contains("dark") ||
+      document.documentElement.classList.contains("charcoal")
     );
     expect(reloadedHasLight).toBe(false);
   });
+
+  for (const signedIn of [false, true]) {
+    test(`public header theme icon works for ${signedIn ? "signed-in users on mobile" : "visitors"}`, async ({ page, context, baseURL }) => {
+      if (signedIn) {
+        await page.setViewportSize({ width: 390, height: 844 });
+        const cookies = user.cookie.split(";").flatMap((pair) => {
+          const index = pair.indexOf("=");
+          if (index < 0) return [];
+          const name = pair.slice(0, index).trim();
+          if (["path", "httponly", "samesite"].includes(name.toLowerCase())) return [];
+          return [{ name, value: pair.slice(index + 1).trim(), url: baseURL ?? "http://localhost:8080" }];
+        });
+        await context.addCookies(cookies);
+      }
+
+      await page.goto(`/${wsSlug}/${productSlug}`);
+      const header = page.locator('[data-shell="portal"] > header');
+      const trigger = header.getByRole("button", { name: /Open theme menu/ });
+      await expect(trigger).toBeVisible();
+      await trigger.focus();
+      await page.keyboard.press("Enter");
+      const menu = page.getByRole("menu");
+      for (const name of ["System", "Light", "Dark", "Charcoal"]) {
+        await expect(menu.getByRole("menuitem", { name, exact: true })).toBeVisible();
+      }
+      await menu.getByRole("menuitem", { name: "Charcoal", exact: true }).click();
+      await expect(page.locator("html")).toHaveAttribute("data-theme", "charcoal");
+      await expect(page.getByRole("radio", { name: "Charcoal", exact: true })).toHaveAttribute("aria-checked", "true");
+      await page.reload();
+      await expect(trigger).toHaveAccessibleName("Theme: currently charcoal. Open theme menu");
+      await expect(page.locator("html")).toHaveClass(/charcoal/);
+      await page.goto(`/${wsSlug}/${productSlug}/faq`);
+      await expect(trigger).toBeVisible();
+      await expect(page.locator("html")).toHaveAttribute("data-theme", "charcoal");
+      await trigger.click();
+      await page.getByRole("menuitem", { name: "Light", exact: true }).click();
+      await expect(page.locator("html")).not.toHaveClass(/dark|charcoal/);
+      await expect(page.getByRole("radio", { name: "Light", exact: true })).toHaveAttribute("aria-checked", "true");
+    });
+  }
 
   test("dashboard header theme switcher allows switching appearance", async ({
     baseURL,
@@ -198,6 +262,27 @@ test.describe("Appearance & Dark Mode (Slice 1 / Phase 07)", () => {
     });
     expect(headerBg).toBe("rgb(19, 29, 46)");
 
+    // Switch to Charcoal via theme toggle
+    await themeToggleBtn.click();
+    const charcoalItem = page.locator('[role="menuitem"]:has-text("Charcoal")');
+    await expect(charcoalItem).toBeVisible();
+    await charcoalItem.click();
+    await expect(page.locator('[role="menu"]')).not.toBeVisible();
+
+    const isCharcoal = await page.evaluate(() => {
+      const header = document.querySelector('header[data-shell="dashboard"]');
+      return {
+        dark: document.documentElement.classList.contains("dark"),
+        charcoal: document.documentElement.classList.contains("charcoal"),
+        theme: document.documentElement.dataset.theme,
+        headerBg: header ? getComputedStyle(header).backgroundColor : "",
+      };
+    });
+    expect(isCharcoal.dark).toBe(true);
+    expect(isCharcoal.charcoal).toBe(true);
+    expect(isCharcoal.theme).toBe("charcoal");
+    expect(isCharcoal.headerBg).toBe("rgb(21, 21, 25)");
+
     // Switch back to Light via theme toggle
     await themeToggleBtn.click();
     const lightItem = page.locator('[role="menuitem"]:has-text("Light")');
@@ -206,7 +291,8 @@ test.describe("Appearance & Dark Mode (Slice 1 / Phase 07)", () => {
     await expect(page.locator('[role="menu"]')).not.toBeVisible();
 
     const isStillDark = await page.evaluate(() =>
-      document.documentElement.classList.contains("dark")
+      document.documentElement.classList.contains("dark") ||
+      document.documentElement.classList.contains("charcoal")
     );
     expect(isStillDark).toBe(false);
   });

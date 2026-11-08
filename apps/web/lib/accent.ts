@@ -29,6 +29,7 @@ export function contrastRatio(hex1: string, hex2: string): number {
 export const ACCENT_SURFACES = {
   light: { background: "#F6F8F7", card: "#FFFFFF", muted: "#EAF0ED" },
   dark: { background: "#0B111E", card: "#131D2E", muted: "#1A2638" },
+  charcoal: { background: "#0D0D12", card: "#151519", muted: "#202025" },
 } as const;
 
 const MIN_TEXT_CONTRAST = 4.5;
@@ -94,7 +95,11 @@ export function accentTokens(
   }
 
   const lightSurfaces = tintedSurfaces(primary, ACCENT_SURFACES.light);
-  const darkSurfaces = tintedSurfaces(primary, ACCENT_SURFACES.dark);
+  // Navy Dark and Charcoal share the dark color-scheme token, so it must read on both palettes.
+  const darkSurfaces = [
+    ...tintedSurfaces(primary, ACCENT_SURFACES.dark),
+    ...tintedSurfaces(primary, ACCENT_SURFACES.charcoal),
+  ];
   // Keep the established fallback for brands that already fail on page/card. Otherwise retain the hue.
   let primaryText = meetsOn(primary, [ACCENT_SURFACES.light.background, ACCENT_SURFACES.light.card]) ? primary : "#171717";
   for (let step = 1; !meetsOn(primaryText, lightSurfaces); step++) {

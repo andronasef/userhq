@@ -1,8 +1,8 @@
 export const USERHQ_THEME_STORAGE_KEY = "userhq_theme";
 
-export const THEME_PREFERENCES = ["system", "light", "dark"] as const;
+export const THEME_PREFERENCES = ["system", "light", "dark", "charcoal"] as const;
 export type ThemePreference = (typeof THEME_PREFERENCES)[number];
-export type ResolvedTheme = "light" | "dark";
+export type ResolvedTheme = "light" | "dark" | "charcoal";
 
 export function isThemePreference(value: unknown): value is ThemePreference {
   return typeof value === "string" && (THEME_PREFERENCES as readonly string[]).includes(value);
@@ -12,6 +12,7 @@ export function resolveEffectiveTheme(
   preference: ThemePreference,
   systemPrefersDark: boolean
 ): ResolvedTheme {
+  if (preference === "charcoal") return "charcoal";
   if (preference === "dark") return "dark";
   if (preference === "light") return "light";
   return systemPrefersDark ? "dark" : "light";
@@ -50,14 +51,17 @@ export function applyThemeToDocument(preference: ThemePreference): ResolvedTheme
   const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const resolved = resolveEffectiveTheme(preference, systemDark);
 
-  if (resolved === "dark") {
+  if (resolved === "charcoal") {
+    document.documentElement.classList.add("dark", "charcoal");
+  } else if (resolved === "dark") {
     document.documentElement.classList.add("dark");
+    document.documentElement.classList.remove("charcoal");
   } else {
-    document.documentElement.classList.remove("dark");
+    document.documentElement.classList.remove("dark", "charcoal");
   }
 
   document.documentElement.dataset.theme = preference;
-  document.documentElement.style.colorScheme = resolved;
+  document.documentElement.style.colorScheme = resolved === "light" ? "light" : "dark";
 
   return resolved;
 }
@@ -74,7 +78,7 @@ export function getDocumentThemePreference(): ThemePreference {
 }
 
 // Re-resolve the current preference, e.g. when the OS scheme changes.
-// An explicit light or dark re-applies to itself, so this is a no-op for them.
+// An explicit light, dark, or charcoal re-applies to itself, so this is a no-op for them.
 export function reapplyDocumentTheme(): ResolvedTheme {
   return applyThemeToDocument(getDocumentThemePreference());
 }
@@ -86,14 +90,16 @@ export const THEME_INIT_SCRIPT = `(function(){
   var pref = 'system';
   try {
     var stored = localStorage.getItem(${JSON.stringify(USERHQ_THEME_STORAGE_KEY)});
-    if (stored === 'light' || stored === 'dark' || stored === 'system') pref = stored;
+    if (stored === 'light' || stored === 'dark' || stored === 'charcoal' || stored === 'system') pref = stored;
   } catch (e) {}
-  var dark = pref === 'dark';
+  var isCharcoal = pref === 'charcoal';
+  var isDark = pref === 'dark' || isCharcoal;
   if (pref === 'system') {
-    try { dark = window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) {}
+    try { isDark = window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) {}
   }
   var root = document.documentElement;
-  if (dark) root.classList.add('dark'); else root.classList.remove('dark');
-  root.style.colorScheme = dark ? 'dark' : 'light';
+  if (isDark) root.classList.add('dark'); else root.classList.remove('dark');
+  if (isCharcoal) root.classList.add('charcoal'); else root.classList.remove('charcoal');
+  root.style.colorScheme = isDark ? 'dark' : 'light';
   root.dataset.theme = pref;
 })();`;

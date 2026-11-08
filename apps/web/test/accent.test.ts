@@ -48,6 +48,11 @@ const palette = {
     card: token(block(".dark"), "--card"),
     muted: token(block(".dark"), "--muted"),
   },
+  charcoal: {
+    background: token(block(".charcoal"), "--background"),
+    card: token(block(".charcoal"), "--card"),
+    muted: token(block(".charcoal"), "--muted"),
+  },
 };
 
 describe("accent tokens: text on the accent", () => {
@@ -65,9 +70,9 @@ describe("accent tokens: accent text on page surfaces", () => {
     return Math.round(ink * 0.2 + background * 0.8).toString(16).padStart(2, "0");
   }).join("")}`;
 
-  it.each(BRANDS)("%s reads at 4.5:1 on all three surfaces and their 20 percent accent tints in both themes", (brand) => {
+  it.each(BRANDS)("%s reads at 4.5:1 on all three surfaces and their 20 percent accent tints in every theme", (brand) => {
     const tokens = accentTokens(brand);
-    for (const theme of ["light", "dark"] as const) {
+    for (const theme of ["light", "dark", "charcoal"] as const) {
       const text = theme === "light" ? tokens.primaryText : tokens.primaryTextDark;
       for (const surface of Object.values(palette[theme])) {
         expect(contrastRatio(text, surface), `${brand} ${theme} on ${surface}`).toBeGreaterThanOrEqual(4.5);
@@ -130,8 +135,8 @@ describe("accentStyle", () => {
 });
 
 describe("static theme text and focus tokens", () => {
-  it.each(["light", "dark"] as const)("%s text clears 4.5:1 on page, card and muted, and focus uses the readable accent", (theme) => {
-    const source = block(theme === "light" ? ":root" : ".dark");
+  it.each(["light", "dark", "charcoal"] as const)("%s text clears 4.5:1 on page, card and muted, and focus uses the readable accent", (theme) => {
+    const source = block(theme === "light" ? ":root" : `.${theme}`);
     for (const name of ["--muted-foreground", "--foreground", "--primary-text"]) {
       for (const surface of Object.values(palette[theme])) {
         expect(contrastRatio(token(source, name), surface), `${theme} ${name} on ${surface}`).toBeGreaterThanOrEqual(4.5);
@@ -150,5 +155,15 @@ describe("ACCENT_SURFACES drift guard", () => {
     });
     expect(norm(ACCENT_SURFACES.light)).toEqual(palette.light);
     expect(norm(ACCENT_SURFACES.dark)).toEqual(palette.dark);
+    expect(norm(ACCENT_SURFACES.charcoal)).toEqual(palette.charcoal);
+  });
+});
+
+describe("accent tokens: brand text on charcoal surfaces", () => {
+  it.each(BRANDS)("primaryTextDark clears 4.5:1 on charcoal page, card and muted for %s", (brand) => {
+    const t = accentTokens(brand);
+    for (const surface of Object.values(ACCENT_SURFACES.charcoal)) {
+      expect(contrastRatio(t.primaryTextDark, surface), `primaryTextDark on charcoal ${surface}`).toBeGreaterThanOrEqual(4.5);
+    }
   });
 });

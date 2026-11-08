@@ -35,8 +35,8 @@ function fakeEnv(opts: { stored?: Stored; osDark?: boolean; dataset?: string } =
   const window = { localStorage, matchMedia: () => mq };
   const documentElement = {
     classList: {
-      add: (c: string) => classes.add(c),
-      remove: (c: string) => classes.delete(c),
+      add: (...c: string[]) => c.forEach((cls) => classes.add(cls)),
+      remove: (...c: string[]) => c.forEach((cls) => classes.delete(cls)),
       contains: (c: string) => classes.has(c),
     },
     style,
@@ -77,13 +77,31 @@ describe("THEME_INIT_SCRIPT (first paint)", () => {
   it("stored dark beats OS light", () => {
     const e = runScript({ stored: "dark", osDark: false });
     expect(e.classes.has("dark")).toBe(true);
+    expect(e.classes.has("charcoal")).toBe(false);
     expect(e.style.colorScheme).toBe("dark");
     expect(e.dataset.theme).toBe("dark");
+  });
+
+  it("stored charcoal beats OS light", () => {
+    const e = runScript({ stored: "charcoal", osDark: false });
+    expect(e.classes.has("dark")).toBe(true);
+    expect(e.classes.has("charcoal")).toBe(true);
+    expect(e.style.colorScheme).toBe("dark");
+    expect(e.dataset.theme).toBe("charcoal");
+  });
+
+  it("stored charcoal beats OS dark", () => {
+    const e = runScript({ stored: "charcoal", osDark: true });
+    expect(e.classes.has("dark")).toBe(true);
+    expect(e.classes.has("charcoal")).toBe(true);
+    expect(e.style.colorScheme).toBe("dark");
+    expect(e.dataset.theme).toBe("charcoal");
   });
 
   it("stored light beats OS dark", () => {
     const e = runScript({ stored: "light", osDark: true });
     expect(e.classes.has("dark")).toBe(false);
+    expect(e.classes.has("charcoal")).toBe(false);
     expect(e.style.colorScheme).toBe("light");
     expect(e.dataset.theme).toBe("light");
   });
@@ -147,6 +165,16 @@ describe("reapplyDocumentTheme (OS scheme changed)", () => {
     e.classes.add("dark");
     expect(reapplyDocumentTheme()).toBe("dark");
     expect(e.classes.has("dark")).toBe(true);
+    expect(e.classes.has("charcoal")).toBe(false);
+  });
+
+  it("explicit charcoal stays charcoal with OS light", () => {
+    const e = install({ dataset: "charcoal", osDark: false });
+    e.classes.add("dark");
+    e.classes.add("charcoal");
+    expect(reapplyDocumentTheme()).toBe("charcoal");
+    expect(e.classes.has("dark")).toBe(true);
+    expect(e.classes.has("charcoal")).toBe(true);
   });
 });
 
@@ -155,6 +183,10 @@ describe("saveThemePreference", () => {
     const e = install({});
     saveThemePreference("dark");
     expect(e.writes[USERHQ_THEME_STORAGE_KEY]).toBe("dark");
+    expect(e.cookieSet).not.toHaveBeenCalled();
+
+    saveThemePreference("charcoal");
+    expect(e.writes[USERHQ_THEME_STORAGE_KEY]).toBe("charcoal");
     expect(e.cookieSet).not.toHaveBeenCalled();
   });
 });
@@ -167,6 +199,11 @@ describe("Theme resolution logic", () => {
     expect(isThemePreference("invalid")).toBe(false);
     expect(isThemePreference("")).toBe(false);
     expect(isThemePreference(null)).toBe(false);
+  });
+
+  it("resolves charcoal preference to charcoal regardless of system", () => {
+    expect(resolveEffectiveTheme("charcoal", false)).toBe("charcoal");
+    expect(resolveEffectiveTheme("charcoal", true)).toBe("charcoal");
   });
 
   it("resolves dark preference to dark regardless of system", () => {

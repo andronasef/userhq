@@ -146,4 +146,19 @@ One bounded diagnostic full-suite run instrumented the real PostgreSQL client qu
 
 The parent approved a measured 30-second **integration hook** budget, matching the existing 30-second test budget, while retaining default file/worker parallelism. This explicitly changes the earlier plan criterion that `hookTimeout` must be absent. The earlier unexplained override was removed and tested; the reinstated budget has recorded failure and timing evidence. It does not suppress failed assertions, PostgreSQL errors or wrong-server responses. No temporary instrumentation was added to tracked source; `/tmp` preloads are absent from the final verification environment. Five standalone runs do not need repeating for this timeout-only configuration change; the three consecutive CI runs restart after it.
 
-<!-- post-fix reliability runs are appended below after the fix -->
+## Final reliability runs
+
+All runs used default Vitest file/worker parallelism. The five API runs followed the client-end fix, before the timeout-only budget change. The three consecutive CI runs followed the final budget change and used neither worker overrides nor `NODE_OPTIONS` preloads.
+
+| Run | Exit | Seconds | Result / log |
+|---|---|---|---|
+| API 1 | 0 | 36.9 | 776 tests, 59 files; `/tmp/bzd-final-api-1.log` |
+| API 2 | 0 | 75.5 | 776 tests, 59 files; `/tmp/bzd-final-api-2.log` |
+| API 3 | 0 | 73.0 | 776 tests, 59 files; `/tmp/bzd-final-api-3.log` |
+| API 4 | 0 | 113.4 | 776 tests, 59 files; `/tmp/bzd-final-api-4.log` |
+| API 5 | 0 | 51.7 | 776 tests, 59 files; `/tmp/bzd-final-api-5.log` |
+| CI 1 | 0 | 79.2 | Complete pipeline; `/tmp/bzd-verified-ci-1.log` |
+| CI 2 | 0 | 122.0 | Complete pipeline; `/tmp/bzd-verified-ci-2.log` |
+| CI 3 | 0 | 92.3 | Complete pipeline; `/tmp/bzd-verified-ci-3.log` |
+
+Every final CI run passed lint/typechecks, package/API builds, lint-rule tests, 32 shared-type tests, 6 database tests, 776 API tests, 264 web tests, vinext standalone and Next fallback builds, and migration checks. No wrong-server response, `57P01`, hook timeout, or unhandled error occurred in those final runs. Routine existing lint/build warnings remain visible in the logs and were not suppressed. The earlier failed API and CI attempts remain recorded above rather than omitted from the evidence.

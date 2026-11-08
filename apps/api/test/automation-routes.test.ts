@@ -156,4 +156,11 @@ describe("automation route inventory and docs sync (quick-261107-flq)", () => {
       `${REDELIVER_THROTTLE.limit} redeliveries per ${REDELIVER_THROTTLE.ttl / 1000} seconds per caller`
     );
   });
+
+  it("the docs state that rate limit counters are shared in PostgreSQL and fail open", () => {
+    const text = section("Rate limits");
+    expect(text).toContain("kept in PostgreSQL");
+    expect(text).toContain("fail open");
+    expect(text).not.toContain("The counter lives in");
+  });
 });

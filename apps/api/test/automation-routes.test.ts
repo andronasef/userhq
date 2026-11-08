@@ -41,13 +41,14 @@ const SESSION_ONLY_CONTROLLERS: Record<string, string> = {
   // Story 20 lists FAQ and product settings as automation targets, but these routes carry no scope today.
   // Pinned deliberately as a known gap, not silently: give them scopes and move them to the docs to close it.
   FaqController: "story-20 gap: FAQ has no scope yet",
-  ProductsController: "story-20 gap: product settings have no scope yet",
   StatusesController: "story-20 gap: product status settings have no scope yet",
   CategoriesController: "story-20 gap: product category settings have no scope yet",
 };
 // Handler exceptions inside otherwise scoped controllers: "Controller.handler".
 const SESSION_ONLY_HANDLERS: Record<string, string> = {
   "WorkspaceFeedbackController.markCommentRead": "a person's own read state",
+  "ProductsController.createProduct": "a key must not create products",
+  "ProductsController.deleteProduct": "removing a product is an owner decision, never a key's",
   "WebhooksController.rotateSecret": "signing secrets are rotated by a signed-in admin only, never by a key",
 };
 

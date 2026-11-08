@@ -89,6 +89,19 @@ describe("rate limits are shared across API instances", () => {
     expect(statuses.filter((s) => s === 429)).toHaveLength(130 - API_KEY_RATE_LIMIT.limit);
   });
 
+  it("initializes fresh integration actors under parallel first use without server errors", async () => {
+    for (let wave = 0; wave < 8; wave++) {
+      const token = await mint(`First use ${wave}`);
+      const apps = [a, b];
+      const results = await Promise.all(Array.from({ length: 130 }, (_, i) => hit(apps[i % 2], token)));
+      const counts = results.reduce<Record<number, number>>((all, res) => {
+        all[res.status] = (all[res.status] ?? 0) + 1;
+        return all;
+      }, {});
+      expect(counts).toEqual({ 200: API_KEY_RATE_LIMIT.limit, 429: 130 - API_KEY_RATE_LIMIT.limit });
+    }
+  });
+
   it("shares the redeliver limit (REDELIVER_THROTTLE) across two instances", async () => {
     const who = await signedInCookie(a.test, { name: "Redeliverer", email: "redeliver@shared-limit.test", emailVerified: true });
     const [ws] = await a.db.select().from(schema.workspaces).limit(1);

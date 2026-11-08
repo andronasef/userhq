@@ -1,5 +1,5 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { and, eq, ne, inArray, desc, asc } from "drizzle-orm";
+import { and, eq, ne, inArray, desc, asc, isNull } from "drizzle-orm";
 import {
   DB,
   type Db,
@@ -150,6 +150,13 @@ export class ChangelogService {
   ): Promise<void> {
     const isLive = entry.publishedAt !== null && new Date(entry.publishedAt).getTime() <= Date.now();
     if (wasLive || !isLive) return;
+
+    // The request already owns the entry lock; share the durable claim with the scheduled path.
+    const [claimed] = await tx.update(changelogEntries)
+      .set({ announcedAt: new Date() })
+      .where(and(eq(changelogEntries.id, entry.id), eq(changelogEntries.productId, productId), isNull(changelogEntries.announcedAt)))
+      .returning({ id: changelogEntries.id });
+    if (!claimed) return;
 
     const [prod] = await tx
       .select({ workspaceId: products.workspaceId })

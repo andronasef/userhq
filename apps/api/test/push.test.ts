@@ -486,6 +486,172 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
     expect(testRes.body.success).toBe(true);
     expect(testRes.body.enqueuedCount).toBeGreaterThanOrEqual(1);
   });
+
+  describe("endpoint ownership (D-11)", () => {
+    let userC: { cookie: string; userId: string; name: string };
+    let counter = 0;
+    const K1 = { p256dh: "owner-p256dh-key-0001", auth: "owner-auth-key-0001" };
+    const K2 = { p256dh: "other-p256dh-key-0002", auth: "other-auth-key-0002" };
+
+    beforeAll(async () => {
+      userC = await signedInCookie(testApp.test, {
+        name: "User Mallory",
+        email: "mallory-own@push.test",
+        emailVerified: true,
+      });
+    });
+
+    const freshEndpoint = () => `https://fcm.googleapis.com/fcm/send/own-${Date.now()}-${counter++}`;
+    const register = (
+      who: { cookie: string },
+      endpoint: string,
+      keys: { p256dh: string; auth: string },
+      userAgent?: string
+    ) =>
+      request(testApp.http)
+        .post("/api/v1/push/subscriptions")
+        .set("Cookie", who.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ endpoint, keys, ...(userAgent ? { userAgent } : {}) });
+    const rows = (endpoint: string) =>
+      testApp.db.select().from(schema.pushSubscriptions).where(eq(schema.pushSubscriptions.endpoint, endpoint));
+    const cleanup = (endpoint: string) =>
+      testApp.db.delete(schema.pushSubscriptions).where(eq(schema.pushSubscriptions.endpoint, endpoint));
+
+    it("refuses a different user without the stored keys and leaves the row untouched", async () => {
+      const endpoint = freshEndpoint();
+      await register(userA, endpoint, K1, "AliceBrowser/1").expect(201);
+      const [before] = await rows(endpoint);
+
+      const res = await register(userC, endpoint, K2, "Mallory/9");
+      expect(res.status).toBe(409);
+      expect(res.body.code).toBe("push_endpoint_conflict");
+      const text = JSON.stringify(res.body);
+      expect(text).not.toContain(userA.userId);
+      expect(text).not.toContain("alice@push.test");
+
+      const after = await rows(endpoint);
+      expect(after).toHaveLength(1);
+      expect(after[0]).toEqual(before);
+      const prefs = await testApp.db
+        .select()
+        .from(schema.pushPreferences)
+        .where(eq(schema.pushPreferences.userId, userC.userId));
+      expect(prefs).toHaveLength(0);
+      await cleanup(endpoint);
+    });
+
+    it("refuses a partial key match (only p256dh, or only auth)", async () => {
+      const endpoint = freshEndpoint();
+      await register(userA, endpoint, K1, "AliceBrowser/1").expect(201);
+      const [before] = await rows(endpoint);
+
+      for (const keys of [
+        { p256dh: K1.p256dh, auth: K2.auth },
+        { p256dh: K2.p256dh, auth: K1.auth },
+      ]) {
+        const res = await register(userC, endpoint, keys);
+        expect(res.status).toBe(409);
+        expect(res.body.code).toBe("push_endpoint_conflict");
+      }
+      const after = await rows(endpoint);
+      expect(after).toHaveLength(1);
+      expect(after[0]).toEqual(before);
+      await cleanup(endpoint);
+    });
+
+    it("lets the same user refresh keys and user agent in place", async () => {
+      const endpoint = freshEndpoint();
+      const first = await register(userA, endpoint, K1, "AliceBrowser/1").expect(201);
+      const res = await register(userA, endpoint, K2, "AliceBrowser/2");
+      expect(res.status).toBe(201);
+      expect(res.body.id).toBe(first.body.id);
+
+      const after = await rows(endpoint);
+      expect(after).toHaveLength(1);
+      expect(after[0]).toMatchObject({
+        id: first.body.id,
+        userId: userA.userId,
+        p256dh: K2.p256dh,
+        auth: K2.auth,
+        userAgent: "AliceBrowser/2",
+      });
+      await cleanup(endpoint);
+    });
+
+    it("replaces the old owner's row on an account switch and drops their queued deliveries", async () => {
+      const endpoint = freshEndpoint();
+      const first = await register(userA, endpoint, K1, "Shared browser").expect(201);
+      const [queued] = await testApp.db
+        .insert(schema.pushDeliveries)
+        .values({
+          subscriptionId: first.body.id,
+          userId: userA.userId,
+          eventType: "test",
+          title: "Alice private",
+          body: "Alice private body",
+        })
+        .returning();
+
+      const res = await register(userC, endpoint, K1, "Shared browser");
+      expect(res.status).toBe(201);
+      expect(res.body.id).not.toBe(first.body.id);
+
+      const after = await rows(endpoint);
+      expect(after).toHaveLength(1);
+      expect(after[0].userId).toBe(userC.userId);
+      expect(after.filter((r) => r.userId === userA.userId)).toHaveLength(0);
+
+      const oldDelivery = await testApp.db
+        .select()
+        .from(schema.pushDeliveries)
+        .where(eq(schema.pushDeliveries.id, queued.id));
+      expect(oldDelivery).toHaveLength(0);
+      const forNew = await testApp.db
+        .select()
+        .from(schema.pushDeliveries)
+        .where(eq(schema.pushDeliveries.subscriptionId, after[0].id));
+      expect(forNew).toHaveLength(0);
+      await cleanup(endpoint);
+    });
+
+    it("keeps delete owner-scoped", async () => {
+      const endpoint = freshEndpoint();
+      await register(userA, endpoint, K1).expect(201);
+
+      await request(testApp.http)
+        .delete("/api/v1/push/subscriptions")
+        .set("Cookie", userC.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ endpoint })
+        .expect(200);
+      const stillThere = await rows(endpoint);
+      expect(stillThere).toHaveLength(1);
+      expect(stillThere[0].userId).toBe(userA.userId);
+
+      await request(testApp.http)
+        .delete("/api/v1/push/subscriptions")
+        .set("Cookie", userA.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send({ endpoint })
+        .expect(200);
+      expect(await rows(endpoint)).toHaveLength(0);
+    });
+
+    it("lets exactly one of two simultaneous registrations of a new endpoint win", async () => {
+      const endpoint = freshEndpoint();
+      const [a, c] = await Promise.all([
+        register(userA, endpoint, K1),
+        register(userC, endpoint, K2),
+      ]);
+      expect([a.status, c.status].sort()).toEqual([201, 409]);
+      const winner = a.status === 201 ? userA : userC;
+      const after = await rows(endpoint);
+      expect(after).toHaveLength(1);
+      expect(after[0].userId).toBe(winner.userId);
+      await cleanup(endpoint);
+    });
+  });
 });
 
 describe("Push delivery network safety", () => {

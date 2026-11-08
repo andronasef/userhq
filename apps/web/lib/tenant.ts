@@ -25,6 +25,14 @@ export function parsePostRef(ref: string): number | null {
   return Number.isInteger(num) && num > 0 ? num : null;
 }
 
+export function dashboardPostHref(
+  ws: string,
+  product: string,
+  number: number
+): string {
+  return `/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/board/${number}`;
+}
+
 export type BoardVariant = "portal" | "dashboard";
 
 // Portal and dashboard expose the same posts/comments suffixes; dashboard uses

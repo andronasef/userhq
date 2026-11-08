@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { portalHref, postHref, parsePostRef } from "./tenant";
+import { portalHref, postHref, dashboardPostHref, parsePostRef } from "./tenant";
 
 describe("portalHref", () => {
   it("formats workspace root link", () => {
@@ -8,6 +8,17 @@ describe("portalHref", () => {
 
   it("formats workspace product link", () => {
     expect(portalHref("acme", "app")).toBe("/acme/app");
+  });
+});
+
+describe("dashboardPostHref", () => {
+  it("formats dashboard board post link with encoded segments", () => {
+    expect(dashboardPostHref("acme", "app", 42)).toBe(
+      "/dashboard/acme/app/board/42"
+    );
+    expect(dashboardPostHref("increasing-labs", "soundboard maker", 2)).toBe(
+      "/dashboard/increasing-labs/soundboard%20maker/board/2"
+    );
   });
 });
 

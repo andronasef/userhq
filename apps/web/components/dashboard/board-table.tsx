@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { ExternalLink } from "lucide-react";
 import type { AdminPostRow, PostStatus } from "@userhq/types";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { PostActionsMenu } from "@/components/post/post-actions-menu";
 import { DeviceBadge } from "@/components/post/device-badge";
 import { BulkMergeDialog } from "@/components/dashboard/bulk-merge-dialog";
 import { formatDate } from "@/lib/format";
+import { postHref } from "@/lib/tenant";
 import { cn } from "@/lib/utils";
 
 export interface BoardTableProps {
@@ -170,6 +172,18 @@ export function BoardTable({
                       >
                         {post.title}
                       </Link>
+                      {boardEnabled && (
+                        <a
+                          href={postHref(ws, product, post.number, post.slug)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-muted-foreground hover:text-foreground shrink-0 transition-colors"
+                          title="Open public portal post"
+                          aria-label={`Open ${post.title} on public portal`}
+                        >
+                          <ExternalLink className="size-3.5" aria-hidden="true" />
+                        </a>
+                      )}
                       {post.deviceInfo && (
                         <DeviceBadge deviceInfo={post.deviceInfo} />
                       )}

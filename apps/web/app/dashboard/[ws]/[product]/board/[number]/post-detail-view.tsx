@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import type {
   PublicPostDetail,
@@ -11,6 +11,7 @@ import type {
   TimelineItem,
   PostStatus,
 } from "@userhq/types";
+import { postHref } from "@/lib/tenant";
 import { HiddenModuleNotice } from "@/components/dashboard/hidden-module-notice";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -133,6 +134,24 @@ export function PostDetailView({
         description={`#${post.number} · Posted by ${authorName} on ${formatDate(post.createdAt)}`}
         action={
           <div className="flex items-center gap-2">
+            {boardEnabled && (
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+                className="h-9 gap-1.5"
+              >
+                <a
+                  href={postHref(ws, product, post.number, post.slug)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Open public portal post"
+                >
+                  <span>Public portal</span>
+                  <ExternalLink className="size-3.5" aria-hidden="true" />
+                </a>
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={() => setStatusDialogOpen(true)}

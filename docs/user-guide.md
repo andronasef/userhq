@@ -12,7 +12,7 @@ UserHQ connects customer feedback to a team's roadmap, release notes and FAQ. A 
 | A workspace administrator | [Set up your workspace](#for-administrators-set-up-your-workspace) | Manage products and content, triage feedback, invite teammates and configure integrations. |
 | A workspace owner | [Manage teammates](#manage-teammates) | Perform administrator work and owner-only operations such as deleting the workspace. |
 | An operator self-hosting UserHQ | [Deployment runbook](deploy.md) | Configure the server, OAuth, email, storage and browser-push keys. |
-| An integrator or assistant | [API guide](api-guide.md) / [LLM guide](llm-guide.md) | Use scoped automation without relying on browser sessions. |
+| An integrator or assistant | [API guide](api-quickstart.md) / [LLM guide](llm-guide.md) | Use scoped automation without relying on browser sessions. |
 
 ## Sign in and find your workspace
 
@@ -194,7 +194,7 @@ Workspace **Settings** contains **API keys** and **Webhooks**. An owner or admin
 
 Webhook signing secrets are shown only when creating or rotating the secret. Save the new value in your receiver before using it; normal list and detail screens cannot reveal it later. Receiver URLs must use public HTTPS.
 
-Start with the [API guide](api-guide.md) for authentication and examples, then use the [automation API reference](automation-api.md) for routes, scopes, restrictions, exports and webhook verification. Browser push preferences and team/account administration are not general API-key capabilities.
+Start with the [API guide](api-quickstart.md) for authentication and examples, then use the [automation API reference](automation-api.md) for routes, scopes, restrictions, exports and webhook verification. Browser push preferences and team/account administration are not general API-key capabilities.
 
 ## Example: close the feedback loop
 

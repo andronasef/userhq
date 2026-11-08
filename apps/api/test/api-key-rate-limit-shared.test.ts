@@ -4,6 +4,7 @@ import { Logger } from "@nestjs/common";
 import pg from "pg";
 import request from "supertest";
 import { schema } from "@userhq/db";
+import { eq } from "drizzle-orm";
 import { API_KEY_RATE_LIMIT } from "@userhq/types";
 import { REDELIVER_THROTTLE } from "../src/webhooks/webhooks.controller.js";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
@@ -100,6 +101,22 @@ describe("rate limits are shared across API instances", () => {
       }, {});
       expect(counts).toEqual({ 200: API_KEY_RATE_LIMIT.limit, 429: 130 - API_KEY_RATE_LIMIT.limit });
     }
+  });
+
+  it("fails closed if an integration email belongs to a different identity", async () => {
+    const key = await request(a.http)
+      .post(`/api/v1/workspaces/${wsSlug}/api-keys`)
+      .set("Cookie", admin.cookie)
+      .set("Origin", a.env.PUBLIC_URL)
+      .send({ name: "Identity conflict", scopes: ["requests:read"] });
+    expect(key.status).toBe(201);
+    const personId = randomUUID();
+    await a.db.insert(schema.user).values({ id: personId, name: "Unrelated person", email: `${key.body.key.id}@api.userhq.invalid` });
+    expect((await hit(a, key.body.token)).status).toBe(500);
+    const [person] = await a.db.select().from(schema.user).where(eq(schema.user.id, personId));
+    expect(person.name).toBe("Unrelated person");
+    const actors = await a.db.select().from(schema.user).where(eq(schema.user.id, `integration:${key.body.key.id}`));
+    expect(actors).toHaveLength(0);
   });
 
   it("shares the redeliver limit (REDELIVER_THROTTLE) across two instances", async () => {

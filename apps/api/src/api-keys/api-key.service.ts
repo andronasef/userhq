@@ -29,14 +29,21 @@ export class ApiKeyService {
   async integrationActor(key: ValidatedApiKey) {
     const id = `${INTEGRATION_ACTOR_PREFIX}${key.id}`;
     const name = `${key.name} (integration)`;
-    // Existing keys acquire their actor lazily; concurrent requests share one row.
+    const email = `${key.id}@api.userhq.invalid`;
+    // Both id and email are unique. Concurrent first use can conflict on either,
+    // so allow either insert conflict, then refresh only this exact actor identity.
     await this.db.insert(user).values({
       id,
       name,
-      email: `${key.id}@api.userhq.invalid`,
+      email,
       emailVerified: false,
       commentEmails: false,
-    }).onConflictDoUpdate({ target: user.id, set: { name } });
+    }).onConflictDoNothing();
+    const [actor] = await this.db.update(user)
+      .set({ name })
+      .where(and(eq(user.id, id), eq(user.email, email)))
+      .returning({ id: user.id });
+    if (!actor) throw new ApiException("internal_error", 500, "Integration identity could not be initialized.");
     return { id, name, image: null };
   }
 

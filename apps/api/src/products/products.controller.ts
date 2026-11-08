@@ -41,6 +41,7 @@ import {
 import { TenantGuard, type Tenant } from "../tenancy/tenant.guard.js";
 import { CurrentTenant } from "../tenancy/current-tenant.decorator.js";
 import { CurrentUser } from "../auth/decorators.js";
+import { RequireScopes } from "../api-keys/api-key.decorator.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { isUniqueViolation } from "../common/db-errors.js";
 import { pickFeatures, productFeatureColumns } from "../portal/product-features.js";
@@ -51,6 +52,7 @@ import { pickFeatures, productFeatureColumns } from "../portal/product-features.
 export class ProductsController {
   constructor(@Inject(DB) private readonly db: Db) {}
 
+  // Deliberately unscoped: a key must never create or delete a product (api_key_route_forbidden).
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @SerializeOptions({ schema: ProductCreatedSchema })
@@ -136,6 +138,7 @@ export class ProductsController {
   }
 
   @Get()
+  @RequireScopes("settings:read")
   @SerializeOptions({ schema: ProductSummarySchema })
   async listProducts(
     @CurrentTenant() tenant: Tenant,
@@ -172,6 +175,7 @@ export class ProductsController {
   }
 
   @Get(":product")
+  @RequireScopes("settings:read")
   @SerializeOptions({ schema: ProductDetailSchema })
   async getProduct(@CurrentTenant() tenant: Tenant): Promise<ProductDetail> {
     const [row] = await this.db
@@ -212,6 +216,7 @@ export class ProductsController {
   }
 
   @Patch(":product")
+  @RequireScopes("settings:write")
   @SerializeOptions({ schema: ProductDetailSchema })
   async updateProduct(
     @CurrentTenant() tenant: Tenant,

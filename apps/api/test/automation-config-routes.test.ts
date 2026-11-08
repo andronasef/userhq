@@ -165,7 +165,7 @@ describe("automation: scoped configuration routes (quick-261108-b3i)", () => {
     });
 
     it("a key restricted to P1 reaches P1 only, and not the product list", async () => {
-      const token = await mint(wsA, ownerA, "P1 only", ["settings:write"], [p1.id]);
+      const token = await mint(wsA, ownerA, "P1 only", ["settings:read", "settings:write"], [p1.id]);
       const ok = await request(testApp.http)
         .patch(api(wsA.slug, "products", p1.slug))
         .set(bearer(token))

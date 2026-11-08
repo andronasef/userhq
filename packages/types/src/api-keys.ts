@@ -13,6 +13,8 @@ export const API_KEY_SCOPES = [
   "export:read",
   "webhooks:read",
   "webhooks:write",
+  "settings:read",
+  "settings:write",
 ] as const;
 
 export type ApiKeyScope = (typeof API_KEY_SCOPES)[number];

@@ -36,7 +36,7 @@ Each key carries one or more scopes. Every endpoint requires exactly one scope. 
 
 | Scope | Description |
 |-------|-------------|
-| `admin` | Every scope below. It never opens session-only routes (API keys, members, invites, workspace settings, products, statuses, categories, FAQ). |
+| `admin` | Every scope below. It never opens session-only routes (API keys, members, invites, workspace settings, product creation and deletion). |
 | `requests:read` | View feedback requests, votes, and status. |
 | `requests:write` | Create posts headlessly, update status, and manage requests. |
 | `comments:read` | View discussions and comments across all posts. |
@@ -48,6 +48,8 @@ Each key carries one or more scopes. Every endpoint requires exactly one scope. 
 | `export:read` | Export all posts, feedback items, and comments in bulk. |
 | `webhooks:read` | View webhook subscriptions and delivery logs. |
 | `webhooks:write` | Create, update, and delete webhook subscriptions and redeliver events. |
+| `settings:read` | View product settings and the product list. |
+| `settings:write` | Change a product's feature switches (Board, Roadmap, Changelog, FAQ) and profile fields. |
 
 ---
 
@@ -56,7 +58,7 @@ Each key carries one or more scopes. Every endpoint requires exactly one scope. 
 A key may be restricted to a list of products at creation. A restricted key can reach only product-scoped routes (`/workspaces/:ws/products/:product/...`) of its allowed products. Anything else returns `403 product_restricted`:
 
 - a product the key is not allowed to use;
-- every workspace-wide route: `requests`, `comments`, `export` and `webhooks`.
+- every workspace-wide route: `requests`, `comments`, `export`, `webhooks` and the product list.
 
 Restrictions are stored as product ids, while URLs use product slugs. An unrestricted key reaches every product in its own workspace. A key never reaches another workspace: a foreign or unknown workspace or product returns `404 not_found`.
 
@@ -107,6 +109,9 @@ Restrictions are stored as product ids, while URLs use product slugs. An unrestr
 | `POST` | `/api/v1/workspaces/:ws/products/:product/changelog/tags` | `changelog:write` | Create a changelog tag. |
 | `DELETE` | `/api/v1/workspaces/:ws/products/:product/changelog/tags/:tagId` | `changelog:write` | Delete a changelog tag. |
 | `GET` | `/api/v1/workspaces/:ws/export/feedback` | `export:read` | Bulk export of posts, comments and votes. |
+| `GET` | `/api/v1/workspaces/:ws/products` | `settings:read` | List the workspace's products with their feature switches. |
+| `GET` | `/api/v1/workspaces/:ws/products/:product` | `settings:read` | Get one product's settings: feature switches, name, slug, tagline, website and accent colors. |
+| `PATCH` | `/api/v1/workspaces/:ws/products/:product` | `settings:write` | Update the four feature switches (`features.board`, `roadmap`, `changelog`, `faq`) and the profile fields (name, slug, tagline, website, accent colors). A key can clear the logo (`logoUploadId: null`) but not set one, because keys cannot upload files. |
 | `GET` | `/api/v1/workspaces/:ws/webhooks` | `webhooks:read` | List webhook subscriptions. |
 | `POST` | `/api/v1/workspaces/:ws/webhooks` | `webhooks:write` | Create a webhook subscription. |
 | `GET` | `/api/v1/workspaces/:ws/webhooks/:id` | `webhooks:read` | Get one subscription. |
@@ -116,7 +121,7 @@ Restrictions are stored as product ids, while URLs use product slugs. An unrestr
 | `GET` | `/api/v1/workspaces/:ws/webhooks/:id/deliveries` | `webhooks:read` | List delivery attempts for a subscription. |
 | `POST` | `/api/v1/workspaces/:ws/webhooks/:id/deliveries/:deliveryId/redeliver` | `webhooks:write` | Redeliver one event. |
 
-Not available to keys, by design or not yet: API keys, webhook secret rotation, members, invites, workspace settings, products, statuses, categories and FAQ. All of these return `403 api_key_route_forbidden`. Product settings, statuses, categories and FAQ are listed as automation targets in the product spec (story 20) but have no scope yet; see the project notes.
+Not available to keys: API keys, webhook secret rotation, members, invites, workspace settings, product creation and deletion, statuses, categories and FAQ. All of these return `403 api_key_route_forbidden`.
 
 ---
 

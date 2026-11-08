@@ -80,6 +80,14 @@ const SCOPE_LABELS: Record<ApiKeyScope, { title: string; description: string }> 
     title: "Manage Webhooks (webhooks:write)",
     description: "Create, update, and delete webhook subscriptions and redeliver events",
   },
+  "settings:read": {
+    title: "Read Settings (settings:read)",
+    description: "View product settings, statuses, and categories",
+  },
+  "settings:write": {
+    title: "Manage Settings (settings:write)",
+    description: "Update product settings and feature switches, and manage statuses and categories",
+  },
 };
 
 export function CreateApiKeyDialog({

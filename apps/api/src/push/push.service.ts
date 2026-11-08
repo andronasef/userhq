@@ -1,5 +1,5 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { and, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import {
   DB,
   type Db,
@@ -17,6 +17,7 @@ import {
 import { ENV, type Env } from "../env.js";
 import { getVapidKeys } from "./push.config.js";
 import { OutboundHttp } from "../common/outbound-http.js";
+import { ApiException } from "../common/api-error.filter.js";
 import { postSlug } from "@userhq/types";
 import type {
   RegisterPushSubscriptionInput,
@@ -48,26 +49,49 @@ export class PushService {
     input: RegisterPushSubscriptionInput
   ): Promise<PushSubscriptionResponse> {
     await this.outbound.validateTarget(input.endpoint);
-    const [sub] = await this.db
-      .insert(pushSubscriptions)
-      .values({
-        userId,
-        endpoint: input.endpoint,
-        p256dh: input.keys.p256dh,
-        auth: input.keys.auth,
-        userAgent: input.userAgent ?? null,
-      })
-      .onConflictDoUpdate({
-        target: [pushSubscriptions.endpoint],
-        set: {
+    const sub = await this.db.transaction(async (tx) => {
+      // Account switch: holding both stored keys proves this browser profile owns the
+      // endpoint. Delete (not reassign) so the old owner's queued deliveries cascade away.
+      await tx
+        .delete(pushSubscriptions)
+        .where(
+          and(
+            eq(pushSubscriptions.endpoint, input.endpoint),
+            ne(pushSubscriptions.userId, userId),
+            eq(pushSubscriptions.p256dh, input.keys.p256dh),
+            eq(pushSubscriptions.auth, input.keys.auth)
+          )
+        );
+      const [row] = await tx
+        .insert(pushSubscriptions)
+        .values({
           userId,
+          endpoint: input.endpoint,
           p256dh: input.keys.p256dh,
           auth: input.keys.auth,
           userAgent: input.userAgent ?? null,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
+        })
+        .onConflictDoUpdate({
+          target: [pushSubscriptions.endpoint],
+          set: {
+            p256dh: input.keys.p256dh,
+            auth: input.keys.auth,
+            userAgent: input.userAgent ?? null,
+            updatedAt: new Date(),
+          },
+          // Only the owner may refresh an existing row; anyone else gets no row back.
+          setWhere: eq(pushSubscriptions.userId, userId),
+        })
+        .returning();
+      return row;
+    });
+    if (!sub) {
+      throw new ApiException(
+        "push_endpoint_conflict",
+        409,
+        "This push endpoint is already registered to another account."
+      );
+    }
 
     // Ensure default preferences exist
     await this.db

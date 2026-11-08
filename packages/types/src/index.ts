@@ -92,6 +92,7 @@ export const API_ERROR_CODES = [
   "product_restricted",
   "webhook_inactive",
   "delivery_not_final",
+  "push_endpoint_conflict",
 ] as const;
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];
 

@@ -13,11 +13,12 @@ describe("Portal attribution URL handling", () => {
     const query = new URLSearchParams({
       constructor: "pro",
       long: "x".repeat(257),
-      ["x".repeat(101)]: "value",
+      ["x".repeat(105)]: "value",
+      ["k".repeat(104)]: "kept",
     });
     const { params } = readAttributionParams(query.toString());
     expect(params.constructor).toBe("pro");
-    expect(Object.keys(params)).toEqual(["constructor"]);
+    expect(Object.keys(params)).toEqual(["constructor", "k".repeat(104)]);
     expect(
       Object.keys(
         readAttributionParams(

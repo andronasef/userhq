@@ -43,7 +43,9 @@ export function BadgeChip({
   size = "sm",
   className,
 }: BadgeChipProps): React.JSX.Element {
-  const IconComponent = badge.icon ? BADGE_ICONS[badge.icon.toLowerCase()] : null;
+  const iconKey = badge.icon?.toLowerCase();
+  const IconComponent =
+    iconKey && Object.hasOwn(BADGE_ICONS, iconKey) ? BADGE_ICONS[iconKey] : null;
 
   return (
     <span

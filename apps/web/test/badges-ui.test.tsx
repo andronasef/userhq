@@ -56,6 +56,24 @@ describe("BadgeChip UI Component", () => {
       />,
     );
     expect(htmlUnknownIcon).toContain("Unknown Icon");
+
+    for (const icon of ["constructor", "__proto__", "toString"]) {
+      const html = renderToString(
+        <BadgeChip
+          badge={{
+            id: "b4",
+            name: "Proto",
+            slug: "proto",
+            color: "#fff",
+            textColor: "#000",
+            icon,
+            priority: 0,
+          }}
+        />,
+      );
+      expect(html).toContain("Proto");
+      expect(html).not.toContain("<svg");
+    }
   });
 
   it("renders author line with badges sorted by priority", () => {

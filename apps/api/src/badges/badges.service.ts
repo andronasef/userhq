@@ -298,29 +298,35 @@ export class BadgesService {
         "Invalid rule pattern or parameter name.",
       );
     }
-    const [count] = await this.db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(productBadgeRules)
-      .where(eq(productBadgeRules.productId, productId));
-    if (count.count >= 50)
-      throw new ApiException(
-        "badge_rule_invalid",
-        400,
-        "A product can have at most 50 badge rules.",
+    // Serialize per product so concurrent creates cannot both pass the cap.
+    const rule = await this.db.transaction(async (tx) => {
+      await tx.execute(
+        sql`SELECT pg_advisory_xact_lock(hashtext(${"badge_rules:" + productId}))`,
       );
-
-    const [rule] = await this.db
-      .insert(productBadgeRules)
-      .values({
-        productId,
-        badgeId,
-        paramKey: input.paramKey,
-        keyMatchType: input.keyMatchType,
-        matchType: input.matchType,
-        matchValue: input.matchValue,
-        secretToken: input.secretToken ? input.secretToken : null,
-      })
-      .returning();
+      const [count] = await tx
+        .select({ count: sql<number>`count(*)::int` })
+        .from(productBadgeRules)
+        .where(eq(productBadgeRules.productId, productId));
+      if (count.count >= 50)
+        throw new ApiException(
+          "badge_rule_invalid",
+          400,
+          "A product can have at most 50 badge rules.",
+        );
+      const [inserted] = await tx
+        .insert(productBadgeRules)
+        .values({
+          productId,
+          badgeId,
+          paramKey: input.paramKey,
+          keyMatchType: input.keyMatchType,
+          matchType: input.matchType,
+          matchValue: input.matchValue,
+          secretToken: input.secretToken ? input.secretToken : null,
+        })
+        .returning();
+      return inserted;
+    });
 
     return toBadgeRule(rule);
   }
@@ -371,7 +377,7 @@ export class BadgesService {
       FROM ${user} u
       WHERE ${participantCondition(productId)}
       ${badgeId ? sql`AND EXISTS (SELECT 1 FROM ${userProductBadges} bsub WHERE bsub.product_id = ${productId} AND bsub.user_id = u.id AND bsub.badge_id = ${badgeId} AND (bsub.expires_at IS NULL OR bsub.expires_at > NOW()))` : sql``}
-      ${search ? sql`AND (u.name ILIKE ${"%" + search + "%"} OR u.email ILIKE ${"%" + search + "%"})` : sql``}
+      ${search ? (includeEmail ? sql`AND (u.name ILIKE ${"%" + search + "%"} OR u.email ILIKE ${"%" + search + "%"})` : sql`AND u.name ILIKE ${"%" + search + "%"}`) : sql``}
     `;
 
     const countRes = await this.db.execute<{ count: string }>(

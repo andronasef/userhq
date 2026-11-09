@@ -302,6 +302,9 @@ export class CommentsService {
       .limit(1);
 
     const isDeletedUser = Boolean(authorUser?.deletedAt);
+    const updatedBadges = isDeletedUser
+      ? []
+      : ((await getPublicBadgesForUsers(this.db, portal.productId, [updated.authorId])).get(updated.authorId) ?? []);
     const [keyRow] = updated.createdByApiKeyId
       ? await this.db
           .select({ name: workspaceApiKeys.name })
@@ -313,12 +316,13 @@ export class CommentsService {
     return {
       id: updated.id,
       author: isDeletedUser
-        ? { name: null, image: null, isAdmin: false, deleted: true }
+        ? { name: null, image: null, isAdmin: false, deleted: true, badges: [] }
         : {
             name: authorUser?.name ?? null,
             image: authorUser?.image ?? null,
             isAdmin: updated.isAdmin,
             deleted: false,
+            badges: updatedBadges,
           },
       body: updated.body,
       createdAt: updated.createdAt.toISOString(),

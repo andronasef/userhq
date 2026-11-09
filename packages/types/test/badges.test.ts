@@ -38,9 +38,19 @@ describe("Badges Schemas", () => {
     ).toBe(false);
     expect(
       AttributeInputSchema.safeParse({
-        searchParams: { ["x".repeat(101)]: "x" },
+        searchParams: { ["x".repeat(105)]: "x" },
       }).success,
     ).toBe(false);
+    // a max-length rule key plus its _sig / _ts companions must be accepted
+    expect(
+      AttributeInputSchema.safeParse({
+        searchParams: {
+          ["a".repeat(100)]: "x",
+          ["a".repeat(100) + "_sig"]: "x",
+          ["a".repeat(100) + "_ts"]: "1",
+        },
+      }).success,
+    ).toBe(true);
   });
   it("validates valid badge creation input", () => {
     const input = {

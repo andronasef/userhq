@@ -4,6 +4,8 @@ export const BADGE_NAME_MAX = 50;
 export const BADGE_SLUG_MAX = 50;
 export const BADGE_DESC_MAX = 200;
 export const RULE_PARAM_KEY_MAX = 100;
+/** Room for the `_sig` / `_ts` companions of a max-length rule key. */
+export const ATTRIBUTE_PARAM_KEY_MAX = RULE_PARAM_KEY_MAX + 4;
 export const RULE_MATCH_VALUE_MAX = 256;
 export const RULE_REGEX_MAX = 200;
 export const ATTRIBUTE_MAX_PARAMS = 50;
@@ -184,7 +186,7 @@ export type PublicBadgeChip = z.infer<typeof PublicBadgeChipSchema>;
 export const AttributeInputSchema = z.object({
   searchParams: z
     .record(
-      z.string().max(RULE_PARAM_KEY_MAX),
+      z.string().max(ATTRIBUTE_PARAM_KEY_MAX),
       z.string().max(ATTRIBUTE_PARAM_VALUE_MAX),
     )
     .refine(

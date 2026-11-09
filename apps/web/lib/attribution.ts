@@ -1,7 +1,7 @@
 import {
   ATTRIBUTE_MAX_PARAMS,
   ATTRIBUTE_PARAM_VALUE_MAX,
-  RULE_PARAM_KEY_MAX,
+  ATTRIBUTE_PARAM_KEY_MAX,
 } from "@userhq/types";
 
 export function readAttributionParams(search: string): {
@@ -12,7 +12,7 @@ export function readAttributionParams(search: string): {
   for (const [key, value] of new URLSearchParams(search)) {
     if (Object.keys(params).length >= ATTRIBUTE_MAX_PARAMS) break;
     if (
-      key.length <= RULE_PARAM_KEY_MAX &&
+      key.length <= ATTRIBUTE_PARAM_KEY_MAX &&
       value.length <= ATTRIBUTE_PARAM_VALUE_MAX
     )
       params[key] = value;

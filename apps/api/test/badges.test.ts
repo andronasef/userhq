@@ -235,4 +235,45 @@ describe("Badge admin contracts", () => {
     expect((await call("delete", `/badges/${badgeId}`)).status).toBe(204);
     expect((await call("get", "/badges")).body.items).toHaveLength(0);
   });
+  it("does not let API keys search hidden emails, but sessions can", async () => {
+    const created = await request(app.http)
+      .post(`/api/v1/workspaces/${seed.a.slug}/api-keys`)
+      .set("Cookie", seed.a.cookie)
+      .set("Origin", app.env.PUBLIC_URL)
+      .send({ name: "Badge reader", scopes: ["settings:read"] });
+    expect(created.status, JSON.stringify(created.body)).toBe(201);
+    const search = "badge-customer@example.test";
+    const viaKey = await request(app.http)
+      .get(`${base}/users?search=${encodeURIComponent(search)}`)
+      .set("Authorization", `Bearer ${created.body.token}`);
+    expect(viaKey.status).toBe(200);
+    expect(viaKey.body.total).toBe(0);
+    const viaSession = await call("get", `/users?search=${encodeURIComponent(search)}`);
+    expect(viaSession.body.total).toBe(1);
+  });
+  it("never lets concurrent rule creation exceed the cap", async () => {
+    const badge = (await call("post", "/badges").send({ name: "Conc", slug: "conc" })).body;
+    const existing = await app.db
+      .select()
+      .from(schema.productBadgeRules)
+      .where(eq(schema.productBadgeRules.productId, seed.a.productId!));
+    await app.db.insert(schema.productBadgeRules).values(
+      Array.from({ length: 49 - existing.length }, (_, i) => ({
+        productId: seed.a.productId!,
+        badgeId: badge.id,
+        paramKey: `c${i}`,
+        matchValue: "x",
+      })),
+    );
+    await Promise.all(
+      Array.from({ length: 4 }, (_, i) =>
+        call("post", `/badges/${badge.id}/rules`).send({ paramKey: `race${i}`, matchValue: "x" }),
+      ),
+    );
+    const rows = await app.db
+      .select()
+      .from(schema.productBadgeRules)
+      .where(eq(schema.productBadgeRules.productId, seed.a.productId!));
+    expect(rows.length).toBeLessThanOrEqual(50);
+  });
 });

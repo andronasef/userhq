@@ -17,6 +17,7 @@ import { PortalTabs } from "../../../components/portal/portal-tabs";
 import { NotificationBell } from "../../../components/notifications/notification-bell";
 import { AppToaster } from "../../../components/ui/toaster";
 import { ProjectContextTracker } from "../../../components/portal/project-context-tracker";
+import { PortalBadgeAttribution } from "../../../components/portal/portal-badge-attribution";
 
 interface PortalLayoutProps {
   children: React.ReactNode;
@@ -170,6 +171,7 @@ export default async function PortalLayout({
         wsName={workspace.name}
         href={portalHref(ws, product)}
       />
+      <PortalBadgeAttribution ws={ws} product={product} />
       <AppToaster />
       {children}
     </PortalFrame>

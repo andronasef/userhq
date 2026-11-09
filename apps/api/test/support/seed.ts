@@ -23,6 +23,8 @@ export interface TenantSeed {
   faqCategoryId?: string;
   faqQuestionId?: string;
   apiKeyId?: string;
+  badgeId?: string;
+  badgeRuleId?: string;
 }
 
 export interface Seed {
@@ -31,7 +33,7 @@ export interface Seed {
 }
 
 export async function seedTenants(
-  testApp: Awaited<ReturnType<typeof createTestApp>>
+  testApp: Awaited<ReturnType<typeof createTestApp>>,
 ): Promise<Seed> {
   const randA = randomBytes(4).toString("hex");
   const randB = randomBytes(4).toString("hex");
@@ -223,7 +225,12 @@ export async function seedTenants(
       summary: "Summary B",
       content: {
         type: "doc",
-        content: [{ type: "paragraph", content: [{ type: "text", text: "Entry content" }] }],
+        content: [
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "Entry content" }],
+          },
+        ],
       },
       status: "draft",
     })
@@ -246,7 +253,12 @@ export async function seedTenants(
       question: "Tenant B FAQ Question?",
       answer: {
         type: "doc",
-        content: [{ type: "paragraph", content: [{ type: "text", text: "FAQ Answer" }] }],
+        content: [
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "FAQ Answer" }],
+          },
+        ],
       },
       rank: "a0",
     })
@@ -264,6 +276,19 @@ export async function seedTenants(
     })
     .returning();
 
+  const [badgeB] = await testApp.db
+    .insert(schema.productBadges)
+    .values({ productId: prodB.id, name: "Tenant B PRO", slug: "pro" })
+    .returning();
+  const [badgeRuleB] = await testApp.db
+    .insert(schema.productBadgeRules)
+    .values({
+      productId: prodB.id,
+      badgeId: badgeB.id,
+      paramKey: "tier",
+      matchValue: "pro",
+    })
+    .returning();
   return {
     a: {
       slug: slugA,
@@ -294,6 +319,8 @@ export async function seedTenants(
       faqCategoryId: faqCatB.id,
       faqQuestionId: faqQB.id,
       apiKeyId: apiKeyB.id,
+      badgeId: badgeB.id,
+      badgeRuleId: badgeRuleB.id,
     },
   };
 }

@@ -60,10 +60,12 @@ function ProductUsersManagerInner({
   const [debouncedQuery, setDebouncedQuery] = React.useState("");
   const [badgeFilter, setBadgeFilter] = React.useState<string>("");
   const [page, setPage] = React.useState(1);
-  const [managingUser, setManagingUser] = React.useState<ProductUserListItem | null>(null);
+  const [managingUser, setManagingUser] =
+    React.useState<ProductUserListItem | null>(null);
 
   // Modal manual assignment state
-  const [selectedBadgeToGrant, setSelectedBadgeToGrant] = React.useState<string>("");
+  const [selectedBadgeToGrant, setSelectedBadgeToGrant] =
+    React.useState<string>("");
   const [expiresAt, setExpiresAt] = React.useState<string>("");
 
   React.useEffect(() => {
@@ -77,7 +79,8 @@ function ProductUsersManagerInner({
   // Load badges for filtering and modal
   const { data: badgesData } = useQuery<{ items: Badge[] }>({
     queryKey: ["product-badges", ws, product],
-    queryFn: () => apiFetch(`/api/workspaces/${ws}/products/${product}/badges`),
+    queryFn: () =>
+      apiFetch(`/api/v1/workspaces/${ws}/products/${product}/badges`),
   });
   const allBadges: Badge[] = badgesData?.items || [];
 
@@ -104,7 +107,7 @@ function ProductUsersManagerInner({
       searchParams.set("page", String(page));
       searchParams.set("limit", "25");
       return apiFetch(
-        `/api/workspaces/${ws}/products/${product}/users?${searchParams.toString()}`
+        `/api/v1/workspaces/${ws}/products/${product}/users?${searchParams.toString()}`,
       );
     },
   });
@@ -120,18 +123,22 @@ function ProductUsersManagerInner({
       expiresAtVal?: string;
     }) => {
       return apiFetch(
-        `/api/workspaces/${ws}/products/${product}/users/${userId}/badges`,
+        `/api/v1/workspaces/${ws}/products/${product}/users/${userId}/badges`,
         {
           method: "POST",
           body: {
             badgeId,
-            expiresAt: expiresAtVal ? new Date(expiresAtVal).toISOString() : null,
+            expiresAt: expiresAtVal
+              ? new Date(expiresAtVal).toISOString()
+              : null,
           },
-        }
+        },
       );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["product-users", ws, product] });
+      queryClient.invalidateQueries({
+        queryKey: ["product-users", ws, product],
+      });
       toast.success("Badge granted");
       setSelectedBadgeToGrant("");
       setExpiresAt("");
@@ -177,19 +184,23 @@ function ProductUsersManagerInner({
       badgeId: string;
     }) => {
       return apiFetch(
-        `/api/workspaces/${ws}/products/${product}/users/${userId}/badges/${badgeId}`,
+        `/api/v1/workspaces/${ws}/products/${product}/users/${userId}/badges/${badgeId}`,
         {
           method: "DELETE",
-        }
+        },
       );
     },
     onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["product-users", ws, product] });
+      queryClient.invalidateQueries({
+        queryKey: ["product-users", ws, product],
+      });
       toast.success("Badge revoked");
       if (managingUser) {
         setManagingUser({
           ...managingUser,
-          badges: managingUser.badges.filter((b) => b.badgeId !== vars.badgeId && b.id !== vars.badgeId),
+          badges: managingUser.badges.filter(
+            (b) => b.badgeId !== vars.badgeId && b.id !== vars.badgeId,
+          ),
         });
       }
     },
@@ -204,7 +215,9 @@ function ProductUsersManagerInner({
 
   // Badges not currently assigned to managingUser
   const availableToGrant = managingUser
-    ? allBadges.filter((b) => !managingUser.badges.some((ub) => ub.badgeId === b.id))
+    ? allBadges.filter(
+        (b) => !managingUser.badges.some((ub) => ub.badgeId === b.id),
+      )
     : [];
 
   return (
@@ -268,7 +281,11 @@ function ProductUsersManagerInner({
               <TR key={u.id}>
                 <TD>
                   <div className="flex items-center gap-3">
-                    <Avatar src={u.image} name={u.name || u.email || "User"} size="sm" />
+                    <Avatar
+                      src={u.image}
+                      name={u.name || u.email || "User"}
+                      size="sm"
+                    />
                     <div className="flex flex-col min-w-0">
                       <span className="font-semibold text-foreground truncate">
                         {u.name || "Unnamed user"}
@@ -296,15 +313,24 @@ function ProductUsersManagerInner({
 
                 <TD>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span title="Posts submitted" className="flex items-center gap-1">
+                    <span
+                      title="Posts submitted"
+                      className="flex items-center gap-1"
+                    >
                       <FileText className="size-3.5 text-muted-foreground/70" />
                       {u.postsCount}
                     </span>
-                    <span title="Comments written" className="flex items-center gap-1">
+                    <span
+                      title="Comments written"
+                      className="flex items-center gap-1"
+                    >
                       <MessageSquare className="size-3.5 text-muted-foreground/70" />
                       {u.commentsCount}
                     </span>
-                    <span title="Votes cast" className="flex items-center gap-1">
+                    <span
+                      title="Votes cast"
+                      className="flex items-center gap-1"
+                    >
                       <ThumbsUp className="size-3.5 text-muted-foreground/70" />
                       {u.votesCount}
                     </span>
@@ -342,7 +368,8 @@ function ProductUsersManagerInner({
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-2">
           <span className="text-xs text-muted-foreground">
-            Showing {(page - 1) * 25 + 1}–{Math.min(page * 25, total)} of {total} users
+            Showing {(page - 1) * 25 + 1}–{Math.min(page * 25, total)} of{" "}
+            {total} users
           </span>
           <div className="flex items-center gap-2">
             <Button
@@ -466,9 +493,7 @@ function ProductUsersManagerInner({
                   <Button
                     size="sm"
                     className="w-full gap-1.5"
-                    disabled={
-                      !selectedBadgeToGrant || assignMutation.isPending
-                    }
+                    disabled={!selectedBadgeToGrant || assignMutation.isPending}
                     onClick={() => {
                       if (!managingUser || !selectedBadgeToGrant) return;
                       assignMutation.mutate({
@@ -500,7 +525,7 @@ function ProductUsersManagerInner({
 }
 
 export function ProductUsersManager(
-  props: ProductUsersManagerProps
+  props: ProductUsersManagerProps,
 ): React.JSX.Element {
   return (
     <QueryProvider>

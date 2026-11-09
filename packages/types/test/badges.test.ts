@@ -3,11 +3,25 @@ import {
   CreateBadgeInputSchema,
   CreateBadgeRuleInputSchema,
   ProductUsersQuerySchema,
-  UpdateBadgeInputSchema,
   AttributeInputSchema,
 } from "../src/badges.js";
 
 describe("Badges Schemas", () => {
+  it("defaults key matching and limits regexes and reserved keys", () => {
+    expect(
+      CreateBadgeRuleInputSchema.parse({ paramKey: "plan", matchValue: "pro" })
+        .keyMatchType,
+    ).toBe("exact");
+    for (const rule of [
+      { paramKey: "plan_sig", matchValue: "pro" },
+      { paramKey: "plan_ts", matchValue: "pro" },
+      { paramKey: "plan", matchType: "regex", matchValue: "x".repeat(201) },
+      { paramKey: "plan", matchValue: "x".repeat(257) },
+      { paramKey: "x".repeat(201), keyMatchType: "regex", matchValue: "pro" },
+    ])
+      expect(CreateBadgeRuleInputSchema.safeParse(rule).success).toBe(false);
+  });
+
   it("bounds public attribution parameters", () => {
     const searchParams = Object.fromEntries(
       Array.from({ length: 50 }, (_, i) => [`key${i}`, "x".repeat(256)]),

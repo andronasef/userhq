@@ -183,6 +183,13 @@
       "when": 1794216504298,
       "tag": "0025_jazzy_wildside",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1794263867310,
+      "tag": "0026_badge_rule_key_match_type",
+      "breakpoints": true
     }
   ]
 }

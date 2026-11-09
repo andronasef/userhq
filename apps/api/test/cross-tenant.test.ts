@@ -13,6 +13,41 @@ const CROSS_TENANT_ROUTES: Record<
   string,
   (s: Seed) => { url: string; body?: unknown; method?: string }
 > = {
+  "GET /workspaces/:ws/products/:product/badges": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/badges`,
+  }),
+  "POST /workspaces/:ws/products/:product/badges": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/badges`,
+    body: { name: "New", slug: "new" },
+  }),
+  "PATCH /workspaces/:ws/products/:product/badges/:badgeId": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/badges/${s.b.badgeId}`,
+    body: { name: "Changed" },
+  }),
+  "DELETE /workspaces/:ws/products/:product/badges/:badgeId": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/badges/${s.b.badgeId}`,
+  }),
+  "POST /workspaces/:ws/products/:product/badges/:badgeId/rules": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/badges/${s.b.badgeId}/rules`,
+    body: { paramKey: "tier", matchValue: "pro" },
+  }),
+  "DELETE /workspaces/:ws/products/:product/badges/:badgeId/rules/:ruleId": (
+    s,
+  ) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/badges/${s.b.badgeId}/rules/${s.b.badgeRuleId}`,
+  }),
+  "GET /workspaces/:ws/products/:product/users": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/users`,
+  }),
+  "POST /workspaces/:ws/products/:product/users/:userId/badges": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/users/${s.b.userId}/badges`,
+    body: { badgeId: s.b.badgeId },
+  }),
+  "DELETE /workspaces/:ws/products/:product/users/:userId/badges/:badgeId": (
+    s,
+  ) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/users/${s.b.userId}/badges/${s.b.badgeId}`,
+  }),
   "GET /workspaces/:ws": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}`,
   }),
@@ -177,7 +212,9 @@ const CROSS_TENANT_ROUTES: Record<
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/roadmap/${s.b.roadmapItemId}/link`,
     body: { postId: s.b.postId! },
   }),
-  "DELETE /workspaces/:ws/products/:product/roadmap/:id/unlink/:postId": (s) => ({
+  "DELETE /workspaces/:ws/products/:product/roadmap/:id/unlink/:postId": (
+    s,
+  ) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/roadmap/${s.b.roadmapItemId}/unlink/${s.b.postId}`,
   }),
   // Changelog
@@ -190,7 +227,12 @@ const CROSS_TENANT_ROUTES: Record<
       title: "Cross Tenant Changelog",
       content: {
         type: "doc",
-        content: [{ type: "paragraph", content: [{ type: "text", text: "Changelog content" }] }],
+        content: [
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "Changelog content" }],
+          },
+        ],
       },
     },
   }),
@@ -251,7 +293,9 @@ const CROSS_TENANT_ROUTES: Record<
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/faq/categories`,
     body: { name: "Cross Category" },
   }),
-  "PATCH /workspaces/:ws/products/:product/faq/categories/:id/reorder": (s) => ({
+  "PATCH /workspaces/:ws/products/:product/faq/categories/:id/reorder": (
+    s,
+  ) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/faq/categories/${s.b.faqCategoryId}/reorder`,
     body: { targetRank: "a1" },
   }),
@@ -269,7 +313,12 @@ const CROSS_TENANT_ROUTES: Record<
       question: "Cross Tenant FAQ Question?",
       answer: {
         type: "doc",
-        content: [{ type: "paragraph", content: [{ type: "text", text: "Answer content" }] }],
+        content: [
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "Answer content" }],
+          },
+        ],
       },
     },
   }),
@@ -320,7 +369,9 @@ const CROSS_TENANT_ROUTES: Record<
   "GET /workspaces/:ws/webhooks/:id/deliveries": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/webhooks/${crypto.randomUUID()}/deliveries`,
   }),
-  "POST /workspaces/:ws/webhooks/:id/deliveries/:deliveryId/redeliver": (s) => ({
+  "POST /workspaces/:ws/webhooks/:id/deliveries/:deliveryId/redeliver": (
+    s,
+  ) => ({
     url: `/api/v1/workspaces/${s.b.slug}/webhooks/${crypto.randomUUID()}/deliveries/${crypto.randomUUID()}/redeliver`,
   }),
   "POST /workspaces/:ws/webhooks/:id/ping": (s) => ({
@@ -366,9 +417,20 @@ describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
           if (requestMethod === undefined) continue;
 
           const verb = RequestMethod[requestMethod];
-          const cPath = Array.isArray(controllerPath) ? controllerPath[0] : controllerPath;
-          const mPath = methodPath ? (Array.isArray(methodPath) ? methodPath[0] : methodPath) : "";
-          const fullPath = "/" + [cPath, mPath].map((p) => p.replace(/^\/+|\/+$/g, "")).filter(Boolean).join("/");
+          const cPath = Array.isArray(controllerPath)
+            ? controllerPath[0]
+            : controllerPath;
+          const mPath = methodPath
+            ? Array.isArray(methodPath)
+              ? methodPath[0]
+              : methodPath
+            : "";
+          const fullPath =
+            "/" +
+            [cPath, mPath]
+              .map((p) => p.replace(/^\/+|\/+$/g, ""))
+              .filter(Boolean)
+              .join("/");
 
           if (fullPath.startsWith("/workspaces/:ws")) {
             routeSet.add(`${verb} ${fullPath}`);
@@ -390,7 +452,7 @@ describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
 
     expect(
       missing,
-      `Missing routes in CROSS_TENANT_ROUTES: ${missing.join(", ")}. Add the new :ws route to CROSS_TENANT_ROUTES.`
+      `Missing routes in CROSS_TENANT_ROUTES: ${missing.join(", ")}. Add the new :ws route to CROSS_TENANT_ROUTES.`,
     ).toEqual([]);
 
     expect(configuredKeys).toEqual(discoveredRoutes);
@@ -433,6 +495,67 @@ describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
     });
   }
 
+  it("tenant A's own product rejects tenant B's badge, rule and user ids without mutation", async () => {
+    const base = `/api/v1/workspaces/${seed.a.slug}/products/${seed.a.productSlug}`;
+    const badgeBefore = await testApp.db
+      .select()
+      .from(schema.productBadges)
+      .where(eq(schema.productBadges.id, seed.b.badgeId!));
+    const ruleBefore = await testApp.db
+      .select()
+      .from(schema.productBadgeRules)
+      .where(eq(schema.productBadgeRules.id, seed.b.badgeRuleId!));
+    const grantsBefore = await testApp.db
+      .select()
+      .from(schema.userProductBadges)
+      .where(eq(schema.userProductBadges.productId, seed.b.productId!));
+    const [ownBadge] = await testApp.db
+      .insert(schema.productBadges)
+      .values({ productId: seed.a.productId!, name: "Own", slug: "own" })
+      .returning();
+    for (const [method, path, body] of [
+      ["patch", `/badges/${seed.b.badgeId}`, { name: "Foreign" }],
+      ["delete", `/badges/${seed.b.badgeId}`, undefined],
+      [
+        "post",
+        `/badges/${seed.b.badgeId}/rules`,
+        { paramKey: "x", matchValue: "y" },
+      ],
+      [
+        "delete",
+        `/badges/${ownBadge.id}/rules/${seed.b.badgeRuleId}`,
+        undefined,
+      ],
+      ["post", `/users/${seed.b.userId}/badges`, { badgeId: ownBadge.id }],
+      ["delete", `/users/${seed.b.userId}/badges/${seed.b.badgeId}`, undefined],
+    ] as const) {
+      const res = await request(testApp.http)
+        [method](base + path)
+        .set("Cookie", seed.a.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL)
+        .send(body);
+      expect(res.status).toBe(404);
+    }
+    expect(
+      await testApp.db
+        .select()
+        .from(schema.productBadges)
+        .where(eq(schema.productBadges.id, seed.b.badgeId!)),
+    ).toEqual(badgeBefore);
+    expect(
+      await testApp.db
+        .select()
+        .from(schema.productBadgeRules)
+        .where(eq(schema.productBadgeRules.id, seed.b.badgeRuleId!)),
+    ).toEqual(ruleBefore);
+    expect(
+      await testApp.db
+        .select()
+        .from(schema.userProductBadges)
+        .where(eq(schema.userProductBadges.productId, seed.b.productId!)),
+    ).toEqual(grantsBefore);
+  });
+
   it("tenant B's comment is untouched after the foreign-tenant route sweep", async () => {
     const rows = await testApp.db
       .select()
@@ -461,7 +584,10 @@ describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
   it("tenant A's own workspace cannot act on tenant B's real comment id (404 comment_not_found, no mutation)", async () => {
     const base = `/api/v1/workspaces/${seed.a.slug}/comments/${seed.b.commentId}`;
     const send = (method: "post" | "delete", path: string, body?: unknown) => {
-      const r = request(testApp.http)[method](`${base}${path}`).set("Cookie", seed.a.cookie).set("Origin", testApp.env.PUBLIC_URL);
+      const r = request(testApp.http)
+        [method](`${base}${path}`)
+        .set("Cookie", seed.a.cookie)
+        .set("Origin", testApp.env.PUBLIC_URL);
       return body ? r.send(body as any) : r;
     };
     const results = [
@@ -502,7 +628,9 @@ describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
   it("workspace A's own product with workspace B's statusId returns 404 on PATCH, PUT default, and DELETE", async () => {
     // PATCH
     const patchRes = await request(testApp.http)
-      .patch(`/api/v1/workspaces/${seed.a.slug}/products/${seed.a.productSlug}/statuses/${seed.b.statusId}`)
+      .patch(
+        `/api/v1/workspaces/${seed.a.slug}/products/${seed.a.productSlug}/statuses/${seed.b.statusId}`,
+      )
       .set("Cookie", seed.a.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)
       .send({ name: "Hacked" });
@@ -511,7 +639,9 @@ describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
 
     // PUT default
     const putRes = await request(testApp.http)
-      .put(`/api/v1/workspaces/${seed.a.slug}/products/${seed.a.productSlug}/statuses/${seed.b.statusId}/default`)
+      .put(
+        `/api/v1/workspaces/${seed.a.slug}/products/${seed.a.productSlug}/statuses/${seed.b.statusId}/default`,
+      )
       .set("Cookie", seed.a.cookie)
       .set("Origin", testApp.env.PUBLIC_URL);
     expect(putRes.status).toBe(404);
@@ -519,7 +649,9 @@ describe("Cross-tenant 404 isolation (Plan 02-03)", () => {
 
     // DELETE
     const delRes = await request(testApp.http)
-      .delete(`/api/v1/workspaces/${seed.a.slug}/products/${seed.a.productSlug}/statuses/${seed.b.statusId}?moveTo=${seed.a.statusId}`)
+      .delete(
+        `/api/v1/workspaces/${seed.a.slug}/products/${seed.a.productSlug}/statuses/${seed.b.statusId}?moveTo=${seed.a.statusId}`,
+      )
       .set("Cookie", seed.a.cookie)
       .set("Origin", testApp.env.PUBLIC_URL);
     expect(delRes.status).toBe(404);

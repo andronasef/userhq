@@ -22,6 +22,8 @@ import {
   posts,
   comments,
   votes,
+  products,
+  workspaceMembers,
 } from "@userhq/db";
 import type {
   Badge,
@@ -36,6 +38,63 @@ import type {
   UserProductBadgeItem,
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
+
+type BadgeRow = typeof productBadges.$inferSelect;
+type RuleRow = typeof productBadgeRules.$inferSelect;
+function toBadgeRule(row: RuleRow): BadgeRule {
+  const { secretToken, createdAt, updatedAt, ...rest } = row;
+  return {
+    ...rest,
+    hasSecretToken: Boolean(secretToken),
+    createdAt: createdAt.toISOString(),
+    updatedAt: updatedAt.toISOString(),
+  };
+}
+function toBadge(row: BadgeRow, rules: BadgeRule[]): Badge {
+  return {
+    ...row,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+    rules,
+    rulesCount: rules.length,
+  };
+}
+function toPublicBadgeChip(
+  row: Pick<
+    BadgeRow,
+    "id" | "name" | "slug" | "color" | "textColor" | "icon" | "priority"
+  >,
+): PublicBadgeChip {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    color: row.color,
+    textColor: row.textColor,
+    icon: row.icon,
+    priority: row.priority,
+  };
+}
+function toUserBadge(
+  row: Omit<UserProductBadgeItem, "grantedAt" | "expiresAt"> & {
+    grantedAt: Date;
+    expiresAt: Date | null;
+  },
+): UserProductBadgeItem {
+  return {
+    ...row,
+    grantedAt: row.grantedAt.toISOString(),
+    expiresAt: row.expiresAt?.toISOString() ?? null,
+  };
+}
+function participantCondition(productId: string) {
+  return sql`(
+    EXISTS (SELECT 1 FROM ${posts} p WHERE p.product_id = ${productId} AND p.author_id = u.id)
+    OR EXISTS (SELECT 1 FROM ${comments} c INNER JOIN ${posts} cp ON cp.id = c.post_id WHERE cp.product_id = ${productId} AND c.author_id = u.id)
+    OR EXISTS (SELECT 1 FROM ${votes} v INNER JOIN ${posts} p ON p.id = v.post_id WHERE p.product_id = ${productId} AND v.user_id = u.id)
+    OR EXISTS (SELECT 1 FROM ${userProductBadges} b WHERE b.product_id = ${productId} AND b.user_id = u.id)
+  )`;
+}
 
 @Injectable()
 export class BadgesService {
@@ -64,39 +123,13 @@ export class BadgesService {
     const rulesByBadge = new Map<string, BadgeRule[]>();
     for (const rule of rules) {
       const list = rulesByBadge.get(rule.badgeId) ?? [];
-      list.push({
-        id: rule.id,
-        productId: rule.productId,
-        badgeId: rule.badgeId,
-        paramKey: rule.paramKey,
-        matchType: rule.matchType as "exact" | "regex",
-        matchValue: rule.matchValue,
-        hasSecretToken: Boolean(rule.secretToken),
-        createdAt: rule.createdAt.toISOString(),
-        updatedAt: rule.updatedAt.toISOString(),
-      });
+      list.push(toBadgeRule(rule));
       rulesByBadge.set(rule.badgeId, list);
     }
 
-    return badges.map((b) => {
-      const badgeRules = rulesByBadge.get(b.id) ?? [];
-      return {
-        id: b.id,
-        productId: b.productId,
-        name: b.name,
-        slug: b.slug,
-        description: b.description,
-        color: b.color,
-        textColor: b.textColor,
-        icon: b.icon,
-        priority: b.priority,
-        isActive: b.isActive,
-        rulesCount: badgeRules.length,
-        rules: badgeRules,
-        createdAt: b.createdAt.toISOString(),
-        updatedAt: b.updatedAt.toISOString(),
-      };
-    });
+    return badges.map((badge) =>
+      toBadge(badge, rulesByBadge.get(badge.id) ?? []),
+    );
   }
 
   async createBadge(
@@ -137,22 +170,7 @@ export class BadgesService {
       })
       .returning();
 
-    return {
-      id: created.id,
-      productId: created.productId,
-      name: created.name,
-      slug: created.slug,
-      description: created.description,
-      color: created.color,
-      textColor: created.textColor,
-      icon: created.icon,
-      priority: created.priority,
-      isActive: created.isActive,
-      rulesCount: 0,
-      rules: [],
-      createdAt: created.createdAt.toISOString(),
-      updatedAt: created.updatedAt.toISOString(),
-    };
+    return toBadge(created, []);
   }
 
   async updateBadge(
@@ -216,20 +234,17 @@ export class BadgesService {
       .where(eq(productBadges.id, badgeId))
       .returning();
 
-    return {
-      id: updated.id,
-      productId: updated.productId,
-      name: updated.name,
-      slug: updated.slug,
-      description: updated.description,
-      color: updated.color,
-      textColor: updated.textColor,
-      icon: updated.icon,
-      priority: updated.priority,
-      isActive: updated.isActive,
-      createdAt: updated.createdAt.toISOString(),
-      updatedAt: updated.updatedAt.toISOString(),
-    };
+    const rules = await this.db
+      .select()
+      .from(productBadgeRules)
+      .where(
+        and(
+          eq(productBadgeRules.productId, productId),
+          eq(productBadgeRules.badgeId, badgeId),
+        ),
+      )
+      .orderBy(asc(productBadgeRules.createdAt));
+    return toBadge(updated, rules.map(toBadgeRule));
   }
 
   async deleteBadge(productId: string, badgeId: string): Promise<void> {
@@ -271,17 +286,28 @@ export class BadgesService {
       throw new ApiException("not_found", 404, "Badge not found.");
     }
 
-    if (input.matchType === "regex") {
-      try {
-        new RegExp(input.matchValue);
-      } catch {
-        throw new ApiException(
-          "badge_rule_invalid",
-          400,
-          "Invalid regex pattern.",
-        );
-      }
+    try {
+      if (input.matchType === "regex") anchoredRegex(input.matchValue);
+      if (input.keyMatchType === "regex") anchoredRegex(input.paramKey);
+      if (input.keyMatchType === "exact" && /_(sig|ts)$/.test(input.paramKey))
+        throw new Error("Reserved name");
+    } catch {
+      throw new ApiException(
+        "badge_rule_invalid",
+        400,
+        "Invalid rule pattern or parameter name.",
+      );
     }
+    const [count] = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(productBadgeRules)
+      .where(eq(productBadgeRules.productId, productId));
+    if (count.count >= 50)
+      throw new ApiException(
+        "badge_rule_invalid",
+        400,
+        "A product can have at most 50 badge rules.",
+      );
 
     const [rule] = await this.db
       .insert(productBadgeRules)
@@ -289,23 +315,14 @@ export class BadgesService {
         productId,
         badgeId,
         paramKey: input.paramKey,
+        keyMatchType: input.keyMatchType,
         matchType: input.matchType,
         matchValue: input.matchValue,
         secretToken: input.secretToken ? input.secretToken : null,
       })
       .returning();
 
-    return {
-      id: rule.id,
-      productId: rule.productId,
-      badgeId: rule.badgeId,
-      paramKey: rule.paramKey,
-      matchType: rule.matchType as "exact" | "regex",
-      matchValue: rule.matchValue,
-      hasSecretToken: Boolean(rule.secretToken),
-      createdAt: rule.createdAt.toISOString(),
-      updatedAt: rule.updatedAt.toISOString(),
-    };
+    return toBadgeRule(rule);
   }
 
   async deleteRule(
@@ -337,6 +354,7 @@ export class BadgesService {
   async listProductUsers(
     productId: string,
     query: ProductUsersQuery,
+    includeEmail = true,
   ): Promise<{
     items: ProductUserListItem[];
     total: number;
@@ -351,16 +369,7 @@ export class BadgesService {
     const candidateQuery = sql`
       SELECT DISTINCT u.id
       FROM ${user} u
-      WHERE (
-        EXISTS (SELECT 1 FROM ${posts} p WHERE p.product_id = ${productId} AND p.author_id = u.id)
-        OR EXISTS (SELECT 1 FROM ${comments} c WHERE c.product_id = ${productId} AND c.author_id = u.id)
-        OR EXISTS (
-          SELECT 1 FROM ${votes} v
-          INNER JOIN ${posts} p2 ON p2.id = v.post_id
-          WHERE p2.product_id = ${productId} AND v.user_id = u.id
-        )
-        OR EXISTS (SELECT 1 FROM ${userProductBadges} upb WHERE upb.product_id = ${productId} AND upb.user_id = u.id)
-      )
+      WHERE ${participantCondition(productId)}
       ${badgeId ? sql`AND EXISTS (SELECT 1 FROM ${userProductBadges} bsub WHERE bsub.product_id = ${productId} AND bsub.user_id = u.id AND bsub.badge_id = ${badgeId} AND (bsub.expires_at IS NULL OR bsub.expires_at > NOW()))` : sql``}
       ${search ? sql`AND (u.name ILIKE ${"%" + search + "%"} OR u.email ILIKE ${"%" + search + "%"})` : sql``}
     `;
@@ -430,20 +439,7 @@ export class BadgesService {
     const userBadgesMap = new Map<string, UserProductBadgeItem[]>();
     for (const b of badgesRows) {
       const list = userBadgesMap.get(b.userId) ?? [];
-      list.push({
-        id: b.id,
-        badgeId: b.badgeId,
-        name: b.name,
-        slug: b.slug,
-        description: b.description,
-        color: b.color,
-        textColor: b.textColor,
-        icon: b.icon,
-        priority: b.priority,
-        source: b.source as "rule" | "manual",
-        grantedAt: b.grantedAt.toISOString(),
-        expiresAt: b.expiresAt ? b.expiresAt.toISOString() : null,
-      });
+      list.push(toUserBadge(b));
       userBadgesMap.set(b.userId, list);
     }
 
@@ -454,6 +450,7 @@ export class BadgesService {
       comments_count: string;
       votes_count: string;
       last_active: string | null;
+      first_seen: string | null;
     }>(
       sql`
         SELECT
@@ -461,27 +458,32 @@ export class BadgesService {
           COALESCE(p_stat.cnt, 0)::text as posts_count,
           COALESCE(c_stat.cnt, 0)::text as comments_count,
           COALESCE(v_stat.cnt, 0)::text as votes_count,
+          LEAST(p_stat.min_act, c_stat.min_act, v_stat.min_act, b_stat.min_act) as first_seen,
           GREATEST(p_stat.max_act, c_stat.max_act, v_stat.max_act) as last_active
-        FROM (SELECT unnest(${userIds}::text[]) as id) u_ids
+        FROM (SELECT unnest(ARRAY[${sql.join(
+          userIds.map((id) => sql`${id}`),
+          sql`, `,
+        )}]::text[]) as id) u_ids
         LEFT JOIN (
-          SELECT author_id, count(*) as cnt, max(created_at) as max_act
+          SELECT author_id, count(*) as cnt, min(created_at) as min_act, max(created_at) as max_act
           FROM ${posts}
           WHERE product_id = ${productId}
           GROUP BY author_id
         ) p_stat ON p_stat.author_id = u_ids.id
         LEFT JOIN (
-          SELECT author_id, count(*) as cnt, max(created_at) as max_act
-          FROM ${comments}
-          WHERE product_id = ${productId}
-          GROUP BY author_id
+          SELECT c.author_id, count(*) as cnt, min(c.created_at) as min_act, max(c.created_at) as max_act
+          FROM ${comments} c INNER JOIN ${posts} cp ON cp.id = c.post_id
+          WHERE cp.product_id = ${productId}
+          GROUP BY c.author_id
         ) c_stat ON c_stat.author_id = u_ids.id
         LEFT JOIN (
-          SELECT v.user_id, count(*) as cnt, max(v.created_at) as max_act
+          SELECT v.user_id, count(*) as cnt, min(v.created_at) as min_act, max(v.created_at) as max_act
           FROM ${votes} v
           INNER JOIN ${posts} p ON p.id = v.post_id
           WHERE p.product_id = ${productId}
           GROUP BY v.user_id
         ) v_stat ON v_stat.user_id = u_ids.id
+        LEFT JOIN (SELECT user_id, min(created_at) as min_act FROM ${userProductBadges} WHERE product_id = ${productId} GROUP BY user_id) b_stat ON b_stat.user_id = u_ids.id
       `,
     );
 
@@ -491,7 +493,8 @@ export class BadgesService {
         postsCount: number;
         commentsCount: number;
         votesCount: number;
-        lastActiveAt: string;
+        firstSeenAt: string | null;
+        lastActiveAt: string | null;
       }
     >();
 
@@ -500,24 +503,28 @@ export class BadgesService {
         postsCount: parseInt(s.posts_count, 10),
         commentsCount: parseInt(s.comments_count, 10),
         votesCount: parseInt(s.votes_count, 10),
-        lastActiveAt: s.last_active ?? new Date().toISOString(),
+        firstSeenAt: s.first_seen ? new Date(s.first_seen).toISOString() : null,
+        lastActiveAt: s.last_active
+          ? new Date(s.last_active).toISOString()
+          : null,
       });
     }
 
     const items: ProductUserListItem[] = pagedUsersRes.rows.map((u) => {
       const stats = statsMap.get(u.id);
+      if (!stats?.firstSeenAt)
+        throw new Error("Product participant has no activity timestamp.");
       return {
         id: u.id,
         name: u.name,
-        email: u.email,
+        email: includeEmail ? u.email : null,
         image: u.image,
         badges: userBadgesMap.get(u.id) ?? [],
         postsCount: stats?.postsCount ?? 0,
         commentsCount: stats?.commentsCount ?? 0,
         votesCount: stats?.votesCount ?? 0,
-        firstSeenAt: new Date(u.created_at).toISOString(),
-        lastActiveAt:
-          stats?.lastActiveAt ?? new Date(u.created_at).toISOString(),
+        firstSeenAt: stats.firstSeenAt,
+        lastActiveAt: stats.lastActiveAt ?? stats.firstSeenAt,
       };
     });
 
@@ -545,15 +552,35 @@ export class BadgesService {
       throw new ApiException("not_found", 404, "Badge not found.");
     }
 
-    const [u] = await this.db
-      .select({ id: user.id })
-      .from(user)
-      .where(eq(user.id, userId))
-      .limit(1);
-
-    if (!u) {
-      throw new ApiException("not_found", 404, "User not found.");
-    }
+    const [product] = await this.db
+      .select({ workspaceId: products.workspaceId })
+      .from(products)
+      .where(eq(products.id, productId));
+    const members = product
+      ? await this.db
+          .select({ id: workspaceMembers.userId })
+          .from(workspaceMembers)
+          .where(
+            and(
+              eq(workspaceMembers.workspaceId, product.workspaceId),
+              eq(workspaceMembers.userId, userId),
+            ),
+          )
+          .limit(1)
+      : [];
+    const participant = members.length
+      ? true
+      : (
+          await this.db.execute(
+            sql`SELECT u.id FROM ${user} u WHERE u.id = ${userId} AND ${participantCondition(productId)} LIMIT 1`,
+          )
+        ).rows.length > 0;
+    if (!participant)
+      throw new ApiException(
+        "badge_user_not_member",
+        404,
+        "User is not a member or participant of this product.",
+      );
 
     await this.db
       .insert(userProductBadges)
@@ -585,7 +612,7 @@ export class BadgesService {
     userId: string,
     badgeId: string,
   ): Promise<void> {
-    await this.db
+    const deleted = await this.db
       .delete(userProductBadges)
       .where(
         and(
@@ -593,7 +620,10 @@ export class BadgesService {
           eq(userProductBadges.productId, productId),
           eq(userProductBadges.badgeId, badgeId),
         ),
-      );
+      )
+      .returning({ id: userProductBadges.id });
+    if (!deleted.length)
+      throw new ApiException("not_found", 404, "Badge grant not found.");
   }
 
   async getPublicUserBadges(
@@ -632,58 +662,64 @@ export class BadgesService {
     >();
     const scrubKeys = new Set<string>();
     for (const { rule, badge } of rules) {
-      const key = rule.paramKey;
-      if (/_sig$|_ts$/.test(key) || !Object.hasOwn(params, key)) continue;
-      const value = params[key];
-      if (value.length > ATTRIBUTE_PARAM_VALUE_MAX) continue;
-      if (
-        rule.secretToken &&
-        !verifySignedValue({
-          secret: rule.secretToken,
-          value,
-          sig: params[`${key}_sig`],
-          ts: params[`${key}_ts`],
-        })
-      )
-        continue;
-      let matches = false;
+      let keys: string[];
       try {
-        matches =
-          rule.matchType === "exact"
-            ? value === rule.matchValue
-            : anchoredRegex(rule.matchValue).test(value);
+        keys =
+          rule.keyMatchType === "regex"
+            ? Object.keys(params).filter((key) =>
+                anchoredRegex(rule.paramKey).test(key),
+              )
+            : [rule.paramKey];
       } catch {
         continue;
       }
-      if (!matches) continue;
-      for (const name of [key, `${key}_sig`, `${key}_ts`])
-        if (Object.hasOwn(params, name)) scrubKeys.add(name);
-      if (!matched.has(badge.id) && matched.size < ATTRIBUTION_MAX_BADGES)
-        matched.set(badge.id, {
-          badge: {
-            id: badge.id,
-            name: badge.name,
-            slug: badge.slug,
-            color: badge.color,
-            textColor: badge.textColor,
-            icon: badge.icon,
-            priority: badge.priority,
-          },
-          entry: { badgeId: badge.id, value },
-        });
+      for (const key of keys) {
+        if (/_sig$|_ts$/.test(key) || !Object.hasOwn(params, key)) continue;
+        const value = params[key];
+        if (value.length > ATTRIBUTE_PARAM_VALUE_MAX) continue;
+        if (
+          rule.secretToken &&
+          !verifySignedValue({
+            secret: rule.secretToken,
+            value,
+            sig: params[`${key}_sig`],
+            ts: params[`${key}_ts`],
+          })
+        )
+          continue;
+        let matches = false;
+        try {
+          matches =
+            rule.matchType === "exact"
+              ? value === rule.matchValue
+              : anchoredRegex(rule.matchValue).test(value);
+        } catch {
+          continue;
+        }
+        if (!matches) continue;
+        for (const name of [key, `${key}_sig`, `${key}_ts`])
+          if (Object.hasOwn(params, name)) scrubKeys.add(name);
+        if (!matched.has(badge.id) && matched.size < ATTRIBUTION_MAX_BADGES)
+          matched.set(badge.id, {
+            badge: toPublicBadgeChip(badge),
+            entry: { badgeId: badge.id, value },
+          });
+      }
     }
     const matchedEntries = [...matched.values()].map((item) => item.entry);
     if (userId && matchedEntries.length)
       await this.db
         .insert(userProductBadges)
         .values(
-          matchedEntries.map((entry) => ({
-            userId,
-            productId,
-            badgeId: entry.badgeId,
-            source: "rule",
-            matchedParamValue: entry.value,
-          })),
+          matchedEntries.map(
+            (entry): typeof userProductBadges.$inferInsert => ({
+              userId,
+              productId,
+              badgeId: entry.badgeId,
+              source: "rule",
+              matchedParamValue: entry.value,
+            }),
+          ),
         )
         .onConflictDoNothing();
     return {
@@ -725,7 +761,7 @@ export class BadgesService {
         await this.db
           .insert(userProductBadges)
           .values(
-            valid.map((entry) => ({
+            valid.map((entry): typeof userProductBadges.$inferInsert => ({
               userId,
               productId,
               badgeId: entry.badgeId,
@@ -793,15 +829,7 @@ export async function getPublicBadgesForUsers(
 
   for (const r of rows) {
     const list = result.get(r.userId) ?? [];
-    list.push({
-      id: r.id,
-      name: r.name,
-      slug: r.slug,
-      color: r.color,
-      textColor: r.textColor,
-      icon: r.icon,
-      priority: r.priority,
-    });
+    list.push(toPublicBadgeChip(r));
     result.set(r.userId, list);
   }
 

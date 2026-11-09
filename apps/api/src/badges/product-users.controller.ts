@@ -10,10 +10,14 @@ import {
   HttpStatus,
   UseGuards,
   UseInterceptors,
+  SerializeOptions,
+  Req,
 } from "@nestjs/common";
 import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
 import { z } from "zod";
 import {
+  ProductUsersResponseSchema,
+  AssignUserBadgeResponseSchema,
   ProductUsersQuerySchema,
   AssignUserBadgeInputSchema,
   type ProductUsersQuery,
@@ -24,9 +28,15 @@ import { TenantGuard, type Tenant } from "../tenancy/tenant.guard.js";
 import { CurrentTenant } from "../tenancy/current-tenant.decorator.js";
 import { CurrentUser } from "../auth/decorators.js";
 import { RequireScopes } from "../api-keys/api-key.decorator.js";
+import { ApiException } from "../common/api-error.filter.js";
 import { BadgesService } from "./badges.service.js";
 
 const UuidParamSchema = z.string().uuid();
+function uuid(value: string): string {
+  const result = UuidParamSchema.safeParse(value);
+  if (!result.success) throw new ApiException("not_found", 404, "Not found.");
+  return result.data;
+}
 
 @Controller("workspaces/:ws/products/:product/users")
 @UseGuards(TenantGuard)
@@ -36,33 +46,38 @@ export class ProductUsersController {
 
   @Get()
   @RequireScopes("settings:read")
+  @SerializeOptions({ schema: ProductUsersResponseSchema })
   async listUsers(
     @CurrentTenant() tenant: Tenant,
-    @Query() rawQuery: unknown
+    @Req() req: any,
+    @Query({ schema: ProductUsersQuerySchema }) query: ProductUsersQuery,
   ): Promise<{
     items: ProductUserListItem[];
     total: number;
     page: number;
     limit: number;
   }> {
-    const query = ProductUsersQuerySchema.parse(rawQuery);
-    return this.badgesService.listProductUsers(tenant.productId!, query);
+    return this.badgesService.listProductUsers(
+      tenant.productId!,
+      query,
+      !req.apiKey,
+    );
   }
 
   @Post(":userId/badges")
   @RequireScopes("settings:write")
+  @SerializeOptions({ schema: AssignUserBadgeResponseSchema })
   async assignBadge(
     @CurrentTenant() tenant: Tenant,
     @CurrentUser() currentUser: { id: string },
     @Param("userId") userId: string,
-    @Body() body: unknown
+    @Body({ schema: AssignUserBadgeInputSchema }) input: AssignUserBadgeInput,
   ): Promise<{ success: true }> {
-    const input = AssignUserBadgeInputSchema.parse(body);
     await this.badgesService.assignUserBadge(
       tenant.productId!,
       userId,
       input,
-      currentUser.id
+      currentUser.id,
     );
     return { success: true };
   }
@@ -73,13 +88,13 @@ export class ProductUsersController {
   async revokeBadge(
     @CurrentTenant() tenant: Tenant,
     @Param("userId") userId: string,
-    @Param("badgeId") badgeId: string
+    @Param("badgeId") badgeId: string,
   ): Promise<void> {
-    const validBadgeId = UuidParamSchema.parse(badgeId);
+    const validBadgeId = uuid(badgeId);
     await this.badgesService.revokeUserBadge(
       tenant.productId!,
       userId,
-      validBadgeId
+      validBadgeId,
     );
   }
 }

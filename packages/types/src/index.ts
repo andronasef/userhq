@@ -96,6 +96,7 @@ export const API_ERROR_CODES = [
   "badge_not_found",
   "badge_rule_invalid",
   "badge_conflict",
+  "badge_user_not_member",
 ] as const;
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];
 

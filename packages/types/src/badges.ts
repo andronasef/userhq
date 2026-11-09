@@ -4,7 +4,8 @@ export const BADGE_NAME_MAX = 50;
 export const BADGE_SLUG_MAX = 50;
 export const BADGE_DESC_MAX = 200;
 export const RULE_PARAM_KEY_MAX = 100;
-export const RULE_MATCH_VALUE_MAX = 500;
+export const RULE_MATCH_VALUE_MAX = 256;
+export const RULE_REGEX_MAX = 200;
 export const ATTRIBUTE_MAX_PARAMS = 50;
 export const ATTRIBUTE_PARAM_VALUE_MAX = 256;
 export const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{6}$/;
@@ -17,6 +18,7 @@ export const BadgeRuleSchema = z.object({
   productId: z.string().uuid(),
   badgeId: z.string().uuid(),
   paramKey: z.string(),
+  keyMatchType: BadgeRuleMatchTypeSchema,
   matchType: BadgeRuleMatchTypeSchema,
   matchValue: z.string(),
   hasSecretToken: z.boolean(),
@@ -25,12 +27,32 @@ export const BadgeRuleSchema = z.object({
 });
 export type BadgeRule = z.infer<typeof BadgeRuleSchema>;
 
-export const CreateBadgeRuleInputSchema = z.object({
-  paramKey: z.string().trim().min(1).max(RULE_PARAM_KEY_MAX),
-  matchType: BadgeRuleMatchTypeSchema.default("exact"),
-  matchValue: z.string().trim().min(1).max(RULE_MATCH_VALUE_MAX),
-  secretToken: z.string().trim().max(255).optional(),
-});
+export const CreateBadgeRuleInputSchema = z
+  .object({
+    keyMatchType: BadgeRuleMatchTypeSchema.default("exact"),
+    paramKey: z.string().trim().min(1).max(RULE_REGEX_MAX),
+    matchType: BadgeRuleMatchTypeSchema.default("exact"),
+    matchValue: z.string().trim().min(1).max(RULE_MATCH_VALUE_MAX),
+    secretToken: z.string().trim().max(255).optional(),
+  })
+  .superRefine((rule, ctx) => {
+    if (
+      rule.keyMatchType === "exact" &&
+      (rule.paramKey.length > RULE_PARAM_KEY_MAX ||
+        /_(sig|ts)$/.test(rule.paramKey))
+    )
+      ctx.addIssue({
+        code: "custom",
+        path: ["paramKey"],
+        message: "Invalid or reserved parameter name",
+      });
+    if (rule.matchType === "regex" && rule.matchValue.length > RULE_REGEX_MAX)
+      ctx.addIssue({
+        code: "custom",
+        path: ["matchValue"],
+        message: "Regex pattern is too long",
+      });
+  });
 export type CreateBadgeRuleInput = z.infer<typeof CreateBadgeRuleInputSchema>;
 
 export const BadgeSchema = z.object({
@@ -176,3 +198,21 @@ export const AttributeResponseSchema = z.object({
   scrubKeys: z.array(z.string()),
 });
 export type AttributeResponse = z.infer<typeof AttributeResponseSchema>;
+
+export const BadgeListResponseSchema = z.object({
+  items: z.array(BadgeSchema),
+});
+export type BadgeListResponse = z.infer<typeof BadgeListResponseSchema>;
+export const ProductUsersResponseSchema = z.object({
+  items: z.array(ProductUserListItemSchema),
+  total: z.number().int(),
+  page: z.number().int(),
+  limit: z.number().int(),
+});
+export type ProductUsersResponse = z.infer<typeof ProductUsersResponseSchema>;
+export const AssignUserBadgeResponseSchema = z.object({
+  success: z.literal(true),
+});
+export type AssignUserBadgeResponse = z.infer<
+  typeof AssignUserBadgeResponseSchema
+>;

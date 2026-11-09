@@ -1,4 +1,4 @@
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   uuid,
@@ -27,14 +27,18 @@ export const productBadges = pgTable(
     icon: text("icon"),
     priority: integer("priority").notNull().default(0),
     isActive: boolean("is_active").notNull().default(true),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (t) => [
     uniqueIndex("product_badges_product_slug_idx").on(t.productId, t.slug),
     index("product_badges_product_id_idx").on(t.productId),
     index("product_badges_priority_idx").on(t.productId, t.priority),
-  ]
+  ],
 );
 
 export const productBadgeRules = pgTable(
@@ -48,17 +52,28 @@ export const productBadgeRules = pgTable(
       .notNull()
       .references(() => productBadges.id, { onDelete: "cascade" }),
     paramKey: text("param_key").notNull(),
-    matchType: text("match_type").notNull().default("exact"), // "exact" | "regex"
+    matchType: text("match_type")
+      .$type<"exact" | "regex">()
+      .notNull()
+      .default("exact"),
+    keyMatchType: text("key_match_type")
+      .$type<"exact" | "regex">()
+      .notNull()
+      .default("exact"),
     matchValue: text("match_value").notNull(),
     secretToken: text("secret_token"),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (t) => [
     index("product_badge_rules_product_id_idx").on(t.productId),
     index("product_badge_rules_badge_id_idx").on(t.badgeId),
     index("product_badge_rules_param_key_idx").on(t.productId, t.paramKey),
-  ]
+  ],
 );
 
 export const userProductBadges = pgTable(
@@ -74,61 +89,74 @@ export const userProductBadges = pgTable(
     badgeId: uuid("badge_id")
       .notNull()
       .references(() => productBadges.id, { onDelete: "cascade" }),
-    source: text("source").notNull().default("rule"), // "rule" | "manual"
+    source: text("source").$type<"rule" | "manual">().notNull().default("rule"),
     matchedParamValue: text("matched_param_value"),
     expiresAt: timestamp("expires_at", { withTimezone: true }),
     grantedByUserId: text("granted_by_user_id").references(() => user.id, {
       onDelete: "set null",
     }),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (t) => [
     uniqueIndex("user_product_badges_user_product_badge_idx").on(
       t.userId,
       t.productId,
-      t.badgeId
+      t.badgeId,
     ),
     index("user_product_badges_product_user_idx").on(t.productId, t.userId),
     index("user_product_badges_badge_id_idx").on(t.badgeId),
-  ]
+  ],
 );
 
-export const productBadgesRelations = relations(productBadges, ({ one, many }) => ({
-  product: one(products, {
-    fields: [productBadges.productId],
-    references: [products.id],
+export const productBadgesRelations = relations(
+  productBadges,
+  ({ one, many }) => ({
+    product: one(products, {
+      fields: [productBadges.productId],
+      references: [products.id],
+    }),
+    rules: many(productBadgeRules),
+    userBadges: many(userProductBadges),
   }),
-  rules: many(productBadgeRules),
-  userBadges: many(userProductBadges),
-}));
+);
 
-export const productBadgeRulesRelations = relations(productBadgeRules, ({ one }) => ({
-  product: one(products, {
-    fields: [productBadgeRules.productId],
-    references: [products.id],
+export const productBadgeRulesRelations = relations(
+  productBadgeRules,
+  ({ one }) => ({
+    product: one(products, {
+      fields: [productBadgeRules.productId],
+      references: [products.id],
+    }),
+    badge: one(productBadges, {
+      fields: [productBadgeRules.badgeId],
+      references: [productBadges.id],
+    }),
   }),
-  badge: one(productBadges, {
-    fields: [productBadgeRules.badgeId],
-    references: [productBadges.id],
-  }),
-}));
+);
 
-export const userProductBadgesRelations = relations(userProductBadges, ({ one }) => ({
-  user: one(user, {
-    fields: [userProductBadges.userId],
-    references: [user.id],
+export const userProductBadgesRelations = relations(
+  userProductBadges,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [userProductBadges.userId],
+      references: [user.id],
+    }),
+    product: one(products, {
+      fields: [userProductBadges.productId],
+      references: [products.id],
+    }),
+    badge: one(productBadges, {
+      fields: [userProductBadges.badgeId],
+      references: [productBadges.id],
+    }),
+    grantedBy: one(user, {
+      fields: [userProductBadges.grantedByUserId],
+      references: [user.id],
+    }),
   }),
-  product: one(products, {
-    fields: [userProductBadges.productId],
-    references: [products.id],
-  }),
-  badge: one(productBadges, {
-    fields: [userProductBadges.badgeId],
-    references: [productBadges.id],
-  }),
-  grantedBy: one(user, {
-    fields: [userProductBadges.grantedByUserId],
-    references: [user.id],
-  }),
-}));
+);

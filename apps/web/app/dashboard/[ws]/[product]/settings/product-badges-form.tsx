@@ -40,14 +40,17 @@ const AVAILABLE_ICONS = [
   "tag",
 ];
 
-function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.JSX.Element {
+function ProductBadgesFormInner({
+  ws,
+  product,
+}: ProductBadgesFormProps): React.JSX.Element {
   const queryClient = useQueryClient();
   const queryKey = ["product-badges", ws, product.slug];
 
   const { data, isLoading } = useQuery<{ items: Badge[] }>({
     queryKey,
     queryFn: () =>
-      apiFetch(`/api/workspaces/${ws}/products/${product.slug}/badges`),
+      apiFetch(`/api/v1/workspaces/${ws}/products/${product.slug}/badges`),
   });
 
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
@@ -64,6 +67,9 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
   const [priority, setPriority] = React.useState("10");
 
   // Form state for Adding Rule
+  const [keyMatchType, setKeyMatchType] = React.useState<"exact" | "regex">(
+    "exact",
+  );
   const [paramKey, setParamKey] = React.useState("");
   const [matchType, setMatchType] = React.useState<"exact" | "regex">("exact");
   const [matchValue, setMatchValue] = React.useState("");
@@ -101,7 +107,7 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
     mutationFn: async () => {
       if (editingBadge) {
         return apiFetch(
-          `/api/workspaces/${ws}/products/${product.slug}/badges/${editingBadge.id}`,
+          `/api/v1/workspaces/${ws}/products/${product.slug}/badges/${editingBadge.id}`,
           {
             method: "PATCH",
             body: {
@@ -113,21 +119,24 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
               icon: icon || null,
               priority: parseInt(priority, 10) || 0,
             },
-          }
+          },
         );
       } else {
-        return apiFetch(`/api/workspaces/${ws}/products/${product.slug}/badges`, {
-          method: "POST",
-          body: {
-            name,
-            slug,
-            description: description || null,
-            color,
-            textColor,
-            icon: icon || null,
-            priority: parseInt(priority, 10) || 0,
+        return apiFetch(
+          `/api/v1/workspaces/${ws}/products/${product.slug}/badges`,
+          {
+            method: "POST",
+            body: {
+              name,
+              slug,
+              description: description || undefined,
+              color,
+              textColor,
+              icon: icon || null,
+              priority: parseInt(priority, 10) || 0,
+            },
           },
-        });
+        );
       }
     },
     onSuccess: () => {
@@ -144,8 +153,8 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
   const deleteBadgeMutation = useMutation({
     mutationFn: (badgeId: string) =>
       apiFetch(
-        `/api/workspaces/${ws}/products/${product.slug}/badges/${badgeId}`,
-        { method: "DELETE" }
+        `/api/v1/workspaces/${ws}/products/${product.slug}/badges/${badgeId}`,
+        { method: "DELETE" },
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
@@ -159,21 +168,23 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
   const addRuleMutation = useMutation({
     mutationFn: (badgeId: string) =>
       apiFetch(
-        `/api/workspaces/${ws}/products/${product.slug}/badges/${badgeId}/rules`,
+        `/api/v1/workspaces/${ws}/products/${product.slug}/badges/${badgeId}/rules`,
         {
           method: "POST",
           body: {
             paramKey,
+            keyMatchType,
             matchType,
             matchValue,
             secretToken: secretToken.trim() || undefined,
           },
-        }
+        },
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
       toast.success("Attribution rule added");
       setParamKey("");
+      setKeyMatchType("exact");
       setMatchValue("");
       setSecretToken("");
     },
@@ -185,8 +196,8 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
   const deleteRuleMutation = useMutation({
     mutationFn: ({ badgeId, ruleId }: { badgeId: string; ruleId: string }) =>
       apiFetch(
-        `/api/workspaces/${ws}/products/${product.slug}/badges/${badgeId}/rules/${ruleId}`,
-        { method: "DELETE" }
+        `/api/v1/workspaces/${ws}/products/${product.slug}/badges/${badgeId}/rules/${ruleId}`,
+        { method: "DELETE" },
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
@@ -203,11 +214,15 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
     <section aria-labelledby="badges-heading" className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h2 id="badges-heading" className="text-base font-semibold text-foreground">
+          <h2
+            id="badges-heading"
+            className="text-base font-semibold text-foreground"
+          >
             User Badges & Attribution
           </h2>
           <p className="text-sm text-muted-foreground">
-            Assign visual badges to users or automatically grant them when visitors arrive with URL query parameters.
+            Assign visual badges to users or automatically grant them when
+            visitors arrive with URL query parameters.
           </p>
         </div>
         <Button onClick={openCreate} size="sm" className="gap-1.5 shrink-0">
@@ -222,7 +237,8 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
         </div>
       ) : badges.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-          No badges configured for this product yet. Click &quot;New badge&quot; to create one.
+          No badges configured for this product yet. Click &quot;New badge&quot;
+          to create one.
         </div>
       ) : (
         <div className="grid gap-3">
@@ -242,19 +258,33 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
                   </span>
                 </div>
                 {badge.description && (
-                  <p className="text-xs text-muted-foreground">{badge.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {badge.description}
+                  </p>
                 )}
                 {badge.rules && badge.rules.length > 0 && (
                   <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                    <span className="text-xs font-medium text-foreground">Rules:</span>
+                    <span className="text-xs font-medium text-foreground">
+                      Rules:
+                    </span>
                     {badge.rules.map((rule: BadgeRule) => (
                       <span
                         key={rule.id}
                         className="inline-flex items-center gap-1 text-[11px] bg-muted/80 text-foreground px-2 py-0.5 rounded font-mono"
                       >
-                        ?{rule.paramKey}={rule.matchType === "regex" ? `/${rule.matchValue}/` : rule.matchValue}
+                        ?
+                        {rule.keyMatchType === "regex"
+                          ? `/${rule.paramKey}/`
+                          : rule.paramKey}
+                        =
+                        {rule.matchType === "regex"
+                          ? `/${rule.matchValue}/`
+                          : rule.matchValue}
                         {rule.hasSecretToken && (
-                          <span title="HMAC verified" className="text-foreground font-bold">
+                          <span
+                            title="HMAC verified"
+                            className="text-foreground font-bold"
+                          >
                             *
                           </span>
                         )}
@@ -326,7 +356,10 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="badge-name" className="text-sm font-semibold text-foreground">
+              <label
+                htmlFor="badge-name"
+                className="text-sm font-semibold text-foreground"
+              >
                 Badge Name
               </label>
               <Input
@@ -339,7 +372,7 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
                       e.target.value
                         .toLowerCase()
                         .replace(/[^a-z0-9]+/g, "-")
-                        .replace(/^-+|-+$/g, "")
+                        .replace(/^-+|-+$/g, ""),
                     );
                   }
                 }}
@@ -349,7 +382,10 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="badge-slug" className="text-sm font-semibold text-foreground">
+              <label
+                htmlFor="badge-slug"
+                className="text-sm font-semibold text-foreground"
+              >
                 Slug (unique identifier)
               </label>
               <Input
@@ -362,7 +398,10 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="badge-desc" className="text-sm font-semibold text-foreground">
+              <label
+                htmlFor="badge-desc"
+                className="text-sm font-semibold text-foreground"
+              >
                 Description (internal note)
               </label>
               <Input
@@ -375,7 +414,10 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="badge-bg-color" className="text-sm font-semibold text-foreground">
+                <label
+                  htmlFor="badge-bg-color"
+                  className="text-sm font-semibold text-foreground"
+                >
                   Background Color
                 </label>
                 <div className="flex items-center gap-2">
@@ -395,7 +437,10 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="badge-text-color" className="text-sm font-semibold text-foreground">
+                <label
+                  htmlFor="badge-text-color"
+                  className="text-sm font-semibold text-foreground"
+                >
                   Text Color
                 </label>
                 <div className="flex items-center gap-2">
@@ -417,7 +462,10 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="badge-icon" className="text-sm font-semibold text-foreground">
+                <label
+                  htmlFor="badge-icon"
+                  className="text-sm font-semibold text-foreground"
+                >
                   Icon
                 </label>
                 <NativeSelect
@@ -434,7 +482,10 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="badge-priority" className="text-sm font-semibold text-foreground">
+                <label
+                  htmlFor="badge-priority"
+                  className="text-sm font-semibold text-foreground"
+                >
                   Priority (Higher = First)
                 </label>
                 <Input
@@ -473,11 +524,10 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
       >
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>
-              Attribution Rules: {ruleBadge?.name}
-            </DialogTitle>
+            <DialogTitle>Attribution Rules: {ruleBadge?.name}</DialogTitle>
             <DialogDescription>
-              Automatically grant this badge when users arrive via links with matching query parameters.
+              Automatically grant this badge when users arrive via links with
+              matching query parameters.
             </DialogDescription>
           </DialogHeader>
 
@@ -498,8 +548,13 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
                       >
                         <div className="space-y-0.5 font-mono">
                           <div>
-                            <span className="text-foreground font-semibold">?{r.paramKey}</span>{" "}
-                            {r.matchType === "regex" ? "==" : "=~"}{" "}
+                            <span className="text-foreground font-semibold">
+                              ?
+                              {r.keyMatchType === "regex"
+                                ? `/${r.paramKey}/`
+                                : r.paramKey}
+                            </span>{" "}
+                            {r.matchType === "regex" ? "=~" : "=="}{" "}
                             <span className="font-semibold text-foreground">
                               &quot;{r.matchValue}&quot;
                             </span>
@@ -540,8 +595,29 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
               </h4>
 
               <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="rule-key-match-type"
+                    className="text-sm font-medium"
+                  >
+                    Parameter name matching
+                  </label>
+                  <NativeSelect
+                    id="rule-key-match-type"
+                    value={keyMatchType}
+                    onChange={(event) =>
+                      setKeyMatchType(event.target.value as "exact" | "regex")
+                    }
+                  >
+                    <option value="exact">Exact name</option>
+                    <option value="regex">Regular expression</option>
+                  </NativeSelect>
+                </div>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="rule-param-key" className="text-sm font-semibold text-foreground">
+                  <label
+                    htmlFor="rule-param-key"
+                    className="text-sm font-semibold text-foreground"
+                  >
                     Query Param Name
                   </label>
                   <Input
@@ -554,7 +630,10 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="rule-match-type" className="text-sm font-semibold text-foreground">
+                  <label
+                    htmlFor="rule-match-type"
+                    className="text-sm font-semibold text-foreground"
+                  >
                     Match Type
                   </label>
                   <NativeSelect
@@ -571,7 +650,10 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="rule-match-value" className="text-sm font-semibold text-foreground">
+                <label
+                  htmlFor="rule-match-value"
+                  className="text-sm font-semibold text-foreground"
+                >
                   Expected Value
                 </label>
                 <Input
@@ -586,7 +668,10 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="rule-secret-token" className="text-sm font-semibold text-foreground">
+                <label
+                  htmlFor="rule-secret-token"
+                  className="text-sm font-semibold text-foreground"
+                >
                   Anti-Spoofing HMAC Secret (Optional)
                 </label>
                 <Input
@@ -597,14 +682,20 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
                   placeholder="Enter secret token for HMAC-SHA256 checking"
                 />
                 <p className="text-[11px] text-muted-foreground">
-                  When set, the URL must also include{" "}
-                  <code>?{paramKey || "param"}_sig=&lt;hmac&gt;</code> to award the badge.
+                  When set, include both signature and timestamp parameters.
+                  <code>{paramKey || "param"}_sig</code> is the HMAC-SHA256 hex
+                  of
+                  <code>value + "." + {paramKey || "param"}_ts</code>.
+                  <code>{paramKey || "param"}_ts</code> is the Unix seconds when
+                  the link was signed, valid for 30 days.
                 </p>
               </div>
 
               <Button
                 size="sm"
-                onClick={() => ruleBadge && addRuleMutation.mutate(ruleBadge.id)}
+                onClick={() =>
+                  ruleBadge && addRuleMutation.mutate(ruleBadge.id)
+                }
                 disabled={
                   addRuleMutation.isPending ||
                   !paramKey.trim() ||
@@ -629,7 +720,9 @@ function ProductBadgesFormInner({ ws, product }: ProductBadgesFormProps): React.
   );
 }
 
-export function ProductBadgesForm(props: ProductBadgesFormProps): React.JSX.Element {
+export function ProductBadgesForm(
+  props: ProductBadgesFormProps,
+): React.JSX.Element {
   return (
     <QueryProvider>
       <ProductBadgesFormInner {...props} />

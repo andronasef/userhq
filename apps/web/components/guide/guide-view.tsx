@@ -454,6 +454,18 @@ export function GuideView({ workspaces }: GuideViewProps) {
                     Support 13 languages with automatic visitor detection, language pickers, and localized entry authoring across Roadmap, Changelog, and FAQ.
                   </p>
                 </div>
+                <div className="p-3.5 rounded-lg border border-border bg-card space-y-1">
+                  <span className="font-semibold text-foreground">Changing the Default Language</span>
+                  <p className="text-muted-foreground">
+                    Existing translations are promoted into the main fields and the previous text is kept as a translation. Review the preview counts first; entries without a translation keep their current text.
+                  </p>
+                </div>
+                <div className="p-3.5 rounded-lg border border-border bg-card space-y-1">
+                  <span className="font-semibold text-foreground">User Badges</span>
+                  <p className="text-muted-foreground">
+                    Recognize customers with badges shown beside their names on posts and comments. Assign them manually or by attribution rules matched from signed or unsigned links, and browse them in the product users directory.
+                  </p>
+                </div>
               </div>
             </section>
 

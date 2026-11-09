@@ -33,6 +33,7 @@ import { Alert } from "../ui/alert";
 import { ConfirmDialog } from "../ui/confirm-dialog";
 import { PostLinkCombobox } from "./post-link-combobox";
 import { EntryLocaleTabs } from "../entry-locale-tabs";
+import { useI18n } from "../../lib/i18n/context";
 import { apiFetch } from "../../lib/api-client";
 import { errorCopy } from "../../lib/api-errors";
 
@@ -65,18 +66,23 @@ export function RoadmapItemModal({
   onSaved,
   onDeleted,
 }: RoadmapItemModalProps) {
+  const { t } = useI18n();
   const isEdit = Boolean(item);
 
   const defaultLocale = productLocales?.defaultLocale ?? DEFAULT_LOCALE;
-  const enabledLocales = (productLocales?.enabledLocales && productLocales.enabledLocales.length > 0)
-    ? productLocales.enabledLocales
-    : [defaultLocale];
-  const [activeLocale, setActiveLocale] = React.useState<SupportedLocale>(defaultLocale);
+  const enabledLocales =
+    productLocales?.enabledLocales && productLocales.enabledLocales.length > 0
+      ? productLocales.enabledLocales
+      : [defaultLocale];
+  const [activeLocale, setActiveLocale] =
+    React.useState<SupportedLocale>(defaultLocale);
   const [translations, setTranslations] = React.useState<
     Record<string, RoadmapTranslation>
   >(item?.translations ?? {});
 
-  const [linkedPosts, setLinkedPosts] = React.useState<RoadmapPostLinkSearchResult[]>([]);
+  const [linkedPosts, setLinkedPosts] = React.useState<
+    RoadmapPostLinkSearchResult[]
+  >([]);
   const [isLoadingPosts, setIsLoadingPosts] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [alertError, setAlertError] = React.useState<string | null>(null);
@@ -85,36 +91,42 @@ export function RoadmapItemModal({
   const initialStatusId =
     item?.statusId ?? defaultStatusId ?? statuses[0]?.id ?? "";
 
-  const [isPublic, setIsPublic] = React.useState<boolean>(item?.isPublic ?? false);
+  const [isPublic, setIsPublic] = React.useState<boolean>(
+    item?.isPublic ?? false,
+  );
   const [publicTitle, setPublicTitle] = React.useState<string>(
-    item?.publicTitle ?? ""
+    item?.publicTitle ?? "",
   );
   const [publicDescription, setPublicDescription] = React.useState<string>(
-    item?.publicDescription ?? ""
+    item?.publicDescription ?? "",
   );
   const [internalTitle, setInternalTitle] = React.useState<string>(
-    item?.internalTitle ?? prelinkedPost?.title ?? ""
+    item?.internalTitle ?? prelinkedPost?.title ?? "",
   );
   const [internalDescription, setInternalDescription] = React.useState<string>(
-    item?.internalDescription ?? ""
+    item?.internalDescription ?? "",
   );
   const [internalNotes, setInternalNotes] = React.useState<string>(
-    item?.internalNotes ?? ""
+    item?.internalNotes ?? "",
   );
   const [statusId, setStatusId] = React.useState<string>(initialStatusId);
   const [assigneeId, setAssigneeId] = React.useState<string>(
-    item?.assignee?.id ?? ""
+    item?.assignee?.id ?? "",
   );
   const [deadlineText, setDeadlineText] = React.useState<string>(
-    item?.deadlineText ?? ""
+    item?.deadlineText ?? "",
   );
 
   const [errors, setErrors] = React.useState<Record<string, string>>({});
 
   const currentPublicTitle =
-    activeLocale === defaultLocale ? publicTitle : (translations[activeLocale]?.publicTitle ?? "");
+    activeLocale === defaultLocale
+      ? publicTitle
+      : (translations[activeLocale]?.publicTitle ?? "");
   const currentPublicDescription =
-    activeLocale === defaultLocale ? publicDescription : (translations[activeLocale]?.publicDescription ?? "");
+    activeLocale === defaultLocale
+      ? publicDescription
+      : (translations[activeLocale]?.publicDescription ?? "");
 
   const translationsStatus = React.useMemo(() => {
     const status: Partial<Record<SupportedLocale, boolean>> = {};
@@ -183,7 +195,7 @@ export function RoadmapItemModal({
       // Fetch linked posts for this item
       setIsLoadingPosts(true);
       apiFetch<RoadmapPostLinkSearchResponse>(
-        `/api/v1/workspaces/${ws}/products/${product}/roadmap/${item.id}/posts`
+        `/api/v1/workspaces/${ws}/products/${product}/roadmap/${item.id}/posts`,
       )
         .then((res) => {
           setLinkedPosts(res.posts);
@@ -212,7 +224,16 @@ export function RoadmapItemModal({
         setLinkedPosts([]);
       }
     }
-  }, [open, item, prelinkedPost, defaultStatusId, statuses, ws, product, defaultLocale]);
+  }, [
+    open,
+    item,
+    prelinkedPost,
+    defaultStatusId,
+    statuses,
+    ws,
+    product,
+    defaultLocale,
+  ]);
 
   const handleTogglePublic = (nextPublic: boolean) => {
     setIsPublic(nextPublic);
@@ -231,7 +252,7 @@ export function RoadmapItemModal({
           {
             method: "POST",
             body: { postId: post.id },
-          }
+          },
         );
         setLinkedPosts((prev) => [...prev, post]);
         toast.success(`Linked #${post.number}`);
@@ -249,7 +270,7 @@ export function RoadmapItemModal({
       try {
         await apiFetch(
           `/api/v1/workspaces/${ws}/products/${product}/roadmap/${item.id}/unlink/${postId}`,
-          { method: "DELETE" }
+          { method: "DELETE" },
         );
         setLinkedPosts((prev) => prev.filter((p) => p.id !== postId));
         toast.success(`Unlinked #${post?.number ?? ""}`);
@@ -329,9 +350,9 @@ export function RoadmapItemModal({
             method: "PATCH",
             body: payload,
             schema: AdminRoadmapItemSchema,
-          }
+          },
         );
-        toast.success("Roadmap item updated");
+        toast.success(t("roadmap.itemUpdated"));
         onSaved(saved);
         onOpenChange(false);
       } else {
@@ -341,9 +362,9 @@ export function RoadmapItemModal({
             method: "POST",
             body: payload,
             schema: AdminRoadmapItemSchema,
-          }
+          },
         );
-        toast.success("Roadmap item created");
+        toast.success(t("roadmap.itemCreated"));
         onSaved(created);
         onOpenChange(false);
       }
@@ -359,9 +380,9 @@ export function RoadmapItemModal({
     try {
       await apiFetch(
         `/api/v1/workspaces/${ws}/products/${product}/roadmap/${item.id}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
-      toast.success("Roadmap item deleted");
+      toast.success(t("roadmap.itemDeleted"));
       if (onDeleted) onDeleted(item.id);
       setConfirmDeleteOpen(false);
       onOpenChange(false);
@@ -376,7 +397,9 @@ export function RoadmapItemModal({
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {isEdit ? "Edit roadmap item" : "New roadmap item"}
+              {isEdit
+                ? t("roadmap.editItemModalTitle")
+                : t("roadmap.newItemModalTitle")}
             </DialogTitle>
           </DialogHeader>
 
@@ -387,19 +410,25 @@ export function RoadmapItemModal({
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     {isPublic ? (
-                      <Globe className="size-4 text-[var(--primary-text)]" aria-hidden="true" />
+                      <Globe
+                        className="size-4 text-[var(--primary-text)]"
+                        aria-hidden="true"
+                      />
                     ) : (
-                      <Lock className="size-4 text-muted-foreground" aria-hidden="true" />
+                      <Lock
+                        className="size-4 text-muted-foreground"
+                        aria-hidden="true"
+                      />
                     )}
                     <label
                       htmlFor="modal-make-public"
                       className="text-sm font-semibold text-foreground cursor-pointer"
                     >
-                      Make public
+                      {t("roadmap.makePublicLabel")}
                     </label>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    When public, this item appears on your customer-facing roadmap in its status column.
+                    {t("roadmap.makePublicHelp")}
                   </p>
                 </div>
                 <input
@@ -415,7 +444,7 @@ export function RoadmapItemModal({
               {isPublic && (
                 <div className="p-4 rounded-lg border border-primary/20 bg-primary/5 space-y-4">
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--primary-text)]">
-                    Public Details (Customer Visible)
+                    {t("roadmap.publicDetailsSection")}
                   </h4>
 
                   <EntryLocaleTabs
@@ -428,14 +457,16 @@ export function RoadmapItemModal({
 
                   <Field
                     id="modal-public-title"
-                    label={`Public title ${activeLocale !== defaultLocale ? `(${activeLocale})` : ""}`}
+                    label={`${t("roadmap.publicTitleLabel")} ${activeLocale !== defaultLocale ? `(${activeLocale})` : ""}`}
                     error={errors.publicTitle}
                     helper="Customer-facing title shown on the public roadmap."
                   >
                     <Input
                       id="modal-public-title"
                       value={currentPublicTitle}
-                      onChange={(e) => handleCurrentPublicTitleChange(e.target.value)}
+                      onChange={(e) =>
+                        handleCurrentPublicTitleChange(e.target.value)
+                      }
                       dir={isRtl(activeLocale) ? "rtl" : "ltr"}
                       placeholder={
                         activeLocale === defaultLocale
@@ -447,14 +478,16 @@ export function RoadmapItemModal({
 
                   <Field
                     id="modal-public-description"
-                    label={`Public description ${activeLocale !== defaultLocale ? `(${activeLocale})` : ""}`}
+                    label={`${t("roadmap.publicSummaryLabel")} ${activeLocale !== defaultLocale ? `(${activeLocale})` : ""}`}
                     error={errors.publicDescription}
                     helper="Optional description explaining what is being delivered and why."
                   >
                     <Textarea
                       id="modal-public-description"
                       value={currentPublicDescription}
-                      onChange={(e) => handleCurrentPublicDescriptionChange(e.target.value)}
+                      onChange={(e) =>
+                        handleCurrentPublicDescriptionChange(e.target.value)
+                      }
                       dir={isRtl(activeLocale) ? "rtl" : "ltr"}
                       placeholder={
                         activeLocale === defaultLocale
@@ -471,7 +504,7 @@ export function RoadmapItemModal({
               <div className="space-y-4">
                 <Field
                   id="modal-internal-title"
-                  label="Internal title"
+                  label={t("roadmap.internalTitleLabel")}
                   error={errors.internalTitle}
                   helper="Internal working title for team planning (never shown publicly)."
                 >
@@ -485,7 +518,7 @@ export function RoadmapItemModal({
 
                 <Field
                   id="modal-internal-description"
-                  label="Internal description"
+                  label={t("roadmap.internalDescriptionLabel")}
                   error={errors.internalDescription}
                   helper="Optional technical notes or scope specifications for the team."
                 >
@@ -500,7 +533,7 @@ export function RoadmapItemModal({
 
                 <Field
                   id="modal-internal-notes"
-                  label="Internal notes"
+                  label={t("roadmap.internalNotesLabel")}
                   error={errors.internalNotes}
                   helper="Private scratchpad for notes and links."
                 >
@@ -516,7 +549,7 @@ export function RoadmapItemModal({
 
               {/* Metadata Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-border">
-                <Field id="modal-status" label="Status">
+                <Field id="modal-status" label={t("roadmap.statusLabel")}>
                   <NativeSelect
                     id="modal-status"
                     value={statusId}
@@ -530,13 +563,13 @@ export function RoadmapItemModal({
                   </NativeSelect>
                 </Field>
 
-                <Field id="modal-assignee" label="Assignee">
+                <Field id="modal-assignee" label={t("roadmap.assigneeLabel")}>
                   <NativeSelect
                     id="modal-assignee"
                     value={assigneeId}
                     onChange={(e) => setAssigneeId(e.target.value)}
                   >
-                    <option value="">Unassigned</option>
+                    <option value="">{t("roadmap.unassigned")}</option>
                     {members.map((m) => (
                       <option key={m.userId} value={m.userId}>
                         {m.name || m.email}
@@ -547,8 +580,7 @@ export function RoadmapItemModal({
 
                 <Field
                   id="modal-deadline"
-                  label="Target deadline"
-                  helper="Quarter, month, or date."
+                  label={t("roadmap.targetDeadlineLabel")}
                 >
                   <Input
                     id="modal-deadline"
@@ -563,7 +595,7 @@ export function RoadmapItemModal({
               <div className="space-y-3 pt-2 border-t border-border">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-semibold text-foreground">
-                    Linked feedback posts
+                    {t("roadmap.linkedPostsLabel")}
                   </label>
                   <Badge variant="neutral" className="tabular-nums">
                     {linkedPosts.length}
@@ -585,12 +617,14 @@ export function RoadmapItemModal({
                   </div>
                 ) : linkedPosts.length === 0 ? (
                   <div className="p-3 text-center text-xs text-muted-foreground border border-dashed border-border rounded-md">
-                    No feedback posts linked yet.
+                    {t("roadmap.noLinkedPosts")}
                   </div>
                 ) : (
                   <div className="space-y-2">
                     {linkedPosts.map((post) => {
-                      const postStatus = statuses.find((s) => s.id === post.statusId);
+                      const postStatus = statuses.find(
+                        (s) => s.id === post.statusId,
+                      );
                       return (
                         <div
                           key={post.id}
@@ -598,7 +632,10 @@ export function RoadmapItemModal({
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             <span className="flex items-center gap-0.5 text-xs font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
-                              <ChevronUp className="size-3" aria-hidden="true" />
+                              <ChevronUp
+                                className="size-3"
+                                aria-hidden="true"
+                              />
                               {post.voteCount}
                             </span>
                             <span className="text-sm font-medium text-foreground truncate">
@@ -651,7 +688,7 @@ export function RoadmapItemModal({
                     className="text-destructive hover:bg-destructive/10 gap-1.5"
                   >
                     <Trash2 className="size-4" aria-hidden="true" />
-                    <span>Delete item</span>
+                    <span>{t("common.delete")}</span>
                   </Button>
                 ) : (
                   <div />
@@ -664,18 +701,18 @@ export function RoadmapItemModal({
                     onClick={() => onOpenChange(false)}
                     disabled={isSubmitting}
                   >
-                    Discard changes
+                    {t("roadmap.discardChanges")}
                   </Button>
                   <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting ? (
                       <>
                         <LoaderCircle className="size-4 animate-spin mr-1.5" />
-                        <span>Saving…</span>
+                        <span>{t("common.saving")}</span>
                       </>
                     ) : isEdit ? (
-                      "Save item"
+                      t("roadmap.saveItem")
                     ) : (
-                      "Create item"
+                      t("roadmap.createItem")
                     )}
                   </Button>
                 </div>
@@ -689,11 +726,11 @@ export function RoadmapItemModal({
       <ConfirmDialog
         open={confirmDeleteOpen}
         onOpenChange={setConfirmDeleteOpen}
-        title="Delete roadmap item?"
-        description="This item will be permanently removed. Linked feedback posts will stay on the board, keep their current status, and be unlocked."
-        dismissLabel="Cancel"
-        confirmLabel="Delete item"
-        pendingLabel="Deleting…"
+        title={t("roadmap.deleteDialogTitle")}
+        description={t("roadmap.deleteDialogDesc")}
+        dismissLabel={t("common.cancel")}
+        confirmLabel={t("common.delete")}
+        pendingLabel={t("common.deleting")}
         onConfirm={handleDelete}
       />
     </>

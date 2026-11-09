@@ -1,15 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { KeyRound, Plus, ShieldAlert, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { KeyRound, Plus, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import type { ApiKeyMetadata, ProductSummary } from "@userhq/types";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { ConfirmDialog } from "../ui/confirm-dialog";
 import { CreateApiKeyDialog } from "./create-api-key-dialog";
+import { useI18n } from "../../lib/i18n/context";
 import { apiFetch } from "../../lib/api-client";
-import { errorCopy } from "../../lib/api-errors";
 
 export interface WorkspaceApiKeysManagerProps {
   ws: string;
@@ -22,11 +22,14 @@ export function WorkspaceApiKeysManager({
   initialKeys,
   products,
 }: WorkspaceApiKeysManagerProps): React.JSX.Element {
+  const { t } = useI18n();
   const [keys, setKeys] = React.useState<ApiKeyMetadata[]>(initialKeys);
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
 
   // Revoke state
-  const [revokeTarget, setRevokeTarget] = React.useState<ApiKeyMetadata | null>(null);
+  const [revokeTarget, setRevokeTarget] = React.useState<ApiKeyMetadata | null>(
+    null,
+  );
 
   const productMap = React.useMemo(() => {
     const map = new Map<string, string>();
@@ -49,9 +52,11 @@ export function WorkspaceApiKeysManager({
 
     const now = new Date().toISOString();
     setKeys((prev) =>
-      prev.map((k) => (k.id === revokeTarget.id ? { ...k, revokedAt: now } : k))
+      prev.map((k) =>
+        k.id === revokeTarget.id ? { ...k, revokedAt: now } : k,
+      ),
     );
-    toast.success(`API key "${revokeTarget.name}" revoked`);
+    toast.success(t("apiKeys.keyRevoked"));
   };
 
   return (
@@ -59,13 +64,13 @@ export function WorkspaceApiKeysManager({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <span>Active API Keys</span>
+            <span>{t("apiKeys.title")}</span>
             <Badge variant="neutral" className="text-xs">
               {keys.filter((k) => !k.revokedAt).length}
             </Badge>
           </h2>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Authenticate automated workflows, external services, and export scripts.
+            {t("apiKeys.description")}
           </p>
         </div>
 
@@ -75,7 +80,7 @@ export function WorkspaceApiKeysManager({
           data-testid="create-api-key-btn"
         >
           <Plus className="size-4" aria-hidden="true" />
-          <span>Create API Key</span>
+          <span>{t("apiKeys.createKey")}</span>
         </Button>
       </div>
 
@@ -85,9 +90,11 @@ export function WorkspaceApiKeysManager({
             <KeyRound className="size-5" aria-hidden="true" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-sm font-medium text-foreground">No API keys created yet</h3>
+            <h3 className="text-sm font-medium text-foreground">
+              {t("apiKeys.emptyTitle")}
+            </h3>
             <p className="text-xs text-muted-foreground max-w-sm">
-              Generate an API key to securely interact with the UserHQ API, trigger headless workflows, or export feedback.
+              {t("apiKeys.emptyDesc")}
             </p>
           </div>
           <Button
@@ -96,40 +103,63 @@ export function WorkspaceApiKeysManager({
             onClick={() => setCreateDialogOpen(true)}
             className="mt-2"
           >
-            Create API Key
+            {t("apiKeys.createKey")}
           </Button>
         </div>
       ) : (
         <div className="rounded-lg border border-border overflow-hidden bg-card">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm" data-testid="api-keys-table">
+            <table
+              className="w-full text-left text-sm"
+              data-testid="api-keys-table"
+            >
               <thead className="border-b border-border bg-muted/40 text-xs font-semibold text-muted-foreground">
                 <tr>
-                  <th scope="col" className="px-4 py-3">Name</th>
-                  <th scope="col" className="px-4 py-3">Token Prefix</th>
-                  <th scope="col" className="px-4 py-3">Scopes</th>
-                  <th scope="col" className="px-4 py-3">Product Scope</th>
-                  <th scope="col" className="px-4 py-3">Last Used</th>
-                  <th scope="col" className="px-4 py-3">Status</th>
-                  <th scope="col" className="px-4 py-3 text-right">Actions</th>
+                  <th scope="col" className="px-4 py-3">
+                    {t("apiKeys.colName")}
+                  </th>
+                  <th scope="col" className="px-4 py-3">
+                    {t("apiKeys.colPrefix")}
+                  </th>
+                  <th scope="col" className="px-4 py-3">
+                    {t("apiKeys.colScopes")}
+                  </th>
+                  <th scope="col" className="px-4 py-3">
+                    {t("apiKeys.colProductScope")}
+                  </th>
+                  <th scope="col" className="px-4 py-3">
+                    {t("apiKeys.colLastUsed")}
+                  </th>
+                  <th scope="col" className="px-4 py-3">
+                    {t("apiKeys.colStatus")}
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-right">
+                    {t("apiKeys.colActions")}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {keys.map((k) => {
                   const isRevoked = Boolean(k.revokedAt);
                   const isExpired =
-                    !isRevoked && k.expiresAt && new Date(k.expiresAt).getTime() < Date.now();
+                    !isRevoked &&
+                    k.expiresAt &&
+                    new Date(k.expiresAt).getTime() < Date.now();
 
                   return (
                     <tr
                       key={k.id}
-                      className={isRevoked ? "opacity-60 bg-muted/10" : "hover:bg-muted/20 transition-colors"}
+                      className={
+                        isRevoked
+                          ? "opacity-60 bg-muted/10"
+                          : "hover:bg-muted/20 transition-colors"
+                      }
                       data-testid={`api-key-row-${k.id}`}
                     >
                       <td className="px-4 py-3 font-medium text-foreground">
                         <div>{k.name}</div>
                         <div className="text-[11px] text-muted-foreground">
-                          Created {new Date(k.createdAt).toLocaleDateString()}
+                          {new Date(k.createdAt).toLocaleDateString()}
                         </div>
                       </td>
 
@@ -142,55 +172,82 @@ export function WorkspaceApiKeysManager({
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1 max-w-xs">
                           {k.scopes.includes("admin") ? (
-                            <Badge variant="outline" className="text-[11px] border-primary/40 text-[var(--primary-text)]">
+                            <Badge
+                              variant="outline"
+                              className="text-[11px] border-primary/40 text-[var(--primary-text)]"
+                            >
                               admin
                             </Badge>
                           ) : (
                             k.scopes.slice(0, 3).map((scope) => (
-                              <Badge key={scope} variant="neutral" className="text-[11px]">
+                              <Badge
+                                key={scope}
+                                variant="neutral"
+                                className="text-[11px]"
+                              >
                                 {scope}
                               </Badge>
                             ))
                           )}
-                          {!k.scopes.includes("admin") && k.scopes.length > 3 && (
-                            <Badge variant="outline" className="text-[11px]">
-                              +{k.scopes.length - 3} more
-                            </Badge>
-                          )}
+                          {!k.scopes.includes("admin") &&
+                            k.scopes.length > 3 && (
+                              <Badge variant="outline" className="text-[11px]">
+                                +{k.scopes.length - 3}
+                              </Badge>
+                            )}
                         </div>
                       </td>
 
                       <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {k.productRestrictions && k.productRestrictions.length > 0 ? (
-                          <span title={k.productRestrictions.map((id) => productMap.get(id) || id).join(", ")}>
+                        {k.productRestrictions &&
+                        k.productRestrictions.length > 0 ? (
+                          <span
+                            title={k.productRestrictions
+                              .map((id) => productMap.get(id) || id)
+                              .join(", ")}
+                          >
                             {k.productRestrictions.length === 1
-                              ? productMap.get(k.productRestrictions[0]) || "1 product"
+                              ? productMap.get(k.productRestrictions[0]) ||
+                                "1 product"
                               : `${k.productRestrictions.length} products`}
                           </span>
                         ) : (
-                          <span className="text-foreground">All products</span>
+                          <span className="text-foreground">
+                            {t("apiKeys.allProducts")}
+                          </span>
                         )}
                       </td>
 
                       <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : "Never"}
+                        {k.lastUsedAt
+                          ? new Date(k.lastUsedAt).toLocaleDateString()
+                          : t("apiKeys.neverUsed")}
                       </td>
 
                       <td className="px-4 py-3">
                         {isRevoked ? (
                           <Badge variant="danger" className="text-[11px] gap-1">
                             <XCircle className="size-3" aria-hidden="true" />
-                            <span>Revoked</span>
+                            <span>{t("apiKeys.statusRevoked")}</span>
                           </Badge>
                         ) : isExpired ? (
-                          <Badge variant="outline" className="text-[11px] gap-1 text-amber-500 border-amber-500/40">
+                          <Badge
+                            variant="outline"
+                            className="text-[11px] gap-1 text-amber-500 border-amber-500/40"
+                          >
                             <Clock className="size-3" aria-hidden="true" />
-                            <span>Expired</span>
+                            <span>{t("apiKeys.statusExpired")}</span>
                           </Badge>
                         ) : (
-                          <Badge variant="neutral" className="text-[11px] gap-1 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10">
-                            <CheckCircle2 className="size-3" aria-hidden="true" />
-                            <span>Active</span>
+                          <Badge
+                            variant="neutral"
+                            className="text-[11px] gap-1 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
+                          >
+                            <CheckCircle2
+                              className="size-3"
+                              aria-hidden="true"
+                            />
+                            <span>{t("apiKeys.statusActive")}</span>
                           </Badge>
                         )}
                       </td>
@@ -204,7 +261,7 @@ export function WorkspaceApiKeysManager({
                             className="text-xs text-destructive hover:bg-destructive/10 hover:text-destructive h-8 px-2.5"
                             data-testid={`revoke-api-key-btn-${k.id}`}
                           >
-                            Revoke
+                            {t("apiKeys.revokeAction")}
                           </Button>
                         )}
                       </td>
@@ -232,12 +289,12 @@ export function WorkspaceApiKeysManager({
         onOpenChange={(open) => {
           if (!open) setRevokeTarget(null);
         }}
-        title={`Revoke "${revokeTarget?.name}"?`}
-        description="Any integrations, automated scripts, or webhooks using this API key will immediately fail with a 401 Unauthorized error. This action cannot be undone."
-        dismissLabel="Cancel"
-        confirmLabel="Revoke API Key"
+        title={`${t("apiKeys.revokeAction")} "${revokeTarget?.name}"?`}
+        description={t("apiKeys.revokeDialogDesc")}
+        dismissLabel={t("common.cancel")}
+        confirmLabel={t("apiKeys.revokeAction")}
         confirmVariant="destructive"
-        pendingLabel="Revoking..."
+        pendingLabel={t("common.deleting")}
         onConfirm={handleConfirmRevoke}
       />
     </div>

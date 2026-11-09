@@ -48,6 +48,7 @@ describe("Portal API (Plan 02-02)", () => {
       },
       product: {
         features: { board: true, roadmap: true, changelog: true, faq: true },
+        locales: { defaultLocale: "en", enabledLocales: ["en"] },
         slug: "app",
         name: "Acme App",
         tagline: null,
@@ -68,6 +69,7 @@ describe("Portal API (Plan 02-02)", () => {
       "accentColor",
       "accentTextColor",
       "features",
+      "locales",
       "logoUrl",
       "name",
       "slug",

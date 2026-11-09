@@ -72,6 +72,10 @@ For your own feedback updates, use the portal's **Activity** tab when signed in 
 5. Configure categories and statuses for the product. Categories organize requests; statuses describe the team's workflow. Status names can be customized, so your team need not use the example names in this guide.
 6. Under **Languages & Localization**, set the default product language and choose which of the 13 supported languages (including Arabic RTL, German, Spanish, French, Portuguese, Russian, Hindi, Filipino, Indonesian, Japanese, Korean, and Chinese) are enabled for the product portal and content entries.
 
+When you change **Primary / Default Language** and select **Save changes**, a confirmation dialog previews the impact on changelog entries, FAQ questions, and roadmap items. Review the counts before selecting **Change primary language**. If the preview fails, select **Retry preview** before confirming; **Cancel** leaves the language settings unchanged.
+
+Existing translations in the new primary language are promoted into the main content fields, and the previous main content is preserved as a translation in its source language. Entries without a translation keep their existing content and source language as a fallback. Changing the primary language does not automatically translate content.
+
 New products start with all four portal features enabled. Use **View portal** to check what customers can currently see.
 
 ### Multi-language content authoring & public fallback

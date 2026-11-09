@@ -27,6 +27,7 @@ import { ConfirmDialog } from "../ui/confirm-dialog";
 import { Table, THead, TBody, TR, TH, TD } from "../ui/table";
 import { ChangelogTagDialog } from "./changelog-tag-dialog";
 import { getChangelogTagClasses } from "./changelog-timeline-item";
+import { useI18n } from "../../lib/i18n/context";
 import { apiFetch } from "../../lib/api-client";
 import { cn } from "../../lib/utils";
 import { isScheduled } from "../../lib/format";
@@ -47,6 +48,7 @@ export function ChangelogStudio({
   entries: initialEntries,
   tags: initialTags,
 }: ChangelogStudioProps): React.JSX.Element {
+  const { t } = useI18n();
   const [entriesList, setEntriesList] =
     React.useState<AdminChangelogEntry[]>(initialEntries);
   const [tagsList, setTagsList] = React.useState<ChangelogTag[]>(initialTags);
@@ -56,7 +58,7 @@ export function ChangelogStudio({
     React.useState<AdminChangelogEntry | null>(null);
 
   const formatReleaseDate = (entry: AdminChangelogEntry): string => {
-    if (!entry.publishedAt) return "Unscheduled draft";
+    if (!entry.publishedAt) return t("ui.unscheduledDraft");
     try {
       return new Intl.DateTimeFormat("en-US", {
         month: "short",
@@ -74,16 +76,12 @@ export function ChangelogStudio({
         `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/changelog/${encodeURIComponent(entry.id)}/unpublish`,
         {
           method: "POST",
-        }
+        },
       );
       setEntriesList((prev) =>
-        prev.map((e) =>
-          e.id === entry.id
-            ? { ...e, publishedAt: null }
-            : e
-        )
+        prev.map((e) => (e.id === entry.id ? { ...e, publishedAt: null } : e)),
       );
-      toast.success("Entry unpublished and reverted to draft");
+      toast.success(t("changelog.entryUnpublished"));
     } catch (err: any) {
       toast.error(err.message || "Failed to unpublish entry");
     }
@@ -95,10 +93,10 @@ export function ChangelogStudio({
       `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/changelog/${encodeURIComponent(deletingEntry.id)}`,
       {
         method: "DELETE",
-      }
+      },
     );
     setEntriesList((prev) => prev.filter((e) => e.id !== deletingEntry.id));
-    toast.success("Changelog entry deleted");
+    toast.success(t("changelog.entryDeleted"));
   };
 
   return (
@@ -107,10 +105,10 @@ export function ChangelogStudio({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Changelog
+            {t("changelog.title")}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Publish release notes, product updates, and improvements.
+            {t("changelog.studioDesc")}
           </p>
         </div>
 
@@ -122,31 +120,33 @@ export function ChangelogStudio({
             onClick={() => setTagDialogOpen(true)}
           >
             <TagIcon className="size-3.5 mr-1.5" />
-            Manage tags
+            {t("changelog.manageTags")}
           </Button>
 
           <Button asChild size="sm">
             <Link href={`/dashboard/${ws}/${product}/changelog/new`}>
-              <Plus className="size-3.5 mr-1.5" />
-              New entry
+              <Plus className="size-4 mr-1.5" />
+              {t("changelog.newEntry")}
             </Link>
           </Button>
         </div>
       </div>
 
-      {!changelogEnabled && <HiddenModuleNotice ws={ws} product={product} module="changelog" />}
+      {!changelogEnabled && (
+        <HiddenModuleNotice ws={ws} product={product} module="changelog" />
+      )}
 
       {/* Main Table or Empty State */}
       {entriesList.length === 0 ? (
         <EmptyState
           icon={<Megaphone className="size-6 text-muted-foreground" />}
-          title="No changelog entries yet"
-          body="Keep your customers informed about new features, improvements, and fixes."
+          title={t("changelog.emptyStudioTitle")}
+          body={t("changelog.emptyStudioDesc")}
           action={
             <Button asChild>
               <Link href={`/dashboard/${ws}/${product}/changelog/new`}>
                 <Plus className="size-4 mr-1.5" />
-                New entry
+                {t("changelog.newEntry")}
               </Link>
             </Button>
           }
@@ -155,10 +155,10 @@ export function ChangelogStudio({
         <Table>
           <THead>
             <TR>
-              <TH>Title</TH>
-              <TH>Status</TH>
-              <TH>Tags</TH>
-              <TH>Release Date</TH>
+              <TH>{t("changelog.colTitle")}</TH>
+              <TH>{t("changelog.colStatus")}</TH>
+              <TH>{t("changelog.colTags")}</TH>
+              <TH>{t("changelog.colReleaseDate")}</TH>
               <TH className="w-12 text-right">
                 <span className="sr-only">Actions</span>
               </TH>
@@ -191,11 +191,19 @@ export function ChangelogStudio({
                           ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
                           : isPublished
                             ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
-                            : "bg-muted text-muted-foreground border-border"
+                            : "bg-muted text-muted-foreground border-border",
                       )}
-                      title={scheduled ? "Goes live on the portal on its release date" : undefined}
+                      title={
+                        scheduled
+                          ? "Goes live on the portal on its release date"
+                          : undefined
+                      }
                     >
-                      {scheduled ? "Scheduled" : isPublished ? "Published" : "Draft"}
+                      {scheduled
+                        ? t("changelog.statusScheduled")
+                        : isPublished
+                          ? t("changelog.statusPublished")
+                          : t("changelog.statusDraft")}
                     </span>
                   </TD>
 
@@ -209,7 +217,7 @@ export function ChangelogStudio({
                             key={tag.id}
                             className={cn(
                               "inline-flex items-center h-5 px-1.5 rounded-full text-[11px] font-semibold",
-                              getChangelogTagClasses(tag.name)
+                              getChangelogTagClasses(tag.name),
                             )}
                           >
                             {tag.name}
@@ -241,7 +249,7 @@ export function ChangelogStudio({
                             href={`/dashboard/${ws}/${product}/changelog/${entry.id}`}
                           >
                             <Pencil className="size-3.5 mr-2" />
-                            Edit
+                            {t("common.edit")}
                           </Link>
                         </DropdownMenuItem>
 
@@ -253,7 +261,7 @@ export function ChangelogStudio({
                               rel="noopener noreferrer"
                             >
                               <ExternalLink className="size-3.5 mr-2" />
-                              View live
+                              {t("changelog.actionViewLive")}
                             </Link>
                           </DropdownMenuItem>
                         )}
@@ -263,7 +271,7 @@ export function ChangelogStudio({
                             onClick={() => handleUnpublishEntry(entry)}
                           >
                             <Undo2 className="size-3.5 mr-2" />
-                            Unpublish
+                            {t("changelog.unpublish")}
                           </DropdownMenuItem>
                         )}
 
@@ -272,7 +280,7 @@ export function ChangelogStudio({
                           className="text-destructive focus:text-destructive"
                         >
                           <Trash2 className="size-3.5 mr-2" />
-                          Delete
+                          {t("common.delete")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -300,11 +308,11 @@ export function ChangelogStudio({
         onOpenChange={(open) => {
           if (!open) setDeletingEntry(null);
         }}
-        title="Delete changelog entry"
-        description={`Are you sure you want to delete "${deletingEntry?.title}"? This action cannot be undone.`}
-        dismissLabel="Cancel"
-        confirmLabel="Delete entry"
-        pendingLabel="Deleting…"
+        title={t("changelog.deleteEntryTitle")}
+        description={t("changelog.deleteEntryDesc")}
+        dismissLabel={t("common.cancel")}
+        confirmLabel={t("common.delete")}
+        pendingLabel={t("common.deleting")}
         onConfirm={handleDeleteEntry}
       />
     </div>

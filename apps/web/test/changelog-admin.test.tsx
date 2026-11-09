@@ -18,14 +18,35 @@ vi.mock("next/navigation", () => ({
 
 // Mock @radix-ui/react-dialog so portal renders in static SSR environment
 vi.mock("@radix-ui/react-dialog", () => ({
-  Root: ({ children, open }: any) => (open ? <div data-testid="dialog-root">{children}</div> : null),
-  Trigger: ({ children }: any) => <div data-testid="dialog-trigger">{children}</div>,
-  Portal: ({ children }: any) => <div data-testid="dialog-portal">{children}</div>,
-  Overlay: ({ children }: any) => <div data-testid="dialog-overlay">{children}</div>,
-  Content: ({ children, className }: any) => <div data-testid="dialog-content" className={className}>{children}</div>,
-  Title: ({ children, className }: any) => <div data-testid="dialog-title" className={className}>{children}</div>,
-  Description: ({ children, className }: any) => <div data-testid="dialog-desc" className={className}>{children}</div>,
-  Close: ({ children }: any) => <div data-testid="dialog-close">{children}</div>,
+  Root: ({ children, open }: any) =>
+    open ? <div data-testid="dialog-root">{children}</div> : null,
+  Trigger: ({ children }: any) => (
+    <div data-testid="dialog-trigger">{children}</div>
+  ),
+  Portal: ({ children }: any) => (
+    <div data-testid="dialog-portal">{children}</div>
+  ),
+  Overlay: ({ children }: any) => (
+    <div data-testid="dialog-overlay">{children}</div>
+  ),
+  Content: ({ children, className }: any) => (
+    <div data-testid="dialog-content" className={className}>
+      {children}
+    </div>
+  ),
+  Title: ({ children, className }: any) => (
+    <div data-testid="dialog-title" className={className}>
+      {children}
+    </div>
+  ),
+  Description: ({ children, className }: any) => (
+    <div data-testid="dialog-desc" className={className}>
+      {children}
+    </div>
+  ),
+  Close: ({ children }: any) => (
+    <div data-testid="dialog-close">{children}</div>
+  ),
 }));
 
 describe("Changelog Admin Studio & Authoring Components", () => {
@@ -50,7 +71,10 @@ describe("Changelog Admin Studio & Authoring Components", () => {
         {
           type: "paragraph",
           content: [
-            { type: "text", text: "Exciting updates to our data export engine." },
+            {
+              type: "text",
+              text: "Exciting updates to our data export engine.",
+            },
           ],
         },
       ],
@@ -67,12 +91,28 @@ describe("Changelog Admin Studio & Authoring Components", () => {
 
   it("keeps hidden changelog authoring available with a settings notice", () => {
     for (const component of [
-      <ChangelogStudio ws="acme" product="core" productName="Acme Core" entries={[sampleEntry]} tags={sampleTags} changelogEnabled={false} />,
-      <ChangelogEditor ws="acme" product="core" productName="Acme Core" availableTags={sampleTags} entry={sampleEntry} changelogEnabled={false} />,
+      <ChangelogStudio
+        ws="acme"
+        product="core"
+        productName="Acme Core"
+        entries={[sampleEntry]}
+        tags={sampleTags}
+        changelogEnabled={false}
+      />,
+      <ChangelogEditor
+        ws="acme"
+        product="core"
+        productName="Acme Core"
+        availableTags={sampleTags}
+        entry={sampleEntry}
+        changelogEnabled={false}
+      />,
     ]) {
       const html = renderToStaticMarkup(component);
       expect(html).toContain("Your entries and drafts are kept.");
-      expect(html).toContain('href="/dashboard/acme/core/settings#portal-features"');
+      expect(html).toContain(
+        'href="/dashboard/acme/core/settings#portal-features"',
+      );
       expect(html).toContain("Version 2.4 - Faster Exports &amp; Analytics");
     }
   });
@@ -87,7 +127,7 @@ describe("Changelog Admin Studio & Authoring Components", () => {
         productName="Acme Core"
         entries={[{ ...sampleEntry, publishedAt: future }]}
         tags={sampleTags}
-      />
+      />,
     );
 
     expect(html).toContain("Scheduled");
@@ -103,7 +143,7 @@ describe("Changelog Admin Studio & Authoring Components", () => {
         productName="Acme Core"
         entries={[]}
         tags={sampleTags}
-      />
+      />,
     );
 
     expect(html).toContain("No changelog entries yet");
@@ -120,7 +160,7 @@ describe("Changelog Admin Studio & Authoring Components", () => {
         productName="Acme Core"
         entries={[sampleEntry, draftEntry]}
         tags={sampleTags}
-      />
+      />,
     );
 
     expect(html).toContain("Version 2.4 - Faster Exports &amp; Analytics");
@@ -140,15 +180,15 @@ describe("Changelog Admin Studio & Authoring Components", () => {
         changelogEnabled={true}
         productName="Acme Core"
         availableTags={sampleTags}
-      />
+      />,
     );
 
-    expect(html).toContain("New release note");
+    expect(html).toContain("New entry");
     expect(html).toContain("Draft");
     expect(html).toContain("/changelog/");
     expect(html).toContain("Save draft");
     expect(html).toContain("Publish");
-    expect(html).toContain("Release Content");
+    expect(html).toContain("Content");
   });
 
   it("renders ChangelogEditor in edit mode with pre-filled entry data", () => {
@@ -160,10 +200,10 @@ describe("Changelog Admin Studio & Authoring Components", () => {
         productName="Acme Core"
         entry={sampleEntry}
         availableTags={sampleTags}
-      />
+      />,
     );
 
-    expect(html).toContain("Edit release note");
+    expect(html).toContain("Edit");
     expect(html).toContain("Published");
     expect(html).toContain("Update");
     expect(html).toContain("Unpublish");
@@ -180,14 +220,14 @@ describe("Changelog Admin Studio & Authoring Components", () => {
         product="core"
         tags={sampleTags}
         onTagsChange={() => {}}
-      />
+      />,
     );
 
     expect(html).toContain("Manage tags");
-    expect(html).toContain("Current tags (2)");
+    expect(html).toContain("Existing tags (2)");
     expect(html).toContain("New");
     expect(html).toContain("Improved");
-    expect(html).toContain("Add new tag");
+    expect(html).toContain("Add tag");
   });
 
   it("renders ChangelogPreviewModal with exact public appearance", () => {
@@ -199,7 +239,7 @@ describe("Changelog Admin Studio & Authoring Components", () => {
         product="core"
         productName="Acme Core"
         entry={sampleEntry}
-      />
+      />,
     );
 
     expect(html).toContain("Changelog Preview");

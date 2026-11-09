@@ -11,6 +11,8 @@ import { PageHeader } from "../../../../components/page-header";
 import { MembersTable } from "../../../../components/team/members-table";
 import { InviteCreator } from "../../../../components/invites/invite-creator";
 import { InviteList } from "../../../../components/invites/invite-list";
+import { getRequestLocale } from "../../../../lib/i18n/server";
+import { DICTIONARIES } from "../../../../lib/i18n/dictionaries";
 
 interface TeamPageProps {
   params: Promise<{ ws: string }>;
@@ -33,15 +35,18 @@ export default async function TeamPage({
   params,
 }: TeamPageProps): Promise<React.JSX.Element | null> {
   const { ws } = await params;
-  const [workspaceResult, membersResult, invitesResult, me] = await Promise.all([
-    getWorkspace(ws),
-    getMembers(ws),
-    getTeamInvites(ws),
-    getMe(),
-  ]);
+  const locale = await getRequestLocale();
+  const dict = DICTIONARIES[locale];
+  const [workspaceResult, membersResult, invitesResult, me] = await Promise.all(
+    [getWorkspace(ws), getMembers(ws), getTeamInvites(ws), getMe()],
+  );
 
   if (!workspaceResult.ok || !membersResult.ok || !invitesResult.ok) {
-    if (!workspaceResult.ok && workspaceResult.status === 403 && workspaceResult.code === "workspace_suspended") {
+    if (
+      !workspaceResult.ok &&
+      workspaceResult.status === 403 &&
+      workspaceResult.code === "workspace_suspended"
+    ) {
       return null;
     }
     notFound();
@@ -54,12 +59,14 @@ export default async function TeamPage({
   return (
     <div className="flex flex-col max-w-5xl">
       <PageHeader
-        title="Team"
+        title={dict.team.title}
         description={`Everyone here is an admin of ${workspace.name}.`}
       />
 
       <section className="mt-8 flex flex-col gap-4">
-        <h2 className="text-lg font-semibold text-foreground">Members</h2>
+        <h2 className="text-lg font-semibold text-foreground">
+          {dict.team.membersHeading}
+        </h2>
         <MembersTable
           ws={ws}
           workspaceName={workspace.name}
@@ -71,7 +78,7 @@ export default async function TeamPage({
 
       <section className="border-t border-border pt-8 mt-8 flex flex-col gap-4">
         <h2 className="text-lg font-semibold text-foreground">
-          Invite a teammate
+          {dict.team.inviteHeading}
         </h2>
         <InviteCreator
           kind="workspace"
@@ -80,7 +87,9 @@ export default async function TeamPage({
       </section>
 
       <section className="border-t border-border pt-8 mt-8 flex flex-col gap-4">
-        <h2 className="text-lg font-semibold text-foreground">Invites</h2>
+        <h2 className="text-lg font-semibold text-foreground">
+          {dict.team.invitesHeading}
+        </h2>
         <InviteList kind="workspace" rows={invites} workspaceSlug={ws} />
       </section>
     </div>

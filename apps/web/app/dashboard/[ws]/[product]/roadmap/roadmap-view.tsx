@@ -16,6 +16,7 @@ import { NativeSelect } from "../../../../../components/ui/native-select";
 import { KanbanBoard } from "../../../../../components/roadmap/kanban-board";
 import { PublicColumnsPopover } from "../../../../../components/roadmap/public-columns-popover";
 import { RoadmapItemModal } from "../../../../../components/roadmap/roadmap-item-modal";
+import { useI18n } from "../../../../../lib/i18n/context";
 
 export interface RoadmapViewProps {
   ws: string;
@@ -40,33 +41,44 @@ export function RoadmapView({
   tabs,
   activeHref,
 }: RoadmapViewProps) {
+  const { t } = useI18n();
   const [statuses, setStatuses] = React.useState<Status[]>(initialStatuses);
   const [items, setItems] = React.useState<AdminRoadmapItem[]>(initialItems);
-  const [selectedAssigneeId, setSelectedAssigneeId] = React.useState<string | null>(null);
+  const [selectedAssigneeId, setSelectedAssigneeId] = React.useState<
+    string | null
+  >(null);
 
   // Modal states
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
-  const [createDefaultStatusId, setCreateDefaultStatusId] = React.useState<string | undefined>(undefined);
-  const [editingItem, setEditingItem] = React.useState<AdminRoadmapItem | null>(() => {
-    if (initialItemId) {
-      return initialItems.find((i) => i.id === initialItemId) ?? null;
-    }
-    return null;
-  });
+  const [createDefaultStatusId, setCreateDefaultStatusId] = React.useState<
+    string | undefined
+  >(undefined);
+  const [editingItem, setEditingItem] = React.useState<AdminRoadmapItem | null>(
+    () => {
+      if (initialItemId) {
+        return initialItems.find((i) => i.id === initialItemId) ?? null;
+      }
+      return null;
+    },
+  );
   const [prelinkedPost, setPrelinkedPost] = React.useState<any | null>(null);
 
   React.useEffect(() => {
     if (initialLinkPostNumber && !isCreateOpen) {
       import("../../../../../lib/api-client").then(({ apiFetch }) => {
         apiFetch<any>(
-          `/api/v1/workspaces/${ws}/products/${product.slug}/roadmap/search-posts?q=${initialLinkPostNumber}`
-        ).then((res) => {
-          const match = res.posts?.find((p: any) => p.number === initialLinkPostNumber);
-          if (match) {
-            setPrelinkedPost(match);
-            setIsCreateOpen(true);
-          }
-        }).catch(() => {});
+          `/api/v1/workspaces/${ws}/products/${product.slug}/roadmap/search-posts?q=${initialLinkPostNumber}`,
+        )
+          .then((res) => {
+            const match = res.posts?.find(
+              (p: any) => p.number === initialLinkPostNumber,
+            );
+            if (match) {
+              setPrelinkedPost(match);
+              setIsCreateOpen(true);
+            }
+          })
+          .catch(() => {});
       });
     }
   }, [initialLinkPostNumber, ws, product.slug]);
@@ -97,17 +109,22 @@ export function RoadmapView({
   return (
     <div className="w-full space-y-6">
       <PageHeader
-        title="Roadmap"
-        description="Plan internal milestones and choose what appears on the public roadmap."
+        title={t("roadmap.title")}
+        description={t("roadmap.description")}
         action={
-          <Button onClick={() => handleAddItem(statuses[0]?.id ?? "")} className="gap-1.5">
+          <Button
+            onClick={() => handleAddItem(statuses[0]?.id ?? "")}
+            className="gap-1.5"
+          >
             <Plus className="size-4" aria-hidden="true" />
-            <span>New item</span>
+            <span>{t("roadmap.newItem")}</span>
           </Button>
         }
       />
 
-      {!product.features.roadmap && <HiddenModuleNotice ws={ws} product={product.slug} module="roadmap" />}
+      {!product.features.roadmap && (
+        <HiddenModuleNotice ws={ws} product={product.slug} module="roadmap" />
+      )}
 
       {tabs && activeHref && (
         <TabNav tabs={tabs} activeHref={activeHref} className="mb-6" />
@@ -125,7 +142,7 @@ export function RoadmapView({
             onChange={(e) => setSelectedAssigneeId(e.target.value || null)}
             className="w-44 text-sm"
           >
-            <option value="">All assignees</option>
+            <option value="">{t("roadmap.allAssignees")}</option>
             {initialMembers.map((m) => (
               <option key={m.userId} value={m.userId}>
                 {m.name || m.email}

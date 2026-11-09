@@ -7,6 +7,7 @@ import type { Status, AdminRoadmapItem } from "@userhq/types";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { KanbanCard } from "./kanban-card";
+import { useI18n } from "../../lib/i18n/context";
 import { cn } from "../../lib/utils";
 
 export interface KanbanColumnProps {
@@ -22,6 +23,7 @@ export function KanbanColumn({
   onAddItem,
   onSelectItem,
 }: KanbanColumnProps) {
+  const { t } = useI18n();
   const { ref, isDropTarget } = useDroppable({
     id: status.id,
   });
@@ -31,7 +33,7 @@ export function KanbanColumn({
       ref={ref}
       className={cn(
         "flex-1 shrink-0 min-w-[280px] sm:min-w-[320px] max-w-[420px] rounded-lg bg-muted/40 border border-border p-3 flex flex-col gap-3 min-h-[500px] transition-colors",
-        isDropTarget && "bg-muted/70 ring-1 ring-primary/30"
+        isDropTarget && "bg-muted/70 ring-1 ring-primary/30",
       )}
     >
       {/* Column Header */}
@@ -48,7 +50,10 @@ export function KanbanColumn({
           >
             {status.name}
           </h2>
-          <Badge variant="neutral" className="px-1.5 py-0 h-5 text-xs tabular-nums">
+          <Badge
+            variant="neutral"
+            className="px-1.5 py-0 h-5 text-xs tabular-nums"
+          >
             {items.length}
           </Badge>
         </div>
@@ -57,14 +62,20 @@ export function KanbanColumn({
           <span
             title={
               status.isPublicRoadmap
-                ? "Public column (shown on customer roadmap)"
-                : "Internal column (hidden from customer roadmap)"
+                ? t("roadmap.visibleOnPortal")
+                : t("roadmap.internalOnly")
             }
           >
             {status.isPublicRoadmap ? (
-              <Eye className="size-3.5 text-muted-foreground" aria-hidden="true" />
+              <Eye
+                className="size-3.5 text-muted-foreground"
+                aria-hidden="true"
+              />
             ) : (
-              <EyeOff className="size-3.5 text-muted-foreground/40" aria-hidden="true" />
+              <EyeOff
+                className="size-3.5 text-muted-foreground/40"
+                aria-hidden="true"
+              />
             )}
           </span>
 
@@ -85,7 +96,7 @@ export function KanbanColumn({
       <div className="flex flex-col gap-2.5 flex-1 min-h-[100px]">
         {items.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center border border-dashed border-border/70 rounded-md p-6 text-center text-xs text-muted-foreground">
-            <span>No items in this stage</span>
+            <span>{t("roadmap.emptyColumn")}</span>
             <Button
               type="button"
               variant="ghost"
@@ -93,7 +104,7 @@ export function KanbanColumn({
               onClick={() => onAddItem(status.id)}
               className="mt-1 text-xs text-muted-foreground hover:text-foreground h-auto p-0"
             >
-              + Add item
+              + {t("roadmap.addItem")}
             </Button>
           </div>
         ) : (

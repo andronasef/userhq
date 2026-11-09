@@ -9,6 +9,7 @@ import { Avatar } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { ConfirmDialog } from "../ui/confirm-dialog";
+import { useI18n } from "@/lib/i18n/context";
 import { apiFetch } from "@/lib/api-client";
 import { formatDate } from "@/lib/format";
 
@@ -26,17 +27,21 @@ export function MembersTable({
   rows,
   viewerId,
 }: MembersTableProps) {
+  const { t } = useI18n();
   const router = useRouter();
   const [memberToRemove, setMemberToRemove] = React.useState<MemberRow | null>(
-    null
+    null,
   );
   const [confirmLeave, setConfirmLeave] = React.useState(false);
 
   const handleRemove = async () => {
     if (!memberToRemove) return;
-    await apiFetch(`/api/v1/workspaces/${ws}/members/${memberToRemove.userId}`, {
-      method: "DELETE",
-    });
+    await apiFetch(
+      `/api/v1/workspaces/${ws}/members/${memberToRemove.userId}`,
+      {
+        method: "DELETE",
+      },
+    );
     toast.success(`${memberToRemove.name} removed`);
     router.refresh();
     const h1 = document.querySelector("h1");
@@ -60,10 +65,10 @@ export function MembersTable({
       <Table>
         <THead>
           <TR>
-            <TH>Name</TH>
-            <TH>Role</TH>
-            <TH>Joined</TH>
-            <TH className="text-right">Actions</TH>
+            <TH>{t("team.colName")}</TH>
+            <TH>{t("team.colRole")}</TH>
+            <TH>{t("team.colJoined")}</TH>
+            <TH className="text-right">{t("team.colActions")}</TH>
           </TR>
         </THead>
         <TBody>
@@ -81,7 +86,9 @@ export function MembersTable({
                         <span className="font-medium text-foreground truncate">
                           {row.name}
                         </span>
-                        {isViewer && <Badge variant="outline">You</Badge>}
+                        {isViewer && (
+                          <Badge variant="outline">{t("team.badgeYou")}</Badge>
+                        )}
                       </div>
                       <span
                         className="text-sm text-muted-foreground truncate"
@@ -94,7 +101,9 @@ export function MembersTable({
                 </TD>
                 <TD>
                   <Badge variant="neutral">
-                    {row.role === "owner" ? "Owner" : "Admin"}
+                    {row.role === "owner"
+                      ? t("team.roleOwner")
+                      : t("team.roleAdmin")}
                   </Badge>
                 </TD>
                 <TD className="text-muted-foreground">
@@ -107,10 +116,10 @@ export function MembersTable({
                       variant="ghost"
                       size="sm"
                       className="text-destructive hover:text-destructive"
-                      aria-label={`Remove ${row.name}`}
+                      aria-label={`${t("team.removeTeammate")} ${row.name}`}
                       onClick={() => setMemberToRemove(row)}
                     >
-                      Remove teammate
+                      {t("team.removeTeammate")}
                     </Button>
                   )}
                   {!isOwner && isViewer && (
@@ -119,10 +128,10 @@ export function MembersTable({
                       variant="ghost"
                       size="sm"
                       className="text-destructive hover:text-destructive"
-                      aria-label="Leave workspace"
+                      aria-label={t("team.leaveWorkspace")}
                       onClick={() => setConfirmLeave(true)}
                     >
-                      Leave workspace
+                      {t("team.leaveWorkspace")}
                     </Button>
                   )}
                 </TD>
@@ -137,11 +146,15 @@ export function MembersTable({
         onOpenChange={(open) => {
           if (!open) setMemberToRemove(null);
         }}
-        title={memberToRemove ? `Remove ${memberToRemove.name}?` : ""}
+        title={
+          memberToRemove
+            ? `${t("team.removeTeammate")} (${memberToRemove.name})?`
+            : ""
+        }
         description={`They'll lose access to ${workspaceName} right away. Anything they created stays.`}
-        dismissLabel="Keep teammate"
-        confirmLabel="Remove teammate"
-        pendingLabel="Removing…"
+        dismissLabel={t("team.keepTeammate")}
+        confirmLabel={t("team.removeTeammate")}
+        pendingLabel={t("common.deleting")}
         onConfirm={handleRemove}
       />
 
@@ -150,11 +163,11 @@ export function MembersTable({
         onOpenChange={(open) => {
           if (!open) setConfirmLeave(false);
         }}
-        title={`Leave ${workspaceName}?`}
-        description="You'll lose access to its dashboard. To come back, an admin has to send you a new invite link."
-        dismissLabel="Stay in workspace"
-        confirmLabel="Leave workspace"
-        pendingLabel="Leaving…"
+        title={t("team.leaveConfirmTitle")}
+        description={t("team.leaveConfirmDesc")}
+        dismissLabel={t("team.stayInWorkspace")}
+        confirmLabel={t("team.leaveWorkspace")}
+        pendingLabel={t("team.leaving")}
         onConfirm={handleLeave}
       />
     </>

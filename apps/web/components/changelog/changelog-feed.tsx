@@ -42,7 +42,7 @@ export function ChangelogFeed({
     try {
       const page = await apiFetch(
         `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/changelog?cursor=${encodeURIComponent(cursor)}&lang=${locale}`,
-        { schema: PublicChangelogFeedResponseSchema }
+        { schema: PublicChangelogFeedResponseSchema },
       );
       setEntries((prev) => {
         const seen = new Set(prev.map((e) => e.id));
@@ -84,7 +84,9 @@ export function ChangelogFeed({
       {cursor && (
         <div className="flex flex-col items-center gap-2">
           <Button variant="outline" onClick={loadMore} disabled={loading}>
-            {loading ? "Loading…" : "Load older updates"}
+            {loading
+              ? t("changelog.loadingOlderUpdates")
+              : t("changelog.loadOlderUpdates")}
           </Button>
           {failed && (
             <p role="alert" className="text-sm text-destructive">

@@ -20,6 +20,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Field } from "../ui/field";
 import { Alert } from "../ui/alert";
+import { useI18n } from "../../lib/i18n/context";
 import { apiFetch } from "../../lib/api-client";
 import { errorCopy } from "../../lib/api-errors";
 
@@ -31,10 +32,14 @@ export interface CreateApiKeyDialogProps {
   onKeyCreated: (key: ApiKeyMetadata) => void;
 }
 
-const SCOPE_LABELS: Record<ApiKeyScope, { title: string; description: string }> = {
+const SCOPE_LABELS: Record<
+  ApiKeyScope,
+  { title: string; description: string }
+> = {
   admin: {
     title: "Full Admin (admin)",
-    description: "Unrestricted access to all workspace admin resources and operations",
+    description:
+      "Unrestricted access to all workspace admin resources and operations",
   },
   "export:read": {
     title: "Export Feedback (export:read)",
@@ -78,7 +83,8 @@ const SCOPE_LABELS: Record<ApiKeyScope, { title: string; description: string }> 
   },
   "webhooks:write": {
     title: "Manage Webhooks (webhooks:write)",
-    description: "Create, update, and delete webhook subscriptions and redeliver events",
+    description:
+      "Create, update, and delete webhook subscriptions and redeliver events",
   },
   "settings:read": {
     title: "Read Settings (settings:read)",
@@ -86,15 +92,18 @@ const SCOPE_LABELS: Record<ApiKeyScope, { title: string; description: string }> 
   },
   "settings:write": {
     title: "Manage Settings (settings:write)",
-    description: "Update product settings and feature switches, and manage statuses and categories",
+    description:
+      "Update product settings and feature switches, and manage statuses and categories",
   },
   "faq:read": {
     title: "Read FAQ (faq:read)",
-    description: "View FAQ categories and questions, including those of a hidden FAQ module",
+    description:
+      "View FAQ categories and questions, including those of a hidden FAQ module",
   },
   "faq:write": {
     title: "Manage FAQ (faq:write)",
-    description: "Create, edit, reorder, and delete FAQ categories and questions",
+    description:
+      "Create, edit, reorder, and delete FAQ categories and questions",
   },
 };
 
@@ -105,20 +114,25 @@ export function CreateApiKeyDialog({
   products,
   onKeyCreated,
 }: CreateApiKeyDialogProps): React.JSX.Element {
+  const { t } = useI18n();
   const [name, setName] = React.useState("");
   const [selectedScopes, setSelectedScopes] = React.useState<ApiKeyScope[]>([
     "requests:read",
     "export:read",
   ]);
   const [restrictProducts, setRestrictProducts] = React.useState(false);
-  const [selectedProductIds, setSelectedProductIds] = React.useState<string[]>([]);
+  const [selectedProductIds, setSelectedProductIds] = React.useState<string[]>(
+    [],
+  );
   const [expiresInDays, setExpiresInDays] = React.useState<string>("never");
 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
   // Result state: displayed when key is generated
-  const [generatedToken, setGeneratedToken] = React.useState<string | null>(null);
+  const [generatedToken, setGeneratedToken] = React.useState<string | null>(
+    null,
+  );
   const [copied, setCopied] = React.useState(false);
 
   // Reset state when dialog closes
@@ -156,7 +170,9 @@ export function CreateApiKeyDialog({
 
   const toggleProduct = (productId: string) => {
     if (selectedProductIds.includes(productId)) {
-      setSelectedProductIds(selectedProductIds.filter((id) => id !== productId));
+      setSelectedProductIds(
+        selectedProductIds.filter((id) => id !== productId),
+      );
     } else {
       setSelectedProductIds([...selectedProductIds, productId]);
     }
@@ -188,7 +204,8 @@ export function CreateApiKeyDialog({
         name: trimmedName,
         scopes: selectedScopes,
         productRestrictions: restrictProducts ? selectedProductIds : null,
-        expiresInDays: expiresInDays === "never" ? null : parseInt(expiresInDays, 10),
+        expiresInDays:
+          expiresInDays === "never" ? null : parseInt(expiresInDays, 10),
       };
 
       const res = await apiFetch<{ key: ApiKeyMetadata; token: string }>(
@@ -196,12 +213,12 @@ export function CreateApiKeyDialog({
         {
           method: "POST",
           body: payload,
-        }
+        },
       );
 
       setGeneratedToken(res.token);
       onKeyCreated(res.key);
-      toast.success("API key generated successfully");
+      toast.success(t("apiKeys.createdTitle"));
     } catch (err: any) {
       setError(errorCopy(err));
     } finally {
@@ -226,33 +243,46 @@ export function CreateApiKeyDialog({
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <KeyRound className="size-5 text-[var(--primary-text)]" aria-hidden="true" />
-            <span>{generatedToken ? "Save your API key" : "Create workspace API key"}</span>
+            <KeyRound
+              className="size-5 text-[var(--primary-text)]"
+              aria-hidden="true"
+            />
+            <span>
+              {generatedToken
+                ? t("apiKeys.createdTitle")
+                : t("apiKeys.dialogTitle")}
+            </span>
           </DialogTitle>
           <DialogDescription>
             {generatedToken
-              ? "Copy this secret token now. You will never be able to view it again."
-              : "Generate a cryptographically secure token for automated tools, scripts, and webhook receivers."}
+              ? t("apiKeys.createdDesc")
+              : t("apiKeys.dialogDesc")}
           </DialogDescription>
         </DialogHeader>
 
         {generatedToken ? (
           <div className="space-y-6 pt-2">
-            <Alert variant="neutral" className="border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200">
+            <Alert
+              variant="neutral"
+              className="border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200"
+            >
               <div className="flex items-start gap-2">
-                <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" aria-hidden="true" />
+                <AlertTriangle
+                  className="size-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0"
+                  aria-hidden="true"
+                />
                 <div className="text-xs space-y-1">
-                  <p className="font-semibold">Store this secret securely</p>
-                  <p>
-                    For security reasons, we do not store plaintext tokens in our database. If you lose this key, you will have to revoke it and generate a new one.
-                  </p>
+                  <p>{t("apiKeys.saveWarning")}</p>
                 </div>
               </div>
             </Alert>
 
             <div className="space-y-2">
-              <label htmlFor="generated-token-input" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Secret Token
+              <label
+                htmlFor="generated-token-input"
+                className="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+              >
+                {t("apiKeys.colPrefix")}
               </label>
               <div className="flex items-center gap-2">
                 <Input
@@ -271,7 +301,10 @@ export function CreateApiKeyDialog({
                 >
                   {copied ? (
                     <>
-                      <Check className="size-4 text-emerald-500" aria-hidden="true" />
+                      <Check
+                        className="size-4 text-emerald-500"
+                        aria-hidden="true"
+                      />
                       <span>Copied</span>
                     </>
                   ) : (
@@ -285,9 +318,11 @@ export function CreateApiKeyDialog({
             </div>
 
             <div className="rounded-md border border-border p-4 bg-muted/20 text-xs space-y-2">
-              <p className="font-semibold text-foreground">Using your API key</p>
+              <p className="font-semibold text-foreground">
+                {t("apiKeys.usingKey")}
+              </p>
               <p className="text-muted-foreground">
-                Pass your key in the <code className="bg-muted px-1.5 py-0.5 rounded text-foreground">Authorization</code> HTTP header:
+                {t("apiKeys.authHeaderInstruction")}
               </p>
               <pre className="bg-muted p-2 rounded text-[11px] font-mono overflow-x-auto">
                 {`curl -H "Authorization: Bearer ${generatedToken.slice(0, 15)}..." \\\n  https://api.userhq.com/api/v1/workspaces/${ws}/export/feedback`}
@@ -300,7 +335,7 @@ export function CreateApiKeyDialog({
                 onClick={() => onOpenChange(false)}
                 data-testid="api-key-done-btn"
               >
-                I have saved this key
+                {t("apiKeys.doneButton")}
               </Button>
             </div>
           </div>
@@ -309,9 +344,9 @@ export function CreateApiKeyDialog({
             {error && <Alert variant="destructive">{error}</Alert>}
 
             <Field
-              label="Key Name"
+              label={t("apiKeys.keyNameLabel")}
               id="api-key-name"
-              helper="A friendly label describing which service or script uses this key."
+              helper={t("apiKeys.keyNameHelper")}
             >
               <Input
                 id="api-key-name"
@@ -326,9 +361,11 @@ export function CreateApiKeyDialog({
             </Field>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Permissions & Scopes</label>
+              <label className="text-sm font-medium text-foreground">
+                {t("apiKeys.scopesLabel")}
+              </label>
               <p className="text-xs text-muted-foreground">
-                Select only the minimal permissions required for this integration.
+                {t("apiKeys.scopesHelper")}
               </p>
               <div className="space-y-2 border border-border rounded-md p-3 max-h-56 overflow-y-auto bg-muted/10">
                 {API_KEY_SCOPES.map((scope) => {
@@ -347,8 +384,12 @@ export function CreateApiKeyDialog({
                         data-testid={`scope-checkbox-${scope}`}
                       />
                       <div className="flex flex-col text-xs">
-                        <span className="font-semibold text-foreground">{info.title}</span>
-                        <span className="text-muted-foreground">{info.description}</span>
+                        <span className="font-semibold text-foreground">
+                          {info.title}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {info.description}
+                        </span>
                       </div>
                     </label>
                   );
@@ -358,7 +399,9 @@ export function CreateApiKeyDialog({
 
             {products.length > 1 && (
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Product Scope</label>
+                <label className="text-sm font-medium text-foreground">
+                  {t("apiKeys.productScopeLabel")}
+                </label>
                 <div className="flex items-center gap-4 text-xs">
                   <label className="flex items-center gap-1.5 cursor-pointer">
                     <input
@@ -368,7 +411,7 @@ export function CreateApiKeyDialog({
                       onChange={() => setRestrictProducts(false)}
                       className="accent-primary"
                     />
-                    <span>All products in workspace</span>
+                    <span>{t("apiKeys.allProductsOption")}</span>
                   </label>
                   <label className="flex items-center gap-1.5 cursor-pointer">
                     <input
@@ -378,7 +421,7 @@ export function CreateApiKeyDialog({
                       onChange={() => setRestrictProducts(true)}
                       className="accent-primary"
                     />
-                    <span>Restrict to specific products</span>
+                    <span>{t("apiKeys.restrictProductsOption")}</span>
                   </label>
                 </div>
 
@@ -388,7 +431,10 @@ export function CreateApiKeyDialog({
                       if (!p.id) return null;
                       const prodId = p.id;
                       return (
-                        <label key={prodId} className="flex items-center gap-2 text-xs cursor-pointer">
+                        <label
+                          key={prodId}
+                          className="flex items-center gap-2 text-xs cursor-pointer"
+                        >
                           <input
                             type="checkbox"
                             checked={selectedProductIds.includes(prodId)}
@@ -404,18 +450,18 @@ export function CreateApiKeyDialog({
               </div>
             )}
 
-            <Field label="Expiration" id="api-key-expiration">
+            <Field label={t("apiKeys.expirationLabel")} id="api-key-expiration">
               <select
                 id="api-key-expiration"
                 value={expiresInDays}
                 onChange={(e) => setExpiresInDays(e.target.value)}
                 className="w-full h-9 rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               >
-                <option value="never">No expiration (Never)</option>
-                <option value="30">30 days</option>
-                <option value="60">60 days</option>
-                <option value="90">90 days</option>
-                <option value="365">1 year (365 days)</option>
+                <option value="never">{t("apiKeys.expNever")}</option>
+                <option value="30">{t("apiKeys.exp30")}</option>
+                <option value="60">{t("apiKeys.exp60")}</option>
+                <option value="90">{t("apiKeys.exp90")}</option>
+                <option value="365">{t("apiKeys.exp365")}</option>
               </select>
             </Field>
 
@@ -426,14 +472,16 @@ export function CreateApiKeyDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting || !name.trim()}
                 data-testid="submit-create-api-key-btn"
               >
-                {isSubmitting ? "Generating..." : "Generate key"}
+                {isSubmitting
+                  ? t("apiKeys.generating")
+                  : t("apiKeys.generateKey")}
               </Button>
             </div>
           </form>

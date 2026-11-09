@@ -24,8 +24,10 @@ import { Input } from "../ui/input";
 import { Field } from "../ui/field";
 import { NativeSelect } from "../ui/native-select";
 import { RichTextEditor } from "../rich-text/rich-text-editor";
+import { useI18n } from "../../lib/i18n/context";
 import { apiFetch } from "../../lib/api-client";
 import { errorCopy } from "../../lib/api-errors";
+import { hasRichTextContent } from "../../lib/rich-text";
 
 export interface FaqQuestionDialogProps {
   open: boolean;
@@ -50,23 +52,26 @@ export function FaqQuestionDialog({
   productLocales,
   onSuccess,
 }: FaqQuestionDialogProps): React.JSX.Element {
+  const { t } = useI18n();
   const isEditing = Boolean(question);
 
   const defaultLocale = productLocales?.defaultLocale ?? DEFAULT_LOCALE;
-  const enabledLocales = (productLocales?.enabledLocales && productLocales.enabledLocales.length > 0)
-    ? productLocales.enabledLocales
-    : [defaultLocale];
-  const [activeLocale, setActiveLocale] = React.useState<SupportedLocale>(defaultLocale);
+  const enabledLocales =
+    productLocales?.enabledLocales && productLocales.enabledLocales.length > 0
+      ? productLocales.enabledLocales
+      : [defaultLocale];
+  const [activeLocale, setActiveLocale] =
+    React.useState<SupportedLocale>(defaultLocale);
   const [translations, setTranslations] = React.useState<
     Record<string, { question?: string; answer?: RichTextDoc | null }>
   >(question?.translations ?? {});
 
   const [categoryId, setCategoryId] = React.useState(
-    question?.categoryId ?? defaultCategoryId ?? categories[0]?.id ?? ""
+    question?.categoryId ?? defaultCategoryId ?? categories[0]?.id ?? "",
   );
   const [title, setTitle] = React.useState(question?.question ?? "");
   const [answer, setAnswer] = React.useState<RichTextDoc | null>(
-    question?.answer ?? { type: "doc", content: [] }
+    question?.answer ?? { type: "doc", content: [] },
   );
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
@@ -90,7 +95,9 @@ export function FaqQuestionDialog({
   }, [open, question, defaultCategoryId, categories, defaultLocale]);
 
   const currentTitle =
-    activeLocale === defaultLocale ? title : (translations[activeLocale]?.question ?? "");
+    activeLocale === defaultLocale
+      ? title
+      : (translations[activeLocale]?.question ?? "");
   const currentAnswer =
     activeLocale === defaultLocale
       ? answer
@@ -102,42 +109,37 @@ export function FaqQuestionDialog({
       if (loc === defaultLocale) {
         status[loc] = Boolean(title.trim());
       } else {
-        const trans = translations[loc];
-        status[loc] = Boolean(trans?.question?.trim());
+        status[loc] = Boolean(translations[loc]?.question?.trim());
       }
     }
     return status;
   }, [enabledLocales, defaultLocale, title, translations]);
 
-  const handleCurrentTitleChange = (nextTitle: string) => {
+  const handleCurrentTitleChange = (val: string) => {
     if (activeLocale === defaultLocale) {
-      setTitle(nextTitle);
-      if (errors.title) {
-        setErrors((prev) => ({ ...prev, title: "" }));
-      }
+      setTitle(val);
+      if (errors.title) setErrors((prev) => ({ ...prev, title: "" }));
     } else {
       setTranslations((prev) => ({
         ...prev,
         [activeLocale]: {
           ...prev[activeLocale],
-          question: nextTitle,
+          question: val,
         },
       }));
     }
   };
 
-  const handleCurrentAnswerChange = (nextAnswer: RichTextDoc | null) => {
+  const handleCurrentAnswerChange = (val: RichTextDoc | null) => {
     if (activeLocale === defaultLocale) {
-      setAnswer(nextAnswer);
-      if (errors.answer) {
-        setErrors((prev) => ({ ...prev, answer: "" }));
-      }
+      setAnswer(val);
+      if (errors.answer) setErrors((prev) => ({ ...prev, answer: "" }));
     } else {
       setTranslations((prev) => ({
         ...prev,
         [activeLocale]: {
           ...prev[activeLocale],
-          answer: nextAnswer,
+          answer: val,
         },
       }));
     }
@@ -147,28 +149,17 @@ export function FaqQuestionDialog({
     e.preventDefault();
 
     const newErrors: Record<string, string> = {};
-    if (!categoryId) {
-      newErrors.categoryId = "Choose a category.";
-    }
-
     const trimmedTitle = title.trim();
-    if (!trimmedTitle) {
-      newErrors.title = "Enter a title.";
-    } else if (trimmedTitle.length < 5 || trimmedTitle.length > 200) {
-      newErrors.title = "Title must be between 5 and 200 characters.";
+
+    if (!categoryId) {
+      newErrors.categoryId = t("ui.categoryChoose");
+    }
+    if (trimmedTitle.length < 5 || trimmedTitle.length > 200) {
+      newErrors.title = t("faq.questionLengthError");
     }
 
-    const hasContent =
-      answer?.content &&
-      answer.content.length > 0 &&
-      answer.content.some((node: any) => {
-        if (node.text?.trim()) return true;
-        if (Array.isArray(node.content) && node.content.length > 0) return true;
-        return false;
-      });
-
-    if (!hasContent) {
-      newErrors.answer = "Content cannot be empty.";
+    if (!hasRichTextContent(answer)) {
+      newErrors.answer = t("faq.answerRequired");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -181,7 +172,8 @@ export function FaqQuestionDialog({
 
     try {
       if (isEditing && question) {
-        const oldCatId = question.categoryId;
+        const oldCatId =
+          question.categoryId !== categoryId ? question.categoryId : undefined;
         const updated = await apiFetch<AdminFaqQuestion>(
           `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/faq/questions/${encodeURIComponent(question.id)}`,
           {
@@ -192,10 +184,10 @@ export function FaqQuestionDialog({
               answer: answer ?? { type: "doc", content: [] },
               translations,
             },
-          }
+          },
         );
-        toast.success("Question updated");
-        onSuccess(updated, oldCatId !== categoryId ? oldCatId : undefined);
+        toast.success(t("faq.questionUpdated"));
+        onSuccess(updated, oldCatId);
       } else {
         const created = await apiFetch<AdminFaqQuestion>(
           `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/faq/questions`,
@@ -207,9 +199,9 @@ export function FaqQuestionDialog({
               answer: answer ?? { type: "doc", content: [] },
               translations,
             },
-          }
+          },
         );
-        toast.success("Question created");
+        toast.success(t("faq.questionCreated"));
         onSuccess(created);
       }
       onOpenChange(false);
@@ -226,13 +218,9 @@ export function FaqQuestionDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Edit question" : "New question"}
+            {isEditing ? t("faq.editQuestionTitle") : t("faq.newQuestionTitle")}
           </DialogTitle>
-          <DialogDescription>
-            {isEditing
-              ? "Update the question, category, or answer prose."
-              : "Add a question and comprehensive answer to this FAQ."}
-          </DialogDescription>
+          <DialogDescription>{t("faq.questionDialogDesc")}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
@@ -244,7 +232,11 @@ export function FaqQuestionDialog({
             translationsStatus={translationsStatus}
           />
 
-          <Field id="faq-question-category" label="Category" error={errors.categoryId}>
+          <Field
+            id="faq-question-category"
+            label={t("faq.categoryLabel")}
+            error={errors.categoryId}
+          >
             <NativeSelect
               value={categoryId}
               onChange={(e) => {
@@ -264,16 +256,12 @@ export function FaqQuestionDialog({
 
           <Field
             id="faq-question-title"
-            label={`Question ${activeLocale !== defaultLocale ? `(${activeLocale})` : ""}`}
+            label={`${t("faq.questionLabel")}${activeLocale !== defaultLocale ? ` (${activeLocale})` : ""}`}
             error={errors.title}
           >
             <Input
               type="text"
-              placeholder={
-                activeLocale === defaultLocale
-                  ? "e.g. How do I change my billing payment method?"
-                  : `Translation for question (${activeLocale})...`
-              }
+              placeholder={t("faq.questionPlaceholder")}
               value={currentTitle}
               onChange={(e) => handleCurrentTitleChange(e.target.value)}
               dir={isRtl(activeLocale) ? "rtl" : "ltr"}
@@ -283,8 +271,12 @@ export function FaqQuestionDialog({
           </Field>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="faq-question-answer" className="text-sm font-semibold text-foreground">
-              Answer {activeLocale !== defaultLocale && `(${activeLocale})`}
+            <label
+              htmlFor="faq-question-answer"
+              className="text-sm font-semibold text-foreground"
+            >
+              {t("faq.answerLabel")}{" "}
+              {activeLocale !== defaultLocale && `(${activeLocale})`}
             </label>
             <div dir={isRtl(activeLocale) ? "rtl" : "ltr"}>
               <RichTextEditor
@@ -313,16 +305,14 @@ export function FaqQuestionDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={isSubmitting || !title.trim()}>
               {isSubmitting
-                ? isEditing
-                  ? "Saving…"
-                  : "Creating…"
+                ? t("common.saving")
                 : isEditing
-                ? "Save question"
-                : "Create question"}
+                  ? t("common.save")
+                  : t("faq.newQuestion")}
             </Button>
           </div>
         </form>

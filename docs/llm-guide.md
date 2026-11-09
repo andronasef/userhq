@@ -58,6 +58,8 @@ Use the request schemas, including a minimal `{"type":"doc","content":[{"type":"
 
 After an edit, read back the relevant resource and check its state; report actual identifiers and outcomes without credentials. Do not report a draft as published or an enabled module as a delivered notification. When using UI automation, verify the visible result as well as successful navigation.
 
+Changing a product's `locales.defaultLocale` promotes existing translations into the main content fields for changelog entries, FAQ questions, and roadmap items. Before making that change, inspect `GET P/locales/swap-preview?target=<locale>` with `settings:read` and explain the promotion/fallback counts. The subsequent product `PATCH` needs `settings:write`; it preserves previous content as a source-language translation when promoting a translation and retains original content when no translation exists. See the [API reference](automation-api.md) for the response shape. The operation does not generate translations.
+
 ## Page, recover and deduplicate correctly
 
 - Follow opaque `nextCursor` values with URL encoding; do not construct them. Respect route-specific wrappers and fixed versus configurable page sizes. Webhook delivery logs use page numbers, not cursors.

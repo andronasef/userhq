@@ -14,6 +14,7 @@ import {
 import { Button } from "../ui/button";
 import { ConfirmDialog } from "../ui/confirm-dialog";
 import { extractTextFromRichText } from "./faq-portal";
+import { useI18n } from "../../lib/i18n/context";
 import { apiFetch } from "../../lib/api-client";
 import { errorCopy } from "../../lib/api-errors";
 import { cn } from "../../lib/utils";
@@ -35,6 +36,7 @@ export function FaqQuestionItem({
   onEdit,
   onDelete,
 }: FaqQuestionItemProps): React.JSX.Element {
+  const { t } = useI18n();
   const { ref, handleRef, isDragging } = useSortable({
     id: question.id,
     index,
@@ -53,9 +55,9 @@ export function FaqQuestionItem({
         `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/faq/questions/${encodeURIComponent(question.id)}`,
         {
           method: "DELETE",
-        }
+        },
       );
-      toast.success("Question deleted");
+      toast.success(t("faq.questionDeleted"));
       onDelete(question.id);
     } catch (err: any) {
       toast.error(errorCopy(err));
@@ -69,7 +71,8 @@ export function FaqQuestionItem({
         ref={ref}
         className={cn(
           "flex items-center justify-between gap-3 p-3 bg-background border border-border rounded-md shadow-2xs hover:border-foreground/20 transition-all",
-          isDragging && "shadow-lg ring-2 ring-primary/40 opacity-70 z-20 bg-muted/40"
+          isDragging &&
+            "shadow-lg ring-2 ring-primary/40 opacity-70 z-20 bg-muted/40",
         )}
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -113,14 +116,14 @@ export function FaqQuestionItem({
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => onEdit(question)}>
                 <Pencil className="size-3.5 mr-2" />
-                Edit
+                {t("common.edit")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => setDeleteOpen(true)}
                 className="text-destructive focus:text-destructive"
               >
                 <Trash2 className="size-3.5 mr-2" />
-                Delete
+                {t("common.delete")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -130,11 +133,11 @@ export function FaqQuestionItem({
       <ConfirmDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        title="Delete question"
-        description="Are you sure you want to delete this FAQ question? This cannot be undone."
-        dismissLabel="Cancel"
-        confirmLabel="Delete"
-        pendingLabel="Deleting…"
+        title={t("faq.deleteQuestionTitle")}
+        description={t("faq.deleteQuestionDesc")}
+        dismissLabel={t("common.cancel")}
+        confirmLabel={t("common.delete")}
+        pendingLabel={t("common.deleting")}
         onConfirm={handleDelete}
       />
     </>

@@ -15,11 +15,24 @@ import {
   isRtl,
 } from "@userhq/types";
 import { Button } from "../../../../../components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../../../../../components/ui/dialog";
 import { apiFetch } from "../../../../../lib/api-client";
 import { errorCopy } from "../../../../../lib/api-errors";
 import { QueryProvider } from "../../../../../lib/query-client";
 import { useI18n } from "../../../../../lib/i18n/context";
 import { cn } from "../../../../../lib/utils";
+
+export interface LocaleSwapStats {
+  changelog: { total: number; promoted: number; fallback: number };
+  faq: { total: number; promoted: number; fallback: number };
+  roadmap: { total: number; promoted: number; fallback: number };
+}
 
 export interface ProductLocalesFormProps {
   ws: string;
@@ -34,13 +47,26 @@ function ProductLocalesFormInner({
   const { t } = useI18n();
 
   const initialDefault = product.locales?.defaultLocale ?? DEFAULT_LOCALE;
-  const initialEnabled = (product.locales?.enabledLocales && product.locales.enabledLocales.length > 0)
-    ? product.locales.enabledLocales
-    : [DEFAULT_LOCALE];
+  const initialEnabled =
+    product.locales?.enabledLocales && product.locales.enabledLocales.length > 0
+      ? product.locales.enabledLocales
+      : [DEFAULT_LOCALE];
 
-  const [defaultLocale, setDefaultLocale] = React.useState<SupportedLocale>(initialDefault);
-  const [enabledLocales, setEnabledLocales] = React.useState<SupportedLocale[]>(initialEnabled);
+  const [defaultLocale, setDefaultLocale] =
+    React.useState<SupportedLocale>(initialDefault);
+  const [enabledLocales, setEnabledLocales] =
+    React.useState<SupportedLocale[]>(initialEnabled);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
+
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
+  const [loadingPreview, setLoadingPreview] = React.useState(false);
+  const [swapStats, setSwapStats] = React.useState<LocaleSwapStats | null>(
+    null,
+  );
+  const [previewTarget, setPreviewTarget] =
+    React.useState<SupportedLocale | null>(null);
+  const [previewError, setPreviewError] = React.useState(false);
+  const previewRequest = React.useRef(0);
 
   const isDirty =
     defaultLocale !== initialDefault ||
@@ -51,7 +77,7 @@ function ProductLocalesFormInner({
     setErrorMsg(null);
     if (enabledLocales.includes(code)) {
       if (enabledLocales.length <= 1) {
-        setErrorMsg("At least one language must remain enabled.");
+        setErrorMsg(t("dashboard.atLeastOneLanguage"));
         return;
       }
       const next = enabledLocales.filter((l) => l !== code);
@@ -66,7 +92,10 @@ function ProductLocalesFormInner({
 
   const mutation = useMutation({
     mutationFn: async (payload: {
-      locales: { defaultLocale: SupportedLocale; enabledLocales: SupportedLocale[] };
+      locales: {
+        defaultLocale: SupportedLocale;
+        enabledLocales: SupportedLocale[];
+      };
     }) => {
       return apiFetch(`/api/v1/workspaces/${ws}/products/${product.slug}`, {
         method: "PATCH",
@@ -76,8 +105,11 @@ function ProductLocalesFormInner({
     },
     onSuccess: (updated) => {
       toast.success(t("dashboard.languagesSaved"));
-      if (updated.locales?.defaultLocale) setDefaultLocale(updated.locales.defaultLocale);
-      if (updated.locales?.enabledLocales) setEnabledLocales(updated.locales.enabledLocales);
+      setConfirmOpen(false);
+      if (updated.locales?.defaultLocale)
+        setDefaultLocale(updated.locales.defaultLocale);
+      if (updated.locales?.enabledLocales)
+        setEnabledLocales(updated.locales.enabledLocales);
       router.refresh();
     },
     onError: (err) => {
@@ -87,19 +119,67 @@ function ProductLocalesFormInner({
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!enabledLocales.includes(defaultLocale)) {
-      setErrorMsg(t("ui.defaultMustBeEnabled"));
+  const doSave = () => {
+    if (mutation.isPending) return;
+    if (
+      defaultLocale !== initialDefault &&
+      (loadingPreview || !swapStats || previewTarget !== defaultLocale)
+    )
       return;
-    }
-    setErrorMsg(null);
     mutation.mutate({
       locales: {
         defaultLocale,
         enabledLocales,
       },
     });
+  };
+
+  const loadPreview = async () => {
+    const request = ++previewRequest.current;
+    const target = defaultLocale;
+    setLoadingPreview(true);
+    setSwapStats(null);
+    setPreviewTarget(null);
+    setPreviewError(false);
+    try {
+      const stats = await apiFetch<LocaleSwapStats>(
+        `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product.slug)}/locales/swap-preview?target=${encodeURIComponent(target)}`,
+      );
+      if (request !== previewRequest.current) return;
+      setSwapStats(stats);
+      setPreviewTarget(target);
+    } catch {
+      if (request === previewRequest.current) setPreviewError(true);
+    } finally {
+      if (request === previewRequest.current) setLoadingPreview(false);
+    }
+  };
+
+  const handleConfirmOpenChange = (open: boolean) => {
+    if (mutation.isPending) return;
+    setConfirmOpen(open);
+    if (!open) {
+      ++previewRequest.current;
+      setSwapStats(null);
+      setPreviewTarget(null);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!enabledLocales.includes(defaultLocale)) {
+      setErrorMsg(t("ui.defaultMustBeEnabled"));
+      return;
+    }
+    setErrorMsg(null);
+
+    if (defaultLocale !== initialDefault) {
+      setConfirmOpen(true);
+      await loadPreview();
+      return;
+    }
+
+    doSave();
   };
 
   return (
@@ -136,6 +216,7 @@ function ProductLocalesFormInner({
         </p>
         <select
           id="defaultLocaleSelect"
+          disabled={mutation.isPending}
           value={defaultLocale}
           onChange={(e) => {
             const val = e.target.value as SupportedLocale;
@@ -175,6 +256,7 @@ function ProductLocalesFormInner({
             return (
               <button
                 type="button"
+                disabled={mutation.isPending}
                 key={code}
                 onClick={() => toggleLocale(code)}
                 className={cn(
@@ -194,11 +276,13 @@ function ProductLocalesFormInner({
                     )}
                     {isDefault && (
                       <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-muted text-foreground border border-border">
-                        Default
+                        {t("ui.defaultLabel")}
                       </span>
                     )}
                   </div>
-                  <div className="text-xs text-muted-foreground truncate">{meta.name}</div>
+                  <div className="text-xs text-muted-foreground truncate">
+                    {meta.name}
+                  </div>
                 </div>
 
                 <div
@@ -233,14 +317,184 @@ function ProductLocalesFormInner({
           )}
         </Button>
       </div>
+
+      <LocaleSwapConfirmation
+        open={confirmOpen}
+        onOpenChange={handleConfirmOpenChange}
+        loadingPreview={loadingPreview}
+        swapStats={swapStats}
+        previewTarget={previewTarget}
+        defaultLocale={defaultLocale}
+        previewError={previewError}
+        saving={mutation.isPending}
+        onRetry={loadPreview}
+        onConfirm={doSave}
+      />
     </form>
   );
 }
 
-export function ProductLocalesForm(props: ProductLocalesFormProps): React.JSX.Element {
+export function ProductLocalesForm(
+  props: ProductLocalesFormProps,
+): React.JSX.Element {
   return (
     <QueryProvider>
       <ProductLocalesFormInner {...props} />
     </QueryProvider>
+  );
+}
+
+export function LocaleSwapConfirmation({
+  open,
+  onOpenChange,
+  loadingPreview,
+  swapStats,
+  previewTarget,
+  defaultLocale,
+  previewError,
+  saving,
+  onRetry,
+  onConfirm,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  loadingPreview: boolean;
+  swapStats: LocaleSwapStats | null;
+  previewTarget: SupportedLocale | null;
+  defaultLocale: SupportedLocale;
+  previewError: boolean;
+  saving: boolean;
+  onRetry: () => void;
+  onConfirm: () => void;
+}): React.JSX.Element {
+  const { t } = useI18n();
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <AlertCircle className="size-5 text-amber-500 shrink-0" />
+            {t("dashboard.changeDefaultLanguageTitle")}
+          </DialogTitle>
+          <DialogDescription>
+            {t("dashboard.changeDefaultLanguageDesc")}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3 py-2 text-sm text-muted-foreground">
+          <div className="p-3 rounded-lg border border-amber-500/20 bg-amber-500/10 text-foreground text-xs leading-relaxed">
+            {t("dashboard.changeDefaultLanguageNotice")}
+          </div>
+
+          {loadingPreview ? (
+            <div className="flex items-center justify-center py-4 text-xs text-muted-foreground gap-2">
+              <LoaderCircle className="size-4 animate-spin" />
+              <span>{t("common.loading")}</span>
+            </div>
+          ) : previewError ? (
+            <div role="alert" className="space-y-2 text-destructive">
+              <p>{t("dashboard.swapPreviewError")}</p>
+              <Button type="button" variant="outline" onClick={onRetry}>
+                {t("dashboard.retryPreview")}
+              </Button>
+            </div>
+          ) : swapStats ? (
+            <div className="space-y-2 rounded-lg border border-border p-3 text-xs bg-muted/30">
+              <div className="flex justify-between items-center py-1 border-b border-border/50">
+                <span className="font-medium text-foreground">
+                  {t("nav.changelog")}
+                </span>
+                <span>
+                  <strong className="text-foreground">
+                    {swapStats.changelog.promoted}
+                  </strong>{" "}
+                  {t("dashboard.promotedCount")}
+                  {swapStats.changelog.fallback > 0 && (
+                    <>
+                      ,{" "}
+                      <strong className="text-foreground">
+                        {swapStats.changelog.fallback}
+                      </strong>{" "}
+                      {t("dashboard.fallbackCount")}
+                    </>
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-border/50">
+                <span className="font-medium text-foreground">
+                  {t("nav.faq")}
+                </span>
+                <span>
+                  <strong className="text-foreground">
+                    {swapStats.faq.promoted}
+                  </strong>{" "}
+                  {t("dashboard.promotedCount")}
+                  {swapStats.faq.fallback > 0 && (
+                    <>
+                      ,{" "}
+                      <strong className="text-foreground">
+                        {swapStats.faq.fallback}
+                      </strong>{" "}
+                      {t("dashboard.fallbackCount")}
+                    </>
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="font-medium text-foreground">
+                  {t("nav.roadmap")}
+                </span>
+                <span>
+                  <strong className="text-foreground">
+                    {swapStats.roadmap.promoted}
+                  </strong>{" "}
+                  {t("dashboard.promotedCount")}
+                  {swapStats.roadmap.fallback > 0 && (
+                    <>
+                      ,{" "}
+                      <strong className="text-foreground">
+                        {swapStats.roadmap.fallback}
+                      </strong>{" "}
+                      {t("dashboard.fallbackCount")}
+                    </>
+                  )}
+                </span>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="flex justify-end gap-2 pt-2 border-t border-border">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={saving}
+          >
+            {t("common.cancel")}
+          </Button>
+          <Button
+            type="button"
+            variant="default"
+            onClick={onConfirm}
+            disabled={
+              saving ||
+              loadingPreview ||
+              !swapStats ||
+              previewTarget !== defaultLocale
+            }
+          >
+            {saving ? (
+              <>
+                <LoaderCircle className="size-4 animate-spin mr-2" />
+                {t("common.saving")}
+              </>
+            ) : (
+              t("dashboard.confirmLanguageChange")
+            )}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

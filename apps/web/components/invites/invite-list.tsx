@@ -9,6 +9,7 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { EmptyState } from "../empty-state";
 import { ConfirmDialog } from "../ui/confirm-dialog";
+import { useI18n } from "@/lib/i18n/context";
 import { apiFetch } from "@/lib/api-client";
 import { formatDate } from "@/lib/format";
 
@@ -19,17 +20,20 @@ export interface InviteListProps {
 }
 
 export function InviteList({ kind, rows, workspaceSlug }: InviteListProps) {
+  const { t } = useI18n();
   const router = useRouter();
-  const [selectedInvite, setSelectedInvite] = React.useState<InviteRow | null>(null);
+  const [selectedInvite, setSelectedInvite] = React.useState<InviteRow | null>(
+    null,
+  );
 
   if (rows.length === 0) {
     return (
       <EmptyState
-        title="No invites yet"
+        title={t("team.noInvitesTitle")}
         body={
           kind === "platform"
             ? "Create an invite link above to let a company set up a workspace."
-            : "Create an invite link above to add a teammate."
+            : t("team.noInvitesDesc")
         }
       />
     );
@@ -38,13 +42,13 @@ export function InviteList({ kind, rows, workspaceSlug }: InviteListProps) {
   const renderStateBadge = (state: InviteRow["state"]) => {
     switch (state) {
       case "pending":
-        return <Badge variant="outline">Pending</Badge>;
+        return <Badge variant="outline">{t("team.statePending")}</Badge>;
       case "used":
-        return <Badge variant="neutral">Used</Badge>;
+        return <Badge variant="neutral">{t("team.stateUsed")}</Badge>;
       case "expired":
-        return <Badge variant="neutral">Expired</Badge>;
+        return <Badge variant="neutral">{t("team.stateExpired")}</Badge>;
       case "revoked":
-        return <Badge variant="neutral">Revoked</Badge>;
+        return <Badge variant="neutral">{t("team.stateRevoked")}</Badge>;
     }
   };
 
@@ -73,7 +77,7 @@ export function InviteList({ kind, rows, workspaceSlug }: InviteListProps) {
     await apiFetch(endpoint, {
       method: "DELETE",
     });
-    toast.success("Invite revoked");
+    toast.success(t("team.inviteRevokedToast"));
     router.refresh();
   };
 
@@ -82,10 +86,10 @@ export function InviteList({ kind, rows, workspaceSlug }: InviteListProps) {
       <Table>
         <THead>
           <TR>
-            <TH>Email</TH>
-            <TH>State</TH>
+            <TH>{t("team.emailLabel")}</TH>
+            <TH>{t("apiKeys.colStatus")}</TH>
             <TH>Details</TH>
-            <TH className="text-right">Actions</TH>
+            <TH className="text-right">{t("team.colActions")}</TH>
           </TR>
         </THead>
         <TBody>
@@ -103,10 +107,10 @@ export function InviteList({ kind, rows, workspaceSlug }: InviteListProps) {
                     variant="ghost"
                     size="sm"
                     className="text-destructive hover:text-destructive"
-                    aria-label={`Revoke invite for ${row.email}`}
+                    aria-label={`${t("team.revokeInvite")} ${row.email}`}
                     onClick={() => setSelectedInvite(row)}
                   >
-                    Revoke invite
+                    {t("team.revokeInvite")}
                   </Button>
                 )}
               </TD>
@@ -120,15 +124,15 @@ export function InviteList({ kind, rows, workspaceSlug }: InviteListProps) {
         onOpenChange={(open) => {
           if (!open) setSelectedInvite(null);
         }}
-        title="Revoke this invite?"
+        title={t("team.revokeDialogTitle")}
         description={
           selectedInvite
             ? `The link for ${selectedInvite.email} stops working right away. You can create a new one at any time.`
             : ""
         }
-        dismissLabel="Keep invite"
-        confirmLabel="Revoke invite"
-        pendingLabel="Revoking…"
+        dismissLabel={t("common.cancel")}
+        confirmLabel={t("team.revokeInvite")}
+        pendingLabel={t("common.deleting")}
         onConfirm={handleRevoke}
       />
     </>

@@ -16,6 +16,7 @@ import { EmptyState } from "../empty-state";
 import { FaqCategoryItem } from "./faq-category-item";
 import { FaqCategoryDialog } from "./faq-category-dialog";
 import { FaqQuestionDialog } from "./faq-question-dialog";
+import { useI18n } from "../../lib/i18n/context";
 import { apiFetch } from "../../lib/api-client";
 import { errorCopy } from "../../lib/api-errors";
 
@@ -32,6 +33,7 @@ export function FaqManager({
   initialCategories,
   productLocales,
 }: FaqManagerProps): React.JSX.Element {
+  const { t } = useI18n();
   const [categories, setCategories] =
     React.useState<AdminFaqCategory[]>(initialCategories);
 
@@ -49,12 +51,10 @@ export function FaqManager({
 
   // Sort categories and questions by rank ascending
   const sortedCategories = React.useMemo(() => {
-    return [...categories]
-      .sort(byRank)
-      .map((cat) => ({
-        ...cat,
-        questions: [...cat.questions].sort(byRank),
-      }));
+    return [...categories].sort(byRank).map((cat) => ({
+      ...cat,
+      questions: [...cat.questions].sort(byRank),
+    }));
   }, [categories]);
 
   const handleDragEnd = async (event: any) => {
@@ -84,7 +84,7 @@ export function FaqManager({
       } else if (targetIndex >= otherCats.length) {
         newRank = generateKeyBetween(
           otherCats[otherCats.length - 1].rank,
-          null
+          null,
         );
       } else {
         const prevRank = otherCats[targetIndex - 1].rank;
@@ -96,7 +96,7 @@ export function FaqManager({
 
       const previousCategories = [...categories];
       setCategories((prev) =>
-        prev.map((c) => (c.id === sourceId ? { ...c, rank: newRank } : c))
+        prev.map((c) => (c.id === sourceId ? { ...c, rank: newRank } : c)),
       );
 
       try {
@@ -105,13 +105,13 @@ export function FaqManager({
           {
             method: "PATCH",
             body: { targetRank: newRank },
-          }
+          },
         );
       } catch (err: any) {
         setCategories(previousCategories);
         toast.error(
           errorCopy(err, undefined) ||
-            "Couldn't reorder FAQ category. Check your connection and try again."
+            "Couldn't reorder FAQ category. Check your connection and try again.",
         );
       }
       return;
@@ -155,10 +155,7 @@ export function FaqManager({
     if (targetCat) {
       targetIndex = destQuestions.length;
     } else if (typeof target.index === "number") {
-      targetIndex = Math.min(
-        Math.max(0, target.index),
-        destQuestions.length
-      );
+      targetIndex = Math.min(Math.max(0, target.index), destQuestions.length);
     } else {
       targetIndex = destQuestions.length;
     }
@@ -171,7 +168,7 @@ export function FaqManager({
     } else if (targetIndex >= destQuestions.length) {
       newRank = generateKeyBetween(
         destQuestions[destQuestions.length - 1].rank,
-        null
+        null,
       );
     } else {
       const prevRank = destQuestions[targetIndex - 1].rank;
@@ -179,10 +176,7 @@ export function FaqManager({
       newRank = generateKeyBetween(prevRank, nextRank);
     }
 
-    if (
-      sourceCatId === targetCatId &&
-      sourceQuestion.rank === newRank
-    ) {
+    if (sourceCatId === targetCatId && sourceQuestion.rank === newRank) {
       return;
     }
 
@@ -210,11 +204,13 @@ export function FaqManager({
           };
         } else if (cat.id === targetCatId) {
           // Added to target
-          const nextQuestions = [...cat.questions, updatedQuestion].sort(byRank);
+          const nextQuestions = [...cat.questions, updatedQuestion].sort(
+            byRank,
+          );
           return { ...cat, questions: nextQuestions };
         }
         return cat;
-      })
+      }),
     );
 
     try {
@@ -226,13 +222,13 @@ export function FaqManager({
             targetRank: newRank,
             targetCategoryId: targetCatId,
           },
-        }
+        },
       );
     } catch (err: any) {
       setCategories(previousCategories);
       toast.error(
         errorCopy(err, undefined) ||
-          "Couldn't reorder FAQ question. Check your connection and try again."
+          "Couldn't reorder FAQ question. Check your connection and try again.",
       );
     }
   };
@@ -263,7 +259,9 @@ export function FaqManager({
     setCategories((prev) => {
       const exists = prev.some((c) => c.id === saved.id);
       if (exists) {
-        return prev.map((c) => (c.id === saved.id ? { ...c, name: saved.name } : c));
+        return prev.map((c) =>
+          c.id === saved.id ? { ...c, name: saved.name } : c,
+        );
       }
       return [...prev, saved];
     });
@@ -275,7 +273,7 @@ export function FaqManager({
 
   const handleQuestionSuccess = (
     saved: AdminFaqQuestion,
-    oldCatId?: string
+    oldCatId?: string,
   ) => {
     setCategories((prev) => {
       return prev.map((cat) => {
@@ -305,7 +303,7 @@ export function FaqManager({
       prev.map((cat) => ({
         ...cat,
         questions: cat.questions.filter((q) => q.id !== questionId),
-      }))
+      })),
     );
   };
 
@@ -319,12 +317,12 @@ export function FaqManager({
               aria-hidden="true"
             />
           }
-          title="No FAQ categories yet"
-          body="Organize self-serve help articles and common questions for your customers."
+          title={t("faq.emptyCategoriesTitle")}
+          body={t("faq.emptyCategoriesDesc")}
           action={
             <Button onClick={handleOpenAddCategory}>
               <Plus className="size-4 mr-1.5" />
-              New category
+              {t("faq.newCategory")}
             </Button>
           }
         />
@@ -346,7 +344,7 @@ export function FaqManager({
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            Drag categories or questions to reorder them on the public portal.
+            {t("faq.reorderHelp")}
           </p>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -356,7 +354,7 @@ export function FaqManager({
               onClick={handleOpenAddCategory}
             >
               <Plus className="size-4 mr-1.5" />
-              New category
+              {t("faq.newCategory")}
             </Button>
             <Button
               type="button"
@@ -364,7 +362,7 @@ export function FaqManager({
               onClick={() => handleOpenAddQuestion()}
             >
               <Plus className="size-4 mr-1.5" />
-              New question
+              {t("faq.newQuestion")}
             </Button>
           </div>
         </div>

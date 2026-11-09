@@ -123,6 +123,7 @@ Restrictions are stored as product ids, while URLs use product slugs. An unrestr
 | `GET` | `/api/v1/workspaces/:ws/export/feedback` | `export:read` | Bulk export of posts, comments and votes. |
 | `GET` | `/api/v1/workspaces/:ws/products` | `settings:read` | List the workspace's products with their feature switches. |
 | `GET` | `/api/v1/workspaces/:ws/products/:product` | `settings:read` | Get one product's settings: feature switches, name, slug, tagline, website, accent colors, and configured `locales` (`defaultLocale`, `enabledLocales`). |
+| `GET` | `/api/v1/workspaces/:ws/products/:product/locales/swap-preview` | `settings:read` | Preview the impact of changing a product's default language: counts of translated and untranslated changelog entries, FAQ questions, and roadmap items (`?target=<locale>`). |
 | `PATCH` | `/api/v1/workspaces/:ws/products/:product` | `settings:write` | Update the four feature switches (`features.board`, `roadmap`, `changelog`, `faq`), profile fields (name, slug, tagline, website, accent colors), and `locales` configuration (`defaultLocale`, `enabledLocales`). A key can clear the logo (`logoUploadId: null`) but not set one, because keys cannot upload files. |
 | `GET` | `/api/v1/workspaces/:ws/products/:product/statuses` | `settings:read` | List the product's statuses in order. |
 | `POST` | `/api/v1/workspaces/:ws/products/:product/statuses` | `settings:write` | Create a status (`name`, `type`, `color`, optional `isPublicRoadmap`). |
@@ -156,6 +157,8 @@ Restrictions are stored as product ids, while URLs use product slugs. An unrestr
 Not available to keys: API keys, webhook secret rotation, members, invites, workspace settings, product creation and deletion, and the account and portal routes. All of these return `403 api_key_route_forbidden`.
 
 ---
+
+Changing `locales.defaultLocale` through the product `PATCH` also updates entry content in the same transaction. Existing target-language translations are promoted into the main fields, and previous main content is preserved under its source language. Entries without a target translation retain their existing content and source language. No machine translation is performed. To inspect the impact first, call `GET /api/v1/workspaces/:ws/products/:product/locales/swap-preview?target=es` (replace `es` with the intended supported locale). The response contains `changelog`, `faq`, and `roadmap`, each with `total`, `promoted`, and `fallback` counts. This is a point-in-time preview; the API does not require a preview token or a separate confirmation field for the subsequent `PATCH`.
 
 ## 5. Pagination and export
 

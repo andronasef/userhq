@@ -13,6 +13,7 @@ import {
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Field } from "../ui/field";
+import { useI18n } from "../../lib/i18n/context";
 import { apiFetch } from "../../lib/api-client";
 import { errorCopy } from "../../lib/api-errors";
 
@@ -33,6 +34,7 @@ export function FaqCategoryDialog({
   product,
   onSuccess,
 }: FaqCategoryDialogProps): React.JSX.Element {
+  const { t } = useI18n();
   const isEditing = Boolean(category);
   const [name, setName] = React.useState(category?.name ?? "");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -71,9 +73,9 @@ export function FaqCategoryDialog({
           {
             method: "PATCH",
             body: { name: trimmed },
-          }
+          },
         );
-        toast.success("Category updated");
+        toast.success(t("faq.categoryUpdated"));
         onSuccess(updated);
       } else {
         const created = await apiFetch<AdminFaqCategory>(
@@ -81,9 +83,9 @@ export function FaqCategoryDialog({
           {
             method: "POST",
             body: { name: trimmed },
-          }
+          },
         );
-        toast.success("Category created");
+        toast.success(t("faq.categoryCreated"));
         onSuccess(created);
       }
       onOpenChange(false);
@@ -101,17 +103,17 @@ export function FaqCategoryDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Rename category" : "New category"}
+            {isEditing ? t("faq.editCategoryTitle") : t("faq.newCategoryTitle")}
           </DialogTitle>
-          <DialogDescription>
-            {isEditing
-              ? "Update the name of this FAQ category."
-              : "Add an FAQ category to organize self-serve help articles."}
-          </DialogDescription>
+          <DialogDescription>{t("faq.categoryDialogDesc")}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-          <Field id="faq-category-name" label="Category name" error={error ?? undefined}>
+          <Field
+            id="faq-category-name"
+            label={t("faq.categoryNameLabel")}
+            error={error ?? undefined}
+          >
             <Input
               type="text"
               placeholder="e.g. Account & Billing"
@@ -133,16 +135,14 @@ export function FaqCategoryDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={isSubmitting || !name.trim()}>
               {isSubmitting
-                ? isEditing
-                  ? "Saving…"
-                  : "Creating…"
+                ? t("common.saving")
                 : isEditing
-                ? "Save category"
-                : "New category"}
+                  ? t("common.save")
+                  : t("faq.newCategory")}
             </Button>
           </div>
         </form>

@@ -3,12 +3,17 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
-import { CreateInviteInputSchema, InviteCreatedSchema, type InviteCreated } from "@userhq/types";
+import {
+  CreateInviteInputSchema,
+  InviteCreatedSchema,
+  type InviteCreated,
+} from "@userhq/types";
 import { Field } from "../ui/field";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Alert } from "../ui/alert";
 import { CopyField } from "../copy-field";
+import { useI18n } from "@/lib/i18n/context";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
 import { errorCopy, FIELD_FOR_CODE } from "@/lib/api-errors";
 import { formatDate } from "@/lib/format";
@@ -19,12 +24,14 @@ export interface InviteCreatorProps {
 }
 
 export function InviteCreator({ kind: _kind, endpoint }: InviteCreatorProps) {
+  const { t } = useI18n();
   const router = useRouter();
   const [email, setEmail] = React.useState("");
   const [fieldError, setFieldError] = React.useState<string | undefined>();
   const [alertError, setAlertError] = React.useState<string | undefined>();
   const [isPending, setIsPending] = React.useState(false);
-  const [createdInvite, setCreatedInvite] = React.useState<InviteCreated | null>(null);
+  const [createdInvite, setCreatedInvite] =
+    React.useState<InviteCreated | null>(null);
 
   const validateEmail = (): boolean => {
     const parse = CreateInviteInputSchema.safeParse({ email });
@@ -68,7 +75,9 @@ export function InviteCreator({ kind: _kind, endpoint }: InviteCreatorProps) {
           setAlertError(errorCopy(err, { email: submittedEmail }));
         }
       } else {
-        setAlertError("Something went wrong on our end. Try again in a moment.");
+        setAlertError(
+          "Something went wrong on our end. Try again in a moment.",
+        );
       }
     } finally {
       setIsPending(false);
@@ -78,16 +87,14 @@ export function InviteCreator({ kind: _kind, endpoint }: InviteCreatorProps) {
   return (
     <div className="flex flex-col gap-4">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {alertError && (
-          <Alert variant="destructive">{alertError}</Alert>
-        )}
+        {alertError && <Alert variant="destructive">{alertError}</Alert>}
 
         <div className="flex flex-col sm:flex-row sm:items-start gap-3">
           <div className="flex-1">
             <Field
               id="invite-email"
-              label="Email"
-              helper="Only someone signed in with this email can use the link."
+              label={t("team.emailLabel")}
+              helper={t("team.emailHelper")}
               error={fieldError}
             >
               <Input
@@ -115,10 +122,10 @@ export function InviteCreator({ kind: _kind, endpoint }: InviteCreatorProps) {
               {isPending ? (
                 <>
                   <LoaderCircle className="size-4 animate-spin" />
-                  <span>Creating link…</span>
+                  <span>{t("team.creatingLink")}</span>
                 </>
               ) : (
-                <span>Create invite link</span>
+                <span>{t("team.createInviteLink")}</span>
               )}
             </Button>
           </div>
@@ -128,13 +135,13 @@ export function InviteCreator({ kind: _kind, endpoint }: InviteCreatorProps) {
       {createdInvite && (
         <div className="bg-muted rounded-lg p-4 flex flex-col gap-2">
           <h3 className="text-sm font-semibold text-foreground">
-            Invite link created
+            {t("team.inviteCreatedTitle")}
           </h3>
           <CopyField value={createdInvite.link} />
           <p className="text-sm text-muted-foreground">
             Only {createdInvite.email} can use this link. It works once and
-            expires on {formatDate(createdInvite.expiresAt)}. Copy it now,
-            because it won't be shown again.
+            expires on {formatDate(createdInvite.expiresAt)}.{" "}
+            {t("team.inviteCreatedHelp")}
           </p>
         </div>
       )}

@@ -24,6 +24,7 @@ import { errorCopy, FIELD_FOR_CODE } from "../../../../lib/api-errors";
 import { QueryProvider } from "../../../../lib/query-client";
 import { ConfirmDialog } from "../../../../components/ui/confirm-dialog";
 import { flash } from "../../../../components/ui/toaster";
+import { useI18n } from "../../../../lib/i18n/context";
 
 export interface WorkspaceSettingsFormsProps {
   ws: string;
@@ -36,11 +37,12 @@ function WorkspaceGeneralForm({
   workspace,
   host,
 }: WorkspaceSettingsFormsProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const [copied, setCopied] = React.useState(false);
   const [alertError, setAlertError] = React.useState<string | null>(null);
   const [logoValue, setLogoValue] = React.useState<LogoValue | null>(
-    workspace.logoUrl ? { id: "", url: workspace.logoUrl } : null
+    workspace.logoUrl ? { id: "", url: workspace.logoUrl } : null,
   );
   const [logoUploading, setLogoUploading] = React.useState(false);
 
@@ -74,7 +76,7 @@ function WorkspaceGeneralForm({
       });
     },
     onSuccess: (updated) => {
-      toast.success("Changes saved");
+      toast.success(t("settings.savedToast"));
       reset({
         name: updated.name,
         websiteUrl: updated.websiteUrl ?? "",
@@ -114,14 +116,10 @@ function WorkspaceGeneralForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-xl">
-      {alertError && (
-        <Alert variant="destructive">
-          {alertError}
-        </Alert>
-      )}
+      {alertError && <Alert variant="destructive">{alertError}</Alert>}
 
       <Field
-        label="Workspace name"
+        label={t("settings.workspaceNameLabel")}
         id="ws-name"
         error={errors.name?.message}
       >
@@ -134,7 +132,7 @@ function WorkspaceGeneralForm({
         />
       </Field>
 
-      <Field label="URL" id="ws-slug">
+      <Field label={t("settings.productUrlLabel")} id="ws-slug">
         <div className="flex items-center gap-2">
           <div className="flex-1 min-w-0">
             <SlugInput
@@ -152,24 +150,27 @@ function WorkspaceGeneralForm({
             size="sm"
             onClick={handleCopyUrl}
             className="shrink-0 gap-1.5"
-            aria-label="Copy URL"
+            aria-label={t("settings.copyUrl")}
           >
             {copied ? (
               <>
                 <Check className="size-3.5 text-success" aria-hidden="true" />
-                <span>Copied</span>
+                <span>{t("settings.copied")}</span>
               </>
             ) : (
               <>
-                <Copy className="size-3.5 text-muted-foreground" aria-hidden="true" />
-                <span>Copy URL</span>
+                <Copy
+                  className="size-3.5 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <span>{t("settings.copyUrl")}</span>
               </>
             )}
           </Button>
         </div>
       </Field>
 
-      <Field label="Logo" id="ws-logo">
+      <Field label={t("settings.logoLabel")} id="ws-logo">
         <LogoField
           name={nameValue || workspace.name}
           value={logoValue}
@@ -182,7 +183,7 @@ function WorkspaceGeneralForm({
       </Field>
 
       <Field
-        label="Website"
+        label={t("settings.websiteLabel")}
         id="ws-website"
         error={errors.websiteUrl?.message}
         helper="Your portals link back here, and visitors land here when the product directory is off."
@@ -207,10 +208,10 @@ function WorkspaceGeneralForm({
                 className="size-4 animate-spin mr-2"
                 aria-hidden="true"
               />
-              <span>Saving…</span>
+              <span>{t("settings.saving")}</span>
             </>
           ) : (
-            <span>Save changes</span>
+            <span>{t("settings.saveChanges")}</span>
           )}
         </Button>
       </div>
@@ -222,6 +223,7 @@ function WorkspaceDirectoryForm({
   ws,
   workspace,
 }: WorkspaceSettingsFormsProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const [alertError, setAlertError] = React.useState<string | null>(null);
 
@@ -248,7 +250,7 @@ function WorkspaceDirectoryForm({
       });
     },
     onSuccess: (updated) => {
-      toast.success("Changes saved");
+      toast.success(t("settings.savedToast"));
       reset({
         directoryEnabled: updated.directoryEnabled,
       });
@@ -268,7 +270,7 @@ function WorkspaceDirectoryForm({
   return (
     <div className="border-t border-border pt-8 mt-8 max-w-xl">
       <h2 className="text-lg font-semibold text-foreground mb-4">
-        Product directory
+        {t("settings.directoryHeading")}
       </h2>
 
       {alertError && (
@@ -290,10 +292,10 @@ function WorkspaceDirectoryForm({
               htmlFor="ws-directory-enabled"
               className="text-sm font-medium text-foreground cursor-pointer"
             >
-              Show a public list of products at /{ws}
+              {t("settings.directoryLabel").replace("{ws}", ws)}
             </label>
             <p className="text-xs text-muted-foreground">
-              Visitors to /{ws} will see a list of your products. If turned off, visitors are redirected to your website.
+              {t("settings.directoryHelp").replaceAll("{ws}", ws)}
             </p>
           </div>
         </div>
@@ -310,10 +312,10 @@ function WorkspaceDirectoryForm({
                   className="size-4 animate-spin mr-2"
                   aria-hidden="true"
                 />
-                <span>Saving…</span>
+                <span>{t("settings.saving")}</span>
               </>
             ) : (
-              <span>Save changes</span>
+              <span>{t("settings.saveChanges")}</span>
             )}
           </Button>
         </div>
@@ -326,6 +328,7 @@ function WorkspaceDangerZone({
   ws,
   workspace,
 }: WorkspaceSettingsFormsProps): React.JSX.Element | null {
+  const { t } = useI18n();
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [confirmText, setConfirmText] = React.useState("");
 
@@ -354,9 +357,11 @@ function WorkspaceDangerZone({
     <div className="border-t border-border pt-8 mt-8 max-w-xl">
       <div className="rounded-lg border border-destructive/30 p-6 flex flex-col gap-4">
         <div>
-          <h2 className="text-base font-semibold text-destructive">Danger zone</h2>
+          <h2 className="text-base font-semibold text-destructive">
+            {t("settings.dangerZoneHeading")}
+          </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Deleting a workspace takes all of its products and portals offline. This cannot be undone.
+            {t("settings.deleteWorkspaceDesc")}
           </p>
         </div>
 
@@ -367,7 +372,7 @@ function WorkspaceDangerZone({
             onClick={() => setDialogOpen(true)}
             className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
           >
-            Delete workspace
+            {t("settings.deleteWorkspace")}
           </Button>
         </div>
 
@@ -376,9 +381,9 @@ function WorkspaceDangerZone({
           onOpenChange={handleOpenChange}
           title={`Delete ${workspace.name}?`}
           description="All products in this workspace will be taken offline immediately, and the workspace URL cannot be used again. This cannot be undone."
-          dismissLabel="Keep workspace"
-          confirmLabel="Delete workspace"
-          pendingLabel="Deleting…"
+          dismissLabel={t("settings.keepWorkspace")}
+          confirmLabel={t("settings.deleteWorkspace")}
+          pendingLabel={t("settings.deleting")}
           confirmDisabled={!isConfirmed}
           onConfirm={handleDelete}
         >
@@ -401,7 +406,7 @@ function WorkspaceDangerZone({
 }
 
 export function WorkspaceSettingsForms(
-  props: WorkspaceSettingsFormsProps
+  props: WorkspaceSettingsFormsProps,
 ): React.JSX.Element {
   return (
     <QueryProvider>

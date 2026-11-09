@@ -13,6 +13,7 @@ import {
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Alert } from "../ui/alert";
+import { useI18n } from "../../lib/i18n/context";
 
 export interface WebhookSecretDialogProps {
   open: boolean;
@@ -28,6 +29,7 @@ export function WebhookSecretDialog({
   url,
   secret,
 }: WebhookSecretDialogProps): React.JSX.Element {
+  const { t } = useI18n();
   const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
@@ -38,7 +40,7 @@ export function WebhookSecretDialog({
     try {
       await navigator.clipboard.writeText(secret);
       setCopied(true);
-      toast.success("Signing secret copied");
+      toast.success(t("webhooks.secretCopiedToast"));
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error("Failed to copy secret");
@@ -50,26 +52,34 @@ export function WebhookSecretDialog({
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <KeyRound className="size-5 text-[var(--primary-text)]" aria-hidden="true" />
-            <span>New signing secret</span>
+            <KeyRound
+              className="size-5 text-[var(--primary-text)]"
+              aria-hidden="true"
+            />
+            <span>{t("webhooks.secretDialogTitle")}</span>
           </DialogTitle>
           <DialogDescription>
-            Copy this secret now. It will not be shown again.
+            {t("webhooks.secretDialogDesc")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5 pt-2">
-          <Alert variant="neutral" className="border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200">
+          <Alert
+            variant="neutral"
+            className="border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200"
+          >
             <div className="flex items-start gap-2">
-              <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" aria-hidden="true" />
-              <p className="text-xs">
-                The previous secret stopped working immediately. Update your receiver now; failed
-                deliveries are retried and signed with this secret.
-              </p>
+              <AlertTriangle
+                className="size-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0"
+                aria-hidden="true"
+              />
+              <p className="text-xs">{t("webhooks.secretRotatedWarning")}</p>
             </div>
           </Alert>
 
-          <p className="font-mono text-xs break-all text-muted-foreground">{url}</p>
+          <p className="font-mono text-xs break-all text-muted-foreground">
+            {url}
+          </p>
 
           <div className="flex items-center gap-2">
             <Input
@@ -88,21 +98,28 @@ export function WebhookSecretDialog({
             >
               {copied ? (
                 <>
-                  <Check className="size-4 text-emerald-500" aria-hidden="true" />
-                  <span>Copied</span>
+                  <Check
+                    className="size-4 text-emerald-500"
+                    aria-hidden="true"
+                  />
+                  <span>{t("common.copied")}</span>
                 </>
               ) : (
                 <>
                   <Copy className="size-4" aria-hidden="true" />
-                  <span>Copy</span>
+                  <span>{t("common.copy")}</span>
                 </>
               )}
             </Button>
           </div>
 
           <div className="flex justify-end">
-            <Button type="button" onClick={() => onOpenChange(false)} data-testid="webhook-secret-done-btn">
-              I have saved this secret
+            <Button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              data-testid="webhook-secret-done-btn"
+            >
+              {t("webhooks.doneBtn")}
             </Button>
           </div>
         </div>

@@ -9,7 +9,6 @@ import {
   Trash2,
   Power,
   KeyRound,
-  Activity,
   Layers,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -24,6 +23,7 @@ import { ConfirmDialog } from "../ui/confirm-dialog";
 import { CreateWebhookDialog } from "./create-webhook-dialog";
 import { WebhookDeliveriesDialog } from "./webhook-deliveries-dialog";
 import { WebhookSecretDialog } from "./webhook-secret-dialog";
+import { useI18n } from "../../lib/i18n/context";
 import { apiFetch } from "../../lib/api-client";
 import { errorCopy } from "../../lib/api-errors";
 
@@ -38,6 +38,7 @@ export function WorkspaceWebhooksManager({
   initialSubscriptions,
   products,
 }: WorkspaceWebhooksManagerProps): React.JSX.Element {
+  const { t } = useI18n();
   const [subscriptions, setSubscriptions] =
     React.useState<WebhookSubscription[]>(initialSubscriptions);
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
@@ -51,11 +52,17 @@ export function WorkspaceWebhooksManager({
     React.useState<WebhookSubscription | null>(null);
 
   // Rotate flow: confirm first, then show the new secret once
-  const [rotateTarget, setRotateTarget] = React.useState<WebhookSubscription | null>(null);
-  const [rotated, setRotated] = React.useState<{ url: string; secret: string } | null>(null);
+  const [rotateTarget, setRotateTarget] =
+    React.useState<WebhookSubscription | null>(null);
+  const [rotated, setRotated] = React.useState<{
+    url: string;
+    secret: string;
+  } | null>(null);
 
   // Ping loading state map
-  const [pingingMap, setPingingMap] = React.useState<Record<string, boolean>>({});
+  const [pingingMap, setPingingMap] = React.useState<Record<string, boolean>>(
+    {},
+  );
 
   const productMap = React.useMemo(() => {
     const map = new Map<string, string>();
@@ -77,16 +84,18 @@ export function WorkspaceWebhooksManager({
         {
           method: "PATCH",
           body: { isActive: updatedStatus },
-        }
+        },
       );
 
       setSubscriptions((prev) =>
-        prev.map((s) => (s.id === sub.id ? { ...s, isActive: updatedStatus } : s))
+        prev.map((s) =>
+          s.id === sub.id ? { ...s, isActive: updatedStatus } : s,
+        ),
       );
       toast.success(
         updatedStatus
-          ? "Webhook subscription activated"
-          : "Webhook subscription paused"
+          ? t("webhooks.activatedToast")
+          : t("webhooks.pausedToast"),
       );
     } catch (err: any) {
       toast.error(errorCopy(err));
@@ -98,9 +107,9 @@ export function WorkspaceWebhooksManager({
       setPingingMap((prev) => ({ ...prev, [sub.id]: true }));
       await apiFetch<{ enqueued: boolean; deliveryId: string }>(
         `/api/v1/workspaces/${ws}/webhooks/${sub.id}/ping`,
-        { method: "POST" }
+        { method: "POST" },
       );
-      toast.success("Test ping event enqueued for delivery");
+      toast.success(t("webhooks.pingSuccessToast"));
     } catch (err: any) {
       toast.error(errorCopy(err));
     } finally {
@@ -117,7 +126,7 @@ export function WorkspaceWebhooksManager({
       });
 
       setSubscriptions((prev) => prev.filter((s) => s.id !== deleteTarget.id));
-      toast.success("Webhook subscription deleted");
+      toast.success(t("webhooks.deletedToast"));
     } catch (err: any) {
       toast.error(errorCopy(err));
     } finally {
@@ -129,7 +138,7 @@ export function WorkspaceWebhooksManager({
     if (!rotateTarget) return;
     const res = await apiFetch<WebhookSubscriptionWithSecret>(
       `/api/v1/workspaces/${ws}/webhooks/${rotateTarget.id}/rotate-secret`,
-      { method: "POST" }
+      { method: "POST" },
     );
     setRotated({ url: res.url, secret: res.secret });
   };
@@ -139,13 +148,13 @@ export function WorkspaceWebhooksManager({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <span>Webhook Endpoints</span>
+            <span>{t("webhooks.title")}</span>
             <Badge variant="neutral" className="text-xs">
               {subscriptions.length}
             </Badge>
           </h2>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Receive signed HMAC-SHA256 HTTP POST notifications when workspace resources change.
+            {t("webhooks.description")}
           </p>
         </div>
 
@@ -155,7 +164,7 @@ export function WorkspaceWebhooksManager({
           data-testid="create-webhook-btn"
         >
           <Plus className="size-4" aria-hidden="true" />
-          <span>Add Webhook</span>
+          <span>{t("webhooks.addWebhook")}</span>
         </Button>
       </div>
 
@@ -165,9 +174,11 @@ export function WorkspaceWebhooksManager({
             <Webhook className="size-5" aria-hidden="true" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-sm font-medium text-foreground">No webhooks configured yet</h3>
+            <h3 className="text-sm font-medium text-foreground">
+              {t("webhooks.emptyTitle")}
+            </h3>
             <p className="text-xs text-muted-foreground max-w-sm">
-              Connect external services, Slack bots, or internal event buses by adding a webhook endpoint.
+              {t("webhooks.emptyDesc")}
             </p>
           </div>
           <Button
@@ -176,7 +187,7 @@ export function WorkspaceWebhooksManager({
             onClick={() => setCreateDialogOpen(true)}
             className="mt-2"
           >
-            Add Webhook
+            {t("webhooks.addWebhook")}
           </Button>
         </div>
       ) : (
@@ -199,18 +210,23 @@ export function WorkspaceWebhooksManager({
                         {sub.url}
                       </span>
                       {sub.isActive ? (
-                        <Badge variant="neutral" className="text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30">
-                          Active
+                        <Badge
+                          variant="neutral"
+                          className="text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30"
+                        >
+                          {t("webhooks.statusActive")}
                         </Badge>
                       ) : (
                         <Badge variant="neutral" className="text-xs">
-                          Paused
+                          {t("webhooks.statusPaused")}
                         </Badge>
                       )}
                     </div>
 
                     {sub.description && (
-                      <p className="text-xs text-muted-foreground">{sub.description}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {sub.description}
+                      </p>
                     )}
 
                     <div className="flex flex-wrap items-center gap-1.5 pt-1">
@@ -224,7 +240,8 @@ export function WorkspaceWebhooksManager({
                         </Badge>
                       ))}
 
-                      {sub.productRestrictions && sub.productRestrictions.length > 0 ? (
+                      {sub.productRestrictions &&
+                      sub.productRestrictions.length > 0 ? (
                         sub.productRestrictions.map((prodId) => (
                           <Badge
                             key={prodId}
@@ -236,8 +253,11 @@ export function WorkspaceWebhooksManager({
                           </Badge>
                         ))
                       ) : (
-                        <Badge variant="neutral" className="text-[11px] px-2 py-0.5 text-muted-foreground">
-                          All Products
+                        <Badge
+                          variant="neutral"
+                          className="text-[11px] px-2 py-0.5 text-muted-foreground"
+                        >
+                          {t("apiKeys.allProducts")}
                         </Badge>
                       )}
                     </div>
@@ -253,8 +273,10 @@ export function WorkspaceWebhooksManager({
                       className="gap-1.5 h-8 text-xs"
                       data-testid={`ping-webhook-${sub.id}`}
                     >
-                      <Send className={`size-3.5 ${isPinging ? "animate-spin" : ""}`} />
-                      <span>Send Ping</span>
+                      <Send
+                        className={`size-3.5 ${isPinging ? "animate-spin" : ""}`}
+                      />
+                      <span>{t("webhooks.sendPing")}</span>
                     </Button>
 
                     <Button
@@ -265,7 +287,7 @@ export function WorkspaceWebhooksManager({
                       data-testid={`deliveries-webhook-${sub.id}`}
                     >
                       <History className="size-3.5" />
-                      <span>Deliveries</span>
+                      <span>{t("webhooks.deliveries")}</span>
                     </Button>
 
                     <Button
@@ -276,7 +298,7 @@ export function WorkspaceWebhooksManager({
                       data-testid={`rotate-webhook-${sub.id}`}
                     >
                       <KeyRound className="size-3.5" />
-                      <span>Rotate secret</span>
+                      <span>{t("webhooks.rotateSecret")}</span>
                     </Button>
 
                     <Button
@@ -284,7 +306,11 @@ export function WorkspaceWebhooksManager({
                       size="sm"
                       onClick={() => handleToggleActive(sub)}
                       className="h-8 px-2 text-xs"
-                      title={sub.isActive ? "Pause webhook" : "Activate webhook"}
+                      title={
+                        sub.isActive
+                          ? t("webhooks.pauseWebhook")
+                          : t("webhooks.activateWebhook")
+                      }
                     >
                       <Power
                         className={`size-4 ${
@@ -300,7 +326,7 @@ export function WorkspaceWebhooksManager({
                       size="sm"
                       onClick={() => setDeleteTarget(sub)}
                       className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10"
-                      title="Delete webhook"
+                      title={t("webhooks.deleteWebhook")}
                       data-testid={`delete-webhook-${sub.id}`}
                     >
                       <Trash2 className="size-4" />
@@ -334,16 +360,16 @@ export function WorkspaceWebhooksManager({
       <ConfirmDialog
         open={Boolean(rotateTarget)}
         onOpenChange={(open) => !open && setRotateTarget(null)}
-        title="Rotate signing secret"
+        title={t("webhooks.rotateDialogTitle")}
         description={
           rotateTarget
-            ? `Generate a new signing secret for ${rotateTarget.url}? The old secret stops working immediately, so update your receiver right away.`
+            ? `${t("webhooks.secretRotatedWarning")} (${rotateTarget.url})`
             : ""
         }
-        dismissLabel="Cancel"
-        confirmLabel="Rotate secret"
+        dismissLabel={t("common.cancel")}
+        confirmLabel={t("webhooks.rotateSecret")}
         confirmVariant="destructive"
-        pendingLabel="Rotating..."
+        pendingLabel={t("common.saving")}
         onConfirm={handleConfirmRotate}
       />
 
@@ -359,16 +385,16 @@ export function WorkspaceWebhooksManager({
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete Webhook Subscription"
+        title={t("webhooks.deleteDialogTitle")}
         description={
           deleteTarget
-            ? `Are you sure you want to delete the webhook for ${deleteTarget.url}? Existing delivery logs will also be permanently deleted.`
+            ? `${t("webhooks.deleteDialogDesc")} (${deleteTarget.url})`
             : ""
         }
-        dismissLabel="Cancel"
-        confirmLabel="Delete Webhook"
+        dismissLabel={t("common.cancel")}
+        confirmLabel={t("common.delete")}
         confirmVariant="destructive"
-        pendingLabel="Deleting..."
+        pendingLabel={t("common.deleting")}
         onConfirm={handleConfirmDelete}
       />
     </div>

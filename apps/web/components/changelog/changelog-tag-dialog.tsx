@@ -13,6 +13,7 @@ import {
 } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { useI18n } from "../../lib/i18n/context";
 import { apiFetch } from "../../lib/api-client";
 import { getChangelogTagClasses } from "./changelog-timeline-item";
 import { cn } from "../../lib/utils";
@@ -43,6 +44,7 @@ export function ChangelogTagDialog({
   tags,
   onTagsChange,
 }: ChangelogTagDialogProps): React.JSX.Element {
+  const { t } = useI18n();
   const [tagName, setTagName] = React.useState("");
   const [tagColor, setTagColor] = React.useState("#3B82F6");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -66,11 +68,11 @@ export function ChangelogTagDialog({
             name: trimmed,
             color: tagColor,
           },
-        }
+        },
       );
       onTagsChange([...tags, created]);
       setTagName("");
-      toast.success(`Tag "${created.name}" created`);
+      toast.success(t("changelog.tagCreated"));
     } catch (err: any) {
       toast.error(err.message || "Failed to create tag");
     } finally {
@@ -85,11 +87,11 @@ export function ChangelogTagDialog({
         `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/changelog/tags/${encodeURIComponent(tag.id)}`,
         {
           method: "DELETE",
-        }
+        },
       );
       const nextTags = tags.filter((t) => t.id !== tag.id);
       onTagsChange(nextTags);
-      toast.success(`Tag "${tag.name}" deleted`);
+      toast.success(t("changelog.tagDeleted"));
     } catch (err: any) {
       toast.error(err.message || "Failed to delete tag");
     } finally {
@@ -101,21 +103,19 @@ export function ChangelogTagDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Manage tags</DialogTitle>
-          <DialogDescription>
-            Add or remove tags used to categorize changelog release updates.
-          </DialogDescription>
+          <DialogTitle>{t("changelog.manageTagsTitle")}</DialogTitle>
+          <DialogDescription>{t("changelog.manageTagsDesc")}</DialogDescription>
         </DialogHeader>
 
         {/* Existing tags list */}
         <div className="space-y-2 my-2">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Current tags ({tags.length})
+            {t("changelog.existingTagsHeading")} ({tags.length})
           </label>
           <div className="border border-border rounded-lg divide-y divide-border max-h-48 overflow-y-auto">
             {tags.length === 0 ? (
               <p className="p-3 text-xs text-muted-foreground text-center">
-                No tags created yet.
+                {t("changelog.noTagsYet")}
               </p>
             ) : (
               tags.map((tag) => (
@@ -132,7 +132,7 @@ export function ChangelogTagDialog({
                     <span
                       className={cn(
                         "inline-flex items-center h-5 px-2 rounded-full text-xs font-semibold",
-                        getChangelogTagClasses(tag.name)
+                        getChangelogTagClasses(tag.name),
                       )}
                     >
                       {tag.name}
@@ -155,15 +155,18 @@ export function ChangelogTagDialog({
         </div>
 
         {/* Add new tag form */}
-        <form onSubmit={handleAddTag} className="space-y-3 pt-2 border-t border-border">
+        <form
+          onSubmit={handleAddTag}
+          className="space-y-3 pt-2 border-t border-border"
+        >
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-            Add new tag
+            {t("changelog.addTagBtn")}
           </label>
 
           <div className="flex items-center gap-2">
             <Input
               type="text"
-              placeholder="Tag name (e.g. Security)"
+              placeholder={t("changelog.tagNameLabel")}
               value={tagName}
               onChange={(e) => setTagName(e.target.value)}
               maxLength={30}
@@ -175,7 +178,7 @@ export function ChangelogTagDialog({
                 value={tagColor}
                 onChange={(e) => setTagColor(e.target.value)}
                 className="size-9 rounded-md border border-input cursor-pointer p-0.5 bg-background"
-                title="Select tag color"
+                title={t("changelog.colorLabel")}
               />
             </div>
           </div>
@@ -191,7 +194,7 @@ export function ChangelogTagDialog({
                   "size-5 rounded-full border border-black/10 transition-transform",
                   tagColor.toUpperCase() === p.hex.toUpperCase()
                     ? "ring-2 ring-[var(--primary-text)] ring-offset-1 scale-110"
-                    : "hover:scale-105"
+                    : "hover:scale-105",
                 )}
                 style={{ backgroundColor: p.hex }}
                 title={p.label}
@@ -206,7 +209,7 @@ export function ChangelogTagDialog({
               size="sm"
             >
               <Plus className="size-3.5 mr-1.5" />
-              Add tag
+              {t("changelog.addTagBtn")}
             </Button>
           </div>
         </form>

@@ -7,6 +7,7 @@ import { Field } from "../../../../../components/ui/field";
 import { Input } from "../../../../../components/ui/input";
 import { ConfirmDialog } from "../../../../../components/ui/confirm-dialog";
 import { flash } from "../../../../../components/ui/toaster";
+import { useI18n } from "../../../../../lib/i18n/context";
 import { apiFetch } from "../../../../../lib/api-client";
 
 export interface ProductDangerZoneProps {
@@ -15,6 +16,7 @@ export interface ProductDangerZoneProps {
 }
 
 export function ProductDangerZone({ ws, product }: ProductDangerZoneProps) {
+  const { t } = useI18n();
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [confirmText, setConfirmText] = React.useState("");
 
@@ -38,9 +40,11 @@ export function ProductDangerZone({ ws, product }: ProductDangerZoneProps) {
   return (
     <div className="rounded-lg border border-destructive/30 p-6 flex flex-col gap-4">
       <div>
-        <h2 className="text-base font-semibold text-destructive">Danger zone</h2>
+        <h2 className="text-base font-semibold text-destructive">
+          {t("settings.dangerZoneHeading")}
+        </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Deleting a product takes its portal offline. Its URL can&apos;t be reused.
+          {t("settings.dangerZoneDesc")}
         </p>
       </div>
 
@@ -51,7 +55,7 @@ export function ProductDangerZone({ ws, product }: ProductDangerZoneProps) {
           onClick={() => setDialogOpen(true)}
           className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
         >
-          Delete product
+          {t("settings.deleteProduct")}
         </Button>
       </div>
 
@@ -60,9 +64,9 @@ export function ProductDangerZone({ ws, product }: ProductDangerZoneProps) {
         onOpenChange={handleOpenChange}
         title={`Delete ${product.name}?`}
         description="Its public portal goes offline right away, and its URL can't be used again. This can't be undone."
-        dismissLabel="Keep product"
-        confirmLabel="Delete product"
-        pendingLabel="Deleting…"
+        dismissLabel={t("settings.keepProduct")}
+        confirmLabel={t("settings.deleteProduct")}
+        pendingLabel={t("settings.deleting")}
         confirmDisabled={!isConfirmed}
         onConfirm={handleDelete}
       >

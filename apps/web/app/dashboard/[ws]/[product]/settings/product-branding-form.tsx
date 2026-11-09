@@ -16,7 +16,12 @@ import {
   type ColorPreset,
 } from "../../../../../components/color-field";
 import { Alert } from "../../../../../components/ui/alert";
-import { accentStyle, accentTokens, contrastRatio } from "../../../../../lib/accent";
+import { useI18n } from "../../../../../lib/i18n/context";
+import {
+  accentStyle,
+  accentTokens,
+  contrastRatio,
+} from "../../../../../lib/accent";
 import { apiFetch } from "../../../../../lib/api-client";
 import { errorCopy } from "../../../../../lib/api-errors";
 import { QueryProvider } from "../../../../../lib/query-client";
@@ -39,10 +44,11 @@ function ProductBrandingFormInner({
   ws,
   product,
 }: ProductBrandingFormProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const [accentColor, setAccentColor] = React.useState(product.accentColor);
   const [accentTextColor, setAccentTextColor] = React.useState<string>(
-    product.accentTextColor ?? ""
+    product.accentTextColor ?? "",
   );
   const [alertError, setAlertError] = React.useState<string | null>(null);
 
@@ -55,8 +61,7 @@ function ProductBrandingFormInner({
   const currentAccent = accentColor.toUpperCase();
   const currentText = accentTextColor.toUpperCase();
 
-  const isDirty =
-    currentAccent !== origAccent || currentText !== origText;
+  const isDirty = currentAccent !== origAccent || currentText !== origText;
 
   const autoTokens = accentTokens(accentColor);
   const autoFg = autoTokens.primaryForeground;
@@ -79,7 +84,7 @@ function ProductBrandingFormInner({
     onSuccess: (updated) => {
       setAccentColor(updated.accentColor);
       setAccentTextColor(updated.accentTextColor ?? "");
-      toast.success("Changes saved");
+      toast.success(t("settings.savedToast"));
       router.refresh();
     },
     onError: (err: unknown) => {
@@ -101,16 +106,18 @@ function ProductBrandingFormInner({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <h2 className="text-base font-semibold text-foreground">Branding</h2>
+        <h2 className="text-base font-semibold text-foreground">
+          {t("settings.brandingHeading")}
+        </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Customize your product's accent color and button text styling on the public portal.
+          {t("settings.brandingDesc")}
         </p>
       </div>
 
       <fieldset disabled={mutation.isPending} className="space-y-6">
         <ColorField
-          label="Accent color"
-          description="Themes buttons, highlights, badges, and focus rings."
+          label={t("settings.accentColorLabel")}
+          description={t("settings.accentColorDesc")}
           value={accentColor}
           onChange={(hex) => {
             setAccentColor(hex);
@@ -136,7 +143,10 @@ function ProductBrandingFormInner({
         <div
           className="rounded-lg border border-border p-4 flex flex-col gap-3 transition-colors"
           style={
-            accentStyle(accentColor, accentTextColor || null) as React.CSSProperties
+            accentStyle(
+              accentColor,
+              accentTextColor || null,
+            ) as React.CSSProperties
           }
         >
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -162,39 +172,41 @@ function ProductBrandingFormInner({
             <div className="flex items-start gap-2 text-xs text-amber-600 dark:text-amber-400 mt-1">
               <AlertTriangle className="size-4 shrink-0 mt-0.5" />
               <span>
-                Low contrast ({fgRatio.toFixed(1)}:1). Visitors may have difficulty reading button text. Consider choosing Auto or a higher contrast color.
+                Low contrast ({fgRatio.toFixed(1)}:1). Visitors may have
+                difficulty reading button text. Consider choosing Auto or a
+                higher contrast color.
               </span>
             </div>
           )}
 
           {tokens.primaryText === "#171717" && (
             <p className="text-xs text-muted-foreground">
-              This accent color is light on white surfaces, so standalone links will use dark text while buttons use your primary background.
+              This accent color is light on white surfaces, so standalone links
+              will use dark text while buttons use your primary background.
             </p>
           )}
         </div>
 
-        {alertError && (
-          <Alert variant="destructive">
-            {alertError}
-          </Alert>
-        )}
+        {alertError && <Alert variant="destructive">{alertError}</Alert>}
 
         <div>
           <Button
             type="submit"
             variant="outline"
             disabled={
-              !isValidAccent || !isValidAccentText || !isDirty || mutation.isPending
+              !isValidAccent ||
+              !isValidAccentText ||
+              !isDirty ||
+              mutation.isPending
             }
           >
             {mutation.isPending ? (
               <>
                 <LoaderCircle className="size-4 animate-spin" />
-                <span>Saving…</span>
+                <span>{t("settings.saving")}</span>
               </>
             ) : (
-              "Save changes"
+              t("settings.saveChanges")
             )}
           </Button>
         </div>
@@ -204,7 +216,7 @@ function ProductBrandingFormInner({
 }
 
 export function ProductBrandingForm(
-  props: ProductBrandingFormProps
+  props: ProductBrandingFormProps,
 ): React.JSX.Element {
   return (
     <QueryProvider>

@@ -32,6 +32,7 @@ import { RichTextEditor } from "../rich-text/rich-text-editor";
 import { ChangelogTagDialog } from "./changelog-tag-dialog";
 import { ChangelogPreviewModal } from "./changelog-preview-modal";
 import { getChangelogTagClasses } from "./changelog-timeline-item";
+import { useI18n } from "../../lib/i18n/context";
 import { apiFetch } from "../../lib/api-client";
 import { cn } from "../../lib/utils";
 import { formatDate, isScheduled } from "../../lib/format";
@@ -69,13 +70,6 @@ function toDatetimeLocal(isoString?: string | null): string {
   }
 }
 
-function publishedToast(publishedAt: string, wasPublished: boolean): string {
-  if (isScheduled(publishedAt)) {
-    return `Scheduled: goes live on ${formatDate(publishedAt)}`;
-  }
-  return wasPublished ? "Changelog entry updated" : "Changelog entry published";
-}
-
 export function ChangelogEditor({
   ws,
   product,
@@ -86,47 +80,56 @@ export function ChangelogEditor({
   entry: initialEntry,
   availableTags: initialTags,
 }: ChangelogEditorProps): React.JSX.Element {
+  const { t, locale } = useI18n();
   const router = useRouter();
 
   const defaultLocale = productLocales?.defaultLocale ?? DEFAULT_LOCALE;
-  const enabledLocales = (productLocales?.enabledLocales && productLocales.enabledLocales.length > 0)
-    ? productLocales.enabledLocales
-    : [defaultLocale];
-  const [activeLocale, setActiveLocale] = React.useState<SupportedLocale>(defaultLocale);
+  const enabledLocales =
+    productLocales?.enabledLocales && productLocales.enabledLocales.length > 0
+      ? productLocales.enabledLocales
+      : [defaultLocale];
+  const [activeLocale, setActiveLocale] =
+    React.useState<SupportedLocale>(defaultLocale);
   const [translations, setTranslations] = React.useState<
-    Record<string, { title?: string; summary?: string | null; content?: RichTextDoc | null }>
+    Record<
+      string,
+      { title?: string; summary?: string | null; content?: RichTextDoc | null }
+    >
   >(initialEntry?.translations ?? {});
 
   const [entryId, setEntryId] = React.useState<string | undefined>(
-    initialEntry?.id
+    initialEntry?.id,
   );
   const [title, setTitle] = React.useState(initialEntry?.title ?? "");
   const [slug, setSlug] = React.useState(initialEntry?.slug ?? "");
   const [isSlugManual, setIsSlugManual] = React.useState(Boolean(initialEntry));
   const [summary, setSummary] = React.useState(initialEntry?.summary ?? "");
   const [releaseDate, setReleaseDate] = React.useState(
-    toDatetimeLocal(initialEntry?.publishedAt)
+    toDatetimeLocal(initialEntry?.publishedAt),
   );
   const [content, setContent] = React.useState<RichTextDoc>(
     initialEntry?.content ?? {
       type: "doc",
       content: [{ type: "paragraph" }],
-    }
+    },
   );
   const [selectedTagIds, setSelectedTagIds] = React.useState<string[]>(
-    initialEntry?.tags?.map((t) => t.id) ?? []
+    initialEntry?.tags?.map((t) => t.id) ?? [],
   );
   const [tags, setTags] = React.useState<ChangelogTag[]>(initialTags);
   const [isPublished, setIsPublished] = React.useState(
-    Boolean(initialEntry?.publishedAt)
+    Boolean(initialEntry?.publishedAt),
   );
   const [savedPublishedAt, setSavedPublishedAt] = React.useState(
-    initialEntry?.publishedAt ?? null
+    initialEntry?.publishedAt ?? null,
   );
   const scheduled = isPublished && isScheduled(savedPublishedAt);
 
   const [isDirty, setIsDirty] = React.useState(false);
-  const [autoSaveStatus, setAutoSaveStatus] = React.useState<string>("Saved");
+  const [autoSaveStatus, setAutoSaveStatus] = React.useState<
+    "saved" | "unsaved" | "saving" | "failed"
+  >("saved");
+  const [savedTime, setSavedTime] = React.useState<Date | null>(null);
   const [isSaving, setIsSaving] = React.useState(false);
 
   // Dialog states
@@ -135,9 +138,13 @@ export function ChangelogEditor({
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
 
   const currentTitle =
-    activeLocale === defaultLocale ? title : (translations[activeLocale]?.title ?? "");
+    activeLocale === defaultLocale
+      ? title
+      : (translations[activeLocale]?.title ?? "");
   const currentSummary =
-    activeLocale === defaultLocale ? summary : (translations[activeLocale]?.summary ?? "");
+    activeLocale === defaultLocale
+      ? summary
+      : (translations[activeLocale]?.summary ?? "");
   const currentContent =
     activeLocale === defaultLocale
       ? content
@@ -217,7 +224,9 @@ export function ChangelogEditor({
   const toggleTag = (tagId: string) => {
     setIsDirty(true);
     setSelectedTagIds((prev) =>
-      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
+      prev.includes(tagId)
+        ? prev.filter((id) => id !== tagId)
+        : [...prev, tagId],
     );
   };
 
@@ -225,9 +234,9 @@ export function ChangelogEditor({
   React.useEffect(() => {
     if (!entryId || !isDirty || isSaving) return;
 
-    setAutoSaveStatus("Unsaved changes");
+    setAutoSaveStatus("unsaved");
     const timer = setTimeout(async () => {
-      setAutoSaveStatus("Saving…");
+      setAutoSaveStatus("saving");
       try {
         await apiFetch(
           `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/changelog/${encodeURIComponent(entryId)}`,
@@ -241,32 +250,49 @@ export function ChangelogEditor({
               tagIds: selectedTagIds,
               translations,
             },
-          }
+          },
         );
         setIsDirty(false);
-        const timeStr = new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-        setAutoSaveStatus(`Draft saved at ${timeStr}`);
+        setSavedTime(new Date());
+        setAutoSaveStatus("saved");
       } catch (err) {
         console.error("Auto-save failed", err);
-        setAutoSaveStatus("Failed to auto-save");
+        setAutoSaveStatus("failed");
       }
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [entryId, isDirty, isSaving, ws, product, title, slug, summary, content, selectedTagIds, translations]);
+  }, [
+    entryId,
+    isDirty,
+    isSaving,
+    ws,
+    product,
+    title,
+    slug,
+    summary,
+    content,
+    selectedTagIds,
+    translations,
+  ]);
+
+  const publishedToast = (
+    publishedAt: string,
+    wasPublished: boolean,
+  ): string =>
+    isScheduled(publishedAt)
+      ? `${t("changelog.statusScheduled")}: ${formatDate(publishedAt, locale)}`
+      : t(wasPublished ? "changelog.entryUpdated" : "changelog.entryPublished");
 
   // Manual save draft
   const handleSaveDraft = async () => {
     if (!title.trim()) {
-      toast.error("Please enter a title");
+      toast.error(t("changelog.titleRequired"));
       return;
     }
 
     setIsSaving(true);
-    setAutoSaveStatus("Saving…");
+    setAutoSaveStatus("saving");
     try {
       if (entryId) {
         const updated = await apiFetch<AdminChangelogEntry>(
@@ -281,11 +307,11 @@ export function ChangelogEditor({
               tagIds: selectedTagIds,
               translations,
             },
-          }
+          },
         );
         setSlug(updated.slug);
         setIsDirty(false);
-        toast.success("Draft saved");
+        toast.success(t("changelog.draftSaved"));
       } else {
         const created = await apiFetch<AdminChangelogEntry>(
           `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/changelog`,
@@ -300,26 +326,23 @@ export function ChangelogEditor({
               publishedAt: null,
               translations,
             },
-          }
+          },
         );
         setEntryId(created.id);
         setSlug(created.slug);
         setIsDirty(false);
-        toast.success("Draft created");
+        toast.success(t("changelog.draftSaved"));
         window.history.replaceState(
           null,
           "",
-          `/dashboard/${ws}/${product}/changelog/${created.id}`
+          `/dashboard/${ws}/${product}/changelog/${created.id}`,
         );
       }
-      const timeStr = new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      setAutoSaveStatus(`Draft saved at ${timeStr}`);
+      setSavedTime(new Date());
+      setAutoSaveStatus("saved");
     } catch (err: any) {
-      toast.error(err.message || "Failed to save draft");
-      setAutoSaveStatus("Save failed");
+      toast.error(err.message || t("common.saveFailed"));
+      setAutoSaveStatus("failed");
     } finally {
       setIsSaving(false);
     }
@@ -328,7 +351,7 @@ export function ChangelogEditor({
   // Publish / Update entry
   const handlePublish = async () => {
     if (!title.trim()) {
-      toast.error("Please enter a title");
+      toast.error(t("changelog.titleRequired"));
       return;
     }
 
@@ -354,7 +377,7 @@ export function ChangelogEditor({
               publishedAt: pubDate,
               translations,
             },
-          }
+          },
         );
         activeId = created.id;
         setEntryId(created.id);
@@ -380,7 +403,7 @@ export function ChangelogEditor({
             tagIds: selectedTagIds,
             translations,
           },
-        }
+        },
       );
 
       await apiFetch<AdminChangelogEntry>(
@@ -390,17 +413,17 @@ export function ChangelogEditor({
           body: {
             publishedAt: pubDate,
           },
-        }
+        },
       );
 
       setIsPublished(true);
       setSavedPublishedAt(pubDate);
       setIsDirty(false);
-      setAutoSaveStatus("Saved");
+      setAutoSaveStatus("saved");
       toast.success(publishedToast(pubDate, isPublished));
       router.push(`/dashboard/${ws}/${product}/changelog`);
     } catch (err: any) {
-      toast.error(err.message || "Failed to publish");
+      toast.error(err.message || t("common.saveFailed"));
     } finally {
       setIsSaving(false);
     }
@@ -412,14 +435,15 @@ export function ChangelogEditor({
     setIsSaving(true);
     try {
       await apiFetch(
-        `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/changelog/${encodeURIComponent(entryId)}/unpublish`, { method: "POST" }
+        `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/changelog/${encodeURIComponent(entryId)}/unpublish`,
+        { method: "POST" },
       );
       setIsPublished(false);
       setSavedPublishedAt(null);
       setReleaseDate("");
-      toast.success("Entry reverted to draft");
+      toast.success(t("changelog.entryUnpublished"));
     } catch (err: any) {
-      toast.error(err.message || "Failed to unpublish");
+      toast.error(err.message || t("common.saveFailed"));
     } finally {
       setIsSaving(false);
     }
@@ -432,9 +456,9 @@ export function ChangelogEditor({
       `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/changelog/${encodeURIComponent(entryId)}`,
       {
         method: "DELETE",
-      }
+      },
     );
-    toast.success("Changelog entry deleted");
+    toast.success(t("changelog.entryDeleted"));
     router.push(`/dashboard/${ws}/${product}/changelog`);
   };
 
@@ -445,7 +469,9 @@ export function ChangelogEditor({
     slug: slug.trim() || "untitled-release",
     summary: summary.trim() || null,
     content,
-    publishedAt: releaseDate ? new Date(releaseDate).toISOString() : new Date().toISOString(),
+    publishedAt: releaseDate
+      ? new Date(releaseDate).toISOString()
+      : new Date().toISOString(),
     createdAt: initialEntry?.createdAt ?? new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     tags: tags.filter((t) => selectedTagIds.includes(t.id)),
@@ -462,7 +488,7 @@ export function ChangelogEditor({
             className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 transition-colors"
           >
             <ArrowLeft className="size-4" />
-            Changelog
+            {t("changelog.title")}
           </Link>
 
           <span className="text-muted-foreground text-xs" aria-hidden="true">
@@ -470,7 +496,7 @@ export function ChangelogEditor({
           </span>
 
           <h1 className="text-sm sm:text-base font-semibold text-foreground">
-            {entryId ? (isPublished ? "Edit release note" : "Edit draft") : "New release note"}
+            {entryId ? t("changelog.actionEdit") : t("changelog.newEntry")}
           </h1>
 
           <span
@@ -480,14 +506,29 @@ export function ChangelogEditor({
                 ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
                 : isPublished
                   ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
-                  : "bg-muted text-muted-foreground border-border"
+                  : "bg-muted text-muted-foreground border-border",
             )}
           >
-            {scheduled ? "Scheduled" : isPublished ? "Published" : "Draft"}
+            {scheduled
+              ? t("changelog.statusScheduled")
+              : isPublished
+                ? t("changelog.statusPublished")
+                : t("changelog.statusDraft")}
           </span>
 
           <span className="text-xs text-muted-foreground hidden md:inline-block">
-            {autoSaveStatus}
+            {t(
+              autoSaveStatus === "unsaved"
+                ? "changelog.unsavedChanges"
+                : autoSaveStatus === "saving"
+                  ? "changelog.savingDraft"
+                  : autoSaveStatus === "failed"
+                    ? "common.saveFailed"
+                    : "changelog.draftSaved",
+            )}
+            {autoSaveStatus === "saved" &&
+              savedTime &&
+              ` · ${savedTime.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}`}
           </span>
         </div>
 
@@ -500,7 +541,7 @@ export function ChangelogEditor({
             onClick={() => setPreviewOpen(true)}
           >
             <Eye className="size-3.5 mr-1.5" />
-            Preview
+            {t("changelog.preview")}
           </Button>
 
           <Button
@@ -510,7 +551,7 @@ export function ChangelogEditor({
             onClick={handleSaveDraft}
             disabled={isSaving}
           >
-            Save draft
+            {t("changelog.saveDraft")}
           </Button>
 
           {entryId && isPublished && (
@@ -522,7 +563,7 @@ export function ChangelogEditor({
               disabled={isSaving}
             >
               <Undo2 className="size-3.5 mr-1.5" />
-              Unpublish
+              {t("changelog.unpublish")}
             </Button>
           )}
 
@@ -537,7 +578,7 @@ export function ChangelogEditor({
             ) : (
               <Send className="size-3.5 mr-1.5" />
             )}
-            {isPublished ? "Update" : "Publish"}
+            {isPublished ? t("changelog.update") : t("changelog.publish")}
           </Button>
 
           {entryId && (
@@ -547,7 +588,7 @@ export function ChangelogEditor({
               size="sm"
               onClick={() => setDeleteDialogOpen(true)}
               className="text-muted-foreground hover:text-destructive"
-              title="Delete entry"
+              title={t("changelog.actionDelete")}
             >
               <Trash2 className="size-3.5" />
             </Button>
@@ -555,7 +596,9 @@ export function ChangelogEditor({
         </div>
       </div>
 
-      {!changelogEnabled && <HiddenModuleNotice ws={ws} product={product} module="changelog" />}
+      {!changelogEnabled && (
+        <HiddenModuleNotice ws={ws} product={product} module="changelog" />
+      )}
 
       <EntryLocaleTabs
         activeLocale={activeLocale}
@@ -570,15 +613,12 @@ export function ChangelogEditor({
         {/* Title */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-            Title {activeLocale !== defaultLocale && `(${activeLocale})`}
+            {t("changelog.titleLabel")}{" "}
+            {activeLocale !== defaultLocale && `(${activeLocale})`}
           </label>
           <Input
             type="text"
-            placeholder={
-              activeLocale === defaultLocale
-                ? "e.g. Version 2.4 - Faster Exports & Analytics"
-                : `Translation for title (${activeLocale})...`
-            }
+            placeholder={t("ui.titlePlaceholder")}
             value={currentTitle}
             onChange={(e) => handleCurrentTitleChange(e.target.value)}
             dir={isRtl(activeLocale) ? "rtl" : "ltr"}
@@ -591,7 +631,7 @@ export function ChangelogEditor({
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-                URL Slug
+                {t("changelog.slugLabel")}
               </label>
               <button
                 type="button"
@@ -601,9 +641,9 @@ export function ChangelogEditor({
                   setIsDirty(true);
                 }}
                 className="text-xs text-[var(--primary-text)] hover:underline flex items-center gap-1 cursor-pointer"
-                title="Re-sync from title"
+                title={t("changelog.resyncSlug")}
               >
-                <RotateCcw className="size-3" /> Re-sync
+                <RotateCcw className="size-3" /> {t("changelog.resyncSlug")}
               </button>
             </div>
             <div className="flex items-center">
@@ -622,7 +662,7 @@ export function ChangelogEditor({
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-              Release date
+              {t("changelog.releaseDateLabel")}
             </label>
             <Input
               type="datetime-local"
@@ -640,14 +680,14 @@ export function ChangelogEditor({
         <div className="space-y-2 pt-2 border-t border-border">
           <div className="flex items-center justify-between">
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-              Tags
+              {t("changelog.tagsLabel")}
             </label>
             <button
               type="button"
               onClick={() => setTagDialogOpen(true)}
               className="text-xs font-medium text-[var(--primary-text)] hover:underline flex items-center gap-1 cursor-pointer"
             >
-              <Plus className="size-3" /> Manage tags
+              <Plus className="size-3" /> {t("changelog.manageTags")}
             </button>
           </div>
 
@@ -667,8 +707,11 @@ export function ChangelogEditor({
                     className={cn(
                       "inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full text-xs font-semibold transition-all border cursor-pointer",
                       selected
-                        ? cn(getChangelogTagClasses(tag.name), "ring-2 ring-[var(--primary-text)] ring-offset-1")
-                        : "bg-muted text-muted-foreground border-border hover:bg-muted/80 opacity-70"
+                        ? cn(
+                            getChangelogTagClasses(tag.name),
+                            "ring-2 ring-[var(--primary-text)] ring-offset-1",
+                          )
+                        : "bg-muted text-muted-foreground border-border hover:bg-muted/80 opacity-70",
                     )}
                   >
                     {selected && <Check className="size-3" />}
@@ -683,15 +726,12 @@ export function ChangelogEditor({
         {/* Short Summary (optional) */}
         <div className="space-y-1.5 pt-2 border-t border-border">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-            Summary / Excerpt (optional) {activeLocale !== defaultLocale && `(${activeLocale})`}
+            {t("changelog.summaryExcerptLabel")}{" "}
+            {activeLocale !== defaultLocale && `(${activeLocale})`}
           </label>
           <Input
             type="text"
-            placeholder={
-              activeLocale === defaultLocale
-                ? "Short preview summary for SEO, RSS, and timeline snippet"
-                : `Translation for summary (${activeLocale})...`
-            }
+            placeholder={t("changelog.summaryExcerptHelp")}
             value={currentSummary}
             onChange={(e) => handleCurrentSummaryChange(e.target.value)}
             dir={isRtl(activeLocale) ? "rtl" : "ltr"}
@@ -704,7 +744,8 @@ export function ChangelogEditor({
       {/* Editor Canvas */}
       <div className="space-y-2">
         <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-          Release Content {activeLocale !== defaultLocale && `(${activeLocale})`}
+          {t("changelog.contentLabel")}{" "}
+          {activeLocale !== defaultLocale && `(${activeLocale})`}
         </label>
         <div
           dir={isRtl(activeLocale) ? "rtl" : "ltr"}
@@ -714,11 +755,7 @@ export function ChangelogEditor({
             key={activeLocale}
             initialContent={currentContent}
             onChange={handleCurrentContentChange}
-            placeholder={
-              activeLocale === defaultLocale
-                ? "Write changelog notes... Markdown shortcuts (#, *, >) and image URLs are supported."
-                : `Write notes in ${activeLocale}...`
-            }
+            placeholder={t("changelog.contentPlaceholder")}
             className="min-h-[350px] p-4 sm:p-6"
           />
         </div>
@@ -752,11 +789,11 @@ export function ChangelogEditor({
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete changelog entry"
-        description="Are you sure you want to delete this changelog entry? This action cannot be undone and will remove it permanently."
-        dismissLabel="Cancel"
-        confirmLabel="Delete entry"
-        pendingLabel="Deleting…"
+        title={t("changelog.deleteEntryTitle")}
+        description={t("changelog.deleteEntryDesc")}
+        dismissLabel={t("common.cancel")}
+        confirmLabel={t("common.delete")}
+        pendingLabel={t("common.deleting")}
         onConfirm={handleDelete}
       />
     </div>

@@ -59,6 +59,9 @@ const CROSS_TENANT_ROUTES: Record<
   "DELETE /workspaces/:ws/products/:product": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}`,
   }),
+  "GET /workspaces/:ws/products/:product/locales/swap-preview": (s) => ({
+    url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/locales/swap-preview?target=es`,
+  }),
   "POST /workspaces/:ws/products/:product/push-follow": (s) => ({
     url: `/api/v1/workspaces/${s.b.slug}/products/${s.b.productSlug}/push-follow`,
   }),

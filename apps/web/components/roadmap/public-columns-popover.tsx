@@ -12,6 +12,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
+import { useI18n } from "../../lib/i18n/context";
 import { apiFetch } from "../../lib/api-client";
 
 export interface PublicColumnsPopoverProps {
@@ -27,6 +28,7 @@ export function PublicColumnsPopover({
   statuses,
   onStatusesChange,
 }: PublicColumnsPopoverProps) {
+  const { t } = useI18n();
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);
 
   const publicCount = statuses.filter((s) => s.isPublicRoadmap).length;
@@ -42,18 +44,14 @@ export function PublicColumnsPopover({
           method: "PATCH",
           body: { isPublicRoadmap: nextValue },
           schema: StatusSchema,
-        }
+        },
       );
 
       const nextList = statuses.map((s) => (s.id === status.id ? updated : s));
       onStatusesChange(nextList);
-      toast.success(
-        nextValue
-          ? `Added "${status.name}" to public roadmap`
-          : `Removed "${status.name}" from public roadmap`
-      );
+      toast.success(t("roadmap.publicColumnsUpdated"));
     } catch {
-      toast.error("Couldn't update status visibility. Try again.");
+      toast.error(t("roadmap.publicColumnsError"));
     } finally {
       setUpdatingId(null);
     }
@@ -64,7 +62,7 @@ export function PublicColumnsPopover({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Eye className="size-4 text-muted-foreground" aria-hidden="true" />
-          <span>Public columns</span>
+          <span>{t("roadmap.publicColumnsTitle")}</span>
           <span className="inline-flex items-center justify-center rounded-full bg-muted px-1.5 py-0.5 text-xs font-semibold text-muted-foreground">
             {publicCount}
           </span>
@@ -72,7 +70,7 @@ export function PublicColumnsPopover({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64 p-2">
         <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2 py-1">
-          Choose which status columns appear on your public roadmap.
+          {t("roadmap.publicColumnsDesc")}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <div className="flex flex-col gap-1 py-1">

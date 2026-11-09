@@ -18,6 +18,7 @@ import { Alert } from "../../../../../components/ui/alert";
 import { Badge } from "../../../../../components/ui/badge";
 import { Button } from "../../../../../components/ui/button";
 import { ConfirmDialog } from "../../../../../components/ui/confirm-dialog";
+import { useI18n } from "../../../../../lib/i18n/context";
 import { apiFetch } from "../../../../../lib/api-client";
 import { errorCopy } from "../../../../../lib/api-errors";
 import { QueryProvider } from "../../../../../lib/query-client";
@@ -59,6 +60,7 @@ function ProductFeaturesFormInner({
   product,
   host,
 }: ProductFeaturesFormProps) {
+  const { t } = useI18n();
   const router = useRouter();
   const [ready, setReady] = React.useState(false);
   React.useEffect(() => setReady(true), []);
@@ -80,7 +82,9 @@ function ProductFeaturesFormInner({
     values: product.features,
     resetOptions: { keepDirtyValues: true },
   });
-  const serverKey = PRODUCT_FEATURE_KEYS.map((key) => product.features[key]).join();
+  const serverKey = PRODUCT_FEATURE_KEYS.map(
+    (key) => product.features[key],
+  ).join();
   React.useEffect(() => setSavedFeatures(product.features), [serverKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const values = watch();
   const allOff = PRODUCT_FEATURE_KEYS.every((key) => !values[key]);
@@ -95,7 +99,7 @@ function ProductFeaturesFormInner({
       setAlertError(null);
       setSavedFeatures(updated.features);
       reset(updated.features);
-      toast.success("Features updated");
+      toast.success(t("settings.featuresUpdatedToast"));
       router.refresh();
     },
     onError: (error) => setAlertError(errorCopy(error)),
@@ -138,11 +142,11 @@ function ProductFeaturesFormInner({
       id="portal-features"
       className="border-t border-border pt-8 mt-8 scroll-mt-24 space-y-4"
     >
-      <h2 className="text-base font-semibold leading-tight">Portal features</h2>
+      <h2 className="text-base font-semibold leading-tight">
+        {t("settings.featuresHeading")}
+      </h2>
       <p id="portal-features-help" className="text-sm text-muted-foreground">
-        Choose what customers can see for this product. Turning a feature off
-        hides it from your portal and keeps all of its content. You can still
-        manage it here and turn it back on at any time.
+        {t("settings.featuresDesc")}
       </p>
       <form onSubmit={handleSubmit(submit)}>
         <fieldset
@@ -176,7 +180,7 @@ function ProductFeaturesFormInner({
                     {!savedFeatures[key] && (
                       <Badge variant="outline">
                         <EyeOff className="size-3 mr-1" aria-hidden />
-                        Hidden from customers
+                        {t("settings.hiddenFromCustomers")}
                       </Badge>
                     )}
                   </span>
@@ -211,10 +215,10 @@ function ProductFeaturesFormInner({
             {mutation.isPending ? (
               <>
                 <LoaderCircle className="size-4 animate-spin" />
-                <span>Saving…</span>
+                <span>{t("settings.saving")}</span>
               </>
             ) : (
-              "Save features"
+              t("settings.saveFeatures")
             )}
           </Button>
         </fieldset>

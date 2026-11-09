@@ -3,7 +3,13 @@
 import * as React from "react";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { useDroppable } from "@dnd-kit/react";
-import { GripVertical, MoreHorizontal, Plus, Pencil, Trash2 } from "lucide-react";
+import {
+  GripVertical,
+  MoreHorizontal,
+  Plus,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import type { AdminFaqCategory, AdminFaqQuestion } from "@userhq/types";
 import {
@@ -16,6 +22,7 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { ConfirmDialog } from "../ui/confirm-dialog";
 import { FaqQuestionItem } from "./faq-question-item";
+import { useI18n } from "../../lib/i18n/context";
 import { apiFetch } from "../../lib/api-client";
 import { errorCopy } from "../../lib/api-errors";
 import { cn } from "../../lib/utils";
@@ -43,6 +50,7 @@ export function FaqCategoryItem({
   onEditQuestion,
   onDeleteQuestion,
 }: FaqCategoryItemProps): React.JSX.Element {
+  const { t } = useI18n();
   const {
     ref: sortableRef,
     handleRef,
@@ -65,9 +73,9 @@ export function FaqCategoryItem({
         `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/faq/categories/${encodeURIComponent(category.id)}`,
         {
           method: "DELETE",
-        }
+        },
       );
-      toast.success("Category deleted");
+      toast.success(t("faq.categoryDeleted"));
       onDeleteCategory(category.id);
     } catch (err: any) {
       toast.error(errorCopy(err));
@@ -81,7 +89,7 @@ export function FaqCategoryItem({
         ref={sortableRef}
         className={cn(
           "bg-card border border-border rounded-lg shadow-xs transition-all",
-          isDragging && "opacity-60 shadow-lg ring-2 ring-primary/40 z-10"
+          isDragging && "opacity-60 shadow-lg ring-2 ring-primary/40 z-10",
         )}
       >
         {/* Header */}
@@ -115,7 +123,7 @@ export function FaqCategoryItem({
               className="h-8 gap-1.5 text-xs font-medium"
             >
               <Plus className="size-3.5" aria-hidden="true" />
-              Add question
+              {t("faq.newQuestion")}
             </Button>
 
             <DropdownMenu>
@@ -133,14 +141,14 @@ export function FaqCategoryItem({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => onRename(category)}>
                   <Pencil className="size-3.5 mr-2" />
-                  Rename
+                  {t("common.edit")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => setDeleteOpen(true)}
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="size-3.5 mr-2" />
-                  Delete
+                  {t("common.delete")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -152,7 +160,7 @@ export function FaqCategoryItem({
           ref={droppableRef}
           className={cn(
             "p-3 flex flex-col gap-2.5 min-h-[70px] rounded-b-lg transition-colors",
-            isDropTarget && "bg-muted/40 ring-1 ring-primary/30"
+            isDropTarget && "bg-muted/40 ring-1 ring-primary/30",
           )}
         >
           {category.questions.length === 0 ? (
@@ -165,7 +173,7 @@ export function FaqCategoryItem({
                 onClick={() => onAddQuestion(category.id)}
                 className="text-xs h-auto p-0 text-muted-foreground hover:text-foreground"
               >
-                + Add question
+                + {t("faq.newQuestion")}
               </Button>
             </div>
           ) : (
@@ -187,11 +195,11 @@ export function FaqCategoryItem({
       <ConfirmDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        title="Delete category"
-        description="Are you sure you want to delete this FAQ category and all its questions? This cannot be undone."
-        dismissLabel="Cancel"
-        confirmLabel="Delete"
-        pendingLabel="Deleting…"
+        title={t("faq.deleteCategoryTitle")}
+        description={t("faq.deleteCategoryDesc")}
+        dismissLabel={t("common.cancel")}
+        confirmLabel={t("common.delete")}
+        pendingLabel={t("common.deleting")}
         onConfirm={handleDelete}
       />
     </>

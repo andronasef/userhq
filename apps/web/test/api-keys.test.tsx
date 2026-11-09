@@ -7,19 +7,41 @@ import type { ApiKeyMetadata, ProductSummary } from "@userhq/types";
 
 // Mock @radix-ui/react-dialog so portal renders in static SSR environment
 vi.mock("@radix-ui/react-dialog", () => ({
-  Root: ({ children, open }: any) => (open ? <div data-testid="dialog-root">{children}</div> : null),
-  Trigger: ({ children }: any) => <div data-testid="dialog-trigger">{children}</div>,
-  Portal: ({ children }: any) => <div data-testid="dialog-portal">{children}</div>,
-  Overlay: ({ children }: any) => <div data-testid="dialog-overlay">{children}</div>,
-  Content: ({ children, className }: any) => <div data-testid="dialog-content" className={className}>{children}</div>,
-  Title: ({ children, className }: any) => <div data-testid="dialog-title" className={className}>{children}</div>,
-  Description: ({ children, className }: any) => <div data-testid="dialog-desc" className={className}>{children}</div>,
-  Close: ({ children }: any) => <div data-testid="dialog-close">{children}</div>,
+  Root: ({ children, open }: any) =>
+    open ? <div data-testid="dialog-root">{children}</div> : null,
+  Trigger: ({ children }: any) => (
+    <div data-testid="dialog-trigger">{children}</div>
+  ),
+  Portal: ({ children }: any) => (
+    <div data-testid="dialog-portal">{children}</div>
+  ),
+  Overlay: ({ children }: any) => (
+    <div data-testid="dialog-overlay">{children}</div>
+  ),
+  Content: ({ children, className }: any) => (
+    <div data-testid="dialog-content" className={className}>
+      {children}
+    </div>
+  ),
+  Title: ({ children, className }: any) => (
+    <div data-testid="dialog-title" className={className}>
+      {children}
+    </div>
+  ),
+  Description: ({ children, className }: any) => (
+    <div data-testid="dialog-desc" className={className}>
+      {children}
+    </div>
+  ),
+  Close: ({ children }: any) => (
+    <div data-testid="dialog-close">{children}</div>
+  ),
 }));
 
 // Mock @radix-ui/react-alert-dialog
 vi.mock("@radix-ui/react-alert-dialog", () => ({
-  Root: ({ children, open }: any) => (open ? <div data-testid="alert-dialog-root">{children}</div> : null),
+  Root: ({ children, open }: any) =>
+    open ? <div data-testid="alert-dialog-root">{children}</div> : null,
   Trigger: ({ children }: any) => <div>{children}</div>,
   Portal: ({ children }: any) => <div>{children}</div>,
   Overlay: ({ children }: any) => <div>{children}</div>,
@@ -83,7 +105,11 @@ const mockKeys: ApiKeyMetadata[] = [
 describe("WorkspaceApiKeysManager", () => {
   it("renders empty state when no keys exist", () => {
     const html = renderToStaticMarkup(
-      <WorkspaceApiKeysManager ws="acme" initialKeys={[]} products={mockProducts} />
+      <WorkspaceApiKeysManager
+        ws="acme"
+        initialKeys={[]}
+        products={mockProducts}
+      />,
     );
 
     expect(html).toContain("No API keys created yet");
@@ -92,7 +118,11 @@ describe("WorkspaceApiKeysManager", () => {
 
   it("renders table with active and revoked keys, scopes badges, and prefix", () => {
     const html = renderToStaticMarkup(
-      <WorkspaceApiKeysManager ws="acme" initialKeys={mockKeys} products={mockProducts} />
+      <WorkspaceApiKeysManager
+        ws="acme"
+        initialKeys={mockKeys}
+        products={mockProducts}
+      />,
     );
 
     expect(html).toContain("CI/CD Pipeline");
@@ -119,10 +149,10 @@ describe("CreateApiKeyDialog", () => {
         ws="acme"
         products={mockProducts}
         onKeyCreated={() => {}}
-      />
+      />,
     );
 
-    expect(html).toContain("Create workspace API key");
+    expect(html).toContain("Create API Key");
     expect(html).toContain("Key Name");
     expect(html).toContain("Permissions &amp; Scopes");
     expect(html).toContain("Full Admin (admin)");

@@ -22,6 +22,7 @@ import {
 } from "../../../../../components/logo-field";
 import { Button } from "../../../../../components/ui/button";
 import { Alert } from "../../../../../components/ui/alert";
+import { useI18n } from "../../../../../lib/i18n/context";
 import { apiFetch, ApiClientError } from "../../../../../lib/api-client";
 import { errorCopy, FIELD_FOR_CODE } from "../../../../../lib/api-errors";
 import { QueryProvider } from "../../../../../lib/query-client";
@@ -39,6 +40,7 @@ function ProductGeneralFormInner({
   host,
   workspaceName,
 }: ProductGeneralFormProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const [copied, setCopied] = React.useState(false);
   const [alertError, setAlertError] = React.useState<string | null>(null);
@@ -85,7 +87,7 @@ function ProductGeneralFormInner({
       });
     },
     onSuccess: (updated) => {
-      toast.success("Changes saved");
+      toast.success(t("settings.savedToast"));
       if (updated.slug !== product.slug) {
         window.location.assign(`/dashboard/${ws}/${updated.slug}/settings`);
         return;
@@ -143,15 +145,19 @@ function ProductGeneralFormInner({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <fieldset disabled={mutation.isPending} className="space-y-6">
-        <Field id="product-name" label="Product name" error={nameError}>
+        <Field
+          id="product-name"
+          label={t("settings.productNameLabel")}
+          error={nameError}
+        >
           <Input placeholder="e.g. Web App" {...register("name")} />
         </Field>
 
         <Field
           id="product-url"
-          label="URL"
+          label={t("settings.productUrlLabel")}
           error={slugError}
-          helper="Changing the URL will change your portal address. Old links will stop working unless updated."
+          helper={t("settings.productUrlHelper")}
         >
           <div className="flex gap-2 items-center">
             <SlugInput
@@ -169,12 +175,12 @@ function ProductGeneralFormInner({
               {copied ? (
                 <>
                   <Check className="size-4" />
-                  <span>Copied</span>
+                  <span>{t("settings.copied")}</span>
                 </>
               ) : (
                 <>
                   <Copy className="size-4" />
-                  <span>Copy URL</span>
+                  <span>{t("settings.copyUrl")}</span>
                 </>
               )}
             </Button>
@@ -183,7 +189,7 @@ function ProductGeneralFormInner({
 
         <div className="space-y-2">
           <label className="text-sm font-semibold leading-none text-foreground">
-            Logo
+            {t("settings.logoLabel")}
           </label>
           <LogoField
             value={logoValue}
@@ -202,8 +208,8 @@ function ProductGeneralFormInner({
 
         <Field
           id="product-tagline"
-          label="Tagline"
-          helper={`One line shown on your portal and in link previews. ${taglineLength}/80`}
+          label={t("settings.taglineLabel")}
+          helper={`${t("settings.taglineHelper")} ${taglineLength}/80`}
           error={taglineError}
         >
           <Input
@@ -214,7 +220,7 @@ function ProductGeneralFormInner({
 
         <Field
           id="product-website"
-          label="Website"
+          label={t("settings.websiteLabel")}
           helper={`Shown as "Back to ${workspaceName}" on your portal. Leave empty to use the workspace website.`}
           error={websiteError}
         >
@@ -235,10 +241,10 @@ function ProductGeneralFormInner({
             {mutation.isPending ? (
               <>
                 <LoaderCircle className="size-4 animate-spin" />
-                <span>Saving…</span>
+                <span>{t("settings.saving")}</span>
               </>
             ) : (
-              "Save changes"
+              t("settings.saveChanges")
             )}
           </Button>
         </div>

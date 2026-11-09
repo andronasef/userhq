@@ -19,28 +19,19 @@ import { cn } from "../lib/utils";
 export interface LanguageSwitcherProps {
   align?: "start" | "end" | "center";
   className?: string;
-  allowedLocales?: SupportedLocale[];
   variant?: "ghost" | "outline" | "portal";
 }
 
 export function LanguageSwitcher({
   align = "end",
   className,
-  allowedLocales,
   variant = "ghost",
 }: LanguageSwitcherProps): React.JSX.Element {
   const router = useRouter();
-  const { locale, setLocale, allowedLocales: ctxAllowed, t } = useI18n();
+  const { locale, setLocale, t } = useI18n();
 
-  const selectableLocales = React.useMemo(() => {
-    const list = allowedLocales && allowedLocales.length > 0 ? allowedLocales : ctxAllowed;
-    return list.map((code) => LOCALE_CATALOG[code] || {
-      code,
-      name: code,
-      nativeName: code,
-      dir: "ltr" as const,
-    });
-  }, [allowedLocales, ctxAllowed]);
+  // The interface is translated into every language, so offer them all.
+  const selectableLocales = Object.values(LOCALE_CATALOG);
 
   const currentMeta = LOCALE_CATALOG[locale] ?? LOCALE_CATALOG.en;
 

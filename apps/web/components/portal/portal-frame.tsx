@@ -22,7 +22,6 @@ export interface PortalFrameProps {
   tagline?: string | null;
   websiteUrl?: string | null;
   companyName?: string;
-  allowedLocales?: SupportedLocale[];
   right?: React.ReactNode;
   tabs?: React.ReactNode;
 }
@@ -37,7 +36,6 @@ export function PortalFrame({
   tagline,
   websiteUrl,
   companyName,
-  allowedLocales,
   right,
   tabs,
 }: PortalFrameProps): React.JSX.Element {
@@ -87,7 +85,7 @@ export function PortalFrame({
                   <ArrowUpRight className="size-3.5" aria-hidden="true" />
                 </a>
               )}
-              <LanguageSwitcher allowedLocales={allowedLocales} variant="portal" />
+              <LanguageSwitcher variant="portal" />
               <ThemeToggle variant="dropdown" />
               {right}
             </div>

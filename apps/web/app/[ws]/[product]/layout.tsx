@@ -158,7 +158,6 @@ export default async function PortalLayout({
       tagline={p.tagline}
       websiteUrl={p.websiteUrl}
       companyName={workspace.name}
-      allowedLocales={p.locales?.enabledLocales}
       accentStyle={productAccentStyle}
       right={right}
       tabs={

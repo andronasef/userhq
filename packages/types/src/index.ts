@@ -93,6 +93,9 @@ export const API_ERROR_CODES = [
   "webhook_inactive",
   "delivery_not_final",
   "push_endpoint_conflict",
+  "badge_not_found",
+  "badge_rule_invalid",
+  "badge_conflict",
 ] as const;
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];
 

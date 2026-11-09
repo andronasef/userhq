@@ -39,6 +39,7 @@ import { ApiKeyRateLimitGuard } from "./api-keys/api-key-rate-limit.guard.js";
 import { ExportModule } from "./export/export.module.js";
 import { WebhooksModule } from "./webhooks/webhooks.module.js";
 import { PushModule } from "./push/push.module.js";
+import { BadgesModule } from "./badges/badges.module.js";
 import { PostgresThrottlerStorage, RateLimitSweeper } from "./common/postgres-throttler-storage.js";
 import { OutboundHttp, OUTBOUND_NETWORK, systemOutboundNetwork } from "./common/outbound-http.js";
 
@@ -103,6 +104,7 @@ export class AppModule {
         ExportModule,
         WebhooksModule,
         PushModule,
+        BadgesModule,
       ],
       controllers: [HealthController, MeController],
       providers: [

@@ -1,6 +1,7 @@
 import { PostRoadmapItemRefSchema } from "./roadmap.js";
 import { z } from "zod";
 import { IntegrationSourceSchema, AdminIntegrationSourceSchema } from "./api-keys.js";
+import { PublicBadgeChipSchema } from "./badges.js";
 import { slugify } from "./slugs.js";
 import { STATUS_TYPES } from "./palette.js";
 
@@ -92,6 +93,7 @@ export const PublicAuthorSchema = z.object({
   image: z.string().nullable(),
   isAdmin: z.boolean(),
   deleted: z.boolean(),
+  badges: z.array(PublicBadgeChipSchema).optional(),
 });
 export type PublicAuthor = z.infer<typeof PublicAuthorSchema>;
 

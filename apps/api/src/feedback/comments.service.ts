@@ -7,6 +7,7 @@ import type {
   PublicComment,
   TimelineItem,
   DeviceInfo,
+  PublicBadgeChip,
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
 import { isFeedbackAdmin } from "./membership.js";
@@ -15,6 +16,7 @@ import { enqueueCommentEmail } from "../email/outbox.js";
 import { enqueueWebhookEvent } from "../webhooks/outbox.js";
 import { parseUserAgent } from "./device-info.js";
 import { PushService } from "../push/push.service.js";
+import { getPublicBadgesForUsers } from "../badges/badges.service.js";
 
 export interface CommentRowWithAuthor {
   id: string;
@@ -196,6 +198,9 @@ export class CommentsService {
         }
       }
 
+      const userBadgesMap = await getPublicBadgesForUsers(this.db, portal.productId, [currentUser.id]);
+      const userBadges = userBadgesMap.get(currentUser.id) ?? [];
+
       return {
         id: newComment.id,
         author: {
@@ -203,6 +208,7 @@ export class CommentsService {
           image: currentUser.image ?? null,
           isAdmin,
           deleted: false,
+          badges: userBadges,
         },
         body: newComment.body,
         createdAt: newComment.createdAt.toISOString(),
@@ -389,7 +395,8 @@ export class CommentsService {
 
   shapeTimeline(
     rows: CommentRowWithAuthor[],
-    viewer: { userId: string | null; isAdmin: boolean }
+    viewer: { userId: string | null; isAdmin: boolean },
+    badgesByUserId?: Map<string, PublicBadgeChip[]>
   ): TimelineItem[] {
     const topLevelRows: CommentRowWithAuthor[] = [];
     const repliesByParent = new Map<string, CommentRowWithAuthor[]>();
@@ -416,12 +423,13 @@ export class CommentsService {
       return {
         id: row.id,
         author: isDeletedUser
-          ? { name: null, image: null, isAdmin: false, deleted: true }
+          ? { name: null, image: null, isAdmin: false, deleted: true, badges: [] }
           : {
               name: row.authorName,
               image: row.authorImage,
               isAdmin: row.isAdmin,
               deleted: false,
+              badges: badgesByUserId?.get(row.authorId) ?? [],
             },
         body: row.body,
         createdAt: row.createdAt.toISOString(),

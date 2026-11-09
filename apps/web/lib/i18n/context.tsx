@@ -63,11 +63,10 @@ export function I18nProvider({
     return Object.keys(LOCALE_CATALOG) as SupportedLocale[];
   }, [allowedLocales, scope]);
 
-  // Inside a product portal only the product's enabled languages apply; the
-  // visitor's saved preference is kept and used again elsewhere.
-  const locale: SupportedLocale = activeAllowedLocales.includes(preferred)
-    ? preferred
-    : (scope?.defaultLocale ?? preferred);
+  // The UI always follows the visitor's own language. A product's enabled
+  // languages only limit translated content (the API falls back to the
+  // product's default language) and what the switcher offers.
+  const locale: SupportedLocale = preferred;
   const contentDefaultLocale = scope?.defaultLocale ?? DEFAULT_LOCALE;
 
   // Client-side auto-detection cascade: ?lang= > cookie > navigator.languages > default

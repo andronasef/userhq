@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { type SupportedLocale } from "@userhq/types";
 import { EntityLogo } from "../entity-logo";
 import { UserHQBrand } from "../userhq-brand";
 import { ThemeToggle } from "../theme-toggle";

@@ -176,6 +176,13 @@
       "when": 1794168993310,
       "tag": "0024_unambiguous_product_restrictions",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1794216504298,
+      "tag": "0025_jazzy_wildside",
+      "breakpoints": true
     }
   ]
 }

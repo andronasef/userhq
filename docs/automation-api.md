@@ -239,6 +239,10 @@ The export carries `createdByApiKeyId` on posts and comments. Status changes are
 
 ---
 
+## Public portal localization
+
+The public portal endpoints for roadmap, changelog and FAQ (`GET /api/v1/portal/:ws/:product/{roadmap,roadmap/:id,changelog,changelog/:slug,faq}`) accept an optional `?lang=<locale>` query parameter. The API serves that language only when the product enabled it (`locales.enabledLocales`); otherwise it serves the product default (`locales.defaultLocale`). Each entry is returned already localized, with `resolvedLocale` (the language of the returned text) and `isFallback` (`true` when the visitor asked for a non-default language but no translation exists, so the original is returned). The stored `translations` map is never included in public responses. The authenticated admin endpoints still return and accept `translations`, keyed by supported locale.
+
 ## 8. Rate limits
 
 Every request authenticated by a key counts against that key: 120 requests per 60 seconds per key, as a sliding window. The request after the limit returns `429` with code `rate_limited` and a `Retry-After` header holding a whole number of seconds to wait.

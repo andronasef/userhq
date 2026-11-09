@@ -183,6 +183,20 @@
       "when": 1794184140112,
       "tag": "0025_green_spot",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1794216504298,
+      "tag": "0026_jazzy_wildside",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1794263867310,
+      "tag": "0027_badge_rule_key_match_type",
+      "breakpoints": true
     }
   ]
 }

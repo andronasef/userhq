@@ -16,6 +16,7 @@ import * as apiKeysSchema from "./schema/api-keys.js";
 import * as webhooksSchema from "./schema/webhooks.js";
 import * as pushSchema from "./schema/push.js";
 import * as rateLimitsSchema from "./schema/rate-limits.js";
+import * as badgesSchema from "./schema/badges.js";
 
 export const schema = {
   ...authSchema,
@@ -30,6 +31,7 @@ export const schema = {
   ...webhooksSchema,
   ...pushSchema,
   ...rateLimitsSchema,
+  ...badgesSchema,
 };
 
 export * from "./schema/auth.js";
@@ -44,6 +46,7 @@ export * from "./schema/api-keys.js";
 export * from "./schema/webhooks.js";
 export * from "./schema/push.js";
 export * from "./schema/rate-limits.js";
+export * from "./schema/badges.js";
 
 export type Db = NodePgDatabase<typeof schema>;
 export const DB: unique symbol = Symbol.for("@userhq/db");

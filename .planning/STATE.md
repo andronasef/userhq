@@ -6,7 +6,7 @@ status: planning
 stopped_at: Phase 06 complete; starting Phase 07 Appearance (dark mode)
 last_updated: "2026-11-09T22:54:38.166Z"
 last_activity: 2026-11-10
-last_activity_desc: Reviewed and committed localization admin changes (261109-loc)
+last_activity_desc: Merging localization admin and user badging branches into main (261110-1ar)
 state_head: 03b83907e61a842ba73f6e47356c07ad31c20f4b
 progress:
   total_phases: 7
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-10-01)
 Phase: 07 (appearance) — PLANNING
 Plan: 0 of TBD complete
 Status: Phase 06 verified and closed; starting Phase 07 Appearance
-Last activity: 2026-11-10 — Reviewed and committed quick task 261109-loc localization admin changes
+Last activity: 2026-11-10 — Merging localization admin and user badging branches into main (261110-1ar)
 
 Progress: [██████████] 100% of Phase 1-6; Phase 07 queued
 
@@ -156,6 +156,8 @@ Items acknowledged and deferred at milestone close, most recent first:
 | 261108-qrv | Shared Postgres store for API-key and route rate limits (multi-replica safe) | 2026-11-08 | 390772b | — | [261108-qrv-shared-postgres-store-for-api-key-and-re](./quick/261108-qrv-shared-postgres-store-for-api-key-and-re/) |
 | 261108-unx | Clarify product restrictions and secure push endpoint ownership | 2026-11-08 | e2ef5c1 | Verified | [261108-unx-unambiguous-productrestrictions-and-push](./quick/261108-unx-unambiguous-productrestrictions-and-push/) |
 | 261109-loc | Localization admin review and fixes; tests and vinext build verified | 2026-11-10 | 03b8390 | Reviewed | .planning/quick/261109-loc-multi-language-platform-and-entry-localization |
+
+| 261109-hy2 | Fix badging attribution security, admin contracts, product directory and regression coverage | 2026-11-10 | 16122d5 | Verified | [261109-hy2-fix-badging-code-review-findings-securit](./quick/261109-hy2-fix-badging-code-review-findings-securit/) |
 
 ## Session Continuity
 

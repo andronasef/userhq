@@ -46,6 +46,12 @@ Each application requires three domain routing rules configured in Dokploy under
 
 ---
 
+### Localization and badging migration merge
+
+The merged history applies `0025_green_spot` (localization columns), `0026_jazzy_wildside` (badge tables), and `0027_badge_rule_key_match_type` (rule parameter-name matching), in that order. The API's normal startup migrator applies these committed migrations under its advisory lock. Databases from the previous `main` through 0024, and databases with localization 0025 already applied, follow this sequence without manual SQL. Back up persistent databases before upgrading.
+
+Development databases that already applied the separate badging branch's old `0025_jazzy_wildside` / `0026_badge_rule_key_match_type` history are divergent: their later migration timestamp causes Drizzle to skip the earlier localization migration. Do not point this merged build at such a database without reconciling its schema and migration history. For disposable development/test data, use a fresh database and apply the merged migrations. For data that must be preserved, back it up and plan a reviewed reconciliation; do not delete migration journal rows or assume renamed files will replay skipped migrations.
+
 ## 3. Environment Variables Specification
 
 Secrets must never be committed to git, printed in CI logs, or shared in chat. Configure environment variables directly inside the Dokploy web interface.
@@ -77,7 +83,7 @@ Secrets must never be committed to git, printed in CI logs, or shared in chat. C
 Recorded Brevo port: smtp-relay.brevo.com:587 (confirmed 2026-10-03 from the prod API container)
 
 > [!NOTE]
-> Rotating `BETTER_AUTH_SECRET` invalidates every unsubscribe and mute link already emailed; recipients then see the "This link isn't valid" page and can use account settings.
+> Rotating `BETTER_AUTH_SECRET` also invalidates pending guest badge attribution cookies. It invalidates every unsubscribe and mute link already emailed; recipients then see the "This link isn't valid" page and can use account settings.
 
 ### Browser push VAPID startup requirement
 

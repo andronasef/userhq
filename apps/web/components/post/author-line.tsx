@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
 import { DeviceBadge } from "@/components/post/device-badge";
 import { useI18n } from "@/lib/i18n/context";
+import { BadgeChip } from "@/components/badges/badge-chip";
 
 export interface AuthorLineProps {
   author: PublicAuthor;
@@ -38,7 +39,13 @@ export function AuthorLine({
           <span className="text-sm font-semibold text-foreground">
             {author.name ?? t("ui.anonymous")}
           </span>
-          {author.isAdmin && <Badge variant="neutral">{t("ui.adminBadge")}</Badge>}
+          {author.isAdmin && (
+            <Badge variant="neutral">{t("ui.adminBadge")}</Badge>
+          )}
+          {author.badges &&
+            [...author.badges]
+              .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
+              .map((b) => <BadgeChip key={b.id} badge={b} />)}
         </>
       )}
       <time

@@ -39,6 +39,7 @@ import { CommentsService } from "./comments.service.js";
 import { enqueueWebhookEvent } from "../webhooks/outbox.js";
 import { parseUserAgent } from "./device-info.js";
 import { PushService } from "../push/push.service.js";
+import { getPublicBadgesForUsers } from "../badges/badges.service.js";
 
 export function engagedSql(postsTable: typeof posts = posts) {
   const tableName = getTableName(postsTable);
@@ -620,13 +621,17 @@ export class PostsService {
       };
     }
 
+    const userBadgesMap = await getPublicBadgesForUsers(this.db, portal.productId, [row.authorId]);
+    const authorBadges = userBadgesMap.get(row.authorId) ?? [];
+
     const author: PublicAuthor = row.authorDeletedAt
-      ? { name: null, image: null, isAdmin: false, deleted: true }
+      ? { name: null, image: null, isAdmin: false, deleted: true, badges: [] }
       : {
           name: row.authorName,
           image: row.authorImage,
           isAdmin: row.authorIsAdmin,
           deleted: false,
+          badges: authorBadges,
         };
 
     let viewer: PostViewer = {
@@ -708,7 +713,8 @@ export class PostsService {
       this.db,
       row.id,
       { userId: viewerId, isAdmin: viewer.isAdmin },
-      this.commentsService
+      this.commentsService,
+      portal.productId
     );
 
     return {
@@ -752,7 +758,8 @@ export async function loadTimeline(
   db: Db,
   postId: string,
   viewer: { userId: string | null; isAdmin: boolean },
-  commentsService?: CommentsService
+  commentsService?: CommentsService,
+  productId?: string
 ): Promise<TimelineItem[]> {
   const service = commentsService ?? new CommentsService(db);
   const commentRows = await db
@@ -780,10 +787,29 @@ export async function loadTimeline(
     .where(eq(comments.postId, postId))
     .orderBy(asc(comments.createdAt), asc(comments.id));
 
-  const commentTimeline = service.shapeTimeline(commentRows, {
-    userId: viewer.userId,
-    isAdmin: viewer.isAdmin,
-  });
+  let resolvedProductId = productId;
+  if (!resolvedProductId && commentRows.length > 0) {
+    const [p] = await db
+      .select({ productId: posts.productId })
+      .from(posts)
+      .where(eq(posts.id, postId))
+      .limit(1);
+    resolvedProductId = p?.productId;
+  }
+
+  const authorIds = Array.from(new Set(commentRows.map((r) => r.authorId)));
+  const badgesByUserId = resolvedProductId
+    ? await getPublicBadgesForUsers(db, resolvedProductId, authorIds)
+    : undefined;
+
+  const commentTimeline = service.shapeTimeline(
+    commentRows,
+    {
+      userId: viewer.userId,
+      isAdmin: viewer.isAdmin,
+    },
+    badgesByUserId
+  );
 
   const activityRows = await db
     .select({

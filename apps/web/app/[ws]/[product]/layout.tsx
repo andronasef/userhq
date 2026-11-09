@@ -18,6 +18,7 @@ import { PortalTabs } from "../../../components/portal/portal-tabs";
 import { NotificationBell } from "../../../components/notifications/notification-bell";
 import { AppToaster } from "../../../components/ui/toaster";
 import { ProjectContextTracker } from "../../../components/portal/project-context-tracker";
+import { PortalBadgeAttribution } from "../../../components/portal/portal-badge-attribution";
 
 interface PortalLayoutProps {
   children: React.ReactNode;
@@ -44,8 +45,7 @@ export async function generateMetadata({
   const origin = await publicOrigin();
   const title = `${p.name} · ${workspace.name}`;
   const description =
-    p.tagline ??
-    portalDescription(p.name, workspace.name, p.features);
+    p.tagline ?? portalDescription(p.name, workspace.name, p.features);
 
   const meta: Metadata = {
     title,
@@ -70,11 +70,7 @@ export async function generateMetadata({
       title,
       description,
       images: p.logoUrl
-        ? [
-            p.logoUrl.startsWith("http")
-              ? p.logoUrl
-              : `${origin}${p.logoUrl}`,
-          ]
+        ? [p.logoUrl.startsWith("http") ? p.logoUrl : `${origin}${p.logoUrl}`]
         : undefined,
     },
   };
@@ -127,10 +123,14 @@ export default async function PortalLayout({
   }
 
   const { workspace, product: p } = result.data;
-  const productAccentStyle = accentStyle(p.accentColor, p.accentTextColor) as React.CSSProperties;
+  const productAccentStyle = accentStyle(
+    p.accentColor,
+    p.accentTextColor,
+  ) as React.CSSProperties;
 
   const isWorkspaceOwner =
-    me.isPlatformOwner || me.workspaces.some((w) => w.slug === ws && w.role === "owner");
+    me.isPlatformOwner ||
+    me.workspaces.some((w) => w.slug === ws && w.role === "owner");
 
   const right = me.user ? (
     <div className="flex items-center gap-2">
@@ -161,9 +161,16 @@ export default async function PortalLayout({
       allowedLocales={p.locales?.enabledLocales}
       accentStyle={productAccentStyle}
       right={right}
-      tabs={portalTabs(ws, product, p.features, Boolean(me.user)).length >= 2
-        ? <PortalTabs ws={ws} product={product} hasUser={Boolean(me.user)} features={p.features} />
-        : undefined}
+      tabs={
+        portalTabs(ws, product, p.features, Boolean(me.user)).length >= 2 ? (
+          <PortalTabs
+            ws={ws}
+            product={product}
+            hasUser={Boolean(me.user)}
+            features={p.features}
+          />
+        ) : undefined
+      }
     >
       <ProjectContextTracker
         name={p.name}
@@ -173,6 +180,8 @@ export default async function PortalLayout({
         href={portalHref(ws, product)}
       />
       <PortalLocaleScope locales={p.locales} />
+
+      <PortalBadgeAttribution ws={ws} product={product} />
       <AppToaster />
       {children}
     </PortalFrame>

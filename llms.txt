@@ -1,6 +1,6 @@
 # UserHQ
 
-> Customer feedback, private/public roadmaps, release notes and FAQ for multi-product workspaces. This repository index points LLM assistants to the implemented v0.3.0 platform and automation contract. Links are repository-relative; adding this file does not create a served HTTP documentation endpoint.
+> Customer feedback, private/public roadmaps, release notes and FAQ for multi-product workspaces. This repository index points LLM assistants to the implemented platform and automation contract in this checkout (including unreleased changes). Links are repository-relative; adding this file does not create a served HTTP documentation endpoint.
 
 ## Start here
 

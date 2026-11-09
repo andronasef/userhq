@@ -61,7 +61,7 @@ describe("Public Posts API (Plan 03-02)", () => {
           color: s.color,
           position: idx,
           isDefault: s.isDefault,
-        }))
+        })),
       )
       .returning();
 
@@ -213,7 +213,9 @@ describe("Public Posts API (Plan 03-02)", () => {
     expect(emptyDescRes.status).toBe(201);
 
     const getEmptyDesc = await request(testApp.http)
-      .get(`/api/v1/portal/${wsSlug}/${prodSlug}/posts/${emptyDescRes.body.number}`)
+      .get(
+        `/api/v1/portal/${wsSlug}/${prodSlug}/posts/${emptyDescRes.body.number}`,
+      )
       .set("Origin", testApp.env.PUBLIC_URL);
     expect(getEmptyDesc.status).toBe(200);
     expect(getEmptyDesc.body.post.description).toBeNull();
@@ -249,8 +251,8 @@ describe("Public Posts API (Plan 03-02)", () => {
       .where(
         and(
           eq(schema.posts.productId, prodId),
-          eq(schema.posts.number, targetRes.body.number)
-        )
+          eq(schema.posts.number, targetRes.body.number),
+        ),
       );
 
     // Set merged_into_id on source
@@ -260,13 +262,15 @@ describe("Public Posts API (Plan 03-02)", () => {
       .where(
         and(
           eq(schema.posts.productId, prodId),
-          eq(schema.posts.number, sourceRes.body.number)
-        )
+          eq(schema.posts.number, sourceRes.body.number),
+        ),
       );
 
     // GET source post -> returns redirect kind
     const redirectRes = await request(testApp.http)
-      .get(`/api/v1/portal/${wsSlug}/${prodSlug}/posts/${sourceRes.body.number}`)
+      .get(
+        `/api/v1/portal/${wsSlug}/${prodSlug}/posts/${sourceRes.body.number}`,
+      )
       .set("Origin", testApp.env.PUBLIC_URL);
     expect(redirectRes.status).toBe(200);
     expect(redirectRes.body).toEqual({
@@ -282,7 +286,9 @@ describe("Public Posts API (Plan 03-02)", () => {
       .where(eq(schema.posts.id, targetRow.id));
 
     const goneRes = await request(testApp.http)
-      .get(`/api/v1/portal/${wsSlug}/${prodSlug}/posts/${sourceRes.body.number}`)
+      .get(
+        `/api/v1/portal/${wsSlug}/${prodSlug}/posts/${sourceRes.body.number}`,
+      )
       .set("Origin", testApp.env.PUBLIC_URL);
     expect(goneRes.status).toBe(404);
     expect(goneRes.body.code).toBe("post_not_found");
@@ -309,8 +315,8 @@ describe("Public Posts API (Plan 03-02)", () => {
       .where(
         and(
           eq(schema.posts.productId, prodId),
-          eq(schema.posts.number, delPost.body.number)
-        )
+          eq(schema.posts.number, delPost.body.number),
+        ),
       );
 
     const resDeleted = await request(testApp.http)
@@ -395,6 +401,7 @@ describe("Public Posts API (Plan 03-02)", () => {
       image: null,
       isAdmin: false,
       deleted: true,
+      badges: [],
     });
   });
 
@@ -453,8 +460,8 @@ describe("Public Posts API (Plan 03-02)", () => {
           name: `Concurrent User ${i + 1}`,
           email: `concurrent-${i + 1}-${Date.now()}@test.local`,
           emailVerified: true,
-        })
-      )
+        }),
+      ),
     );
 
     // Fire 20 parallel creates
@@ -464,8 +471,8 @@ describe("Public Posts API (Plan 03-02)", () => {
           .post(`/api/v1/portal/${wsSlug}/${concurrentProdSlug}/posts`)
           .set("Cookie", u.cookie)
           .set("Origin", testApp.env.PUBLIC_URL)
-          .send({ title: `Concurrent Post ${i + 1}` })
-      )
+          .send({ title: `Concurrent Post ${i + 1}` }),
+      ),
     );
 
     for (const r of results) {

@@ -125,6 +125,7 @@ export function DashboardSidebar({
               const faqHref = `/dashboard/${ws}/${product.slug}/faq`;
               const categoriesHref = `/dashboard/${ws}/${product.slug}/categories`;
               const statusesHref = `/dashboard/${ws}/${product.slug}/statuses`;
+              const usersHref = `/dashboard/${ws}/${product.slug}/users`;
               const settingsHref = `/dashboard/${ws}/${product.slug}/settings`;
 
               const isProductActive = pathname.startsWith(
@@ -145,6 +146,8 @@ export function DashboardSidebar({
                 pathname.startsWith(`${changelogHref}/`);
               const isFaqActive =
                 pathname === faqHref || pathname.startsWith(`${faqHref}/`);
+              const isUsersActive =
+                pathname === usersHref || pathname.startsWith(`${usersHref}/`);
               const isSettingsActive = pathname === settingsHref;
 
               return (
@@ -255,6 +258,22 @@ export function DashboardSidebar({
                           <EyeOff className="size-3.5 ml-auto shrink-0 text-muted-foreground" aria-hidden />
                           <span className="sr-only">Hidden from customers</span>
                         </>)}
+                      </Link>
+
+                      <Link
+                        href={usersHref}
+                        className={cn(
+                          "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
+                          isUsersActive &&
+                            "text-[var(--primary-text)] font-semibold bg-[var(--brand-selection)]",
+                        )}
+                        aria-current={isUsersActive ? "page" : undefined}
+                      >
+                        <Users
+                          className="size-3.5 shrink-0"
+                          aria-hidden="true"
+                        />
+                        <span className="truncate">Users</span>
                       </Link>
 
                       <Link

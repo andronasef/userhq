@@ -29,12 +29,21 @@ function portalProductHandlers(testApp: App): PortalHandler[] {
   for (const moduleRef of modulesContainer.values()) {
     for (const { instance, metatype } of moduleRef.controllers.values()) {
       if (!instance || !metatype) continue;
-      const controllerPath = [Reflect.getMetadata("path", metatype) ?? ""].flat()[0];
-      for (const name of metadataScanner.getAllMethodNames(Object.getPrototypeOf(instance))) {
+      const controllerPath = [
+        Reflect.getMetadata("path", metatype) ?? "",
+      ].flat()[0];
+      for (const name of metadataScanner.getAllMethodNames(
+        Object.getPrototypeOf(instance),
+      )) {
         const handler = instance[name];
-        const methodPath = typeof handler === "function" ? Reflect.getMetadata("path", handler) : undefined;
+        const methodPath =
+          typeof handler === "function"
+            ? Reflect.getMetadata("path", handler)
+            : undefined;
         if (methodPath === undefined) continue;
-        const path = `/${controllerPath}/${[methodPath].flat()[0]}`.replace(/\/+/g, "/").replace(/\/$/, "");
+        const path = `/${controllerPath}/${[methodPath].flat()[0]}`
+          .replace(/\/+/g, "/")
+          .replace(/\/$/, "");
         if (!/^\/portal\/:ws\/:product(\/|$)/.test(path)) continue;
         const serializer =
           Reflect.getMetadata("class_serializer:options", handler) ??
@@ -43,7 +52,9 @@ function portalProductHandlers(testApp: App): PortalHandler[] {
           id: `${metatype.name}.${name}`,
           controller: metatype.name,
           path,
-          setting: Reflect.getMetadata(PORTAL_FEATURE, handler) ?? Reflect.getMetadata(PORTAL_FEATURE, metatype),
+          setting:
+            Reflect.getMetadata(PORTAL_FEATURE, handler) ??
+            Reflect.getMetadata(PORTAL_FEATURE, metatype),
           hasSerializer: !!serializer?.schema,
           noContent: Reflect.getMetadata("__httpCode__", handler) === 204,
         });
@@ -56,6 +67,7 @@ function portalProductHandlers(testApp: App): PortalHandler[] {
 // Tested endpoint classifications (D-08/D-11). A new portal product controller must be added here
 // AND declare @PortalFeature(...), otherwise this suite fails.
 const EXPECTED_CLASSIFICATION: Record<string, string> = {
+  PortalBadgesController: "exempt",
   PortalController: "exempt", // branding metadata only (GET /portal/:ws/:product)
   PortalPostsController: "board",
   PortalCommentsController: "board",
@@ -91,14 +103,15 @@ describe("Public Contract Seam Test (Plan 02-05)", () => {
         if (!instance || !metatype) continue;
 
         const controllerPath = Reflect.getMetadata("path", metatype) ?? "";
-        const isClassPublic = Reflect.getMetadata("isPublic", metatype) === true;
+        const isClassPublic =
+          Reflect.getMetadata("isPublic", metatype) === true;
         const classSerializerOpts = Reflect.getMetadata(
           "class_serializer:options",
-          metatype
+          metatype,
         );
 
         const methodNames = metadataScanner.getAllMethodNames(
-          Object.getPrototypeOf(instance)
+          Object.getPrototypeOf(instance),
         );
 
         for (const methodName of methodNames) {
@@ -109,7 +122,8 @@ describe("Public Contract Seam Test (Plan 02-05)", () => {
           const methodPath = Reflect.getMetadata("path", handler);
           if (methodPath === undefined) continue;
 
-          const isHandlerPublic = Reflect.getMetadata("isPublic", handler) === true;
+          const isHandlerPublic =
+            Reflect.getMetadata("isPublic", handler) === true;
           const isPublic = isHandlerPublic || isClassPublic;
 
           if (!isPublic) continue;
@@ -133,7 +147,7 @@ describe("Public Contract Seam Test (Plan 02-05)", () => {
 
     expect(
       missingSchema,
-      `The following @Public handlers lack @SerializeOptions with a schema: ${missingSchema.join(", ")}`
+      `The following @Public handlers lack @SerializeOptions with a schema: ${missingSchema.join(", ")}`,
     ).toEqual([]);
 
     // Assert discovered routes include the required routes
@@ -157,26 +171,34 @@ describe("Public Contract Seam Test (Plan 02-05)", () => {
       const handlers = portalProductHandlers(testApp);
       expect(handlers.length).toBeGreaterThanOrEqual(15);
       expect(new Set(handlers.map((h) => h.controller))).toEqual(
-        new Set(Object.keys(EXPECTED_CLASSIFICATION))
+        new Set(Object.keys(EXPECTED_CLASSIFICATION)),
       );
     });
 
     it("every portal/:ws/:product handler has a valid module or explicit exempt declaration", () => {
-      const missing = portalProductHandlers(testApp).filter((h) => !isPortalFeatureSetting(h.setting));
+      const missing = portalProductHandlers(testApp).filter(
+        (h) => !isPortalFeatureSetting(h.setting),
+      );
       expect(missing.map((h) => h.id)).toEqual([]);
     });
 
     it.each(Object.entries(EXPECTED_CLASSIFICATION))(
       "%s is classified %s on all of its handlers",
       (controller, setting) => {
-        const own = portalProductHandlers(testApp).filter((h) => h.controller === controller);
+        const own = portalProductHandlers(testApp).filter(
+          (h) => h.controller === controller,
+        );
         expect(own.length).toBeGreaterThan(0);
-        expect(own.filter((h) => h.setting !== setting).map((h) => h.id)).toEqual([]);
-      }
+        expect(
+          own.filter((h) => h.setting !== setting).map((h) => h.id),
+        ).toEqual([]);
+      },
     );
 
     it("every portal/:ws/:product handler with a response body keeps a serializer schema", () => {
-      const bare = portalProductHandlers(testApp).filter((h) => !h.noContent && !h.hasSerializer);
+      const bare = portalProductHandlers(testApp).filter(
+        (h) => !h.noContent && !h.hasSerializer,
+      );
       expect(bare.map((h) => h.id)).toEqual([]);
     });
 
@@ -190,11 +212,19 @@ describe("Public Contract Seam Test (Plan 02-05)", () => {
           return { leaked: true };
         }
       }
-      const probeApp = await createTestApp({ extraControllers: [UnclassifiedProbeController] });
+      const probeApp = await createTestApp({
+        extraControllers: [UnclassifiedProbeController],
+      });
       try {
-        const flagged = portalProductHandlers(probeApp).filter((h) => !isPortalFeatureSetting(h.setting));
-        expect(flagged.map((h) => h.id)).toEqual(["UnclassifiedProbeController.read"]);
-        const res = await request(probeApp.http).get("/api/v1/portal/any-ws/any-product/probe");
+        const flagged = portalProductHandlers(probeApp).filter(
+          (h) => !isPortalFeatureSetting(h.setting),
+        );
+        expect(flagged.map((h) => h.id)).toEqual([
+          "UnclassifiedProbeController.read",
+        ]);
+        const res = await request(probeApp.http).get(
+          "/api/v1/portal/any-ws/any-product/probe",
+        );
         expect(res.status).toBe(500);
         expect(JSON.stringify(res.body)).not.toContain("leaked");
       } finally {

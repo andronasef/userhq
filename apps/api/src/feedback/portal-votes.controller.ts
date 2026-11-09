@@ -1,3 +1,4 @@
+import { AttributionBindInterceptor } from "../badges/attribution-bind.interceptor.js";
 import {
   Controller,
   Put,
@@ -35,10 +36,11 @@ export class PortalVotesController {
   @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @SerializeOptions({ schema: VoteResultSchema })
+  @UseInterceptors(AttributionBindInterceptor)
   async putVote(
     @Req() req: any,
     @Param("number") rawNumber: string,
-    @CurrentUser() user: any
+    @CurrentUser() user: any,
   ): Promise<VoteResult> {
     const parseResult = postNumberParamSchema.safeParse(rawNumber);
     if (!parseResult.success) {
@@ -48,7 +50,7 @@ export class PortalVotesController {
       req.portal.productId,
       parseResult.data,
       user.id,
-      true
+      true,
     );
   }
 
@@ -60,7 +62,7 @@ export class PortalVotesController {
   async deleteVote(
     @Req() req: any,
     @Param("number") rawNumber: string,
-    @CurrentUser() user: any
+    @CurrentUser() user: any,
   ): Promise<VoteResult> {
     const parseResult = postNumberParamSchema.safeParse(rawNumber);
     if (!parseResult.success) {
@@ -70,7 +72,7 @@ export class PortalVotesController {
       req.portal.productId,
       parseResult.data,
       user.id,
-      false
+      false,
     );
   }
 }

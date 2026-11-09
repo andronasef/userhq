@@ -1,0 +1,1 @@
+ALTER TABLE "product_badge_rules" ADD COLUMN "key_match_type" text DEFAULT 'exact' NOT NULL;

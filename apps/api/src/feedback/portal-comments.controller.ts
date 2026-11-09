@@ -1,3 +1,4 @@
+import { AttributionBindInterceptor } from "../badges/attribution-bind.interceptor.js";
 import {
   Controller,
   Post,
@@ -45,11 +46,12 @@ export class PortalCommentsController {
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.CREATED)
   @SerializeOptions({ schema: PublicCommentSchema })
+  @UseInterceptors(AttributionBindInterceptor)
   async createComment(
     @Req() req: any,
     @CurrentUser() user: any,
     @Param("number") rawNumber: string,
-    @Body({ schema: CreateCommentInputSchema }) input: CreateCommentInput
+    @Body({ schema: CreateCommentInputSchema }) input: CreateCommentInput,
   ): Promise<PublicComment> {
     if (!user) {
       throw new ApiException("unauthorized", 401, "Sign in required.");
@@ -61,7 +63,13 @@ export class PortalCommentsController {
 
     const portal = req.portal;
     const userAgent = req.headers?.["user-agent"];
-    return this.commentsService.createComment(portal, user, parseResult.data, input, userAgent);
+    return this.commentsService.createComment(
+      portal,
+      user,
+      parseResult.data,
+      input,
+      userAgent,
+    );
   }
 
   @Patch("comments/:id")
@@ -70,7 +78,7 @@ export class PortalCommentsController {
     @Req() req: any,
     @CurrentUser() user: any,
     @Param("id") rawId: string,
-    @Body({ schema: UpdateCommentInputSchema }) input: UpdateCommentInput
+    @Body({ schema: UpdateCommentInputSchema }) input: UpdateCommentInput,
   ): Promise<PublicComment> {
     if (!user) {
       throw new ApiException("unauthorized", 401, "Sign in required.");
@@ -81,7 +89,12 @@ export class PortalCommentsController {
     }
 
     const portal = req.portal;
-    return this.commentsService.updateComment(portal, user, idParsed.data, input);
+    return this.commentsService.updateComment(
+      portal,
+      user,
+      idParsed.data,
+      input,
+    );
   }
 
   @Delete("comments/:id")
@@ -89,7 +102,7 @@ export class PortalCommentsController {
   async deleteComment(
     @Req() req: any,
     @CurrentUser() user: any,
-    @Param("id") rawId: string
+    @Param("id") rawId: string,
   ): Promise<void> {
     if (!user) {
       throw new ApiException("unauthorized", 401, "Sign in required.");

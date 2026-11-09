@@ -11,6 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Multi-Language Platform UI & Entry Localization**: Full bidirectional internationalization supporting 13 languages (English, Arabic RTL, German, Spanish, French, Portuguese, Russian, Hindi, Filipino, Indonesian, Japanese, Korean, and Simplified Chinese). Features automatic visitor language detection (query parameter cascade > `userhq_locale` cookie > browser `navigator.languages` > product default locale > `en`), compact language switchers in header and public portal, product-level language controls in settings, multi-locale authoring tabs in Changelog, FAQ, and Roadmap studios, and seamless public portal fallbacks with an "Original" badge.
 
+- Product user badges with exact or regex name/value attribution rules, signed links, a product users directory and manual grants/revocation.
+- Badge chips on post details and comments.
+
+### Security
+
+- Signed httpOnly guest attribution cookies, verified binding after sign-in, and removal of public self-claim.
+- Anchored, capped regex matching, throttled public attribution and timestamp checks for signed links.
+- Manual grants require membership or product participation; API keys receive no directory email.
+
+### Upgrade notes
+
+- The merged migration sequence is `0025_green_spot` (localization), `0026_jazzy_wildside` (badging tables), then `0027_badge_rule_key_match_type`. Existing databases from the previous `main` apply all three at API startup. A development database that already applied the separate badging branch's old 0025/0026 history needs migration reconciliation or a fresh disposable database before using this merged history; see the deployment guide.
+- Signed rules require `{param}_ts` and HMAC-SHA256 over `value + "." + timestamp`; update link generators.
+- Regex rules now match the entire input. Migration 0027 adds the parameter-name match mode; normal startup migration application is sufficient. No new environment variables.
+
 ## [v0.3.1] - 2026-11-09
 
 ### Added

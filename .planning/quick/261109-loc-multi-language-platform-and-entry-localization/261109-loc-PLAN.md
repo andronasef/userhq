@@ -34,3 +34,12 @@ title: Multi-Language Platform UI & Entry Localization
    - API build (`bun run --filter @userhq/api build`).
    - Web build / typecheck (`bun run --filter @userhq/web typecheck` / build).
    - Atomic commits adhering to GSD standards.
+
+## Review & Finalization — 2026-11-10 Resume
+
+Review the fixed point `HEAD d1b5fb1` plus its staged/unstaged working diff and the untracked `apps/web/test/product-locales-form.test.tsx`. Treat the existing SUMMARY verification as historical evidence; record fresh results for this pending change set.
+
+1. Run separate read-only standards and specification review agents against that fixed point. The standards review checks correctness, tenant isolation, privacy, validation, accessibility, and project conventions; the specification review checks the localization request above, all 13 locale dictionaries, language settings, translated entry editing, and public fallback behavior. Reviewers return actionable findings with file/line evidence and do not edit or commit.
+2. The parent agent resolves accepted findings, adds focused regression coverage where needed, and updates affected guides alongside visible workflow, API, permission, or error changes. Follow AGENTS.md documentation and global UserHQ skill synchronization requirements when applicable.
+3. The parent agent verifies `bun run lint`, `bun run typecheck`, and `bun run test`, then runs `bun run build:packages`, `bun run --filter @userhq/api build`, and `bun run --filter @userhq/web build`. Run existing documentation-sync checks when API documentation changes. Record failures or environmental limits accurately and recheck affected behavior after fixes.
+4. The parent agent records review scope, findings, dispositions, and verification in `261109-loc-REVIEW.md`, updates `261109-loc-SUMMARY.md` and `.planning/STATE.md` with the final outcome, inspects the final diff, and commits the reviewed pending changes with their tests and documentation.

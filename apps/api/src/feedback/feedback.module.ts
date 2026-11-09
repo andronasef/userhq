@@ -1,3 +1,5 @@
+import { BadgesModule } from "../badges/badges.module.js";
+import { AttributionBindInterceptor } from "../badges/attribution-bind.interceptor.js";
 import { Module } from "@nestjs/common";
 import { CategoriesController } from "./categories.controller.js";
 import { PortalPostsController } from "./portal-posts.controller.js";
@@ -19,7 +21,7 @@ import { NotificationsModule } from "../notifications/notifications.module.js";
 import { PushModule } from "../push/push.module.js";
 
 @Module({
-  imports: [NotificationsModule, PushModule],
+  imports: [NotificationsModule, PushModule, BadgesModule],
   controllers: [
     PortalPostsController,
     PortalVotesController,
@@ -31,6 +33,7 @@ import { PushModule } from "../push/push.module.js";
     CategoriesController,
   ],
   providers: [
+    AttributionBindInterceptor,
     PostsService,
     VotesService,
     CommentsService,
@@ -50,4 +53,3 @@ import { PushModule } from "../push/push.module.js";
   ],
 })
 export class FeedbackModule {}
-

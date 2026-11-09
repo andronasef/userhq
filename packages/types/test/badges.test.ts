@@ -4,9 +4,30 @@ import {
   CreateBadgeRuleInputSchema,
   ProductUsersQuerySchema,
   UpdateBadgeInputSchema,
+  AttributeInputSchema,
 } from "../src/badges.js";
 
 describe("Badges Schemas", () => {
+  it("bounds public attribution parameters", () => {
+    const searchParams = Object.fromEntries(
+      Array.from({ length: 50 }, (_, i) => [`key${i}`, "x".repeat(256)]),
+    );
+    expect(AttributeInputSchema.safeParse({ searchParams }).success).toBe(true);
+    expect(
+      AttributeInputSchema.safeParse({
+        searchParams: { ...searchParams, extra: "x" },
+      }).success,
+    ).toBe(false);
+    expect(
+      AttributeInputSchema.safeParse({ searchParams: { key: "x".repeat(257) } })
+        .success,
+    ).toBe(false);
+    expect(
+      AttributeInputSchema.safeParse({
+        searchParams: { ["x".repeat(101)]: "x" },
+      }).success,
+    ).toBe(false);
+  });
   it("validates valid badge creation input", () => {
     const input = {
       name: "PRO Member",
@@ -29,7 +50,7 @@ describe("Badges Schemas", () => {
         name: "Test",
         slug: "Invalid Slug!",
         color: "#123",
-      })
+      }),
     ).toThrow();
   });
 

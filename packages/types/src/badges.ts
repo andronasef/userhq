@@ -5,6 +5,8 @@ export const BADGE_SLUG_MAX = 50;
 export const BADGE_DESC_MAX = 200;
 export const RULE_PARAM_KEY_MAX = 100;
 export const RULE_MATCH_VALUE_MAX = 500;
+export const ATTRIBUTE_MAX_PARAMS = 50;
+export const ATTRIBUTE_PARAM_VALUE_MAX = 256;
 export const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{6}$/;
 
 export const BadgeRuleMatchTypeSchema = z.enum(["exact", "regex"]);
@@ -56,10 +58,19 @@ export const CreateBadgeInputSchema = z.object({
     .trim()
     .min(1)
     .max(BADGE_SLUG_MAX)
-    .regex(/^[a-z0-9-]+$/, "Slug must only contain lowercase letters, numbers, and hyphens"),
+    .regex(
+      /^[a-z0-9-]+$/,
+      "Slug must only contain lowercase letters, numbers, and hyphens",
+    ),
   description: z.string().trim().max(BADGE_DESC_MAX).optional(),
-  color: z.string().regex(HEX_COLOR_REGEX, "Must be a 6-digit hex color like #0284c7").default("#0284c7"),
-  textColor: z.string().regex(HEX_COLOR_REGEX, "Must be a 6-digit hex color like #ffffff").default("#ffffff"),
+  color: z
+    .string()
+    .regex(HEX_COLOR_REGEX, "Must be a 6-digit hex color like #0284c7")
+    .default("#0284c7"),
+  textColor: z
+    .string()
+    .regex(HEX_COLOR_REGEX, "Must be a 6-digit hex color like #ffffff")
+    .default("#ffffff"),
   icon: z.string().trim().max(50).nullable().optional(),
   priority: z.number().int().min(0).max(1000).default(0),
   isActive: z.boolean().default(true),
@@ -73,11 +84,20 @@ export const UpdateBadgeInputSchema = z.object({
     .trim()
     .min(1)
     .max(BADGE_SLUG_MAX)
-    .regex(/^[a-z0-9-]+$/, "Slug must only contain lowercase letters, numbers, and hyphens")
+    .regex(
+      /^[a-z0-9-]+$/,
+      "Slug must only contain lowercase letters, numbers, and hyphens",
+    )
     .optional(),
   description: z.string().trim().max(BADGE_DESC_MAX).nullable().optional(),
-  color: z.string().regex(HEX_COLOR_REGEX, "Must be a 6-digit hex color").optional(),
-  textColor: z.string().regex(HEX_COLOR_REGEX, "Must be a 6-digit hex color").optional(),
+  color: z
+    .string()
+    .regex(HEX_COLOR_REGEX, "Must be a 6-digit hex color")
+    .optional(),
+  textColor: z
+    .string()
+    .regex(HEX_COLOR_REGEX, "Must be a 6-digit hex color")
+    .optional(),
   icon: z.string().trim().max(50).nullable().optional(),
   priority: z.number().int().min(0).max(1000).optional(),
   isActive: z.boolean().optional(),
@@ -138,3 +158,21 @@ export const PublicBadgeChipSchema = z.object({
   priority: z.number().int(),
 });
 export type PublicBadgeChip = z.infer<typeof PublicBadgeChipSchema>;
+
+export const AttributeInputSchema = z.object({
+  searchParams: z
+    .record(
+      z.string().max(RULE_PARAM_KEY_MAX),
+      z.string().max(ATTRIBUTE_PARAM_VALUE_MAX),
+    )
+    .refine(
+      (params) => Object.keys(params).length <= ATTRIBUTE_MAX_PARAMS,
+      "Too many parameters",
+    ),
+});
+export type AttributeInput = z.infer<typeof AttributeInputSchema>;
+export const AttributeResponseSchema = z.object({
+  matchedBadges: z.array(PublicBadgeChipSchema),
+  scrubKeys: z.array(z.string()),
+});
+export type AttributeResponse = z.infer<typeof AttributeResponseSchema>;

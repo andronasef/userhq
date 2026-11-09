@@ -1,3 +1,4 @@
+import { AttributionBindInterceptor } from "../badges/attribution-bind.interceptor.js";
 import {
   Controller,
   Get,
@@ -53,7 +54,7 @@ export class PortalPostsController {
   @SerializeOptions({ schema: PublicBoardPageSchema })
   async listBoard(
     @Req() req: any,
-    @Query({ schema: BoardQuerySchema }) query: BoardQuery
+    @Query({ schema: BoardQuerySchema }) query: BoardQuery,
   ): Promise<PublicBoardPage> {
     const portal = req.portal;
     const viewerId = req.user?.id ?? null;
@@ -65,7 +66,7 @@ export class PortalPostsController {
   @SerializeOptions({ schema: PublicPostPageSchema })
   async getPostPage(
     @Req() req: any,
-    @Param("number") rawNumber: string
+    @Param("number") rawNumber: string,
   ): Promise<PublicPostPage> {
     const parseResult = postNumberParamSchema.safeParse(rawNumber);
     if (!parseResult.success) {
@@ -85,10 +86,11 @@ export class PortalPostsController {
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @HttpCode(HttpStatus.CREATED)
   @SerializeOptions({ schema: PostCreatedSchema })
+  @UseInterceptors(AttributionBindInterceptor)
   async createPost(
     @Req() req: any,
     @CurrentUser() user: any,
-    @Body({ schema: CreatePostInputSchema }) input: CreatePostInput
+    @Body({ schema: CreatePostInputSchema }) input: CreatePostInput,
   ): Promise<PostCreated> {
     if (!user) {
       throw new ApiException("unauthorized", 401, "Sign in required.");
@@ -104,7 +106,7 @@ export class PortalPostsController {
     @Req() req: any,
     @CurrentUser() user: any,
     @Param("number") rawNumber: string,
-    @Body({ schema: UpdatePostInputSchema }) input: UpdatePostInput
+    @Body({ schema: UpdatePostInputSchema }) input: UpdatePostInput,
   ): Promise<PostCreated> {
     if (!user) {
       throw new ApiException("unauthorized", 401, "Sign in required.");
@@ -122,7 +124,7 @@ export class PortalPostsController {
   async deletePost(
     @Req() req: any,
     @CurrentUser() user: any,
-    @Param("number") rawNumber: string
+    @Param("number") rawNumber: string,
   ): Promise<void> {
     if (!user) {
       throw new ApiException("unauthorized", 401, "Sign in required.");

@@ -17,7 +17,7 @@ describe("BadgeChip UI Component", () => {
           icon: "crown",
           priority: 50,
         }}
-      />
+      />,
     );
 
     expect(html).toContain("VIP Patron");
@@ -38,7 +38,7 @@ describe("BadgeChip UI Component", () => {
           icon: null,
           priority: 10,
         }}
-      />
+      />,
     );
     expect(htmlNoIcon).toContain("Early Adopter");
 
@@ -53,7 +53,7 @@ describe("BadgeChip UI Component", () => {
           icon: "non-existent-icon",
           priority: 0,
         }}
-      />
+      />,
     );
     expect(htmlUnknownIcon).toContain("Unknown Icon");
   });
@@ -62,7 +62,8 @@ describe("BadgeChip UI Component", () => {
     const author = {
       name: "Jane Doe",
       image: null,
-      role: "customer" as const,
+      isAdmin: false,
+      deleted: false,
       badges: [
         {
           id: "b1",
@@ -86,10 +87,7 @@ describe("BadgeChip UI Component", () => {
     };
 
     const html = renderToString(
-      <AuthorLine
-        author={author}
-        createdAt="2026-11-09T10:00:00Z"
-      />
+      <AuthorLine author={author} createdAt="2026-11-09T10:00:00Z" />,
     );
 
     expect(html).toContain("Jane Doe");

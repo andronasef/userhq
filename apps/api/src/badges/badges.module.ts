@@ -1,3 +1,4 @@
+import { UserThrottlerGuard } from "../feedback/throttle.js";
 import { Module } from "@nestjs/common";
 import { BadgesService } from "./badges.service.js";
 import { BadgesController } from "./badges.controller.js";
@@ -10,7 +11,7 @@ import { PortalBadgesController } from "./portal-badges.controller.js";
     ProductUsersController,
     PortalBadgesController,
   ],
-  providers: [BadgesService],
+  providers: [BadgesService, UserThrottlerGuard],
   exports: [BadgesService],
 })
 export class BadgesModule {}

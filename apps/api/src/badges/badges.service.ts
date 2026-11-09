@@ -1,6 +1,17 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { eq, and, sql, desc, asc, inArray, or } from "drizzle-orm";
-import crypto from "node:crypto";
+import { ENV, type Env } from "../env.js";
+import { ATTRIBUTE_PARAM_VALUE_MAX } from "@userhq/types";
+import {
+  anchoredRegex,
+  attributionCookieName,
+  ATTRIBUTION_MAX_BADGES,
+  readCookie,
+  signAttributionCookie,
+  verifyAttributionCookie,
+  verifySignedValue,
+  type AttributionEntry,
+} from "./attribution.js";
 import {
   DB,
   type Db,
@@ -28,7 +39,10 @@ import { ApiException } from "../common/api-error.filter.js";
 
 @Injectable()
 export class BadgesService {
-  constructor(@Inject(DB) private readonly db: Db) {}
+  constructor(
+    @Inject(DB) private readonly db: Db,
+    @Inject(ENV) private readonly env: Env,
+  ) {}
 
   async listBadges(productId: string): Promise<Badge[]> {
     const badges = await this.db
@@ -85,15 +99,18 @@ export class BadgesService {
     });
   }
 
-  async createBadge(productId: string, input: CreateBadgeInput): Promise<Badge> {
+  async createBadge(
+    productId: string,
+    input: CreateBadgeInput,
+  ): Promise<Badge> {
     const [existing] = await this.db
       .select({ id: productBadges.id })
       .from(productBadges)
       .where(
         and(
           eq(productBadges.productId, productId),
-          eq(productBadges.slug, input.slug)
-        )
+          eq(productBadges.slug, input.slug),
+        ),
       )
       .limit(1);
 
@@ -101,7 +118,7 @@ export class BadgesService {
       throw new ApiException(
         "badge_conflict",
         409,
-        `Badge with slug "${input.slug}" already exists for this product.`
+        `Badge with slug "${input.slug}" already exists for this product.`,
       );
     }
 
@@ -141,7 +158,7 @@ export class BadgesService {
   async updateBadge(
     productId: string,
     badgeId: string,
-    input: UpdateBadgeInput
+    input: UpdateBadgeInput,
   ): Promise<Badge> {
     const [badge] = await this.db
       .select()
@@ -149,8 +166,8 @@ export class BadgesService {
       .where(
         and(
           eq(productBadges.id, badgeId),
-          eq(productBadges.productId, productId)
-        )
+          eq(productBadges.productId, productId),
+        ),
       )
       .limit(1);
 
@@ -165,8 +182,8 @@ export class BadgesService {
         .where(
           and(
             eq(productBadges.productId, productId),
-            eq(productBadges.slug, input.slug)
-          )
+            eq(productBadges.slug, input.slug),
+          ),
         )
         .limit(1);
 
@@ -174,7 +191,7 @@ export class BadgesService {
         throw new ApiException(
           "badge_conflict",
           409,
-          `Badge with slug "${input.slug}" already exists.`
+          `Badge with slug "${input.slug}" already exists.`,
         );
       }
     }
@@ -192,7 +209,8 @@ export class BadgesService {
         textColor: input.textColor ?? badge.textColor,
         icon: input.icon !== undefined ? input.icon : badge.icon,
         priority: input.priority ?? badge.priority,
-        isActive: input.isActive !== undefined ? input.isActive : badge.isActive,
+        isActive:
+          input.isActive !== undefined ? input.isActive : badge.isActive,
         updatedAt: new Date(),
       })
       .where(eq(productBadges.id, badgeId))
@@ -221,8 +239,8 @@ export class BadgesService {
       .where(
         and(
           eq(productBadges.id, badgeId),
-          eq(productBadges.productId, productId)
-        )
+          eq(productBadges.productId, productId),
+        ),
       )
       .limit(1);
 
@@ -230,15 +248,13 @@ export class BadgesService {
       throw new ApiException("not_found", 404, "Badge not found.");
     }
 
-    await this.db
-      .delete(productBadges)
-      .where(eq(productBadges.id, badgeId));
+    await this.db.delete(productBadges).where(eq(productBadges.id, badgeId));
   }
 
   async addRule(
     productId: string,
     badgeId: string,
-    input: CreateBadgeRuleInput
+    input: CreateBadgeRuleInput,
   ): Promise<BadgeRule> {
     const [badge] = await this.db
       .select({ id: productBadges.id })
@@ -246,8 +262,8 @@ export class BadgesService {
       .where(
         and(
           eq(productBadges.id, badgeId),
-          eq(productBadges.productId, productId)
-        )
+          eq(productBadges.productId, productId),
+        ),
       )
       .limit(1);
 
@@ -262,7 +278,7 @@ export class BadgesService {
         throw new ApiException(
           "badge_rule_invalid",
           400,
-          "Invalid regex pattern."
+          "Invalid regex pattern.",
         );
       }
     }
@@ -295,7 +311,7 @@ export class BadgesService {
   async deleteRule(
     productId: string,
     badgeId: string,
-    ruleId: string
+    ruleId: string,
   ): Promise<void> {
     const [rule] = await this.db
       .select({ id: productBadgeRules.id })
@@ -304,8 +320,8 @@ export class BadgesService {
         and(
           eq(productBadgeRules.id, ruleId),
           eq(productBadgeRules.badgeId, badgeId),
-          eq(productBadgeRules.productId, productId)
-        )
+          eq(productBadgeRules.productId, productId),
+        ),
       )
       .limit(1);
 
@@ -320,7 +336,7 @@ export class BadgesService {
 
   async listProductUsers(
     productId: string,
-    query: ProductUsersQuery
+    query: ProductUsersQuery,
   ): Promise<{
     items: ProductUserListItem[];
     total: number;
@@ -350,7 +366,7 @@ export class BadgesService {
     `;
 
     const countRes = await this.db.execute<{ count: string }>(
-      sql`SELECT count(*)::text as count FROM (${candidateQuery}) candidates`
+      sql`SELECT count(*)::text as count FROM (${candidateQuery}) candidates`,
     );
     const total = parseInt(countRes.rows[0]?.count ?? "0", 10);
 
@@ -371,7 +387,7 @@ export class BadgesService {
         INNER JOIN (${candidateQuery}) c ON c.id = u.id
         ORDER BY u.created_at DESC
         LIMIT ${limit} OFFSET ${offset}
-      `
+      `,
     );
 
     const userIds = pagedUsersRes.rows.map((r) => r.id);
@@ -397,10 +413,7 @@ export class BadgesService {
         expiresAt: userProductBadges.expiresAt,
       })
       .from(userProductBadges)
-      .innerJoin(
-        productBadges,
-        eq(userProductBadges.badgeId, productBadges.id)
-      )
+      .innerJoin(productBadges, eq(userProductBadges.badgeId, productBadges.id))
       .where(
         and(
           eq(userProductBadges.productId, productId),
@@ -408,9 +421,9 @@ export class BadgesService {
           eq(productBadges.isActive, true),
           or(
             sql`${userProductBadges.expiresAt} IS NULL`,
-            sql`${userProductBadges.expiresAt} > NOW()`
-          )
-        )
+            sql`${userProductBadges.expiresAt} > NOW()`,
+          ),
+        ),
       )
       .orderBy(desc(productBadges.priority), asc(userProductBadges.createdAt));
 
@@ -469,7 +482,7 @@ export class BadgesService {
           WHERE p.product_id = ${productId}
           GROUP BY v.user_id
         ) v_stat ON v_stat.user_id = u_ids.id
-      `
+      `,
     );
 
     const statsMap = new Map<
@@ -503,7 +516,8 @@ export class BadgesService {
         commentsCount: stats?.commentsCount ?? 0,
         votesCount: stats?.votesCount ?? 0,
         firstSeenAt: new Date(u.created_at).toISOString(),
-        lastActiveAt: stats?.lastActiveAt ?? new Date(u.created_at).toISOString(),
+        lastActiveAt:
+          stats?.lastActiveAt ?? new Date(u.created_at).toISOString(),
       };
     });
 
@@ -514,7 +528,7 @@ export class BadgesService {
     productId: string,
     userId: string,
     input: AssignUserBadgeInput,
-    grantedByUserId?: string
+    grantedByUserId?: string,
   ): Promise<void> {
     const [badge] = await this.db
       .select({ id: productBadges.id })
@@ -522,8 +536,8 @@ export class BadgesService {
       .where(
         and(
           eq(productBadges.id, input.badgeId),
-          eq(productBadges.productId, productId)
-        )
+          eq(productBadges.productId, productId),
+        ),
       )
       .limit(1);
 
@@ -569,7 +583,7 @@ export class BadgesService {
   async revokeUserBadge(
     productId: string,
     userId: string,
-    badgeId: string
+    badgeId: string,
   ): Promise<void> {
     await this.db
       .delete(userProductBadges)
@@ -577,146 +591,176 @@ export class BadgesService {
         and(
           eq(userProductBadges.userId, userId),
           eq(userProductBadges.productId, productId),
-          eq(userProductBadges.badgeId, badgeId)
-        )
+          eq(userProductBadges.badgeId, badgeId),
+        ),
       );
   }
 
   async getPublicUserBadges(
     productId: string,
-    userIds: string[]
+    userIds: string[],
   ): Promise<Map<string, PublicBadgeChip[]>> {
     return getPublicBadgesForUsers(this.db, productId, userIds);
   }
 
   async evaluateAttribution(
     productId: string,
-    queryParams: Record<string, string>,
-    userId?: string
+    params: Record<string, string>,
+    userId?: string,
   ): Promise<{
     matchedBadges: PublicBadgeChip[];
-    matchedBadgeIds: string[];
+    matchedEntries: AttributionEntry[];
+    scrubKeys: string[];
   }> {
+    if (Object.keys(params).length === 0)
+      return { matchedBadges: [], matchedEntries: [], scrubKeys: [] };
     const rules = await this.db
-      .select({
-        ruleId: productBadgeRules.id,
-        badgeId: productBadgeRules.badgeId,
-        paramKey: productBadgeRules.paramKey,
-        matchType: productBadgeRules.matchType,
-        matchValue: productBadgeRules.matchValue,
-        secretToken: productBadgeRules.secretToken,
-        badgeName: productBadges.name,
-        badgeSlug: productBadges.slug,
-        badgeColor: productBadges.color,
-        badgeTextColor: productBadges.textColor,
-        badgeIcon: productBadges.icon,
-        badgePriority: productBadges.priority,
-        isActive: productBadges.isActive,
-      })
+      .select({ rule: productBadgeRules, badge: productBadges })
       .from(productBadgeRules)
-      .innerJoin(
-        productBadges,
-        eq(productBadgeRules.badgeId, productBadges.id)
-      )
+      .innerJoin(productBadges, eq(productBadgeRules.badgeId, productBadges.id))
       .where(
         and(
           eq(productBadgeRules.productId, productId),
-          eq(productBadges.isActive, true)
-        )
+          eq(productBadges.productId, productId),
+          eq(productBadges.isActive, true),
+        ),
       )
-      .orderBy(desc(productBadges.priority));
-
-    const matchedBadgeMap = new Map<string, PublicBadgeChip>();
-    const matchedParamValues = new Map<string, string>();
-
-    for (const rule of rules) {
-      const val = queryParams[rule.paramKey];
-      if (val === undefined || val === null) {
+      .orderBy(desc(productBadges.priority), asc(productBadgeRules.createdAt));
+    const matched = new Map<
+      string,
+      { badge: PublicBadgeChip; entry: AttributionEntry }
+    >();
+    const scrubKeys = new Set<string>();
+    for (const { rule, badge } of rules) {
+      const key = rule.paramKey;
+      if (/_sig$|_ts$/.test(key) || !Object.hasOwn(params, key)) continue;
+      const value = params[key];
+      if (value.length > ATTRIBUTE_PARAM_VALUE_MAX) continue;
+      if (
+        rule.secretToken &&
+        !verifySignedValue({
+          secret: rule.secretToken,
+          value,
+          sig: params[`${key}_sig`],
+          ts: params[`${key}_ts`],
+        })
+      )
+        continue;
+      let matches = false;
+      try {
+        matches =
+          rule.matchType === "exact"
+            ? value === rule.matchValue
+            : anchoredRegex(rule.matchValue).test(value);
+      } catch {
         continue;
       }
-
-      // If secretToken is present, verify HMAC signature
-      if (rule.secretToken) {
-        const sig =
-          queryParams[`${rule.paramKey}_sig`] ??
-          queryParams["sig"] ??
-          queryParams["signature"];
-        if (!sig) {
-          continue;
-        }
-
-        const expectedSig = crypto
-          .createHmac("sha256", rule.secretToken)
-          .update(val)
-          .digest("hex");
-
-        if (sig.length !== expectedSig.length) {
-          continue;
-        }
-
-        const matchesSig = crypto.timingSafeEqual(
-          Buffer.from(sig),
-          Buffer.from(expectedSig)
-        );
-        if (!matchesSig) {
-          continue;
-        }
-      }
-
-      // Check match value
-      let isMatch = false;
-      if (rule.matchType === "exact") {
-        isMatch = val === rule.matchValue;
-      } else if (rule.matchType === "regex") {
-        try {
-          const reg = new RegExp(rule.matchValue);
-          isMatch = reg.test(val);
-        } catch {
-          isMatch = false;
-        }
-      }
-
-      if (isMatch) {
-        matchedBadgeMap.set(rule.badgeId, {
-          id: rule.badgeId,
-          name: rule.badgeName,
-          slug: rule.badgeSlug,
-          color: rule.badgeColor,
-          textColor: rule.badgeTextColor,
-          icon: rule.badgeIcon,
-          priority: rule.badgePriority,
+      if (!matches) continue;
+      for (const name of [key, `${key}_sig`, `${key}_ts`])
+        if (Object.hasOwn(params, name)) scrubKeys.add(name);
+      if (!matched.has(badge.id) && matched.size < ATTRIBUTION_MAX_BADGES)
+        matched.set(badge.id, {
+          badge: {
+            id: badge.id,
+            name: badge.name,
+            slug: badge.slug,
+            color: badge.color,
+            textColor: badge.textColor,
+            icon: badge.icon,
+            priority: badge.priority,
+          },
+          entry: { badgeId: badge.id, value },
         });
-        matchedParamValues.set(rule.badgeId, val);
-      }
     }
-
-    const matchedBadgeIds = Array.from(matchedBadgeMap.keys());
-    const matchedBadges = Array.from(matchedBadgeMap.values());
-
-    // If caller has an authenticated user, bind the badges immediately
-    if (userId && matchedBadgeIds.length > 0) {
-      for (const badgeId of matchedBadgeIds) {
-        await this.db
-          .insert(userProductBadges)
-          .values({
+    const matchedEntries = [...matched.values()].map((item) => item.entry);
+    if (userId && matchedEntries.length)
+      await this.db
+        .insert(userProductBadges)
+        .values(
+          matchedEntries.map((entry) => ({
             userId,
             productId,
-            badgeId,
+            badgeId: entry.badgeId,
             source: "rule",
-            matchedParamValue: matchedParamValues.get(badgeId) ?? null,
-          })
-          .onConflictDoNothing();
-      }
-    }
+            matchedParamValue: entry.value,
+          })),
+        )
+        .onConflictDoNothing();
+    return {
+      matchedBadges: [...matched.values()].map((item) => item.badge),
+      matchedEntries,
+      scrubKeys: [...scrubKeys],
+    };
+  }
 
-    return { matchedBadges, matchedBadgeIds };
+  async bindPendingAttribution(
+    productId: string,
+    userId: string,
+    cookieHeader?: string,
+  ): Promise<{ present: boolean }> {
+    const raw = readCookie(cookieHeader, attributionCookieName(productId));
+    if (raw === undefined) return { present: false };
+    const entries = verifyAttributionCookie(
+      this.env.BETTER_AUTH_SECRET,
+      productId,
+      raw,
+    );
+    if (entries?.length) {
+      const active = await this.db
+        .select({ id: productBadges.id })
+        .from(productBadges)
+        .where(
+          and(
+            eq(productBadges.productId, productId),
+            eq(productBadges.isActive, true),
+            inArray(
+              productBadges.id,
+              entries.map((e) => e.badgeId),
+            ),
+          ),
+        );
+      const ids = new Set(active.map((b) => b.id));
+      const valid = entries.filter((entry) => ids.has(entry.badgeId));
+      if (valid.length)
+        await this.db
+          .insert(userProductBadges)
+          .values(
+            valid.map((entry) => ({
+              userId,
+              productId,
+              badgeId: entry.badgeId,
+              source: "rule",
+              matchedParamValue: entry.value,
+            })),
+          )
+          .onConflictDoNothing();
+    }
+    return { present: true };
+  }
+
+  buildAttributionCookie(
+    productId: string,
+    entries: AttributionEntry[],
+    cookieHeader?: string,
+  ): string {
+    const raw = readCookie(cookieHeader, attributionCookieName(productId));
+    const old = raw
+      ? (verifyAttributionCookie(this.env.BETTER_AUTH_SECRET, productId, raw) ??
+        [])
+      : [];
+    const merged = new Map(entries.map((entry) => [entry.badgeId, entry]));
+    for (const entry of old)
+      if (!merged.has(entry.badgeId)) merged.set(entry.badgeId, entry);
+    return signAttributionCookie(this.env.BETTER_AUTH_SECRET, productId, [
+      ...merged.values(),
+    ]);
   }
 }
 
 export async function getPublicBadgesForUsers(
   db: Db,
   productId: string,
-  userIds: string[]
+  userIds: string[],
 ): Promise<Map<string, PublicBadgeChip[]>> {
   const result = new Map<string, PublicBadgeChip[]>();
   if (userIds.length === 0) return result;
@@ -733,10 +777,7 @@ export async function getPublicBadgesForUsers(
       priority: productBadges.priority,
     })
     .from(userProductBadges)
-    .innerJoin(
-      productBadges,
-      eq(userProductBadges.badgeId, productBadges.id)
-    )
+    .innerJoin(productBadges, eq(userProductBadges.badgeId, productBadges.id))
     .where(
       and(
         eq(userProductBadges.productId, productId),
@@ -744,9 +785,9 @@ export async function getPublicBadgesForUsers(
         eq(productBadges.isActive, true),
         or(
           sql`${userProductBadges.expiresAt} IS NULL`,
-          sql`${userProductBadges.expiresAt} > NOW()`
-        )
-      )
+          sql`${userProductBadges.expiresAt} > NOW()`,
+        ),
+      ),
     )
     .orderBy(desc(productBadges.priority), asc(userProductBadges.createdAt));
 

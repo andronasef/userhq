@@ -6,23 +6,29 @@ import {
   Res,
   UseGuards,
   UseInterceptors,
+  SerializeOptions,
+  Inject,
+  StandardSchemaSerializerInterceptor,
 } from "@nestjs/common";
-import { StandardSchemaSerializerInterceptor } from "@nestjs/common";
-import type { Request, Response } from "express";
-import { z } from "zod";
-import type { PublicBadgeChip } from "@userhq/types";
+import { Throttle } from "@nestjs/throttler";
+import type { Response } from "express";
+import {
+  AttributeInputSchema,
+  AttributeResponseSchema,
+  type AttributeInput,
+  type AttributeResponse,
+} from "@userhq/types";
+import { ENV, type Env } from "../env.js";
 import { Public } from "../auth/decorators.js";
+import { ApiException } from "../common/api-error.filter.js";
 import { PortalGuard } from "../portal/portal.guard.js";
 import { PortalFeature } from "../portal/product-features.js";
+import { UserThrottlerGuard } from "../feedback/throttle.js";
+import {
+  attributionCookieName,
+  attributionCookieOptions,
+} from "./attribution.js";
 import { BadgesService } from "./badges.service.js";
-
-const AttributeInputSchema = z.object({
-  searchParams: z.record(z.string(), z.string()),
-});
-
-const ClaimInputSchema = z.object({
-  badgeIds: z.array(z.string().uuid()),
-});
 
 @Controller("portal/:ws/:product/badges")
 @Public()
@@ -30,64 +36,49 @@ const ClaimInputSchema = z.object({
 @UseGuards(PortalGuard)
 @UseInterceptors(StandardSchemaSerializerInterceptor)
 export class PortalBadgesController {
-  constructor(private readonly badgesService: BadgesService) {}
-
+  constructor(
+    private readonly badgesService: BadgesService,
+    @Inject(ENV) private readonly env: Env,
+  ) {}
   @Post("attribute")
+  @UseGuards(UserThrottlerGuard)
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
+  @SerializeOptions({ schema: AttributeResponseSchema })
   async attributeVisitor(
     @Req() req: any,
     @Res({ passthrough: true }) res: Response,
-    @Body() body: unknown
-  ): Promise<{ matchedBadges: PublicBadgeChip[] }> {
+    @Body({ schema: AttributeInputSchema }) input: AttributeInput,
+  ): Promise<AttributeResponse> {
     const productId = req.portal?.productId;
-    if (!productId) {
-      return { matchedBadges: [] };
-    }
-
-    const { searchParams } = AttributeInputSchema.parse(body);
-    const userId = req.user?.id;
-
-    const { matchedBadges, matchedBadgeIds } =
+    if (!productId) throw new ApiException("not_found", 404, "Not found.");
+    const { matchedBadges, matchedEntries, scrubKeys } =
       await this.badgesService.evaluateAttribution(
         productId,
-        searchParams,
-        userId
+        input.searchParams,
+        req.user?.id,
       );
-
-    if (matchedBadgeIds.length > 0) {
-      const cookieName = `uhq_attr_${productId}`;
-      // Cookie valid for 30 days
-      res.cookie(cookieName, JSON.stringify(matchedBadgeIds), {
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-      });
-    }
-
-    return { matchedBadges };
-  }
-
-  @Post("claim")
-  async claimBadges(
-    @Req() req: any,
-    @Body() body: unknown
-  ): Promise<{ success: boolean }> {
-    const productId = req.portal?.productId;
-    const userId = req.user?.id;
-    if (!productId || !userId) {
-      return { success: false };
-    }
-
-    const { badgeIds } = ClaimInputSchema.parse(body);
-    for (const badgeId of badgeIds) {
-      await this.badgesService.assignUserBadge(
+    if (req.user?.id) {
+      const { present } = await this.badgesService.bindPendingAttribution(
         productId,
-        userId,
-        { badgeId },
-        undefined
+        req.user.id,
+        req.headers.cookie,
+      );
+      if (present)
+        res.clearCookie(
+          attributionCookieName(productId),
+          attributionCookieOptions(this.env),
+        );
+    } else if (matchedEntries.length) {
+      res.cookie(
+        attributionCookieName(productId),
+        this.badgesService.buildAttributionCookie(
+          productId,
+          matchedEntries,
+          req.headers.cookie,
+        ),
+        attributionCookieOptions(this.env),
       );
     }
-
-    return { success: true };
+    return { matchedBadges, scrubKeys };
   }
 }

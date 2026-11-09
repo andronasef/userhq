@@ -5,6 +5,7 @@ import { GuideView } from "../components/guide/guide-view";
 import { SwaggerExplorer } from "../components/guide/swagger-explorer";
 import { UserMenu } from "../components/user-menu";
 import { DashboardSidebar } from "../components/dashboard/sidebar";
+import { I18nProvider } from "../lib/i18n/context";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/guide",
@@ -171,4 +172,70 @@ describe("GuideView Rubix-style documentation", () => {
     expect(html).toContain("Interactive API Explorer");
     expect(html).toContain("Webhooks &amp; HMAC Signature Verification");
   });
+
+  it("renders Arabic localized markdown guide when locale is ar", () => {
+    const html = renderToStaticMarkup(
+      <I18nProvider initialLocale="ar">
+        <GuideView
+          workspaces={[{ slug: "acme", name: "Acme Corp", role: "owner" }]}
+          isPlatformOwner={false}
+        />
+      </I18nProvider>
+    );
+
+    // RTL layout
+    expect(html).toContain('dir="rtl"');
+
+    // Arabic Header & Breadcrumbs
+    expect(html).toContain("دليل الاستخدام ومرجع الـ API");
+    expect(html).toContain("دليل منصة UserHQ وواجهة البرمجة (API)");
+    expect(html).toContain("البحث في الموضوعات...");
+
+    // Arabic Sections
+    expect(html).toContain("نظرة عامة وهيكل مساحة العمل");
+    expect(html).toContain("الأدوار وصلاحيات الفريق");
+    expect(html).toContain("صندوق الطلبات الموحد والفرز");
+    expect(html).toContain("صندوق التعليقات والملاحظات التي تحتاج انتباهاً");
+    expect(html).toContain("بيانات وتواصل أصحاب الطلبات والموقع الجغرافي");
+    expect(html).toContain("بوابات العملاء العامة");
+    expect(html).toContain("خريطة الطريق وسجل التحديثات");
+    expect(html).toContain("قاعدة معرفة الأسئلة الشائعة الذاتية");
+    expect(html).toContain("مستعرض API التفاعلي");
+    expect(html).toContain("الـ Webhooks والتحقق من توقيع HMAC");
+
+    // Interactive Swagger explorer still embedded in Arabic view
+    expect(html).toContain("Search endpoints by path, verb, scope, or keyword");
+  });
+
+  it("renders localized guide across all 13 supported locales", () => {
+    const locales = [
+      "en", "ar", "de", "es", "fr", "ja", "ko", "pt", "ru", "zh", "fil", "hi", "id",
+    ];
+
+    for (const loc of locales) {
+      const html = renderToStaticMarkup(
+        <I18nProvider initialLocale={loc as any}>
+          <GuideView
+            workspaces={[{ slug: "acme", name: "Acme Corp", role: "owner" }]}
+            isPlatformOwner={false}
+          />
+        </I18nProvider>
+      );
+
+      expect(html).toContain("acme");
+      expect(html).toContain("overview");
+      expect(html).toContain("roles-permissions");
+      expect(html).toContain("requests-inbox");
+      expect(html).toContain("comments-attention");
+      expect(html).toContain("author-location");
+      expect(html).toContain("customer-portals");
+      expect(html).toContain("roadmap-changelog");
+      expect(html).toContain("faq-system");
+      expect(html).toContain("themes-push");
+      expect(html).toContain("api-overview");
+      expect(html).toContain("swagger-explorer");
+      expect(html).toContain("webhooks-hmac");
+    }
+  });
 });
+

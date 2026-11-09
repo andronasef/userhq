@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useI18n } from "../lib/i18n/context";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ImageUp,
   LogOut,
@@ -19,7 +19,10 @@ import {
   Check,
   Contrast,
   BookOpen,
+  Globe,
 } from "lucide-react";
+import { LOCALE_CATALOG } from "@userhq/types";
+import { cn } from "../lib/utils";
 import { Button } from "./ui/button";
 import { Avatar } from "./ui/avatar";
 import {
@@ -54,7 +57,8 @@ export function UserMenu({
   isPlatformOwner = false,
   isWorkspaceOwner = false,
 }: UserMenuProps): React.JSX.Element {
-  const { t } = useI18n();
+  const router = useRouter();
+  const { t, locale, setLocale } = useI18n();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [isPending, setIsPending] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -260,6 +264,44 @@ export function UserMenu({
               </span>
               {theme === "charcoal" && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
             </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="flex items-center gap-2 w-full cursor-pointer">
+            <Globe className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <span>{t("common.language", "Language")}</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-48 max-h-72 overflow-y-auto">
+            {Object.values(LOCALE_CATALOG).map((item) => {
+              const isSelected = item.code === locale;
+              return (
+                <DropdownMenuItem
+                  key={item.code}
+                  onClick={() => {
+                    setLocale(item.code);
+                    router.refresh();
+                  }}
+                  className={cn(
+                    "flex items-center justify-between cursor-pointer text-xs py-1.5 px-2",
+                    isSelected && "font-semibold text-foreground bg-muted/60",
+                  )}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-foreground">{item.nativeName}</span>
+                    <span className="text-[11px] text-muted-foreground truncate">
+                      ({item.name})
+                    </span>
+                  </div>
+                  {isSelected && (
+                    <Check
+                      className="size-3.5 text-[var(--primary-text)] shrink-0 ml-2"
+                      aria-hidden="true"
+                    />
+                  )}
+                </DropdownMenuItem>
+              );
+            })}
           </DropdownMenuSubContent>
         </DropdownMenuSub>
 

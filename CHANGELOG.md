@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [v0.4.1] - 2026-11-10
 
+### Added
+
+- **Multi-locale Markdown User Guide**: Converted the in-app platform & API guide (`/guide`) to a localized Markdown architecture with complete documentation across all 13 supported languages (`en`, `ar`, `de`, `es`, `fr`, `ja`, `ko`, `pt`, `ru`, `zh`, `fil`, `hi`, `id`), featuring full bidirectional RTL layout support for Arabic, an interactive Swagger API explorer component, categorized navigation, and quick links.
+- **Language Switcher in User Menu & Account Settings**: Added a language selection submenu to the user profile avatar dropdown across the entire application and a dedicated language preference card in user `/account` settings, allowing team members and admins to switch their preferred interface language without cluttering the main navigation header.
+
 ### Changed
 
 - **Portal interface follows the visitor's language**: The portal UI is shown in the visitor's own language even when that language is not enabled for the product, and the language switcher lists every supported language. A product's enabled languages now only decide which translated content is shown; entries without a translation still fall back to the product's default language.

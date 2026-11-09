@@ -9,6 +9,7 @@ import { PushNotificationPreferences } from "./push-preferences";
 import { DeleteAccount } from "./delete-account";
 import { AccountBackButton } from "./back-button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguagePreference } from "./language-preference";
 
 export const metadata: Metadata = {
   title: "Account · UserHQ",
@@ -53,6 +54,10 @@ export default async function AccountPage({
             Customize how UserHQ looks on your device. Choose between system settings, light mode, dark mode, or charcoal.
           </p>
           <ThemeToggle variant="segmented" />
+        </section>
+
+        <section className="rounded-lg border border-border bg-card p-6">
+          <LanguagePreference />
         </section>
 
         <section className="rounded-lg border border-border bg-card p-6">

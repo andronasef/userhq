@@ -12,6 +12,7 @@ import {
   uniqueIndex,
   index,
   integer,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { uploads } from "./uploads.js";
 import { user } from "./auth.js";
@@ -63,6 +64,10 @@ export const products = pgTable(
     roadmapEnabled: boolean("roadmap_enabled").notNull().default(true),
     changelogEnabled: boolean("changelog_enabled").notNull().default(true),
     faqEnabled: boolean("faq_enabled").notNull().default(true),
+    locales: jsonb("locales")
+      .$type<{ defaultLocale: string; enabledLocales: string[] }>()
+      .notNull()
+      .default({ defaultLocale: "en", enabledLocales: ["en"] }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

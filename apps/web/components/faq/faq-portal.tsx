@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useI18n } from "../../lib/i18n/context";
 import Link from "next/link";
 import { HelpCircle } from "lucide-react";
 import type { PublicFaqCategory, RichTextDoc } from "@userhq/types";
@@ -41,6 +42,7 @@ export function FaqPortal({
   categories,
   boardEnabled,
 }: FaqPortalProps): React.JSX.Element {
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [openQuestions, setOpenQuestions] = React.useState<Set<string>>(new Set());
   const [closedInSearch, setClosedInSearch] = React.useState<Set<string>>(new Set());
@@ -165,11 +167,11 @@ export function FaqPortal({
     return (
       <EmptyState
         icon={<HelpCircle className="size-6 text-muted-foreground" aria-hidden="true" />}
-        title="No frequently asked questions yet"
+        title={t("ui.noFaqYet")}
         body="Self-serve help articles and common questions will appear here soon."
         action={boardEnabled ? (
           <Button asChild variant="default">
-            <Link href={`/${ws}/${product}`}>Explore feedback</Link>
+            <Link href={`/${ws}/${product}`}>{t("ui.exploreFeedback")}</Link>
           </Button>
         ) : undefined}
       />

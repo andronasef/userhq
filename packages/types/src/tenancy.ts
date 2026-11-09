@@ -2,6 +2,7 @@ import { z } from "zod";
 import { workspaceSlugSchema, productSlugSchema } from "./slugs.js";
 import { PublicUserSchema } from "./user.js";
 import { HEX_COLOR_RE, STATUS_TYPES } from "./palette.js";
+import { ProductLocalesConfigSchema, type ProductLocalesConfig } from "./i18n.js";
 
 export const PRODUCT_FEATURE_KEYS = [
   "board",
@@ -33,6 +34,7 @@ export const PublicPortalProductSchema = z.object({
     accentTextColor: z.string().nullable().optional(),
     logoUrl: z.string().nullable(),
     websiteUrl: z.string().nullable(),
+    locales: ProductLocalesConfigSchema.optional(),
   }),
   categories: z.array(
     z.object({
@@ -279,6 +281,7 @@ export const ProductDetailSchema = ProductSummarySchema.extend({
   logoUploadId: z.uuid().nullable(),
   tagline: z.string().nullable(),
   websiteUrl: z.string().nullable(),
+  locales: ProductLocalesConfigSchema.optional(),
 });
 export type ProductDetail = z.infer<typeof ProductDetailSchema>;
 
@@ -291,8 +294,9 @@ export const UpdateProductInputSchema = z.object({
   websiteUrl: WebsiteUrlSchema.optional(),
   accentColor: HexColorSchema.optional(),
   accentTextColor: NullableHexColorSchema.optional(),
+  locales: ProductLocalesConfigSchema.optional(),
 });
-export type UpdateProductInput = z.infer<typeof UpdateProductInputSchema>;
+export type UpdateProductInput = z.input<typeof UpdateProductInputSchema>;
 
 export const HealthResponseSchema = z.object({
   status: z.literal("ok"),

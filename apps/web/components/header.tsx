@@ -7,6 +7,7 @@ import { SessionKeepAlive } from "./session-keepalive";
 import { NotificationBell } from "./notifications/notification-bell";
 import { HeaderBrand } from "./header-brand";
 import { ThemeToggle } from "./theme-toggle";
+import { LanguageSwitcher } from "./language-switcher";
 
 export async function Header(): Promise<React.JSX.Element> {
   const me = await getMe();
@@ -32,6 +33,7 @@ export async function Header(): Promise<React.JSX.Element> {
         </div>
 
         <div className="flex items-center gap-2">
+          <LanguageSwitcher variant="ghost" />
           <ThemeToggle />
           {me.user ? (
             <div className="flex items-center gap-2">

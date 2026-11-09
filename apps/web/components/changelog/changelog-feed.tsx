@@ -8,6 +8,7 @@ import {
 } from "@userhq/types";
 import { EmptyState } from "../empty-state";
 import { Button } from "../ui/button";
+import { useI18n } from "../../lib/i18n/context";
 import { apiFetch } from "../../lib/api-client";
 import { ChangelogTimelineItem } from "./changelog-timeline-item";
 
@@ -28,6 +29,7 @@ export function ChangelogFeed({
   entries: initialEntries,
   nextCursor: initialCursor = null,
 }: ChangelogFeedProps): React.JSX.Element {
+  const { locale, t } = useI18n();
   const [entries, setEntries] = React.useState(initialEntries);
   const [cursor, setCursor] = React.useState(initialCursor);
   const [loading, setLoading] = React.useState(false);
@@ -39,7 +41,7 @@ export function ChangelogFeed({
     setFailed(false);
     try {
       const page = await apiFetch(
-        `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/changelog?cursor=${encodeURIComponent(cursor)}`,
+        `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/changelog?cursor=${encodeURIComponent(cursor)}&lang=${locale}`,
         { schema: PublicChangelogFeedResponseSchema }
       );
       setEntries((prev) => {
@@ -58,7 +60,7 @@ export function ChangelogFeed({
     return (
       <EmptyState
         icon={<Megaphone className="size-6 text-muted-foreground" />}
-        title="No updates published yet"
+        title={t("ui.noUpdatesYet")}
         body="Check back soon for announcements, new features, and improvements."
       />
     );
@@ -86,7 +88,7 @@ export function ChangelogFeed({
           </Button>
           {failed && (
             <p role="alert" className="text-sm text-destructive">
-              Couldn't load more updates. Try again.
+              {t("ui.loadMoreFailed")}
             </p>
           )}
         </div>

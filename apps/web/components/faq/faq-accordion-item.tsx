@@ -4,10 +4,12 @@ import * as React from "react";
 import { Link2, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import type { PublicFaqQuestion } from "@userhq/types";
+import { isRtl } from "@userhq/types";
 import { HighlightText } from "./faq-highlight";
 import { RichTextViewer } from "../rich-text/rich-text-viewer";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
+import { useI18n } from "../../lib/i18n/context";
 
 export interface FaqAccordionItemProps {
   question: PublicFaqQuestion;
@@ -24,6 +26,13 @@ export function FaqAccordionItem({
   onToggle,
   isHighlighted = false,
 }: FaqAccordionItemProps): React.JSX.Element {
+  const { contentDefaultLocale, t } = useI18n();
+
+  const displayQuestion = question.question;
+  const displayAnswer = question.answer;
+  const isFallback = Boolean(("isFallback" in (question ?? {})) && (question as { isFallback?: boolean }).isFallback);
+  const textDir = isRtl((question as { resolvedLocale?: string } | undefined)?.resolvedLocale ?? contentDefaultLocale) ? "rtl" : "ltr";
+
   const handleCopyLink = (e: React.MouseEvent) => {
     e.stopPropagation();
     const url =
@@ -56,8 +65,13 @@ export function FaqAccordionItem({
           aria-controls={`faq-answer-${question.id}`}
           className="w-full flex items-center justify-between gap-3 p-4 text-left font-semibold text-sm sm:text-base text-foreground hover:bg-muted/30 transition-colors"
         >
-          <span className="min-w-0 flex-1 pr-8">
-            <HighlightText text={question.question} query={searchQuery} />
+          <span className="min-w-0 flex-1 pr-8 flex items-center gap-2" dir={textDir}>
+            <HighlightText text={displayQuestion} query={searchQuery} />
+            {isFallback && (
+              <span className="text-[10px] text-muted-foreground bg-muted border border-border px-1.5 py-0.5 rounded font-normal shrink-0">
+                {t("ui.original")}
+              </span>
+            )}
           </span>
           <ChevronDown
             className={cn(
@@ -73,8 +87,8 @@ export function FaqAccordionItem({
           size="icon"
           onClick={handleCopyLink}
           className="absolute right-10 top-1/2 -translate-y-1/2 size-7 text-muted-foreground hover:text-foreground"
-          aria-label="Copy link to question"
-          title="Copy question link"
+          aria-label={t("ui.copyQuestionLink")}
+          title={t("ui.copyQuestionLink")}
         >
           <Link2 className="size-3.5" aria-hidden="true" />
         </Button>
@@ -91,8 +105,11 @@ export function FaqAccordionItem({
         )}
       >
         <div className="overflow-hidden">
-          <div className="p-4 pt-1 text-sm sm:text-base text-muted-foreground leading-relaxed bg-background/50 border-t border-border/50 overflow-x-auto">
-            <RichTextViewer content={question.answer} />
+          <div
+            dir={textDir}
+            className="p-4 pt-1 text-sm sm:text-base text-muted-foreground leading-relaxed bg-background/50 border-t border-border/50 overflow-x-auto"
+          >
+            <RichTextViewer content={displayAnswer} />
           </div>
         </div>
       </div>

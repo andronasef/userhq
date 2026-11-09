@@ -68,6 +68,7 @@ describe("FAQ Admin Studio & Management Components", () => {
       ],
     },
     rank: "0|hzzzzz:",
+    translations: {},
     createdAt: "2026-10-15T10:00:00.000Z",
     updatedAt: "2026-10-15T10:00:00.000Z",
   };

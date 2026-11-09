@@ -5,6 +5,7 @@ import {
   Patch,
   Delete,
   Body,
+  Query,
   HttpCode,
   HttpStatus,
   Inject,
@@ -23,6 +24,7 @@ import {
   uploads,
   changelogTags,
 } from "@userhq/db";
+import { executeLocaleSwap, previewLocaleSwap } from "./locale-swap.js";
 import {
   CreateProductInputSchema,
   ProductCreatedSchema,
@@ -191,6 +193,7 @@ export class ProductsController {
         accentTextColor: products.accentTextColor,
         tagline: products.tagline,
         websiteUrl: products.websiteUrl,
+        locales: products.locales,
       })
       .from(products)
       .leftJoin(uploads, eq(products.logoUploadId, uploads.id))
@@ -213,7 +216,25 @@ export class ProductsController {
       accentTextColor: row.accentTextColor ?? null,
       tagline: row.tagline ?? null,
       websiteUrl: row.websiteUrl ?? null,
+      locales: (row.locales as any) ?? { defaultLocale: "en", enabledLocales: ["en"] },
     });
+  }
+
+  @Get(":product/locales/swap-preview")
+  @RequireScopes("settings:read")
+  async getLocaleSwapPreview(
+    @CurrentTenant() tenant: Tenant,
+    @Query("target") target?: string,
+  ) {
+    const [currentProd] = await this.db
+      .select({ locales: products.locales })
+      .from(products)
+      .where(eq(products.id, tenant.productId!))
+      .limit(1);
+
+    const oldDef = (currentProd?.locales as any)?.defaultLocale ?? "en";
+    const newDef = (target as any) || "en";
+    return await previewLocaleSwap(this.db, tenant.productId!, oldDef, newDef);
   }
 
   @Patch(":product")
@@ -300,16 +321,32 @@ export class ProductsController {
       updateData.accentColor = input.accentColor;
     if (input.accentTextColor !== undefined)
       updateData.accentTextColor = input.accentTextColor;
+    if (input.locales !== undefined)
+      updateData.locales = input.locales;
 
     if (Object.keys(updateData).length > 0) {
       try {
         await this.db.transaction(async (tx) => {
-        await tx
-          .update(products)
-          .set(updateData)
-          .where(
-            and(eq(products.id, tenant.productId!), eq(products.workspaceId, tenant.workspaceId), isNull(products.deletedAt)),
-          );
+          if (input.locales?.defaultLocale) {
+            const [currentProd] = await tx
+              .select({ locales: products.locales })
+              .from(products)
+              .where(eq(products.id, tenant.productId!))
+              .limit(1);
+
+            const oldDef = (currentProd?.locales as any)?.defaultLocale ?? "en";
+            const newDef = input.locales.defaultLocale;
+            if (newDef !== oldDef) {
+              await executeLocaleSwap(tx, tenant.productId!, oldDef, newDef);
+            }
+          }
+
+          await tx
+            .update(products)
+            .set(updateData)
+            .where(
+              and(eq(products.id, tenant.productId!), eq(products.workspaceId, tenant.workspaceId), isNull(products.deletedAt)),
+            );
         if (input.features?.board === false) {
           // Delete only derived, unsent delivery state. Source content and read history survive.
           await tx.execute(sql`

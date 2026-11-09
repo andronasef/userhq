@@ -7,7 +7,7 @@ import {
 import { Reflector } from "@nestjs/core";
 import { eq, and, isNull } from "drizzle-orm";
 import { DB, type Db, workspaces, products } from "@userhq/db";
-import type { ProductFeatures } from "@userhq/types";
+import { pickContentLocale, type ProductFeatures, type ProductLocalesConfig } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
 import {
   PORTAL_FEATURE,
@@ -65,10 +65,12 @@ export class PortalGuard implements CanActivate {
 
     let productId: string | undefined;
     let features: ProductFeatures | undefined;
+    let locales: ProductLocalesConfig | undefined;
+    let locale: ReturnType<typeof pickContentLocale> | undefined;
 
     if (productSlug) {
       const [prod] = await this.db
-        .select({ id: products.id, ...productFeatureColumns })
+        .select({ id: products.id, locales: products.locales, ...productFeatureColumns })
         .from(products)
         .where(
           and(
@@ -89,12 +91,17 @@ export class PortalGuard implements CanActivate {
       }
 
       productId = prod.id;
+      locales = prod.locales as ProductLocalesConfig;
+      const lang = req.query?.lang;
+      locale = pickContentLocale(locales, typeof lang === "string" ? lang : null);
     }
 
     req.portal = {
       workspaceId: ws.id,
       productId,
       features,
+      locales,
+      locale,
     };
 
     return true;

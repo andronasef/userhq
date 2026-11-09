@@ -20,7 +20,11 @@ import type {
   AdminChangelogEntry,
   ChangelogTag,
   RichTextDoc,
+  ProductLocalesConfig,
+  SupportedLocale,
 } from "@userhq/types";
+import { DEFAULT_LOCALE, isRtl } from "@userhq/types";
+import { EntryLocaleTabs } from "../entry-locale-tabs";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { ConfirmDialog } from "../ui/confirm-dialog";
@@ -38,6 +42,7 @@ export interface ChangelogEditorProps {
   productName: string;
   changelogEnabled: boolean;
   productLogoUrl?: string | null;
+  productLocales?: ProductLocalesConfig | null;
   entry?: AdminChangelogEntry;
   availableTags: ChangelogTag[];
 }
@@ -77,10 +82,20 @@ export function ChangelogEditor({
   changelogEnabled,
   productName,
   productLogoUrl,
+  productLocales,
   entry: initialEntry,
   availableTags: initialTags,
 }: ChangelogEditorProps): React.JSX.Element {
   const router = useRouter();
+
+  const defaultLocale = productLocales?.defaultLocale ?? DEFAULT_LOCALE;
+  const enabledLocales = (productLocales?.enabledLocales && productLocales.enabledLocales.length > 0)
+    ? productLocales.enabledLocales
+    : [defaultLocale];
+  const [activeLocale, setActiveLocale] = React.useState<SupportedLocale>(defaultLocale);
+  const [translations, setTranslations] = React.useState<
+    Record<string, { title?: string; summary?: string | null; content?: RichTextDoc | null }>
+  >(initialEntry?.translations ?? {});
 
   const [entryId, setEntryId] = React.useState<string | undefined>(
     initialEntry?.id
@@ -119,12 +134,77 @@ export function ChangelogEditor({
   const [previewOpen, setPreviewOpen] = React.useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
 
-  // Auto-derives slug when title changes unless manually modified
-  const handleTitleChange = (nextTitle: string) => {
-    setTitle(nextTitle);
+  const currentTitle =
+    activeLocale === defaultLocale ? title : (translations[activeLocale]?.title ?? "");
+  const currentSummary =
+    activeLocale === defaultLocale ? summary : (translations[activeLocale]?.summary ?? "");
+  const currentContent =
+    activeLocale === defaultLocale
+      ? content
+      : (translations[activeLocale]?.content ?? {
+          type: "doc",
+          content: [{ type: "paragraph" }],
+        });
+
+  const translationsStatus = React.useMemo(() => {
+    const status: Partial<Record<SupportedLocale, boolean>> = {};
+    for (const loc of enabledLocales) {
+      if (loc === defaultLocale) {
+        status[loc] = Boolean(title.trim());
+      } else {
+        const trans = translations[loc];
+        status[loc] = Boolean(trans?.title?.trim() || trans?.summary?.trim());
+      }
+    }
+    return status;
+  }, [enabledLocales, defaultLocale, title, translations]);
+
+  // Handle active locale edits
+  const handleCurrentTitleChange = (nextTitle: string) => {
     setIsDirty(true);
-    if (!isSlugManual) {
-      setSlug(slugify(nextTitle));
+    if (activeLocale === defaultLocale) {
+      setTitle(nextTitle);
+      if (!isSlugManual) {
+        setSlug(slugify(nextTitle));
+      }
+    } else {
+      setTranslations((prev) => ({
+        ...prev,
+        [activeLocale]: {
+          ...prev[activeLocale],
+          title: nextTitle,
+        },
+      }));
+    }
+  };
+
+  const handleCurrentSummaryChange = (nextSummary: string) => {
+    setIsDirty(true);
+    if (activeLocale === defaultLocale) {
+      setSummary(nextSummary);
+    } else {
+      setTranslations((prev) => ({
+        ...prev,
+        [activeLocale]: {
+          ...prev[activeLocale],
+          summary: nextSummary,
+        },
+      }));
+    }
+  };
+
+  const handleCurrentContentChange = (nextDoc: RichTextDoc) => {
+    setIsDirty(true);
+    if (activeLocale === defaultLocale) {
+      setContent(nextDoc);
+    } else {
+      setTranslations((prev) => ({
+        ...prev,
+        [activeLocale]: {
+          ...prev[activeLocale],
+          content: nextDoc,
+        },
+      }));
     }
   };
 
@@ -139,11 +219,6 @@ export function ChangelogEditor({
     setSelectedTagIds((prev) =>
       prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
     );
-  };
-
-  const handleContentChange = (nextDoc: RichTextDoc) => {
-    setContent(nextDoc);
-    setIsDirty(true);
   };
 
   // Debounced auto-save every 3,000ms for existing entries (D-07)
@@ -164,6 +239,7 @@ export function ChangelogEditor({
               summary: summary.trim() || null,
               content,
               tagIds: selectedTagIds,
+              translations,
             },
           }
         );
@@ -180,7 +256,7 @@ export function ChangelogEditor({
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [entryId, isDirty, isSaving, ws, product, title, slug, summary, content, selectedTagIds]);
+  }, [entryId, isDirty, isSaving, ws, product, title, slug, summary, content, selectedTagIds, translations]);
 
   // Manual save draft
   const handleSaveDraft = async () => {
@@ -203,6 +279,7 @@ export function ChangelogEditor({
               summary: summary.trim() || null,
               content,
               tagIds: selectedTagIds,
+              translations,
             },
           }
         );
@@ -221,6 +298,7 @@ export function ChangelogEditor({
               content,
               tagIds: selectedTagIds,
               publishedAt: null,
+              translations,
             },
           }
         );
@@ -274,6 +352,7 @@ export function ChangelogEditor({
               content,
               tagIds: selectedTagIds,
               publishedAt: pubDate,
+              translations,
             },
           }
         );
@@ -299,6 +378,7 @@ export function ChangelogEditor({
             summary: summary.trim() || null,
             content,
             tagIds: selectedTagIds,
+            translations,
           },
         }
       );
@@ -369,6 +449,7 @@ export function ChangelogEditor({
     createdAt: initialEntry?.createdAt ?? new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     tags: tags.filter((t) => selectedTagIds.includes(t.id)),
+    translations,
   };
 
   return (
@@ -476,18 +557,31 @@ export function ChangelogEditor({
 
       {!changelogEnabled && <HiddenModuleNotice ws={ws} product={product} module="changelog" />}
 
+      <EntryLocaleTabs
+        activeLocale={activeLocale}
+        onSelectLocale={setActiveLocale}
+        defaultLocale={defaultLocale}
+        enabledLocales={enabledLocales}
+        translationsStatus={translationsStatus}
+      />
+
       {/* Metadata Configuration Section */}
       <div className="bg-card border border-border rounded-lg p-4 sm:p-6 space-y-4">
         {/* Title */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-            Title
+            Title {activeLocale !== defaultLocale && `(${activeLocale})`}
           </label>
           <Input
             type="text"
-            placeholder="e.g. Version 2.4 - Faster Exports & Analytics"
-            value={title}
-            onChange={(e) => handleTitleChange(e.target.value)}
+            placeholder={
+              activeLocale === defaultLocale
+                ? "e.g. Version 2.4 - Faster Exports & Analytics"
+                : `Translation for title (${activeLocale})...`
+            }
+            value={currentTitle}
+            onChange={(e) => handleCurrentTitleChange(e.target.value)}
+            dir={isRtl(activeLocale) ? "rtl" : "ltr"}
             className="text-base font-medium"
           />
         </div>
@@ -589,16 +683,18 @@ export function ChangelogEditor({
         {/* Short Summary (optional) */}
         <div className="space-y-1.5 pt-2 border-t border-border">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-            Summary / Excerpt (optional)
+            Summary / Excerpt (optional) {activeLocale !== defaultLocale && `(${activeLocale})`}
           </label>
           <Input
             type="text"
-            placeholder="Short preview summary for SEO, RSS, and timeline snippet"
-            value={summary}
-            onChange={(e) => {
-              setSummary(e.target.value);
-              setIsDirty(true);
-            }}
+            placeholder={
+              activeLocale === defaultLocale
+                ? "Short preview summary for SEO, RSS, and timeline snippet"
+                : `Translation for summary (${activeLocale})...`
+            }
+            value={currentSummary}
+            onChange={(e) => handleCurrentSummaryChange(e.target.value)}
+            dir={isRtl(activeLocale) ? "rtl" : "ltr"}
             maxLength={300}
             className="text-sm"
           />
@@ -608,13 +704,21 @@ export function ChangelogEditor({
       {/* Editor Canvas */}
       <div className="space-y-2">
         <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-          Release Content
+          Release Content {activeLocale !== defaultLocale && `(${activeLocale})`}
         </label>
-        <div className="border border-border rounded-lg bg-card shadow-xs">
+        <div
+          dir={isRtl(activeLocale) ? "rtl" : "ltr"}
+          className="border border-border rounded-lg bg-card shadow-xs"
+        >
           <RichTextEditor
-            initialContent={initialEntry?.content}
-            onChange={handleContentChange}
-            placeholder="Write changelog notes... Markdown shortcuts (#, *, >) and image URLs are supported."
+            key={activeLocale}
+            initialContent={currentContent}
+            onChange={handleCurrentContentChange}
+            placeholder={
+              activeLocale === defaultLocale
+                ? "Write changelog notes... Markdown shortcuts (#, *, >) and image URLs are supported."
+                : `Write notes in ${activeLocale}...`
+            }
             className="min-h-[350px] p-4 sm:p-6"
           />
         </div>

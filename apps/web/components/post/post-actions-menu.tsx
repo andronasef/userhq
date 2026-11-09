@@ -21,6 +21,7 @@ import { VotersDialog } from "@/components/post/voters-dialog";
 import { MergeDialog } from "@/components/post/merge-dialog";
 import { apiFetch } from "@/lib/api-client";
 import { portalHref, boardApiBase } from "@/lib/tenant";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface PostActionsMenuProps {
   ws: string;
@@ -47,6 +48,7 @@ export function PostActionsMenu({
   variant = "portal",
   triggerIconOnly = false,
 }: PostActionsMenuProps): React.JSX.Element | null {
+  const { t } = useI18n();
   const router = useRouter();
   const [statusDialogOpen, setStatusDialogOpen] = React.useState(false);
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
@@ -59,7 +61,7 @@ export function PostActionsMenu({
       `${boardApiBase(variant, ws, product)}/posts/${post.number}`,
       { method: "DELETE" }
     );
-    toast.success("Post deleted");
+    toast.success(t("ui.postDeleted"));
     if (variant === "dashboard") {
       router.push(`/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/board`);
     } else {
@@ -86,33 +88,33 @@ export function PostActionsMenu({
                   ? "size-8 text-muted-foreground hover:text-foreground"
                   : "text-muted-foreground hover:text-foreground h-8 px-2 flex items-center gap-1.5"
               }
-              aria-label={triggerIconOnly ? "Admin actions" : undefined}
+              aria-label={triggerIconOnly ? t("ui.adminActions") : undefined}
             >
               <Ellipsis className="size-4" aria-hidden="true" />
-              {!triggerIconOnly && <span>Admin</span>}
+              {!triggerIconOnly && <span>{t("ui.adminBadge")}</span>}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onSelect={() => setEditDialogOpen(true)}>
-              Edit post
+              {t("ui.editPost")}
             </DropdownMenuItem>
             {variant !== "dashboard" && (
               <DropdownMenuItem onSelect={() => setStatusDialogOpen(true)}>
-                Change status
+                {t("ui.changeStatus")}
               </DropdownMenuItem>
             )}
             <DropdownMenuItem onSelect={() => setVotersDialogOpen(true)}>
-              View voters
+              {t("ui.viewVoters")}
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setMergeDialogOpen(true)}>
-              Merge into…
+              {t("ui.mergeInto")}
             </DropdownMenuItem>
             {post.roadmapItem ? (
               <DropdownMenuItem asChild>
                 <Link
                   href={`/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap?item=${encodeURIComponent(post.roadmapItem.id)}`}
                 >
-                  View on roadmap
+                  {t("ui.viewOnRoadmap")}
                 </Link>
               </DropdownMenuItem>
             ) : (
@@ -120,7 +122,7 @@ export function PostActionsMenu({
                 <Link
                   href={`/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap?linkPost=${post.number}`}
                 >
-                  Add to roadmap
+                  {t("ui.addToRoadmap")}
                 </Link>
               </DropdownMenuItem>
             )}
@@ -132,7 +134,7 @@ export function PostActionsMenu({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  View on portal
+                  {t("ui.viewOnPortal")}
                 </a>
               </DropdownMenuItem>
             )}
@@ -141,7 +143,7 @@ export function PostActionsMenu({
               onSelect={() => setDeleteDialogOpen(true)}
               className="text-destructive focus:text-destructive data-[highlighted]:text-destructive"
             >
-              Delete post
+              {t("ui.deletePost")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -163,7 +165,7 @@ export function PostActionsMenu({
               onSelect={() => setEditDialogOpen(true)}
               className={isLocked ? "flex flex-col items-start h-auto py-2" : undefined}
             >
-              <span>Edit post</span>
+              <span>{t("ui.editPost")}</span>
               {isLocked && (
                 <span className="text-xs text-muted-foreground font-normal">
                   Locked after someone else voted or commented
@@ -177,7 +179,7 @@ export function PostActionsMenu({
                 isLocked ? "flex flex-col items-start h-auto py-2" : ""
               }`}
             >
-              <span>Delete post</span>
+              <span>{t("ui.deletePost")}</span>
               {isLocked && (
                 <span className="text-xs text-muted-foreground font-normal">
                   Locked after someone else voted or commented
@@ -228,8 +230,8 @@ export function PostActionsMenu({
             ? "It disappears from the portal. You can restore it from the Deleted tab on the dashboard board."
             : "It'll be removed from the board, along with its votes. This can't be undone."
         }
-        dismissLabel="Keep post"
-        confirmLabel="Delete post"
+        dismissLabel={t("common.cancel")}
+        confirmLabel={t("ui.deletePost")}
         pendingLabel="Deleting…"
         onConfirm={handleDelete}
       />

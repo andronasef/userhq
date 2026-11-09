@@ -27,6 +27,11 @@ export const changelogEntries = pgTable(
     content: jsonb("content").notNull(), // ProseMirror JSON AST
     publishedAt: timestamp("published_at", { withTimezone: true }), // null = draft (CHLG-04)
     announcedAt: timestamp("announced_at", { withTimezone: true }), // null = not yet announced for this live transition
+    sourceLocale: text("source_locale").notNull().default("en"),
+    translations: jsonb("translations")
+      .$type<Record<string, { title?: string; summary?: string | null; content?: any }>>()
+      .notNull()
+      .default({}),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },

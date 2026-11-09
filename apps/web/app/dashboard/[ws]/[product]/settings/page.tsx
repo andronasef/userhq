@@ -10,6 +10,7 @@ import { PageHeader } from "../../../../../components/page-header";
 import { ProductGeneralForm } from "./product-general-form";
 import { ProductFeaturesForm } from "./product-features-form";
 import { ProductBrandingForm } from "./product-branding-form";
+import { ProductLocalesForm } from "./product-locales-form";
 import { ProductDangerZone } from "./product-danger-zone";
 
 interface ProductSettingsPageProps {
@@ -71,6 +72,10 @@ export default async function ProductSettingsPage({
 
       <div className="border-t border-border pt-8 mt-8">
         <ProductBrandingForm ws={ws} product={productData} />
+      </div>
+
+      <div className="border-t border-border pt-8 mt-8">
+        <ProductLocalesForm ws={ws} product={productData} />
       </div>
 
       <div className="border-t border-border pt-8 mt-8">

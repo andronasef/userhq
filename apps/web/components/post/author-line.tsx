@@ -1,9 +1,12 @@
+"use client";
+
 import * as React from "react";
 import type { PublicAuthor, DeviceInfo } from "@userhq/types";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
 import { DeviceBadge } from "@/components/post/device-badge";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface AuthorLineProps {
   author: PublicAuthor;
@@ -18,6 +21,7 @@ export function AuthorLine({
   editedAt,
   deviceInfo,
 }: AuthorLineProps): React.JSX.Element {
+  const { locale, t } = useI18n();
   const isDeleted = author.deleted;
   const avatarSrc = isDeleted ? null : author.image;
   const avatarName = isDeleted ? "" : (author.name ?? "");
@@ -27,14 +31,14 @@ export function AuthorLine({
       <Avatar src={avatarSrc} name={avatarName} size="sm" />
       {isDeleted ? (
         <span className="text-sm font-semibold text-muted-foreground">
-          Deleted user
+          {t("ui.deletedUser")}
         </span>
       ) : (
         <>
           <span className="text-sm font-semibold text-foreground">
-            {author.name ?? "Anonymous"}
+            {author.name ?? t("ui.anonymous")}
           </span>
-          {author.isAdmin && <Badge variant="neutral">Admin</Badge>}
+          {author.isAdmin && <Badge variant="neutral">{t("ui.adminBadge")}</Badge>}
         </>
       )}
       <time
@@ -42,14 +46,14 @@ export function AuthorLine({
         title={createdAt}
         className="text-sm text-muted-foreground"
       >
-        {formatDate(createdAt)}
+        {formatDate(createdAt, locale)}
       </time>
       {editedAt && (
         <span
           className="text-xs text-muted-foreground font-normal"
-          title={`Edited ${formatDate(editedAt)}`}
+          title={`Edited ${formatDate(editedAt, locale)}`}
         >
-          · edited
+          · {t("ui.editedBadge")}
         </span>
       )}
       {deviceInfo && <DeviceBadge deviceInfo={deviceInfo} />}

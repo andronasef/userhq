@@ -53,6 +53,7 @@ export default async function NewChangelogPage({
       changelogEnabled={productRes.data.features.changelog}
       productName={p.name}
       productLogoUrl={p.logoUrl}
+      productLocales={p.locales}
       availableTags={tags}
     />
   );

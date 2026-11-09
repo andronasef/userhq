@@ -1,5 +1,6 @@
 import "server-only";
 import { headers } from "next/headers";
+import { getRequestLocale } from "./i18n/server";
 import { cache } from "react";
 import { z } from "zod";
 import {
@@ -140,6 +141,11 @@ export const getMe: () => Promise<MeResponse> = cache(async () => {
 export type ApiReadResult<T> =
   | { ok: true; data: T }
   | { ok: false; status: number; code: string | null };
+
+/** Public portal reads are served in the visitor's language (API falls back to the product default). */
+async function localizedPath(path: string): Promise<string> {
+  return `${path}?lang=${await getRequestLocale()}`;
+}
 
 export async function apiRead<T>(
   path: string,
@@ -429,19 +435,17 @@ export const getAdminRoadmap = cache(
 
 export const getPublicRoadmap = cache(
   (ws: string, product: string): Promise<ApiReadResult<PublicRoadmapListResponse>> => {
-    return apiRead(
-      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap`,
-      PublicRoadmapListResponseSchema
+    return localizedPath(`/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap`).then((path) =>
+      apiRead(path, PublicRoadmapListResponseSchema)
     );
   }
 );
 
 export const getPublicRoadmapItem = cache(
   (ws: string, product: string, id: string): Promise<ApiReadResult<PublicRoadmapDetailResponse>> => {
-    return apiRead(
-      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap/${encodeURIComponent(id)}`,
-      PublicRoadmapDetailResponseSchema
-    );
+    return localizedPath(
+      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap/${encodeURIComponent(id)}`
+    ).then((path) => apiRead(path, PublicRoadmapDetailResponseSchema));
   }
 );
 
@@ -456,19 +460,17 @@ export const getActivity = cache(
 
 export const getPublicChangelogFeed = cache(
   (ws: string, product: string): Promise<ApiReadResult<PublicChangelogFeedResponse>> => {
-    return apiRead(
-      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/changelog`,
-      PublicChangelogFeedResponseSchema
+    return localizedPath(`/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/changelog`).then((path) =>
+      apiRead(path, PublicChangelogFeedResponseSchema)
     );
   }
 );
 
 export const getPublicChangelogEntry = cache(
   (ws: string, product: string, slug: string): Promise<ApiReadResult<PublicChangelogEntry>> => {
-    return apiRead(
-      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/changelog/${encodeURIComponent(slug)}`,
-      PublicChangelogEntrySchema
-    );
+    return localizedPath(
+      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/changelog/${encodeURIComponent(slug)}`
+    ).then((path) => apiRead(path, PublicChangelogEntrySchema));
   }
 );
 
@@ -501,9 +503,8 @@ export const getAdminChangelogTags = cache(
 
 export const getPublicFaqTree = cache(
   (ws: string, product: string): Promise<ApiReadResult<PublicFaqResponse>> => {
-    return apiRead(
-      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/faq`,
-      PublicFaqResponseSchema
+    return localizedPath(`/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/faq`).then((path) =>
+      apiRead(path, PublicFaqResponseSchema)
     );
   }
 );

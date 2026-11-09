@@ -1,5 +1,7 @@
 import * as React from "react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }), usePathname: () => "/acme/widget" }));
 import { renderToStaticMarkup } from "react-dom/server";
 import { ThemeToggle } from "../components/theme-toggle";
 import { ThemeProvider } from "../components/theme-provider";
@@ -44,7 +46,7 @@ describe("ThemeToggle component", () => {
     );
 
     // Header has the dropdown theme toggle icon button
-    expect(html).toContain("Open theme menu");
+    expect(html).toContain("Theme: System");
     // Footer has the segmented control
     expect(html).toContain('role="radiogroup"');
     expect(html).toContain("Charcoal");

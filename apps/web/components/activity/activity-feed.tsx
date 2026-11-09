@@ -13,6 +13,8 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { StatusBadge } from "../status-badge";
 import { postHref, portalHref } from "../../lib/tenant";
+import { formatRelativeTime } from "../../lib/format";
+import { useI18n } from "../../lib/i18n/context";
 
 export interface ActivityFeedProps {
   ws: string;
@@ -20,47 +22,36 @@ export interface ActivityFeedProps {
   activities: ActivityItem[];
 }
 
-function formatRelativeTime(dateString: string): string {
-  const diffMs = Date.now() - new Date(dateString).getTime();
-  const diffSec = Math.floor(diffMs / 1000);
-  if (diffSec < 60) return "just now";
-  const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin}m ago`;
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
-  const diffDays = Math.floor(diffHr / 24);
-  if (diffDays < 30) return `${diffDays}d ago`;
-  return new Date(dateString).toLocaleDateString();
-}
-
-function engagementLabel(type: string): string {
-  switch (type) {
-    case "created":
-      return "Created by you";
-    case "commented":
-      return "You commented";
-    case "voted":
-    default:
-      return "You upvoted";
-  }
-}
-
 export function ActivityFeed({
   ws,
   product,
   activities,
 }: ActivityFeedProps): React.JSX.Element {
+  const { currentLocale, t } = useI18n();
+
+  const engagementLabel = (type: string): string => {
+    switch (type) {
+      case "created":
+        return t("ui.createdByUser");
+      case "commented":
+        return t("ui.commentedByUser");
+      case "voted":
+      default:
+        return t("ui.upvotedByUser");
+    }
+  };
+
   if (activities.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center rounded-xl border border-dashed border-border bg-card/50">
         <Activity className="size-10 text-muted-foreground/60 mb-3" aria-hidden="true" />
-        <h3 className="text-base font-semibold text-foreground">No activity yet</h3>
+        <h3 className="text-base font-semibold text-foreground">{t("ui.noActivityYet")}</h3>
         <p className="text-sm text-muted-foreground max-w-sm mt-1 mb-5">
-          Posts you create, upvote, or comment on will appear here with status changes and new comments highlighted.
+          {t("ui.noActivityDesc")}
         </p>
         <Button asChild>
           <Link href={portalHref(ws, product)}>
-            <span>Explore feedback</span>
+            <span>{t("ui.allFeedback")}</span>
             <ArrowRight className="size-4 ml-1.5" aria-hidden="true" />
           </Link>
         </Button>
@@ -92,7 +83,7 @@ export function ActivityFeed({
                     className="border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 gap-1 text-[11px] font-medium"
                   >
                     <Sparkles className="size-3" aria-hidden="true" />
-                    <span>Status changed</span>
+                    <span>{t("ui.statusChanged")}</span>
                   </Badge>
                 )}
                 {item.hasNewComments && (
@@ -101,7 +92,7 @@ export function ActivityFeed({
                     className="border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10 gap-1 text-[11px] font-medium"
                   >
                     <MessageSquare className="size-3" aria-hidden="true" />
-                    <span>New comments</span>
+                    <span>{t("ui.newCommentsBadge")}</span>
                   </Badge>
                 )}
               </div>
@@ -122,7 +113,7 @@ export function ActivityFeed({
                 </div>
               )}
               <span className="text-[11px]">
-                {formatRelativeTime(item.createdAt)}
+                {formatRelativeTime(item.createdAt, currentLocale)}
               </span>
             </div>
           </div>

@@ -20,6 +20,7 @@ import {
 import type { ProductSummary } from "@userhq/types";
 import { cn } from "../../lib/utils";
 import { portalHref } from "../../lib/tenant";
+import { useI18n } from "../../lib/i18n/context";
 import { EntityLogo } from "../entity-logo";
 import { Button } from "../ui/button";
 
@@ -37,6 +38,7 @@ export function DashboardSidebar({
   isWorkspaceOwner = false,
 }: DashboardSidebarProps): React.JSX.Element {
   const pathname = usePathname();
+  const { t } = useI18n();
 
   const isOverviewActive = pathname === `/dashboard/${ws}`;
   const isTeamActive = pathname === `/dashboard/${ws}/team`;
@@ -51,7 +53,7 @@ export function DashboardSidebar({
     >
       <nav aria-label="Workspace navigation" className="flex flex-col gap-1">
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1">
-          Workspace
+          {t("ui.workspace")}
         </div>
 
         <Link
@@ -64,7 +66,7 @@ export function DashboardSidebar({
           aria-current={isOverviewActive ? "page" : undefined}
         >
           <LayoutGrid className="size-4 shrink-0" aria-hidden="true" />
-          <span className="truncate">Overview</span>
+          <span className="truncate">{t("nav.overview")}</span>
         </Link>
 
         <Link
@@ -77,7 +79,7 @@ export function DashboardSidebar({
           aria-current={isTeamActive ? "page" : undefined}
         >
           <Users className="size-4 shrink-0" aria-hidden="true" />
-          <span className="truncate">Team</span>
+          <span className="truncate">{t("nav.team")}</span>
         </Link>
 
         <Link
@@ -90,14 +92,14 @@ export function DashboardSidebar({
           aria-current={isWorkspaceSettingsActive ? "page" : undefined}
         >
           <Settings className="size-4 shrink-0" aria-hidden="true" />
-          <span className="truncate">Settings</span>
+          <span className="truncate">{t("nav.settings")}</span>
         </Link>
       </nav>
 
       <nav aria-label="Products navigation" className="flex flex-col gap-1">
         <div className="flex items-center justify-between px-3 mb-1">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Products
+            {t("dashboard.products")}
           </span>
           <Button variant="ghost" size="icon" className="size-5" asChild>
             <Link
@@ -185,7 +187,7 @@ export function DashboardSidebar({
                           className="size-3.5 shrink-0"
                           aria-hidden="true"
                         />
-                        <span className="truncate">Board</span>
+                        <span className="truncate">{t("nav.board")}</span>
                         {!product.features.board && (<>
                           <EyeOff className="size-3.5 ml-auto shrink-0 text-muted-foreground" aria-hidden />
                           <span className="sr-only">Hidden from customers</span>
@@ -206,7 +208,7 @@ export function DashboardSidebar({
                           className="size-3.5 shrink-0"
                           aria-hidden="true"
                         />
-                        <span className="truncate">Roadmap</span>
+                        <span className="truncate">{t("nav.roadmap")}</span>
                         {!product.features.roadmap && (<>
                           <EyeOff className="size-3.5 ml-auto shrink-0 text-muted-foreground" aria-hidden />
                           <span className="sr-only">Hidden from customers</span>
@@ -227,7 +229,7 @@ export function DashboardSidebar({
                           className="size-3.5 shrink-0"
                           aria-hidden="true"
                         />
-                        <span className="truncate">Changelog</span>
+                        <span className="truncate">{t("nav.changelog")}</span>
                         {!product.features.changelog && (<>
                           <EyeOff className="size-3.5 ml-auto shrink-0 text-muted-foreground" aria-hidden />
                           <span className="sr-only">Hidden from customers</span>
@@ -248,7 +250,7 @@ export function DashboardSidebar({
                           className="size-3.5 shrink-0"
                           aria-hidden="true"
                         />
-                        <span className="truncate">FAQ</span>
+                        <span className="truncate">{t("nav.faq")}</span>
                         {!product.features.faq && (<>
                           <EyeOff className="size-3.5 ml-auto shrink-0 text-muted-foreground" aria-hidden />
                           <span className="sr-only">Hidden from customers</span>
@@ -268,7 +270,7 @@ export function DashboardSidebar({
                           className="size-3.5 shrink-0"
                           aria-hidden="true"
                         />
-                        <span className="truncate">Settings</span>
+                        <span className="truncate">{t("nav.settings")}</span>
                       </Link>
 
                       <a

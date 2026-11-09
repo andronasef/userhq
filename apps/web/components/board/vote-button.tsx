@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { VoteResultSchema, type VoteResult } from "@userhq/types";
 import { QueryProvider } from "@/lib/query-client";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
+import { useI18n } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 
 export interface VoteButtonProps {
@@ -30,6 +31,7 @@ function VoteButtonInner({
   signedIn = false,
   className,
 }: VoteButtonProps): React.JSX.Element {
+  const { currentLocale, t } = useI18n();
   const [optimistic, setOptimistic] = React.useState({
     voted,
     count: voteCount,
@@ -70,11 +72,9 @@ function VoteButtonInner({
         setOptimistic(context.previous);
       }
       if (err instanceof ApiClientError && err.code === "rate_limited") {
-        toast.error(
-          "You're doing that too often. Wait a minute and try again.",
-        );
+        toast.error(t("ui.voteRateLimited"));
       } else {
-        toast.error("Couldn't save your vote. Try again.");
+        toast.error(t("ui.voteFailed"));
       }
     },
     onSettled: (data) => {
@@ -114,14 +114,15 @@ function VoteButtonInner({
 
   const formattedCount =
     optimistic.count >= 1000
-      ? new Intl.NumberFormat("en", { notation: "compact" }).format(
+      ? new Intl.NumberFormat(currentLocale || "en", { notation: "compact" }).format(
           optimistic.count,
         )
       : String(optimistic.count);
 
-  const voteLabel =
-    optimistic.count === 1 ? "1 vote" : `${optimistic.count} votes`;
-  const ariaLabel = title ? `Upvote ${title}, ${voteLabel}` : voteLabel;
+  const voteUnit =
+    optimistic.count === 1 ? t("ui.voteSingular") : t("ui.votes");
+  const voteLabel = `${optimistic.count} ${voteUnit}`;
+  const ariaLabel = title ? `${t("ui.upvote")} ${title}, ${voteLabel}` : voteLabel;
 
   return (
     <button

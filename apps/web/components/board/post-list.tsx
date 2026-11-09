@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useI18n } from "../../lib/i18n/context";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import { PublicBoardPageSchema, type PublicBoardPage } from "@userhq/types";
@@ -24,6 +25,7 @@ function PostListInner({
   initial,
   signedIn,
 }: PostListProps): React.JSX.Element {
+  const { t } = useI18n();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["board", ws, product, search],
@@ -81,10 +83,10 @@ function PostListInner({
                   className="size-4 animate-spin"
                   aria-hidden="true"
                 />
-                <span>Loading…</span>
+                <span>{t("common.loading")}</span>
               </>
             ) : (
-              <span>Load more</span>
+              <span>{t("ui.loadMore")}</span>
             )}
           </Button>
         </div>

@@ -65,6 +65,7 @@ export default async function EditChangelogPage({
       changelogEnabled={productRes.data.features.changelog}
       productName={p.name}
       productLogoUrl={p.logoUrl}
+      productLocales={p.locales}
       entry={entry}
       availableTags={tags}
     />

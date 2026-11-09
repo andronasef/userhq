@@ -3,7 +3,15 @@
 import * as React from "react";
 import { CircleAlert } from "lucide-react";
 import { toast } from "sonner";
-import type { AdminFaqQuestion, AdminFaqCategory, RichTextDoc } from "@userhq/types";
+import type {
+  AdminFaqQuestion,
+  AdminFaqCategory,
+  RichTextDoc,
+  ProductLocalesConfig,
+  SupportedLocale,
+} from "@userhq/types";
+import { DEFAULT_LOCALE, isRtl } from "@userhq/types";
+import { EntryLocaleTabs } from "../entry-locale-tabs";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +35,7 @@ export interface FaqQuestionDialogProps {
   categories: AdminFaqCategory[];
   ws: string;
   product: string;
+  productLocales?: ProductLocalesConfig | null;
   onSuccess: (question: AdminFaqQuestion, oldCategoryId?: string) => void;
 }
 
@@ -38,9 +47,20 @@ export function FaqQuestionDialog({
   categories,
   ws,
   product,
+  productLocales,
   onSuccess,
 }: FaqQuestionDialogProps): React.JSX.Element {
   const isEditing = Boolean(question);
+
+  const defaultLocale = productLocales?.defaultLocale ?? DEFAULT_LOCALE;
+  const enabledLocales = (productLocales?.enabledLocales && productLocales.enabledLocales.length > 0)
+    ? productLocales.enabledLocales
+    : [defaultLocale];
+  const [activeLocale, setActiveLocale] = React.useState<SupportedLocale>(defaultLocale);
+  const [translations, setTranslations] = React.useState<
+    Record<string, { question?: string; answer?: RichTextDoc | null }>
+  >(question?.translations ?? {});
+
   const [categoryId, setCategoryId] = React.useState(
     question?.categoryId ?? defaultCategoryId ?? categories[0]?.id ?? ""
   );
@@ -53,18 +73,75 @@ export function FaqQuestionDialog({
 
   React.useEffect(() => {
     if (open) {
+      setActiveLocale(defaultLocale);
       if (question) {
         setCategoryId(question.categoryId);
         setTitle(question.question);
         setAnswer(question.answer);
+        setTranslations(question.translations ?? {});
       } else {
         setCategoryId(defaultCategoryId ?? categories[0]?.id ?? "");
         setTitle("");
         setAnswer({ type: "doc", content: [] });
+        setTranslations({});
       }
       setErrors({});
     }
-  }, [open, question, defaultCategoryId, categories]);
+  }, [open, question, defaultCategoryId, categories, defaultLocale]);
+
+  const currentTitle =
+    activeLocale === defaultLocale ? title : (translations[activeLocale]?.question ?? "");
+  const currentAnswer =
+    activeLocale === defaultLocale
+      ? answer
+      : (translations[activeLocale]?.answer ?? { type: "doc", content: [] });
+
+  const translationsStatus = React.useMemo(() => {
+    const status: Partial<Record<SupportedLocale, boolean>> = {};
+    for (const loc of enabledLocales) {
+      if (loc === defaultLocale) {
+        status[loc] = Boolean(title.trim());
+      } else {
+        const trans = translations[loc];
+        status[loc] = Boolean(trans?.question?.trim());
+      }
+    }
+    return status;
+  }, [enabledLocales, defaultLocale, title, translations]);
+
+  const handleCurrentTitleChange = (nextTitle: string) => {
+    if (activeLocale === defaultLocale) {
+      setTitle(nextTitle);
+      if (errors.title) {
+        setErrors((prev) => ({ ...prev, title: "" }));
+      }
+    } else {
+      setTranslations((prev) => ({
+        ...prev,
+        [activeLocale]: {
+          ...prev[activeLocale],
+          question: nextTitle,
+        },
+      }));
+    }
+  };
+
+  const handleCurrentAnswerChange = (nextAnswer: RichTextDoc | null) => {
+    if (activeLocale === defaultLocale) {
+      setAnswer(nextAnswer);
+      if (errors.answer) {
+        setErrors((prev) => ({ ...prev, answer: "" }));
+      }
+    } else {
+      setTranslations((prev) => ({
+        ...prev,
+        [activeLocale]: {
+          ...prev[activeLocale],
+          answer: nextAnswer,
+        },
+      }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,6 +190,7 @@ export function FaqQuestionDialog({
               categoryId,
               question: trimmedTitle,
               answer: answer ?? { type: "doc", content: [] },
+              translations,
             },
           }
         );
@@ -127,6 +205,7 @@ export function FaqQuestionDialog({
               categoryId,
               question: trimmedTitle,
               answer: answer ?? { type: "doc", content: [] },
+              translations,
             },
           }
         );
@@ -157,6 +236,14 @@ export function FaqQuestionDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          <EntryLocaleTabs
+            activeLocale={activeLocale}
+            onSelectLocale={setActiveLocale}
+            defaultLocale={defaultLocale}
+            enabledLocales={enabledLocales}
+            translationsStatus={translationsStatus}
+          />
+
           <Field id="faq-question-category" label="Category" error={errors.categoryId}>
             <NativeSelect
               value={categoryId}
@@ -175,37 +262,42 @@ export function FaqQuestionDialog({
             </NativeSelect>
           </Field>
 
-          <Field id="faq-question-title" label="Question" error={errors.title}>
+          <Field
+            id="faq-question-title"
+            label={`Question ${activeLocale !== defaultLocale ? `(${activeLocale})` : ""}`}
+            error={errors.title}
+          >
             <Input
               type="text"
-              placeholder="e.g. How do I change my billing payment method?"
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                if (errors.title) {
-                  setErrors((prev) => ({ ...prev, title: "" }));
-                }
-              }}
-              minLength={5}
+              placeholder={
+                activeLocale === defaultLocale
+                  ? "e.g. How do I change my billing payment method?"
+                  : `Translation for question (${activeLocale})...`
+              }
+              value={currentTitle}
+              onChange={(e) => handleCurrentTitleChange(e.target.value)}
+              dir={isRtl(activeLocale) ? "rtl" : "ltr"}
+              minLength={activeLocale === defaultLocale ? 5 : undefined}
               maxLength={200}
             />
           </Field>
 
           <div className="flex flex-col gap-2">
             <label htmlFor="faq-question-answer" className="text-sm font-semibold text-foreground">
-              Answer
+              Answer {activeLocale !== defaultLocale && `(${activeLocale})`}
             </label>
-            <RichTextEditor
-              key={question ? question.id : "new-question"}
-              initialContent={answer}
-              onChange={(doc) => {
-                setAnswer(doc);
-                if (errors.answer) {
-                  setErrors((prev) => ({ ...prev, answer: "" }));
+            <div dir={isRtl(activeLocale) ? "rtl" : "ltr"}>
+              <RichTextEditor
+                key={`${question?.id ?? "new"}-${activeLocale}`}
+                initialContent={currentAnswer}
+                onChange={handleCurrentAnswerChange}
+                placeholder={
+                  activeLocale === defaultLocale
+                    ? "Write the detailed answer here..."
+                    : `Write answer in ${activeLocale}...`
                 }
-              }}
-              placeholder="Write the detailed answer here..."
-            />
+              />
+            </div>
             {errors.answer && (
               <p className="flex items-center gap-1.5 text-sm font-normal text-destructive">
                 <CircleAlert className="size-4 shrink-0" />

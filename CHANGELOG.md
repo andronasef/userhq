@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Multi-Language Platform UI & Entry Localization**: Full bidirectional internationalization supporting 13 languages (English, Arabic RTL, German, Spanish, French, Portuguese, Russian, Hindi, Filipino, Indonesian, Japanese, Korean, and Simplified Chinese). Features automatic visitor language detection (query parameter cascade > `userhq_locale` cookie > browser `navigator.languages` > product default locale > `en`), compact language switchers in header and public portal, product-level language controls in settings, multi-locale authoring tabs in Changelog, FAQ, and Roadmap studios, and seamless public portal fallbacks with an "Original" badge.
+
 ## [v0.3.1] - 2026-11-09
 
 ### Added

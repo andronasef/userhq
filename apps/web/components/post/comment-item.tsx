@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
 import { errorCopy } from "@/lib/api-errors";
+import { useI18n } from "@/lib/i18n/context";
 import { boardApiBase, type BoardVariant } from "@/lib/tenant";
 
 export interface CommentItemProps {
@@ -43,6 +44,7 @@ export function CommentItem({
   onUpdate,
   onDelete,
 }: CommentItemProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const [isEditing, setIsEditing] = React.useState(false);
   const [editBody, setEditBody] = React.useState(comment.body);
@@ -181,7 +183,7 @@ export function CommentItem({
               disabled={isSaving}
               onClick={handleDiscardEdit}
             >
-              Discard changes
+              {t("ui.discardChanges")}
             </Button>
             <Button
               type="button"
@@ -193,10 +195,10 @@ export function CommentItem({
               {isSaving ? (
                 <>
                   <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" />
-                  <span>Saving…</span>
+                  <span>{t("common.saving")}</span>
                 </>
               ) : (
-                "Save comment"
+                t("ui.saveComment")
               )}
             </Button>
           </div>
@@ -215,7 +217,7 @@ export function CommentItem({
                 className="text-muted-foreground hover:text-foreground h-8 px-2"
               >
                 <Reply className="size-4" aria-hidden="true" />
-                <span>Reply</span>
+                <span>{t("ui.reply")}</span>
               </Button>
             ) : (
               <Button
@@ -226,7 +228,7 @@ export function CommentItem({
               >
                 <Link href={signInHref}>
                   <Reply className="size-4" aria-hidden="true" />
-                  <span>Reply</span>
+                  <span>{t("ui.reply")}</span>
                 </Link>
               </Button>
             )}

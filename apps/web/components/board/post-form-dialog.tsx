@@ -32,6 +32,7 @@ import { Alert } from "@/components/ui/alert";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
 import { errorCopy, FIELD_FOR_CODE } from "@/lib/api-errors";
 import { QueryProvider } from "@/lib/query-client";
+import { useI18n } from "@/lib/i18n/context";
 import { postHref, portalHref, boardApiBase, type BoardVariant } from "@/lib/tenant";
 
 export interface PostFormDialogProps {
@@ -62,6 +63,7 @@ function PostFormDialogInner({
   mode = "create",
   initial,
 }: PostFormDialogProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const [alertError, setAlertError] = React.useState<string | null>(null);
   const [isConflict, setIsConflict] = React.useState(false);
@@ -131,7 +133,7 @@ function PostFormDialogInner({
     onSuccess: (result) => {
       onOpenChange(false);
       if (mode === "edit") {
-        toast.success("Post updated");
+        toast.success(t("ui.postUpdated"));
         // Dashboard URLs are keyed by number, so only the portal URL changes with the slug.
         if (variant === "portal" && initial?.slug && result.slug !== initial.slug) {
           router.replace(postHref(ws, product, result.number, result.slug));
@@ -140,7 +142,7 @@ function PostFormDialogInner({
         }
       } else {
         router.push(postHref(ws, product, result.number, result.slug));
-        toast.success("Post submitted");
+        toast.success(t("ui.postSubmitted"));
       }
     },
     onError: (err: unknown) => {
@@ -177,19 +179,19 @@ function PostFormDialogInner({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{mode === "edit" ? "Edit post" : "New post"}</DialogTitle>
+          <DialogTitle>{mode === "edit" ? t("ui.editPost") : t("ui.newPost")}</DialogTitle>
           <DialogDescription>
             {mode === "edit"
-              ? "Update the title, category, or details for this post."
-              : "Describe the problem or idea. Others can vote on it and join the conversation."}
+              ? t("ui.editPostDesc")
+              : t("ui.newPostDesc")}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <fieldset disabled={mutation.isPending} className="space-y-4">
-            <Field id="post-title" label="Title" error={errors.title?.message}>
+            <Field id="post-title" label={t("entries.titleLabel")} error={errors.title?.message}>
               <Input
-                placeholder='A short summary, like "Export to CSV"'
+                placeholder={t("ui.titlePlaceholder")}
                 {...register("title")}
               />
             </Field>
@@ -206,7 +208,7 @@ function PostFormDialogInner({
                   {...register("categoryId")}
                 >
                   <option value="" disabled>
-                    Choose a category
+                    {t("ui.categoryChoose")}
                   </option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -219,11 +221,11 @@ function PostFormDialogInner({
 
             <Field
               id="post-details"
-              label="Details (optional)"
+              label={t("ui.detailsOptional")}
               error={errors.description?.message}
             >
               <Textarea
-                placeholder="What are you trying to do, and what gets in the way?"
+                placeholder={t("ui.detailsPlaceholder")}
                 {...register("description")}
               />
             </Field>
@@ -254,7 +256,7 @@ function PostFormDialogInner({
                 onClick={() => onOpenChange(false)}
                 disabled={mutation.isPending}
               >
-                {mode === "edit" ? "Discard changes" : "Discard post"}
+                {mode === "edit" ? t("ui.discardChanges") : t("ui.discardPost")}
               </Button>
               <Button
                 type="submit"
@@ -263,12 +265,12 @@ function PostFormDialogInner({
                 {mutation.isPending ? (
                   <>
                     <LoaderCircle className="size-4 animate-spin" />
-                    <span>{mode === "edit" ? "Saving…" : "Submitting…"}</span>
+                    <span>{mode === "edit" ? t("common.saving") : t("ui.submitting")}</span>
                   </>
                 ) : mode === "edit" ? (
-                  "Save post"
+                  t("ui.savePost")
                 ) : (
-                  "Submit post"
+                  t("ui.submitPost")
                 )}
               </Button>
             </DialogFooter>

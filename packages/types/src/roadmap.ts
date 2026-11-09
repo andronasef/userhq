@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SupportedLocaleSchema } from "./i18n.js";
 import { isValidRank } from "./rank.js";
 
 // A malformed stored rank makes generateKeyBetween throw for its whole column.
@@ -38,6 +39,12 @@ export const AdminRoadmapAssigneeSchema = z.object({
 });
 export type AdminRoadmapAssignee = z.infer<typeof AdminRoadmapAssigneeSchema>;
 
+export const RoadmapTranslationSchema = z.object({
+  publicTitle: z.string().max(ROADMAP_TITLE_MAX, { message: "public_title_length" }).nullable().optional(),
+  publicDescription: z.string().max(ROADMAP_DESC_MAX, { message: "description_too_long" }).nullable().optional(),
+});
+export type RoadmapTranslation = z.infer<typeof RoadmapTranslationSchema>;
+
 export const AdminRoadmapItemSchema = z.object({
   id: z.string().uuid(),
   statusId: z.string().uuid(),
@@ -52,6 +59,8 @@ export const AdminRoadmapItemSchema = z.object({
   deadlineText: z.string().nullable(),
   deadlineDate: z.string().nullable(),
   linkedPostCount: z.number().int().nonnegative(),
+  sourceLocale: SupportedLocaleSchema.optional(),
+  translations: z.partialRecord(SupportedLocaleSchema, RoadmapTranslationSchema).default({}),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -68,6 +77,9 @@ export const PublicRoadmapItemSchema = z.object({
   title: z.string(), // publicTitle
   description: z.string().nullable(), // publicDescription
   postCount: z.number().int().nonnegative(),
+  sourceLocale: SupportedLocaleSchema.optional(),
+  resolvedLocale: SupportedLocaleSchema.optional(),
+  isFallback: z.boolean().optional(),
   createdAt: z.string(),
 });
 export type PublicRoadmapItem = z.infer<typeof PublicRoadmapItemSchema>;
@@ -102,6 +114,8 @@ export const CreateRoadmapItemInputSchema = z.object({
   deadlineDate: z.string().nullable().optional(),
   rank: RankInputSchema.optional(),
   postIds: z.array(z.string().uuid()).optional(),
+  sourceLocale: SupportedLocaleSchema.optional(),
+  translations: z.partialRecord(SupportedLocaleSchema, RoadmapTranslationSchema).optional(),
 });
 export type CreateRoadmapItemInput = z.infer<typeof CreateRoadmapItemInputSchema>;
 
@@ -128,6 +142,8 @@ export const UpdateRoadmapItemInputSchema = z.object({
   assigneeId: z.string().nullable().optional(),
   deadlineText: z.string().max(60).nullable().optional(),
   deadlineDate: z.string().nullable().optional(),
+  sourceLocale: SupportedLocaleSchema.optional(),
+  translations: z.partialRecord(SupportedLocaleSchema, RoadmapTranslationSchema).optional(),
 });
 export type UpdateRoadmapItemInput = z.infer<typeof UpdateRoadmapItemInputSchema>;
 

@@ -37,6 +37,8 @@ export class ChangelogService {
         summary: changelogEntries.summary,
         content: changelogEntries.content,
         publishedAt: changelogEntries.publishedAt,
+        sourceLocale: changelogEntries.sourceLocale,
+        translations: changelogEntries.translations,
         createdAt: changelogEntries.createdAt,
         updatedAt: changelogEntries.updatedAt,
       })
@@ -76,7 +78,9 @@ export class ChangelogService {
         summary: e.summary ?? null,
         content: e.content as any,
         publishedAt: e.publishedAt ? new Date(e.publishedAt).toISOString() : null,
+        sourceLocale: (e.sourceLocale as any) ?? "en",
         tags: tagsByEntry.get(e.id) ?? [],
+        translations: (e.translations as any) ?? {},
         createdAt: new Date(e.createdAt).toISOString(),
         updatedAt: new Date(e.updatedAt).toISOString(),
       })),
@@ -97,6 +101,8 @@ export class ChangelogService {
         summary: changelogEntries.summary,
         content: changelogEntries.content,
         publishedAt: changelogEntries.publishedAt,
+        sourceLocale: changelogEntries.sourceLocale,
+        translations: changelogEntries.translations,
         createdAt: changelogEntries.createdAt,
         updatedAt: changelogEntries.updatedAt,
       })
@@ -135,7 +141,9 @@ export class ChangelogService {
       summary: row.summary ?? null,
       content: row.content as any,
       publishedAt: row.publishedAt ? new Date(row.publishedAt).toISOString() : null,
+      sourceLocale: (row.sourceLocale as any) ?? "en",
       tags: tagRows,
+      translations: (row.translations as any) ?? {},
       createdAt: new Date(row.createdAt).toISOString(),
       updatedAt: new Date(row.updatedAt).toISOString(),
     };
@@ -189,6 +197,14 @@ export class ChangelogService {
 
       const slug = await this.findUniqueSlug(tx, productId, baseSlug);
 
+      const [productRow] = await tx
+        .select({ locales: products.locales })
+        .from(products)
+        .where(eq(products.id, productId))
+        .limit(1);
+      const defaultLoc = (productRow?.locales as any)?.defaultLocale ?? "en";
+      const sourceLocale = input.sourceLocale ?? defaultLoc;
+
       const [created] = await tx
         .insert(changelogEntries)
         .values({
@@ -197,6 +213,8 @@ export class ChangelogService {
           slug,
           summary: input.summary ?? null,
           content: input.content,
+          sourceLocale,
+          translations: input.translations ?? {},
           publishedAt: input.publishedAt ? new Date(input.publishedAt) : null,
         })
         .returning({ id: changelogEntries.id });
@@ -267,6 +285,12 @@ export class ChangelogService {
       }
       if (input.content !== undefined) {
         updates.content = input.content;
+      }
+      if (input.sourceLocale !== undefined) {
+        updates.sourceLocale = input.sourceLocale;
+      }
+      if (input.translations !== undefined) {
+        updates.translations = input.translations;
       }
       if (input.publishedAt !== undefined) {
         updates.publishedAt = input.publishedAt ? new Date(input.publishedAt) : null;

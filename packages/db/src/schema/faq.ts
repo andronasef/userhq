@@ -44,6 +44,11 @@ export const faqQuestions = pgTable(
     question: text("question").notNull(),
     answer: jsonb("answer").notNull(), // ProseMirror JSON AST
     rank: text("rank").notNull(), // LexoRank string within category
+    sourceLocale: text("source_locale").notNull().default("en"),
+    translations: jsonb("translations")
+      .$type<Record<string, { question?: string; answer?: any }>>()
+      .notNull()
+      .default({}),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },

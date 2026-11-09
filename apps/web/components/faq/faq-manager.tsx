@@ -9,6 +9,7 @@ import {
   generateKeyBetween,
   type AdminFaqCategory,
   type AdminFaqQuestion,
+  type ProductLocalesConfig,
 } from "@userhq/types";
 import { Button } from "../ui/button";
 import { EmptyState } from "../empty-state";
@@ -22,12 +23,14 @@ export interface FaqManagerProps {
   ws: string;
   product: string;
   initialCategories: AdminFaqCategory[];
+  productLocales?: ProductLocalesConfig | null;
 }
 
 export function FaqManager({
   ws,
   product,
   initialCategories,
+  productLocales,
 }: FaqManagerProps): React.JSX.Element {
   const [categories, setCategories] =
     React.useState<AdminFaqCategory[]>(initialCategories);
@@ -403,6 +406,7 @@ export function FaqManager({
         categories={sortedCategories}
         ws={ws}
         product={product}
+        productLocales={productLocales}
         onSuccess={handleQuestionSuccess}
       />
     </>

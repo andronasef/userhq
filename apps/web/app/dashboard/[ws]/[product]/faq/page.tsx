@@ -55,6 +55,7 @@ export default async function DashboardFaqPage({
         ws={ws}
         product={product}
         initialCategories={categories}
+        productLocales={productRes.data.locales}
       />
     </div>
   );

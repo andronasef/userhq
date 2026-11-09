@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useI18n } from "../lib/i18n/context";
 import { Check, Contrast, Monitor, Moon, Sun } from "lucide-react";
 import { cn } from "../lib/utils";
 import { type ThemePreference } from "../lib/theme";
@@ -21,13 +22,13 @@ interface ThemeToggleProps {
 
 const THEME_OPTIONS: Array<{
   value: ThemePreference;
-  label: string;
+  label: "ui.themeSystem" | "ui.themeLight" | "ui.themeDark" | "ui.themeCharcoal";
   icon: React.ComponentType<{ className?: string }>;
 }> = [
-  { value: "system", label: "System", icon: Monitor },
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
-  { value: "charcoal", label: "Charcoal", icon: Contrast },
+  { value: "system", label: "ui.themeSystem", icon: Monitor },
+  { value: "light", label: "ui.themeLight", icon: Sun },
+  { value: "dark", label: "ui.themeDark", icon: Moon },
+  { value: "charcoal", label: "ui.themeCharcoal", icon: Contrast },
 ];
 
 export function ThemeToggle({
@@ -35,6 +36,7 @@ export function ThemeToggle({
   className,
   align = "end",
 }: ThemeToggleProps): React.JSX.Element {
+  const { t } = useI18n();
   const { theme, setTheme, resolvedTheme } = useTheme();
 
   // Pick active trigger icon
@@ -51,7 +53,7 @@ export function ThemeToggle({
     return (
       <div
         role="radiogroup"
-        aria-label="Appearance preference"
+        aria-label={t("ui.appearance")}
         className={cn(
           "inline-flex items-center gap-1 p-1 bg-muted/60 border border-border/80 rounded-lg text-xs font-medium text-muted-foreground",
           className
@@ -75,7 +77,7 @@ export function ThemeToggle({
               )}
             >
               <Icon className="size-3.5 shrink-0" aria-hidden="true" />
-              <span>{opt.label}</span>
+              <span>{t(opt.label)}</span>
             </button>
           );
         })}
@@ -89,7 +91,7 @@ export function ThemeToggle({
         <Button
           variant="ghost"
           size="icon"
-          aria-label={`Theme: currently ${theme}. Open theme menu`}
+          aria-label={`${t("ui.theme")}: ${t(THEME_OPTIONS.find((o) => o.value === theme)?.label ?? "ui.themeSystem")}`}
           className={cn("size-8 rounded-md text-muted-foreground hover:text-foreground", className)}
         >
           <ActiveIcon className="size-4 shrink-0 transition-transform duration-200" aria-hidden="true" />
@@ -108,7 +110,7 @@ export function ThemeToggle({
             >
               <span className="flex items-center gap-2">
                 <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                <span>{opt.label}</span>
+                <span>{t(opt.label)}</span>
               </span>
               {isSelected && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
             </DropdownMenuItem>

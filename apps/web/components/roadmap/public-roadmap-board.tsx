@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useI18n } from "../../lib/i18n/context";
 import Link from "next/link";
 import { Kanban, MessageSquarePlus } from "lucide-react";
 import type { PostStatus, PublicRoadmapItem } from "@userhq/types";
@@ -26,6 +27,7 @@ export function PublicRoadmapBoard({
   items,
   boardEnabled,
 }: PublicRoadmapBoardProps): React.JSX.Element {
+  const { t } = useI18n();
   const [activeItem, setActiveItem] = React.useState<PublicRoadmapItem | null>(null);
 
   // Group items by status
@@ -66,7 +68,7 @@ export function PublicRoadmapBoard({
         {boardEnabled && <Button asChild>
           <Link href={portalHref(ws, product)}>
             <MessageSquarePlus className="size-4 mr-2" aria-hidden="true" />
-            <span>View feedback board</span>
+            <span>{t("ui.viewBoard")}</span>
           </Link>
         </Button>}
       </div>
@@ -121,8 +123,8 @@ export function PublicRoadmapBoard({
         <div className="flex flex-col gap-3 min-h-[200px]">
           {mobileItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-center rounded-lg border border-dashed border-border/80 bg-muted/20">
-              <p className="text-sm font-medium text-foreground">Nothing in this stage yet</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Check back soon for updates.</p>
+              <p className="text-sm font-medium text-foreground">{t("ui.nothingInStage")}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("ui.checkBackSoon")}</p>
             </div>
           ) : (
             mobileItems.map((item) => (
@@ -167,10 +169,10 @@ export function PublicRoadmapBoard({
                 {colItems.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-32 p-4 text-center rounded-lg border border-dashed border-border/60 bg-muted/20">
                     <p className="text-xs font-medium text-foreground">
-                      Nothing in this stage yet
+                      {t("ui.nothingInStage")}
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Check back soon for updates.
+                      {t("ui.checkBackSoon")}
                     </p>
                   </div>
                 ) : (

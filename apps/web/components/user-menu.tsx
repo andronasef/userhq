@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useI18n } from "../lib/i18n/context";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
@@ -53,6 +54,7 @@ export function UserMenu({
   isPlatformOwner = false,
   isWorkspaceOwner = false,
 }: UserMenuProps): React.JSX.Element {
+  const { t } = useI18n();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [isPending, setIsPending] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -143,7 +145,7 @@ export function UserMenu({
           variant="ghost"
           size="icon"
           className="rounded-full"
-          aria-label="Open account menu"
+          aria-label={t("ui.openAccountMenu")}
         >
           <Avatar size="sm" src={user.image} name={user.name} />
         </Button>
@@ -161,7 +163,7 @@ export function UserMenu({
               <DropdownMenuItem asChild>
                 <Link href="/dashboard" className="flex items-center gap-2 w-full">
                   <LayoutDashboard className="size-4 shrink-0" aria-hidden="true" />
-                  <span>Dashboard</span>
+                  <span>{t("nav.goToDashboard")}</span>
                 </Link>
               </DropdownMenuItem>
             )}
@@ -169,7 +171,7 @@ export function UserMenu({
               <DropdownMenuItem asChild>
                 <Link href="/platform" className="flex items-center gap-2 w-full">
                   <ShieldCheck className="size-4 shrink-0" aria-hidden="true" />
-                  <span>Platform console</span>
+                  <span>{t("ui.platformConsole")}</span>
                 </Link>
               </DropdownMenuItem>
             )}
@@ -195,10 +197,10 @@ export function UserMenu({
               <ArrowLeft className="size-4 shrink-0" aria-hidden="true" />
               <span>
                 {accountReturnHref.startsWith("/dashboard")
-                  ? "Back to dashboard"
+                  ? t("ui.backToDashboard")
                   : isReturnPortal
-                  ? "Back to portal"
-                  : "Back"}
+                  ? t("nav.backToPortal")
+                  : t("common.back")}
               </span>
             </Link>
           </DropdownMenuItem>
@@ -208,14 +210,14 @@ export function UserMenu({
           <DropdownMenuItem asChild>
             <Link href={effectiveActivityHref} className="flex items-center gap-2 w-full">
               <Activity className="size-4 shrink-0" aria-hidden="true" />
-              <span>My activity</span>
+              <span>{t("ui.myActivity")}</span>
             </Link>
           </DropdownMenuItem>
         )}
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="flex items-center gap-2 w-full cursor-pointer">
             <ThemeIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-            <span>Theme</span>
+            <span>{t("ui.theme")}</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-36">
             <DropdownMenuItem
@@ -224,7 +226,7 @@ export function UserMenu({
             >
               <span className="flex items-center gap-2">
                 <Monitor className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                <span>System</span>
+                <span>{t("ui.themeSystem")}</span>
               </span>
               {theme === "system" && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
             </DropdownMenuItem>
@@ -234,7 +236,7 @@ export function UserMenu({
             >
               <span className="flex items-center gap-2">
                 <Sun className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                <span>Light</span>
+                <span>{t("ui.themeLight")}</span>
               </span>
               {theme === "light" && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
             </DropdownMenuItem>
@@ -244,7 +246,7 @@ export function UserMenu({
             >
               <span className="flex items-center gap-2">
                 <Moon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                <span>Dark</span>
+                <span>{t("ui.themeDark")}</span>
               </span>
               {theme === "dark" && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
             </DropdownMenuItem>
@@ -254,7 +256,7 @@ export function UserMenu({
             >
               <span className="flex items-center gap-2">
                 <Contrast className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                <span>Charcoal</span>
+                <span>{t("ui.themeCharcoal")}</span>
               </span>
               {theme === "charcoal" && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
             </DropdownMenuItem>
@@ -265,7 +267,7 @@ export function UserMenu({
           <DropdownMenuItem asChild>
             <Link href="/guide" className="flex items-center gap-2 w-full cursor-pointer">
               <BookOpen className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-              <span>User guide</span>
+              <span>{t("ui.userGuide")}</span>
             </Link>
           </DropdownMenuItem>
         )}
@@ -273,7 +275,7 @@ export function UserMenu({
         <DropdownMenuItem asChild>
           <Link href={accountHref} className="flex items-center gap-2 w-full">
             <UserCog className="size-4 shrink-0" aria-hidden="true" />
-            <span>Account settings</span>
+            <span>{t("ui.accountSettings")}</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -291,12 +293,12 @@ export function UserMenu({
                 className="size-4 animate-spin shrink-0"
                 aria-hidden="true"
               />
-              <span>Signing out…</span>
+              <span>{t("ui.signingOut")}</span>
             </>
           ) : (
             <>
               <LogOut className="size-4 shrink-0" aria-hidden="true" />
-              <span>Sign out</span>
+              <span>{t("ui.signOut")}</span>
             </>
           )}
         </DropdownMenuItem>
@@ -315,6 +317,7 @@ export function UserMenu({
 }
 
 export function SignInButton(): React.JSX.Element | null {
+  const { t } = useI18n();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -328,7 +331,7 @@ export function SignInButton(): React.JSX.Element | null {
 
   return (
     <Button variant="outline" asChild>
-      <Link href={href}>Sign in</Link>
+      <Link href={href}>{t("ui.signIn")}</Link>
     </Button>
   );
 }

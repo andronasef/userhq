@@ -70,8 +70,17 @@ For your own feedback updates, use the portal's **Activity** tab when signed in 
 3. Open **Product settings** to change the name, URL, logo, tagline or website.
 4. Under branding, choose **Accent color** and **Button text color**, then save. Customer pages use the product branding in both light and dark themes.
 5. Configure categories and statuses for the product. Categories organize requests; statuses describe the team's workflow. Status names can be customized, so your team need not use the example names in this guide.
+6. Under **Languages & Localization**, set the default product language and choose which of the 13 supported languages (including Arabic RTL, German, Spanish, French, Portuguese, Russian, Hindi, Filipino, Indonesian, Japanese, Korean, and Chinese) are enabled for the product portal and content entries.
 
 New products start with all four portal features enabled. Use **View portal** to check what customers can currently see.
+
+### Multi-language content authoring & public fallback
+
+When managing product entries (Roadmap items, Changelog releases, and FAQ questions), administrators can author content in any enabled product language:
+- **Language Tabs**: Switch between language tabs in the entry dialogs to provide translated titles, summaries, and descriptions/answers. Status indicators highlight which languages have translations.
+- **RTL Writing**: Arabic tabs automatically activate right-to-left text direction for natural editing.
+- **Visitor Experience**: Portals automatically detect visitor language preferences (via URL parameter `?lang=`, cookie, or browser settings).
+- **Graceful Fallback**: If an entry has not yet been translated into the visitor's selected language, UserHQ displays the original default language version tagged with an **Original** badge.
 
 ### Manage teammates
 

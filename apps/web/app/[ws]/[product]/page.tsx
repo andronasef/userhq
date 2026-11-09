@@ -6,6 +6,7 @@ import { NewPostButton } from "@/components/board/post-form-dialog";
 import { BoardToolbar } from "@/components/board/board-toolbar";
 import { PostList } from "@/components/board/post-list";
 import { EmptyState } from "@/components/empty-state";
+import { getDictionary } from "@/lib/i18n";
 
 import Link from "next/link";
 import { landingHref } from "@/lib/portal-features";
@@ -81,6 +82,11 @@ export default async function PortalBoardPage({
     sp?.q || sp?.category || sp?.status || (sp?.sort && sp?.sort !== "top")
   );
 
+  const dict = getDictionary(
+    (productResult.data.product as { resolvedLocale?: string }).resolvedLocale ??
+      (typeof sp.lang === "string" ? sp.lang : undefined)
+  );
+
   return (
     <div className="mx-auto max-w-3xl flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -104,21 +110,21 @@ export default async function PortalBoardPage({
       {posts.length === 0 ? (
         isFiltered ? (
           <EmptyState
-            title="No posts match"
-            body="Try a different search, or clear the filters to see every open post."
+            title={dict.ui.noPostsMatch}
+            body={dict.ui.noPostsMatchDesc}
             action={
               <Link
                 href={`/${encodeURIComponent(ws)}/${encodeURIComponent(product)}`}
                 className={buttonVariants({ variant: "outline" })}
               >
-                Clear filters
+                {dict.ui.clearFilters}
               </Link>
             }
           />
         ) : (
           <EmptyState
-            title="Nothing here yet"
-            body={`Share an idea for ${productName}, and others can vote on it.`}
+            title={dict.ui.nothingHereYet}
+            body={dict.ui.shareAnIdeaDesc}
             action={
               <NewPostButton
                 ws={ws}

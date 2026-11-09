@@ -5,9 +5,12 @@ import Link from "next/link";
 import { Share2 } from "lucide-react";
 import { toast } from "sonner";
 import type { PublicChangelogEntry, RichTextDoc } from "@userhq/types";
+import { isRtl } from "@userhq/types";
 import { RichTextViewer } from "../rich-text/rich-text-viewer";
 import { EntityLogo } from "../entity-logo";
 import { cn } from "../../lib/utils";
+import { formatDate } from "../../lib/format";
+import { useI18n } from "../../lib/i18n/context";
 
 export interface ChangelogTimelineItemProps {
   entry: PublicChangelogEntry;
@@ -57,20 +60,23 @@ export function ChangelogTimelineItem({
   defaultExpanded = false,
   className,
 }: ChangelogTimelineItemProps): React.JSX.Element {
+  const { currentLocale, contentDefaultLocale, t } = useI18n();
   const [expanded, setExpanded] = React.useState(defaultExpanded);
-  const expandable = isContentExpandable(entry.content);
+
+  const displayTitle = entry.title;
+  const displayContent = entry.content;
+  const isFallback = Boolean(("isFallback" in (entry ?? {})) && (entry as { isFallback?: boolean }).isFallback);
+  const textDir = isRtl((entry as { resolvedLocale?: string } | undefined)?.resolvedLocale ?? contentDefaultLocale) ? "rtl" : "ltr";
+
+  const expandable = isContentExpandable(displayContent);
 
   const formattedDate = React.useMemo(() => {
-    try {
-      return new Intl.DateTimeFormat("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }).format(new Date(entry.publishedAt));
-    } catch {
-      return entry.publishedAt;
-    }
-  }, [entry.publishedAt]);
+    return formatDate(entry.publishedAt, currentLocale, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }, [entry.publishedAt, currentLocale]);
 
   const handleCopyLink = async () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -114,11 +120,17 @@ export function ChangelogTimelineItem({
           </span>
         ))}
 
+        {isFallback && (
+          <span className="text-[10px] text-muted-foreground bg-muted border border-border px-1.5 py-0.5 rounded font-normal">
+            {t("ui.original")}
+          </span>
+        )}
+
         <button
           type="button"
           onClick={handleCopyLink}
-          aria-label="Copy link"
-          title="Copy link"
+          aria-label={t("ui.copyLink")}
+          title={t("ui.copyLink")}
           className="size-7 rounded-md inline-flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors ml-auto sm:ml-0"
         >
           <Share2 className="size-3.5" />
@@ -129,22 +141,23 @@ export function ChangelogTimelineItem({
       <h2 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight mb-3">
         <Link
           href={`/${ws}/${product}/changelog/${entry.slug}`}
+          dir={textDir}
           className="hover:underline hover:text-[var(--primary-text)] transition-colors"
         >
-          {entry.title}
+          {displayTitle}
         </Link>
       </h2>
 
       {/* Body: inline expansion toggle */}
       {expandable ? (
-        <div>
+        <div dir={textDir}>
           <div
             className={cn(
               "relative",
               !expanded && "max-h-48 overflow-hidden mask-fade-bottom"
             )}
           >
-            <RichTextViewer content={entry.content} />
+            <RichTextViewer content={displayContent} />
           </div>
           <button
             type="button"
@@ -155,7 +168,9 @@ export function ChangelogTimelineItem({
           </button>
         </div>
       ) : (
-        <RichTextViewer content={entry.content} />
+        <div dir={textDir}>
+          <RichTextViewer content={displayContent} />
+        </div>
       )}
 
       {/* Footer: brand attribution (D-14) */}

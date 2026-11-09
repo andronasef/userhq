@@ -122,8 +122,8 @@ Restrictions are stored as product ids, while URLs use product slugs. An unrestr
 | `DELETE` | `/api/v1/workspaces/:ws/products/:product/changelog/tags/:tagId` | `changelog:write` | Delete a changelog tag. |
 | `GET` | `/api/v1/workspaces/:ws/export/feedback` | `export:read` | Bulk export of posts, comments and votes. |
 | `GET` | `/api/v1/workspaces/:ws/products` | `settings:read` | List the workspace's products with their feature switches. |
-| `GET` | `/api/v1/workspaces/:ws/products/:product` | `settings:read` | Get one product's settings: feature switches, name, slug, tagline, website and accent colors. |
-| `PATCH` | `/api/v1/workspaces/:ws/products/:product` | `settings:write` | Update the four feature switches (`features.board`, `roadmap`, `changelog`, `faq`) and the profile fields (name, slug, tagline, website, accent colors). A key can clear the logo (`logoUploadId: null`) but not set one, because keys cannot upload files. |
+| `GET` | `/api/v1/workspaces/:ws/products/:product` | `settings:read` | Get one product's settings: feature switches, name, slug, tagline, website, accent colors, and configured `locales` (`defaultLocale`, `enabledLocales`). |
+| `PATCH` | `/api/v1/workspaces/:ws/products/:product` | `settings:write` | Update the four feature switches (`features.board`, `roadmap`, `changelog`, `faq`), profile fields (name, slug, tagline, website, accent colors), and `locales` configuration (`defaultLocale`, `enabledLocales`). A key can clear the logo (`logoUploadId: null`) but not set one, because keys cannot upload files. |
 | `GET` | `/api/v1/workspaces/:ws/products/:product/statuses` | `settings:read` | List the product's statuses in order. |
 | `POST` | `/api/v1/workspaces/:ws/products/:product/statuses` | `settings:write` | Create a status (`name`, `type`, `color`, optional `isPublicRoadmap`). |
 | `PATCH` | `/api/v1/workspaces/:ws/products/:product/statuses/:statusId` | `settings:write` | Edit a status. |

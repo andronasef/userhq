@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SupportedLocaleSchema } from "./i18n.js";
 import { RichTextDocSchema } from "./rich-text.js";
 
 export const FAQ_CATEGORY_NAME_MIN = 2;
@@ -30,6 +31,12 @@ export const MoveFaqCategoryResponseSchema = z.object({
 });
 export type MoveFaqCategoryResponse = z.infer<typeof MoveFaqCategoryResponseSchema>;
 
+export const FaqTranslationSchema = z.object({
+  question: z.string().max(FAQ_QUESTION_MAX, { message: "title_length" }).optional(),
+  answer: RichTextDocSchema.optional(),
+});
+export type FaqTranslation = z.infer<typeof FaqTranslationSchema>;
+
 export const FaqQuestionInputSchema = z.object({
   categoryId: z.string().uuid({ message: "category_required" }),
   question: z
@@ -40,6 +47,8 @@ export const FaqQuestionInputSchema = z.object({
     .max(FAQ_QUESTION_MAX, { message: "title_length" }),
   answer: RichTextDocSchema,
   rank: z.string().optional(),
+  sourceLocale: SupportedLocaleSchema.optional(),
+  translations: z.partialRecord(SupportedLocaleSchema, FaqTranslationSchema).optional(),
 });
 export type FaqQuestionInput = z.infer<typeof FaqQuestionInputSchema>;
 export const CreateFaqQuestionInputSchema = FaqQuestionInputSchema;
@@ -55,6 +64,8 @@ export const UpdateFaqQuestionInputSchema = z.object({
     .max(FAQ_QUESTION_MAX, { message: "title_length" })
     .optional(),
   answer: RichTextDocSchema.optional(),
+  sourceLocale: SupportedLocaleSchema.optional(),
+  translations: z.partialRecord(SupportedLocaleSchema, FaqTranslationSchema).optional(),
 });
 export type UpdateFaqQuestionInput = z.infer<typeof UpdateFaqQuestionInputSchema>;
 
@@ -81,6 +92,8 @@ export const AdminFaqQuestionSchema = z.object({
   question: z.string(),
   answer: RichTextDocSchema,
   rank: z.string(),
+  sourceLocale: SupportedLocaleSchema.optional(),
+  translations: z.partialRecord(SupportedLocaleSchema, FaqTranslationSchema).default({}),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -105,6 +118,9 @@ export const PublicFaqQuestionSchema = z.object({
   id: z.string().uuid(),
   question: z.string(),
   answer: RichTextDocSchema,
+  sourceLocale: SupportedLocaleSchema.optional(),
+  resolvedLocale: SupportedLocaleSchema.optional(),
+  isFallback: z.boolean().optional(),
 });
 export type PublicFaqQuestion = z.infer<typeof PublicFaqQuestionSchema>;
 

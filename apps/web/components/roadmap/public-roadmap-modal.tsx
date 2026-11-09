@@ -8,6 +8,7 @@ import type {
   PublicRoadmapPostRef,
   PostStatus,
 } from "@userhq/types";
+import { isRtl } from "@userhq/types";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,7 @@ import { StatusBadge } from "../status-badge";
 import { PlainText } from "../plain-text";
 import { postHref } from "../../lib/tenant";
 import { apiFetch } from "../../lib/api-client";
+import { useI18n } from "../../lib/i18n/context";
 
 export interface PublicRoadmapModalProps {
   open: boolean;
@@ -39,8 +41,14 @@ export function PublicRoadmapModal({
   ws,
   product,
 }: PublicRoadmapModalProps): React.JSX.Element | null {
+  const { contentDefaultLocale, t } = useI18n();
   const [loadingPosts, setLoadingPosts] = React.useState(false);
   const [linkedPosts, setLinkedPosts] = React.useState<PublicRoadmapPostRef[]>([]);
+
+  const displayTitle = item?.title ?? "";
+  const displayDescription = item?.description;
+  const isFallback = Boolean(("isFallback" in (item ?? {})) && (item as { isFallback?: boolean }).isFallback);
+  const textDir = isRtl((item as { resolvedLocale?: string } | undefined)?.resolvedLocale ?? contentDefaultLocale) ? "rtl" : "ltr";
 
   React.useEffect(() => {
     if (!open || !item) {
@@ -75,25 +83,30 @@ export function PublicRoadmapModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[85vh] flex flex-col gap-5 overflow-hidden">
         <DialogHeader className="flex flex-col gap-2.5">
-          <div>
+          <div className="flex items-center justify-between gap-2">
             {status && <StatusBadge name={status.name} color={status.color} />}
+            {isFallback && (
+              <span className="text-[10px] text-muted-foreground bg-muted border border-border px-1.5 py-0.5 rounded font-normal shrink-0">
+                {t("ui.original")}
+              </span>
+            )}
           </div>
-          <DialogTitle className="text-xl font-semibold text-foreground text-left">
-            {item.title}
+          <DialogTitle dir={textDir} className="text-xl font-semibold text-foreground text-left">
+            {displayTitle}
           </DialogTitle>
           <DialogDescription className="sr-only">
-            Details for roadmap item {item.title}
+            Details for roadmap item {displayTitle}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-5">
-          {item.description ? (
+        <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-5" dir={textDir}>
+          {displayDescription ? (
             <div className="text-sm text-foreground leading-relaxed">
-              <PlainText text={item.description} />
+              <PlainText text={displayDescription} />
             </div>
           ) : (
             <p className="text-sm text-muted-foreground italic">
-              No description provided.
+              {t("ui.noDescription")}
             </p>
           )}
 
@@ -101,12 +114,12 @@ export function PublicRoadmapModal({
             <div className="border-t border-border pt-4 flex flex-col gap-3">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                 <MessageSquare className="size-3.5" aria-hidden="true" />
-                <span>Related feedback discussions</span>
+                <span>{t("ui.relatedFeedback")}</span>
               </h4>
 
               {loadingPosts ? (
                 <div className="text-xs text-muted-foreground py-2">
-                  Loading related feedback…
+                  {t("ui.loadingRelated")}
                 </div>
               ) : linkedPosts.length === 0 ? (
                 <div className="text-xs text-muted-foreground py-2">
@@ -148,7 +161,7 @@ export function PublicRoadmapModal({
             size="sm"
             onClick={() => onOpenChange(false)}
           >
-            Close
+            {t("common.close")}
           </Button>
         </DialogFooter>
       </DialogContent>

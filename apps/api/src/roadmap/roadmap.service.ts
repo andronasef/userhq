@@ -11,6 +11,7 @@ import {
   postActivity,
   user,
   workspaceMembers,
+  products,
 } from "@userhq/db";
 import {
   generateKeyBetween,
@@ -44,6 +45,8 @@ export class RoadmapService {
         publicDescription: roadmapItems.publicDescription,
         isPublic: roadmapItems.isPublic,
         rank: roadmapItems.rank,
+        sourceLocale: roadmapItems.sourceLocale,
+        translations: roadmapItems.translations,
         createdAt: roadmapItems.createdAt,
         updatedAt: roadmapItems.updatedAt,
         internalTitle: roadmapItemInternals.internalTitle,
@@ -94,6 +97,8 @@ export class RoadmapService {
         publicDescription: roadmapItems.publicDescription,
         isPublic: roadmapItems.isPublic,
         rank: roadmapItems.rank,
+        sourceLocale: roadmapItems.sourceLocale,
+        translations: roadmapItems.translations,
         createdAt: roadmapItems.createdAt,
         updatedAt: roadmapItems.updatedAt,
         internalTitle: roadmapItemInternals.internalTitle,
@@ -211,6 +216,14 @@ export class RoadmapService {
             ? input.internalTitle
             : null;
 
+      const [prod] = await tx
+        .select({ locales: products.locales })
+        .from(products)
+        .where(eq(products.id, tenant.productId))
+        .limit(1);
+      const defaultLoc = (prod?.locales as any)?.defaultLocale ?? "en";
+      const sourceLocale = input.sourceLocale ?? defaultLoc;
+
       // 5. Insert public-safe roadmap item
       const [newItem] = await tx
         .insert(roadmapItems)
@@ -221,6 +234,8 @@ export class RoadmapService {
           publicDescription: input.publicDescription ?? null,
           isPublic,
           rank,
+          sourceLocale,
+          translations: input.translations ?? {},
         })
         .returning({ id: roadmapItems.id });
 
@@ -374,6 +389,8 @@ export class RoadmapService {
       if (input.isPublic !== undefined) itemUpdates.isPublic = input.isPublic;
       if (resultingPublicTitle !== undefined) itemUpdates.publicTitle = resultingPublicTitle;
       if (input.publicDescription !== undefined) itemUpdates.publicDescription = input.publicDescription;
+      if (input.sourceLocale !== undefined) itemUpdates.sourceLocale = input.sourceLocale;
+      if (input.translations !== undefined) itemUpdates.translations = input.translations;
 
       await tx
         .update(roadmapItems)
@@ -748,6 +765,8 @@ export class RoadmapService {
       publicDescription: row.publicDescription ?? null,
       isPublic: Boolean(row.isPublic),
       rank: row.rank,
+      sourceLocale: (row.sourceLocale as any) ?? "en",
+      translations: (row.translations as any) ?? {},
       assignee: row.assigneeId
         ? {
             id: row.assigneeId,

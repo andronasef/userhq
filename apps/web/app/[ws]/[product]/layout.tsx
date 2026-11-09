@@ -13,6 +13,7 @@ import { StatePage } from "../../../components/state-page";
 import { Button } from "../../../components/ui/button";
 import { UserMenu, SignInButton } from "../../../components/user-menu";
 import { SessionKeepAlive } from "../../../components/session-keepalive";
+import { PortalLocaleScope } from "../../../components/portal/portal-locale-scope";
 import { PortalTabs } from "../../../components/portal/portal-tabs";
 import { NotificationBell } from "../../../components/notifications/notification-bell";
 import { AppToaster } from "../../../components/ui/toaster";
@@ -157,6 +158,7 @@ export default async function PortalLayout({
       tagline={p.tagline}
       websiteUrl={p.websiteUrl}
       companyName={workspace.name}
+      allowedLocales={p.locales?.enabledLocales}
       accentStyle={productAccentStyle}
       right={right}
       tabs={portalTabs(ws, product, p.features, Boolean(me.user)).length >= 2
@@ -170,6 +172,7 @@ export default async function PortalLayout({
         wsName={workspace.name}
         href={portalHref(ws, product)}
       />
+      <PortalLocaleScope locales={p.locales} />
       <AppToaster />
       {children}
     </PortalFrame>

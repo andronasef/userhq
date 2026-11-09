@@ -16,6 +16,7 @@ export * from "./api-keys.js";
 export * from "./export.js";
 export * from "./webhooks.js";
 export * from "./push.js";
+export * from "./i18n.js";
 
 export const API_ERROR_CODES = [
   "unauthorized",

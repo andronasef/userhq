@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, timestamp, unique, index, foreignKey } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, timestamp, unique, index, foreignKey, jsonb } from "drizzle-orm/pg-core";
 import { products, statuses } from "./tenancy.js";
 import { user } from "./auth.js";
 
@@ -15,6 +15,11 @@ export const roadmapItems = pgTable(
     publicDescription: text("public_description"),
     isPublic: boolean("is_public").notNull().default(false),
     rank: text("rank").notNull(), // LexoRank string (e.g. "a0", "a0V", "a1")
+    sourceLocale: text("source_locale").notNull().default("en"),
+    translations: jsonb("translations")
+      .$type<Record<string, { publicTitle?: string | null; publicDescription?: string | null }>>()
+      .notNull()
+      .default({}),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },

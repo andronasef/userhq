@@ -1,9 +1,14 @@
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { type SupportedLocale } from "@userhq/types";
 import { EntityLogo } from "../entity-logo";
 import { UserHQBrand } from "../userhq-brand";
 import { ThemeToggle } from "../theme-toggle";
+import { LanguageSwitcher } from "../language-switcher";
+import { useI18n } from "../../lib/i18n/context";
 import { PortalSectionMotion } from "./portal-section-motion";
 import { PortalAccentProvider } from "./portal-accent-context";
 
@@ -17,6 +22,7 @@ export interface PortalFrameProps {
   tagline?: string | null;
   websiteUrl?: string | null;
   companyName?: string;
+  allowedLocales?: SupportedLocale[];
   right?: React.ReactNode;
   tabs?: React.ReactNode;
 }
@@ -31,9 +37,11 @@ export function PortalFrame({
   tagline,
   websiteUrl,
   companyName,
+  allowedLocales,
   right,
   tabs,
 }: PortalFrameProps): React.JSX.Element {
+  const { t } = useI18n();
   const combinedStyle = style ?? accentStyle;
 
   return (
@@ -67,7 +75,7 @@ export function PortalFrame({
               </div>
             </Link>
 
-            <div className="ml-auto flex items-center gap-4 shrink-0">
+            <div className="ml-auto flex items-center gap-2 sm:gap-4 shrink-0">
               {websiteUrl && (
                 <a
                   href={websiteUrl}
@@ -79,6 +87,7 @@ export function PortalFrame({
                   <ArrowUpRight className="size-3.5" aria-hidden="true" />
                 </a>
               )}
+              <LanguageSwitcher allowedLocales={allowedLocales} variant="portal" />
               <ThemeToggle variant="dropdown" />
               {right}
             </div>
@@ -102,7 +111,7 @@ export function PortalFrame({
         <footer className="border-t border-border py-6">
           <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
-              Powered by{" "}
+              {t("ui.poweredBy")}{" "}
               <Link
                 href="/"
                 className="hover:underline font-medium text-foreground"

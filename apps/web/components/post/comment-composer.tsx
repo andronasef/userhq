@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
 import { errorCopy } from "@/lib/api-errors";
+import { useI18n } from "@/lib/i18n/context";
 import { boardApiBase, type BoardVariant } from "@/lib/tenant";
 
 export interface CommentComposerProps {
@@ -37,7 +38,9 @@ export function CommentComposer({
   onDraftChange,
   onSuccess,
   onCancel,
+  discardLabel,
 }: CommentComposerProps): React.JSX.Element {
+  const { t } = useI18n();
   const [body, setBody] = React.useState(initialDraft);
   const [isPending, setIsPending] = React.useState(false);
   const [fieldError, setFieldError] = React.useState<string | null>(null);
@@ -64,11 +67,11 @@ export function CommentComposer({
 
     const trimmed = body.trim();
     if (!trimmed) {
-      setFieldError("Write something before posting.");
+      setFieldError(t("ui.commentRequired"));
       return;
     }
     if (trimmed.length > 5000) {
-      setFieldError("Keep comments under 5,000 characters.");
+      setFieldError(t("ui.commentTooLong"));
       return;
     }
 
@@ -94,9 +97,9 @@ export function CommentComposer({
     } catch (err) {
       if (err instanceof ApiClientError) {
         if (err.code === "comment_required") {
-          setFieldError("Write something before posting.");
+          setFieldError(t("ui.commentRequired"));
         } else if (err.code === "comment_too_long") {
-          setFieldError("Keep comments under 5,000 characters.");
+          setFieldError(t("ui.commentTooLong"));
         } else {
           setAlertError(errorCopy(err));
         }
@@ -110,9 +113,9 @@ export function CommentComposer({
 
   const isReply = mode === "reply";
   const formId = isReply ? (parentId ? `comment-${parentId}` : undefined) : "comment";
-  const labelText = isReply ? "Write a reply" : "Write a comment";
-  const placeholder = isReply ? "Write a reply…" : "Add a comment…";
-  const submitText = isReply ? "Post reply" : "Post comment";
+  const labelText = isReply ? t("ui.writeAReply") : t("ui.writeAComment");
+  const placeholder = isReply ? t("ui.writeAReplyPlaceholder") : t("ui.addACommentPlaceholder");
+  const submitText = isReply ? t("ui.postReply") : t("ui.postComment");
 
   return (
     <form
@@ -164,7 +167,7 @@ export function CommentComposer({
             onClick={onCancel}
             disabled={isPending}
           >
-            Discard reply
+            {discardLabel ?? t("ui.discardReply")}
           </Button>
         )}
         <Button
@@ -176,7 +179,7 @@ export function CommentComposer({
           {isPending ? (
             <>
               <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
-              <span>Posting…</span>
+              <span>{t("ui.submitting")}</span>
             </>
           ) : (
             submitText

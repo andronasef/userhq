@@ -21,10 +21,28 @@ import {
 } from "@userhq/types";
 import { Public } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
+import { localize } from "../portal/localize.js";
 import { PortalGuard } from "../portal/portal.guard.js";
 import { PortalFeature } from "../portal/product-features.js";
 
 const UuidParamSchema = z.string().uuid();
+
+function localizeRoadmap(
+  portal: any,
+  r: { title: string | null; description: string | null; translations: unknown; sourceLocale?: any },
+) {
+  const { translation: tr, resolvedLocale, isFallback } = localize<{
+    publicTitle?: string | null;
+    publicDescription?: string | null;
+  }>(portal, r.translations, (t) => Boolean(t.publicTitle?.trim() || t.publicDescription?.trim()), r.sourceLocale);
+  return {
+    title: tr?.publicTitle?.trim() ? tr.publicTitle : (r.title ?? "Untitled item"),
+    description: tr?.publicDescription?.trim() ? tr.publicDescription : (r.description ?? null),
+    sourceLocale: r.sourceLocale,
+    resolvedLocale,
+    isFallback,
+  };
+}
 
 @Controller("portal/:ws/:product/roadmap")
 @UseGuards(PortalGuard)
@@ -41,6 +59,7 @@ export class PortalRoadmapController {
     if (!productId) {
       throw new ApiException("not_found", 404, "Not found.");
     }
+    const portal = req.portal;
 
     // Linked requests are queried only when Board is publicly available.
     // STRICT ZERO-JOIN to roadmapItemInternals (ROAD-12)
@@ -51,6 +70,8 @@ export class PortalRoadmapController {
         title: roadmapItems.publicTitle,
         description: roadmapItems.publicDescription,
         rank: roadmapItems.rank,
+        sourceLocale: roadmapItems.sourceLocale,
+        translations: roadmapItems.translations,
         createdAt: roadmapItems.createdAt,
         postCount: features.board
           ? sql<number>`(
@@ -82,8 +103,7 @@ export class PortalRoadmapController {
       items: rows.map((r) => ({
         id: r.id,
         statusId: r.statusId,
-        title: r.title ?? "Untitled item",
-        description: r.description ?? null,
+        ...localizeRoadmap(portal, r),
         postCount: Number(r.postCount ?? 0),
         createdAt: new Date(r.createdAt).toISOString(),
       })),
@@ -115,6 +135,8 @@ export class PortalRoadmapController {
         statusId: roadmapItems.statusId,
         title: roadmapItems.publicTitle,
         description: roadmapItems.publicDescription,
+        sourceLocale: roadmapItems.sourceLocale,
+        translations: roadmapItems.translations,
         createdAt: roadmapItems.createdAt,
       })
       .from(roadmapItems)
@@ -159,8 +181,7 @@ export class PortalRoadmapController {
       item: {
         id: row.id,
         statusId: row.statusId,
-        title: row.title ?? "Untitled item",
-        description: row.description ?? null,
+        ...localizeRoadmap(req.portal, row),
         postCount: linkedPosts.length,
         createdAt: new Date(row.createdAt).toISOString(),
       },

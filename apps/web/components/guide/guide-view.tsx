@@ -435,7 +435,7 @@ export function GuideView({ workspaces }: GuideViewProps) {
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Every product in your workspace can have its own public portal at <code className="px-1.5 py-0.5 rounded bg-muted font-mono text-xs">/[ws]/[product]</code>.
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <div className="p-3.5 rounded-lg border border-border bg-card space-y-1">
                   <span className="font-semibold text-foreground">Modular Feature Toggles</span>
                   <p className="text-muted-foreground">
@@ -446,6 +446,12 @@ export function GuideView({ workspaces }: GuideViewProps) {
                   <span className="font-semibold text-foreground">Custom Branding &amp; Colors</span>
                   <p className="text-muted-foreground">
                     Customize your portal with your logo, brand name, and custom accent color to create a seamless extension of your app.
+                  </p>
+                </div>
+                <div className="p-3.5 rounded-lg border border-border bg-card space-y-1">
+                  <span className="font-semibold text-foreground">Multi-Language &amp; RTL</span>
+                  <p className="text-muted-foreground">
+                    Support 13 languages with automatic visitor detection, language pickers, and localized entry authoring across Roadmap, Changelog, and FAQ.
                   </p>
                 </div>
               </div>

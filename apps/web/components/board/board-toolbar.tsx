@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useI18n } from "../../lib/i18n/context";
 import { useQueryStates, parseAsString, parseAsStringLiteral } from "nuqs";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "../ui/input";
@@ -16,6 +17,7 @@ export function BoardToolbar({
   categories = [],
   statuses = [],
 }: BoardToolbarProps): React.JSX.Element {
+  const { t } = useI18n();
   const [{ q, sort, category, status }, setParams] = useQueryStates(
     {
       q: parseAsString.withDefault(""),
@@ -67,7 +69,7 @@ export function BoardToolbar({
   const renderSortSelect = (id: string) => (
     <div className="w-full sm:w-40">
       <label htmlFor={id} className="sr-only">
-        Sort by
+        {t("portal.sortBy")}
       </label>
       <NativeSelect
         id={id}
@@ -77,9 +79,9 @@ export function BoardToolbar({
           void setParams({ sort: val === defaultSort ? null : val });
         }}
       >
-        {hasQ && <option value="match">Best match</option>}
-        <option value="top">Top voted</option>
-        <option value="new">Newest</option>
+        {hasQ && <option value="match">{t("ui.bestMatch")}</option>}
+        <option value="top">{t("ui.topVoted")}</option>
+        <option value="new">{t("portal.newest")}</option>
       </NativeSelect>
     </div>
   );
@@ -89,7 +91,7 @@ export function BoardToolbar({
     return (
       <div className="w-full sm:w-40">
         <label htmlFor={id} className="sr-only">
-          Category
+          {t("ui.category")}
         </label>
         <NativeSelect
           id={id}
@@ -99,7 +101,7 @@ export function BoardToolbar({
             void setParams({ category: val === "" ? null : val });
           }}
         >
-          <option value="">All categories</option>
+          <option value="">{t("portal.allCategories")}</option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -113,7 +115,7 @@ export function BoardToolbar({
   const renderStatusSelect = (id: string) => (
     <div className="w-full sm:w-40">
       <label htmlFor={id} className="sr-only">
-        Status
+        {t("ui.status")}
       </label>
       <NativeSelect
         id={id}
@@ -123,8 +125,8 @@ export function BoardToolbar({
           void setParams({ status: val === "" ? null : val });
         }}
       >
-        <option value="">Open</option>
-        <option value="all">All statuses</option>
+        <option value="">{t("ui.openStatus")}</option>
+        <option value="all">{t("ui.allStatuses")}</option>
         {statuses.map((s) => (
           <option key={s.id} value={s.id}>
             {s.name}
@@ -143,12 +145,12 @@ export function BoardToolbar({
             aria-hidden="true"
           />
           <label htmlFor="board-search-input" className="sr-only">
-            Search posts
+            {t("ui.searchPosts")}
           </label>
           <Input
             id="board-search-input"
             type="search"
-            placeholder="Search posts"
+            placeholder={t("ui.searchPosts")}
             value={searchVal}
             onChange={(e) => {
               const nextVal = e.target.value;

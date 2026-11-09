@@ -132,6 +132,7 @@ export class PortalController {
         productAccentTextColor: products.accentTextColor,
         productWebsiteUrl: products.websiteUrl,
         productLogoKey: productLogo.storageKey,
+        productLocales: products.locales,
       })
       .from(products)
       .innerJoin(workspaces, eq(products.workspaceId, workspaces.id))
@@ -186,6 +187,7 @@ export class PortalController {
         accentTextColor: row.productAccentTextColor ?? null,
         logoUrl,
         websiteUrl,
+        locales: (row.productLocales as any) ?? { defaultLocale: "en", enabledLocales: ["en"] },
       },
       categories: catRows,
       statuses: statusRows.map((status) => ({

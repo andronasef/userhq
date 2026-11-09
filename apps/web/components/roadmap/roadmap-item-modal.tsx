@@ -5,12 +5,16 @@ import { ChevronUp, LoaderCircle, Trash2, X, Lock, Globe } from "lucide-react";
 import { toast } from "sonner";
 import {
   type AdminRoadmapItem,
+  AdminRoadmapItemSchema,
   type Status,
   type MemberRow,
   type RoadmapPostLinkSearchResult,
   type RoadmapPostLinkSearchResponse,
-  AdminRoadmapItemSchema,
-  RoadmapPostLinkSearchResponseSchema,
+  type ProductLocalesConfig,
+  type SupportedLocale,
+  type RoadmapTranslation,
+  DEFAULT_LOCALE,
+  isRtl,
 } from "@userhq/types";
 import {
   Dialog,
@@ -28,6 +32,7 @@ import { Badge } from "../ui/badge";
 import { Alert } from "../ui/alert";
 import { ConfirmDialog } from "../ui/confirm-dialog";
 import { PostLinkCombobox } from "./post-link-combobox";
+import { EntryLocaleTabs } from "../entry-locale-tabs";
 import { apiFetch } from "../../lib/api-client";
 import { errorCopy } from "../../lib/api-errors";
 
@@ -39,6 +44,7 @@ export interface RoadmapItemModalProps {
   members: MemberRow[];
   defaultStatusId?: string;
   prelinkedPost?: RoadmapPostLinkSearchResult | null;
+  productLocales?: ProductLocalesConfig | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaved: (item: AdminRoadmapItem) => void;
@@ -53,12 +59,22 @@ export function RoadmapItemModal({
   members,
   defaultStatusId,
   prelinkedPost,
+  productLocales,
   open,
   onOpenChange,
   onSaved,
   onDeleted,
 }: RoadmapItemModalProps) {
   const isEdit = Boolean(item);
+
+  const defaultLocale = productLocales?.defaultLocale ?? DEFAULT_LOCALE;
+  const enabledLocales = (productLocales?.enabledLocales && productLocales.enabledLocales.length > 0)
+    ? productLocales.enabledLocales
+    : [defaultLocale];
+  const [activeLocale, setActiveLocale] = React.useState<SupportedLocale>(defaultLocale);
+  const [translations, setTranslations] = React.useState<
+    Record<string, RoadmapTranslation>
+  >(item?.translations ?? {});
 
   const [linkedPosts, setLinkedPosts] = React.useState<RoadmapPostLinkSearchResult[]>([]);
   const [isLoadingPosts, setIsLoadingPosts] = React.useState(false);
@@ -95,17 +111,68 @@ export function RoadmapItemModal({
 
   const [errors, setErrors] = React.useState<Record<string, string>>({});
 
+  const currentPublicTitle =
+    activeLocale === defaultLocale ? publicTitle : (translations[activeLocale]?.publicTitle ?? "");
+  const currentPublicDescription =
+    activeLocale === defaultLocale ? publicDescription : (translations[activeLocale]?.publicDescription ?? "");
+
+  const translationsStatus = React.useMemo(() => {
+    const status: Partial<Record<SupportedLocale, boolean>> = {};
+    for (const loc of enabledLocales) {
+      if (loc === defaultLocale) {
+        status[loc] = Boolean(publicTitle.trim());
+      } else {
+        const trans = translations[loc];
+        status[loc] = Boolean(trans?.publicTitle?.trim());
+      }
+    }
+    return status;
+  }, [enabledLocales, defaultLocale, publicTitle, translations]);
+
+  const handleCurrentPublicTitleChange = (nextTitle: string) => {
+    if (activeLocale === defaultLocale) {
+      setPublicTitle(nextTitle);
+      if (errors.publicTitle) {
+        setErrors((prev) => ({ ...prev, publicTitle: "" }));
+      }
+    } else {
+      setTranslations((prev) => ({
+        ...prev,
+        [activeLocale]: {
+          ...prev[activeLocale],
+          publicTitle: nextTitle,
+        },
+      }));
+    }
+  };
+
+  const handleCurrentPublicDescriptionChange = (nextDesc: string) => {
+    if (activeLocale === defaultLocale) {
+      setPublicDescription(nextDesc);
+    } else {
+      setTranslations((prev) => ({
+        ...prev,
+        [activeLocale]: {
+          ...prev[activeLocale],
+          publicDescription: nextDesc,
+        },
+      }));
+    }
+  };
+
   // Reset form whenever modal opens or item changes
   React.useEffect(() => {
     if (!open) return;
 
     setAlertError(null);
     setErrors({});
+    setActiveLocale(defaultLocale);
 
     if (item) {
       setIsPublic(item.isPublic);
       setPublicTitle(item.publicTitle ?? "");
       setPublicDescription(item.publicDescription ?? "");
+      setTranslations(item.translations ?? {});
       setInternalTitle(item.internalTitle);
       setInternalDescription(item.internalDescription ?? "");
       setInternalNotes(item.internalNotes ?? "");
@@ -116,8 +183,7 @@ export function RoadmapItemModal({
       // Fetch linked posts for this item
       setIsLoadingPosts(true);
       apiFetch<RoadmapPostLinkSearchResponse>(
-        `/api/v1/workspaces/${ws}/products/${product}/roadmap/${item.id}/posts`,
-        { schema: RoadmapPostLinkSearchResponseSchema }
+        `/api/v1/workspaces/${ws}/products/${product}/roadmap/${item.id}/posts`
       )
         .then((res) => {
           setLinkedPosts(res.posts);
@@ -132,6 +198,7 @@ export function RoadmapItemModal({
       setIsPublic(false);
       setPublicTitle("");
       setPublicDescription("");
+      setTranslations({});
       setInternalTitle(prelinkedPost?.title ?? "");
       setInternalDescription("");
       setInternalNotes("");
@@ -145,7 +212,7 @@ export function RoadmapItemModal({
         setLinkedPosts([]);
       }
     }
-  }, [open, item, prelinkedPost, defaultStatusId, statuses, ws, product]);
+  }, [open, item, prelinkedPost, defaultStatusId, statuses, ws, product, defaultLocale]);
 
   const handleTogglePublic = (nextPublic: boolean) => {
     setIsPublic(nextPublic);
@@ -242,6 +309,7 @@ export function RoadmapItemModal({
       publicTitle: isPublic ? publicTitle.trim() : null,
       publicDescription:
         isPublic && publicDescription.trim() ? publicDescription.trim() : null,
+      translations: isPublic ? translations : {},
       internalTitle: internalTitle.trim(),
       internalDescription: internalDescription.trim()
         ? internalDescription.trim()
@@ -349,31 +417,50 @@ export function RoadmapItemModal({
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--primary-text)]">
                     Public Details (Customer Visible)
                   </h4>
+
+                  <EntryLocaleTabs
+                    activeLocale={activeLocale}
+                    onSelectLocale={setActiveLocale}
+                    defaultLocale={defaultLocale}
+                    enabledLocales={enabledLocales}
+                    translationsStatus={translationsStatus}
+                  />
+
                   <Field
                     id="modal-public-title"
-                    label="Public title"
+                    label={`Public title ${activeLocale !== defaultLocale ? `(${activeLocale})` : ""}`}
                     error={errors.publicTitle}
                     helper="Customer-facing title shown on the public roadmap."
                   >
                     <Input
                       id="modal-public-title"
-                      value={publicTitle}
-                      onChange={(e) => setPublicTitle(e.target.value)}
-                      placeholder="e.g. Dark Mode Support"
+                      value={currentPublicTitle}
+                      onChange={(e) => handleCurrentPublicTitleChange(e.target.value)}
+                      dir={isRtl(activeLocale) ? "rtl" : "ltr"}
+                      placeholder={
+                        activeLocale === defaultLocale
+                          ? "e.g. Dark Mode Support"
+                          : `Translation for public title (${activeLocale})...`
+                      }
                     />
                   </Field>
 
                   <Field
                     id="modal-public-description"
-                    label="Public description"
+                    label={`Public description ${activeLocale !== defaultLocale ? `(${activeLocale})` : ""}`}
                     error={errors.publicDescription}
                     helper="Optional description explaining what is being delivered and why."
                   >
                     <Textarea
                       id="modal-public-description"
-                      value={publicDescription}
-                      onChange={(e) => setPublicDescription(e.target.value)}
-                      placeholder="Describe the feature value for your users…"
+                      value={currentPublicDescription}
+                      onChange={(e) => handleCurrentPublicDescriptionChange(e.target.value)}
+                      dir={isRtl(activeLocale) ? "rtl" : "ltr"}
+                      placeholder={
+                        activeLocale === defaultLocale
+                          ? "Describe the feature value for your users…"
+                          : `Translation for public description (${activeLocale})...`
+                      }
                       rows={3}
                     />
                   </Field>

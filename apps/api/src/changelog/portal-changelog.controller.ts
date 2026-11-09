@@ -27,6 +27,7 @@ import {
 } from "@userhq/types";
 import { Public } from "../auth/decorators.js";
 import { ApiException } from "../common/api-error.filter.js";
+import { localize } from "../portal/localize.js";
 import { PortalGuard } from "../portal/portal.guard.js";
 import { PortalFeature } from "../portal/product-features.js";
 import { encodeBoardCursor, decodeBoardCursor } from "../feedback/cursor.js";
@@ -34,6 +35,25 @@ import { encodeBoardCursor, decodeBoardCursor } from "../feedback/cursor.js";
 // Published and not future-dated: an entry dated ahead goes live when its date
 // arrives. lte() also excludes drafts (NULL).
 const isLive = lte(changelogEntries.publishedAt, sql`now()`);
+
+function localizeEntry(
+  portal: any,
+  r: { title: string; summary: string | null; content: unknown; translations: unknown; sourceLocale?: any },
+) {
+  const { translation: tr, resolvedLocale, isFallback } = localize<{
+    title?: string;
+    summary?: string | null;
+    content?: any;
+  }>(portal, r.translations, (t) => Boolean(t.title?.trim() || t.content), r.sourceLocale);
+  return {
+    title: tr?.title?.trim() ? tr.title : r.title,
+    summary: tr?.summary?.trim() ? tr.summary : (r.summary ?? null),
+    content: (tr?.content ?? r.content) as any,
+    sourceLocale: r.sourceLocale,
+    resolvedLocale,
+    isFallback,
+  };
+}
 
 @Controller("portal/:ws/:product/changelog")
 @UseGuards(PortalGuard)
@@ -63,6 +83,8 @@ export class PortalChangelogController {
         summary: changelogEntries.summary,
         content: changelogEntries.content,
         publishedAt: changelogEntries.publishedAt,
+        sourceLocale: changelogEntries.sourceLocale,
+        translations: changelogEntries.translations,
         createdAt: changelogEntries.createdAt,
       })
       .from(changelogEntries)
@@ -109,10 +131,8 @@ export class PortalChangelogController {
     return {
       entries: page.map((r) => ({
         id: r.id,
-        title: r.title,
         slug: r.slug,
-        summary: r.summary ?? null,
-        content: r.content as any,
+        ...localizeEntry(req.portal, r),
         publishedAt: new Date(r.publishedAt!).toISOString(),
         tags: tagsByEntry.get(r.id) ?? [],
         createdAt: new Date(r.createdAt).toISOString(),
@@ -141,6 +161,8 @@ export class PortalChangelogController {
         summary: changelogEntries.summary,
         content: changelogEntries.content,
         publishedAt: changelogEntries.publishedAt,
+        sourceLocale: changelogEntries.sourceLocale,
+        translations: changelogEntries.translations,
         createdAt: changelogEntries.createdAt,
       })
       .from(changelogEntries)
@@ -174,10 +196,8 @@ export class PortalChangelogController {
 
     return {
       id: row.id,
-      title: row.title,
       slug: row.slug,
-      summary: row.summary ?? null,
-      content: row.content as any,
+      ...localizeEntry(req.portal, row),
       publishedAt: new Date(row.publishedAt!).toISOString(),
       tags: tagRows,
       createdAt: new Date(row.createdAt).toISOString(),

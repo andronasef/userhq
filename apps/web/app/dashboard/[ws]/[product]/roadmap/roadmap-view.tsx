@@ -161,6 +161,7 @@ export function RoadmapView({
         <RoadmapItemModal
           ws={ws}
           product={product.slug}
+          productLocales={product.locales}
           open={isCreateOpen}
           onOpenChange={setIsCreateOpen}
           statuses={statuses}
@@ -176,6 +177,7 @@ export function RoadmapView({
         <RoadmapItemModal
           ws={ws}
           product={product.slug}
+          productLocales={product.locales}
           item={editingItem}
           open={Boolean(editingItem)}
           onOpenChange={(open) => {

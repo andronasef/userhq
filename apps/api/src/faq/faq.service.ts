@@ -1,6 +1,6 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { and, eq, desc, asc, sql } from "drizzle-orm";
-import { DB, type Db, faqCategories, faqQuestions } from "@userhq/db";
+import { DB, type Db, faqCategories, faqQuestions, products } from "@userhq/db";
 import {
   generateKeyBetween,
   isValidRank,
@@ -42,6 +42,8 @@ export class FaqService {
         question: faqQuestions.question,
         answer: faqQuestions.answer,
         rank: faqQuestions.rank,
+        sourceLocale: faqQuestions.sourceLocale,
+        translations: faqQuestions.translations,
         createdAt: faqQuestions.createdAt,
         updatedAt: faqQuestions.updatedAt,
       })
@@ -58,6 +60,8 @@ export class FaqService {
         question: q.question,
         answer: q.answer as any,
         rank: q.rank,
+        sourceLocale: (q.sourceLocale as any) ?? "en",
+        translations: (q.translations as any) ?? {},
         createdAt: new Date(q.createdAt).toISOString(),
         updatedAt: new Date(q.updatedAt).toISOString(),
       });
@@ -164,6 +168,8 @@ export class FaqService {
           question: faqQuestions.question,
           answer: faqQuestions.answer,
           rank: faqQuestions.rank,
+          sourceLocale: faqQuestions.sourceLocale,
+          translations: faqQuestions.translations,
           createdAt: faqQuestions.createdAt,
           updatedAt: faqQuestions.updatedAt,
         })
@@ -186,6 +192,8 @@ export class FaqService {
           question: q.question,
           answer: q.answer as any,
           rank: q.rank,
+          sourceLocale: (q.sourceLocale as any) ?? "en",
+          translations: (q.translations as any) ?? {},
           createdAt: new Date(q.createdAt).toISOString(),
           updatedAt: new Date(q.updatedAt).toISOString(),
         })),
@@ -294,6 +302,14 @@ export class FaqService {
       rank = generateKeyBetween(highest?.rank ?? null, null);
     }
 
+    const [prod] = await this.db
+      .select({ locales: products.locales })
+      .from(products)
+      .where(eq(products.id, productId))
+      .limit(1);
+    const defaultLoc = (prod?.locales as any)?.defaultLocale ?? "en";
+    const sourceLocale = input.sourceLocale ?? defaultLoc;
+
     const [created] = await this.db
       .insert(faqQuestions)
       .values({
@@ -302,6 +318,8 @@ export class FaqService {
         question: input.question.trim(),
         answer: input.answer,
         rank,
+        sourceLocale,
+        translations: input.translations ?? {},
       })
       .returning();
 
@@ -311,6 +329,8 @@ export class FaqService {
       question: created.question,
       answer: created.answer as any,
       rank: created.rank,
+      sourceLocale: (created.sourceLocale as any) ?? "en",
+      translations: (created.translations as any) ?? {},
       createdAt: new Date(created.createdAt).toISOString(),
       updatedAt: new Date(created.updatedAt).toISOString(),
     };
@@ -346,6 +366,12 @@ export class FaqService {
     if (input.answer !== undefined) {
       updates.answer = input.answer;
     }
+    if (input.sourceLocale !== undefined) {
+      updates.sourceLocale = input.sourceLocale;
+    }
+    if (input.translations !== undefined) {
+      updates.translations = input.translations;
+    }
     if (input.categoryId !== undefined) {
       const [targetCat] = await this.db
         .select({ id: faqCategories.id })
@@ -376,6 +402,8 @@ export class FaqService {
       question: updated.question,
       answer: updated.answer as any,
       rank: updated.rank,
+      sourceLocale: (updated.sourceLocale as any) ?? "en",
+      translations: (updated.translations as any) ?? {},
       createdAt: new Date(updated.createdAt).toISOString(),
       updatedAt: new Date(updated.updatedAt).toISOString(),
     };

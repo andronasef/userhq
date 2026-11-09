@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface CommentActionsMenuProps {
   canEdit: boolean;
@@ -32,6 +33,7 @@ export function CommentActionsMenu({
   onStartEdit,
   onDelete,
 }: CommentActionsMenuProps): React.JSX.Element | null {
+  const { t } = useI18n();
   const [confirmOpen, setConfirmOpen] = React.useState(false);
 
   if (!canEdit && !canDelete) {
@@ -41,11 +43,11 @@ export function CommentActionsMenu({
   const isAdminCopy = viewerIsAdmin && !isAuthor;
   const dialogDescription = isAdminCopy
     ? "It disappears from the portal. You can restore it from the Deleted tab on the dashboard board."
-    : "It'll be removed from the conversation. This can't be undone.";
+    : t("ui.deleteCommentConfirmDesc");
 
   const handleConfirmDelete = async () => {
     await onDelete();
-    toast.success("Comment deleted");
+    toast.success(t("ui.commentDeleted"));
     const heading = document.getElementById("comments-heading");
     if (heading) {
       heading.tabIndex = -1;
@@ -70,7 +72,7 @@ export function CommentActionsMenu({
         <DropdownMenuContent align="end" sideOffset={4}>
           {canEdit && (
             <DropdownMenuItem onSelect={onStartEdit}>
-              Edit comment
+              {t("ui.editComment")}
             </DropdownMenuItem>
           )}
           {canEdit && canDelete && <DropdownMenuSeparator />}
@@ -79,7 +81,7 @@ export function CommentActionsMenu({
               className="text-destructive focus:text-destructive"
               onSelect={() => setConfirmOpen(true)}
             >
-              Delete comment
+              {t("ui.deleteComment")}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -88,10 +90,10 @@ export function CommentActionsMenu({
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title="Delete this comment?"
+        title={t("ui.deleteCommentTitle")}
         description={dialogDescription}
-        dismissLabel="Keep comment"
-        confirmLabel="Delete comment"
+        dismissLabel={t("ui.keepComment")}
+        confirmLabel={t("ui.deleteComment")}
         pendingLabel="Deleting…"
         onConfirm={handleConfirmDelete}
       />

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SupportedLocaleSchema } from "./i18n.js";
 import { RichTextDocSchema } from "./rich-text.js";
 
 export const CHANGELOG_TITLE_MIN = 3;
@@ -49,6 +50,13 @@ export const ChangelogTagInputSchema = z.object({
 });
 export type ChangelogTagInput = z.infer<typeof ChangelogTagInputSchema>;
 
+export const ChangelogTranslationSchema = z.object({
+  title: z.string().max(CHANGELOG_TITLE_MAX, { message: "title_length" }).optional(),
+  summary: z.string().max(500).nullable().optional(),
+  content: RichTextDocSchema.nullable().optional(),
+});
+export type ChangelogTranslation = z.infer<typeof ChangelogTranslationSchema>;
+
 export const AdminChangelogEntrySchema = z.object({
   id: z.string().uuid(),
   title: z.string(),
@@ -57,6 +65,8 @@ export const AdminChangelogEntrySchema = z.object({
   content: RichTextDocSchema,
   publishedAt: z.string().nullable(), // ISO string or null
   tags: z.array(ChangelogTagSchema),
+  sourceLocale: SupportedLocaleSchema.optional(),
+  translations: z.partialRecord(SupportedLocaleSchema, ChangelogTranslationSchema).default({}),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -76,6 +86,9 @@ export const PublicChangelogEntrySchema = z.object({
   content: RichTextDocSchema,
   publishedAt: z.string(), // Always non-null on public portal
   tags: z.array(ChangelogTagSchema),
+  sourceLocale: SupportedLocaleSchema.optional(),
+  resolvedLocale: SupportedLocaleSchema.optional(),
+  isFallback: z.boolean().optional(),
   createdAt: z.string(),
 });
 export type PublicChangelogEntry = z.infer<typeof PublicChangelogEntrySchema>;
@@ -95,6 +108,8 @@ export const CreateChangelogEntryInputSchema = z.object({
   content: RichTextDocSchema,
   tagIds: z.array(z.string().uuid()).default([]),
   publishedAt: z.string().nullable().optional(), // If provided upon creation
+  sourceLocale: SupportedLocaleSchema.optional(),
+  translations: z.partialRecord(SupportedLocaleSchema, ChangelogTranslationSchema).optional(),
 });
 export type CreateChangelogEntryInput = z.infer<typeof CreateChangelogEntryInputSchema>;
 
@@ -105,6 +120,8 @@ export const UpdateChangelogEntryInputSchema = z.object({
   content: RichTextDocSchema.optional(),
   tagIds: z.array(z.string().uuid()).optional(),
   publishedAt: z.string().nullable().optional(),
+  sourceLocale: SupportedLocaleSchema.optional(),
+  translations: z.partialRecord(SupportedLocaleSchema, ChangelogTranslationSchema).optional(),
 });
 export type UpdateChangelogEntryInput = z.infer<typeof UpdateChangelogEntryInputSchema>;
 

@@ -77,7 +77,7 @@ Secrets must never be committed to git, printed in CI logs, or shared in chat. C
 Recorded Brevo port: smtp-relay.brevo.com:587 (confirmed 2026-10-03 from the prod API container)
 
 > [!NOTE]
-> Rotating `BETTER_AUTH_SECRET` invalidates every unsubscribe and mute link already emailed; recipients then see the "This link isn't valid" page and can use account settings.
+> Rotating `BETTER_AUTH_SECRET` also invalidates pending guest badge attribution cookies. It invalidates every unsubscribe and mute link already emailed; recipients then see the "This link isn't valid" page and can use account settings.
 
 ### Browser push VAPID startup requirement
 

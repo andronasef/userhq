@@ -44,7 +44,7 @@ Behind the scenes, your product and engineering team manages ideas privately wit
 ### 🗳️ Customer Feedback Board
 - **Idea Submission & Upvoting**: Allow users to propose ideas, vote on features, and prevent duplicate requests.
 - **Categorization & Filtering**: Filter by categories and sort by *Top Voted* or *Newest*.
-- **Admin Moderation & Badges**: Engage directly with users in comment threads with official team badges.
+- **Admin Moderation & Badges**: Engage directly with users in comment threads with official team badges. Product user badges also support attribution rules, signed links and a product users directory; see the [user guide](docs/user-guide.md#recognize-product-users-with-badges).
 - **Status Badges**: Real-time status tags (*Under Review*, *Planned*, *In Progress*, *Shipped*).
 
 ### 🗺️ Dual-Layer Roadmap

@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Product user badges with exact or regex name/value attribution rules, signed links, a product users directory and manual grants/revocation.
+- Badge chips on post details and comments.
+
+### Security
+
+- Signed httpOnly guest attribution cookies, verified binding after sign-in, and removal of public self-claim.
+- Anchored, capped regex matching, throttled public attribution and timestamp checks for signed links.
+- Manual grants require membership or product participation; API keys receive no directory email.
+
+### Upgrade notes
+
+- Signed rules require `{param}_ts` and HMAC-SHA256 over `value + "." + timestamp`; update link generators.
+- Regex rules now match the entire input. Migration 0026 adds the parameter-name match mode; normal startup migration application is sufficient. No new environment variables.
+
 ## [v0.3.1] - 2026-11-09
 
 ### Added

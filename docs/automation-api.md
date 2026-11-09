@@ -50,8 +50,8 @@ Each key carries one or more scopes. Every endpoint requires exactly one scope. 
 | `export:read` | Export all posts, feedback items, and comments in bulk. |
 | `webhooks:read` | View webhook subscriptions and delivery logs. |
 | `webhooks:write` | Create, update, and delete webhook subscriptions and redeliver events. |
-| `settings:read` | View the product list and product settings, statuses and categories. |
-| `settings:write` | Change a product's feature switches (Board, Roadmap, Changelog, FAQ) and profile fields, and manage its statuses and categories. Statuses decide which ones appear on the public roadmap, so this scope changes what customers see. |
+| `settings:read` | View the product list, product settings, statuses, categories, badges, rules and product users directory. |
+| `settings:write` | Change a product's feature switches (Board, Roadmap, Changelog, FAQ) and profile fields, and manage its statuses, categories, badges, rules and manual badge grants. Statuses decide which ones appear on the public roadmap, so this scope changes what customers see. |
 | `faq:read` | View FAQ categories and questions, including those of a product whose FAQ module is switched off. |
 | `faq:write` | Create, edit, reorder and delete FAQ categories and questions. |
 
@@ -152,6 +152,15 @@ Restrictions are stored as product ids, while URLs use product slugs. An unrestr
 | `POST` | `/api/v1/workspaces/:ws/webhooks/:id/ping` | `webhooks:write` | Send a test event. |
 | `GET` | `/api/v1/workspaces/:ws/webhooks/:id/deliveries` | `webhooks:read` | List delivery attempts for a subscription. |
 | `POST` | `/api/v1/workspaces/:ws/webhooks/:id/deliveries/:deliveryId/redeliver` | `webhooks:write` | Redeliver one event. |
+| `GET` | `/api/v1/workspaces/:ws/products/:product/badges` | `settings:read` | List badges and rules. |
+| `POST` | `/api/v1/workspaces/:ws/products/:product/badges` | `settings:write` | Create a badge. |
+| `PATCH` | `/api/v1/workspaces/:ws/products/:product/badges/:badgeId` | `settings:write` | Update a badge. |
+| `DELETE` | `/api/v1/workspaces/:ws/products/:product/badges/:badgeId` | `settings:write` | Delete a badge. |
+| `POST` | `/api/v1/workspaces/:ws/products/:product/badges/:badgeId/rules` | `settings:write` | Add an attribution rule. |
+| `DELETE` | `/api/v1/workspaces/:ws/products/:product/badges/:badgeId/rules/:ruleId` | `settings:write` | Delete a rule. |
+| `GET` | `/api/v1/workspaces/:ws/products/:product/users` | `settings:read` | List product users. |
+| `POST` | `/api/v1/workspaces/:ws/products/:product/users/:userId/badges` | `settings:write` | Grant a badge to a member or participant. |
+| `DELETE` | `/api/v1/workspaces/:ws/products/:product/users/:userId/badges/:badgeId` | `settings:write` | Revoke a badge. |
 
 Not available to keys: API keys, webhook secret rotation, members, invites, workspace settings, product creation and deletion, and the account and portal routes. All of these return `403 api_key_route_forbidden`.
 
@@ -210,7 +219,7 @@ Branch on `code`, not on `message`.
 | 404 | `not_found` | Unknown workspace or product, or one that belongs to another workspace. |
 | 429 | `rate_limited` | Too many requests; see Rate limits. |
 
-Validation and domain failures (`validation_failed`, `post_not_found`, `comment_not_found`, `post_locked`, `edit_conflict`, `merge_target_invalid`, and similar) use the same body with their own codes.
+Validation and domain failures (`validation_failed`, `post_not_found`, `comment_not_found`, `post_locked`, `edit_conflict`, `merge_target_invalid`, `badge_conflict`, `badge_rule_invalid`, `badge_user_not_member`, and similar) use the same body with their own codes.
 
 ---
 
@@ -343,3 +352,14 @@ Events for a product whose Board (`post.*`, `comment.*`) or Changelog (`changelo
 ### Retention
 
 Delivery logs for delivered, failed and suppressed deliveries older than 30 days, measured from the last attempt (or creation if never attempted), are deleted by an hourly cleanup. Pending and in-flight deliveries are never deleted.
+
+
+## User badges
+
+Badges belong to one product. Create/update fields include `name`, `slug`, `description`, `color`, `textColor`, `icon`, `priority` and `isActive`. Higher priority displays first. Rule fields are `paramKey`, `keyMatchType` (exact or regex, default exact), `matchType` (exact or regex), `matchValue` and optional `secretToken`. Secrets are write-only: responses contain `hasSecretToken`, never the secret.
+
+Exact parameter names and incoming keys are limited to 100 characters, values to 256, regex patterns (including name patterns) to 200, and each product to 50 rules. Both regex matches cover the entire name/value. Names ending `_sig` or `_ts` are reserved. Signed links require `{key}_sig`, hex HMAC-SHA256 of `value + "." + {key}_ts` using the rule secret, and `{key}_ts`, Unix seconds. Links expire after 30 days; timestamps over five minutes in the future fail verification. Unsigned rules check matching only and do not prove a purchase.
+
+The users directory accepts `page` (default 1), `limit` (default 25, max 100), `search` and `badgeId`. It returns `{items,total,page,limit}`; each item has identity, badges, post/comment/vote counts, `firstSeenAt` and `lastActiveAt`. Email is null for API keys. First seen is earliest product activity or badge grant; last active is latest post/comment/vote, falling back to first seen. Manual grants accept `{badgeId,expiresAt?}` and require a workspace member or participant of this product. Unknown users and outsiders both receive 404 `badge_user_not_member`. Revoking a nonexistent product-scoped grant returns 404 `not_found`.
+
+The browser calls `POST /api/v1/portal/:ws/:product/badges/attribute` with `{searchParams:{pro_id:"example",pro_id_ts:"…",pro_id_sig:"…"}}`. Its response is `{matchedBadges:[],scrubKeys:[]}` (arrays contain matched public badge chips and caller-supplied keys to remove). Sessions are optional; API keys cannot use this route. It is limited to 60 calls per minute per caller, 50 parameters per call and 256 characters per value. Guests receive a signed httpOnly cookie; authenticated calls bind pending badges and clear it. There is no self-claim route. See the [protocol specification](specs/user-badging-engine.md) for cookie and URL handling.

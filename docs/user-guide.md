@@ -61,6 +61,8 @@ Use the edit or delete controls offered on content you own. Administrators also 
 
 For your own feedback updates, use the portal's **Activity** tab when signed in and the Feedback board is enabled. Notification delivery depends on your preferences, product availability and your current access.
 
+Badges can appear beside customer names on post details and comments.
+
 ## For administrators: set up your workspace
 
 ### Create and brand a product
@@ -72,6 +74,26 @@ For your own feedback updates, use the portal's **Activity** tab when signed in 
 5. Configure categories and statuses for the product. Categories organize requests; statuses describe the team's workflow. Status names can be customized, so your team need not use the example names in this guide.
 
 New products start with all four portal features enabled. Use **View portal** to check what customers can currently see.
+
+### Recognize product users with badges
+
+In product Settings, open **User Badges & Attribution**, choose **New badge**, and set its name, colors, icon and priority. Open **Rules** and use **Add Rule** to match a query parameter name and value, exactly or with a regular expression. Regexes match the whole input. An unsigned match does not verify a purchase. Use a rule secret for signed links, generated on your backend.
+
+For a rule matching `pro_id`, this Node backend fragment computes the timestamp and signature (read the secret from protected configuration; do not print it):
+
+```js
+import { createHmac } from "node:crypto";
+const value = "purchase-reference";
+const ts = String(Math.floor(Date.now() / 1000));
+const sig = createHmac("sha256", process.env.BADGE_RULE_SECRET)
+  .update(`${value}.${ts}`).digest("hex");
+const params = new URLSearchParams({ pro_id: value, pro_id_ts: ts, pro_id_sig: sig });
+// Append params to your product portal URL on the backend.
+```
+
+Signed links are valid for 30 days. Avoid sharing them: possession allows use within that window. The portal removes signature parameters before attribution and matched values after processing. A signed httpOnly cookie preserves guest attribution until sign-in, then is consumed. Rule secrets and matching rules are not exposed publicly.
+
+Open the product **Users** page to search/filter participants and inspect activity and assigned badges. Choose **Manage Badges**, then **Grant Badge** (optionally with an expiration date), or **Revoke badge**. Manual grants require an existing workspace member or participant of that product. Badges are product-specific. Inbox/requests badge filters are not yet available.
 
 ### Manage teammates
 

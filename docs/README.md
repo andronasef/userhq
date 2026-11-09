@@ -5,7 +5,7 @@ These guides describe the implemented platform and automation contracts on the c
 | Reader or task | Start here | Continue with |
 | --- | --- | --- |
 | Customer submitting feedback | [User guide](user-guide.md) | Board, votes, comments, roadmap, changelog and FAQ sections |
-| Workspace owner or admin | [User guide](user-guide.md) | Workspace inbox, product switches, publication, themes and notifications |
+| Workspace owner or admin | [User guide](user-guide.md) | Workspace inbox, product switches, user badges, publication, themes and notifications |
 | Developer automating a workspace | [API quickstart](api-quickstart.md) | [Canonical API reference](automation-api.md) for routes, scopes, filters, exports and webhooks |
 | LLM or coding assistant using the platform/API | [LLM guide](llm-guide.md) | [Repository LLM index](../llms.txt), API quickstart and reference |
 | Operator deploying or upgrading | [Deployment runbook](deploy.md) | [Release notes](../CHANGELOG.md), environment and migration requirements |

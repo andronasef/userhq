@@ -177,7 +177,7 @@ export function ChangelogTimelineItem({
       <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border/40">
         <EntityLogo src={productLogoUrl} name={productName} size={20} />
         <span className="text-xs text-muted-foreground font-medium">
-          Published by {productName}
+          {t("changelog.publishedBy", { name: productName })}
         </span>
       </div>
     </article>

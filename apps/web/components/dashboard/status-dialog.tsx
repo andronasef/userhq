@@ -172,7 +172,7 @@ function StatusDialogInner({
             <Field
               id="status-type"
               label={t("statuses.typeLabel")}
-              helper="The type decides how the status behaves, for example which posts count as done."
+              helper={t("statuses.typeHelper")}
               error={errors.type?.message}
             >
               <NativeSelect {...register("type")}>

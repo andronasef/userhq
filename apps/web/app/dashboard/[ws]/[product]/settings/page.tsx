@@ -13,6 +13,7 @@ import { ProductBrandingForm } from "./product-branding-form";
 import { ProductLocalesForm } from "./product-locales-form";
 import { ProductBadgesForm } from "./product-badges-form";
 import { ProductDangerZone } from "./product-danger-zone";
+import { getRequestLocale, getDictionary } from "../../../../../lib/i18n/server";
 
 interface ProductSettingsPageProps {
   params: Promise<{ ws: string; product: string }>;
@@ -35,6 +36,8 @@ export default async function ProductSettingsPage({
   params,
 }: ProductSettingsPageProps): Promise<React.JSX.Element | null> {
   const { ws, product } = await params;
+  const locale = await getRequestLocale();
+  const dict = await getDictionary(locale);
   const [productRes, wsRes, host] = await Promise.all([
     getProduct(ws, product),
     getWorkspace(ws),
@@ -58,8 +61,8 @@ export default async function ProductSettingsPage({
   return (
     <div className="space-y-8 max-w-3xl">
       <PageHeader
-        title="Product settings"
-        description="Changes appear on the public portal right away."
+        title={dict.settings.productSettingsTitle}
+        description={dict.settings.productSettingsDesc}
       />
 
       <ProductGeneralForm

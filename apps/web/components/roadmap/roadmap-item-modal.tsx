@@ -613,7 +613,7 @@ export function RoadmapItemModal({
                 {isLoadingPosts ? (
                   <div className="flex items-center justify-center p-4 text-xs text-muted-foreground">
                     <LoaderCircle className="size-4 animate-spin mr-2" />
-                    Loading linked posts…
+                    {t("roadmap.loadingLinkedPosts")}
                   </div>
                 ) : linkedPosts.length === 0 ? (
                   <div className="p-3 text-center text-xs text-muted-foreground border border-dashed border-border rounded-md">

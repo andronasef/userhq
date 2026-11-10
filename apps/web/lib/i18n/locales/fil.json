@@ -70,7 +70,10 @@
     "copyLink": "Kopyahin ang link",
     "uploading": "Nag-a-upload...",
     "deletedUser": "Tinanggal na user",
-    "anonymous": "Hindi nagpakilala"
+    "anonymous": "Hindi nagpakilala",
+    "byAuthor": "ng {author}",
+    "voteCount": "{count} boto",
+    "votesCount": "{count} mga boto"
   },
   "portal": {
     "submitFeedback": "Magbigay ng mungkahi",
@@ -103,7 +106,9 @@
     "emptyBody": "Hindi pa bukas ang {name} sa mga bisita sa ngayon. Mangyaring bumalik mamaya.",
     "visitCompany": "Bisitahin ang {company}",
     "backToCompany": "Bumalik sa {name}",
-    "activitySubtitle": "Mga post na ginawa mo, binoto, o kinomentohan para sa {name}."
+    "activitySubtitle": "Mga post na ginawa mo, binoto, o kinomentohan para sa {name}.",
+    "noProductsYet": "Wala pang mga produkto",
+    "noProductsYetDesc": "Hindi pa nagpa-publish ng anumang mga produkto ang {name}."
   },
   "dashboard": {
     "workspaces": "Mga Workspace",
@@ -347,8 +352,10 @@
     "moveItemError": "Hindi mailipat ang item. Suriin ang iyong koneksyon at subukan muli.",
     "linkedPostSuccess": "Naka-link ang #{number}",
     "deleteItemError": "Hindi matanggal ang item. Subukan muli.",
-    "loadingLinkedPosts": "Kinakarga ang mga naka-link na post…",
-    "unlinkPostAria": "I-unlink ang post #{number}"
+    "loadingLinkedPosts": "Naglo-load ng mga naka-link na post…",
+    "unlinkPostAria": "I-unlink ang post #{number}",
+    "alreadyLinked": "Naka-link na",
+    "linkedElsewhere": "Naka-link sa iba"
   },
   "changelog": {
     "title": "Changelog",
@@ -413,14 +420,15 @@
     "allUpdates": "Lahat ng mga update",
     "previewTitle": "Preview ng Changelog",
     "previewDesc": "Ito ay preview kung paano lilitaw ang release note na ito sa mga pampublikong mambabasa.",
-    "publishedBy": "Koponan ng {name}",
+    "publishedBy": "Inilathala ni {name}",
     "failedToUnpublish": "Nabigong i-unpublish ang entry",
     "scheduledNotice": "Mapanood/mababasa nang live sa portal sa petsa ng release nito",
     "tagNameRequired": "Kailangan ang pangalan ng tag",
     "failedToCreateTag": "Nabigong gumawa ng tag",
     "failedToDeleteTag": "Nabigong burahin ang tag",
     "deleteTagAria": "Burahin ang tag na {name}",
-    "noTagsYetHelp": "Wala pang mga tag. I-click ang \"Pamahalaan ang mga tag\" upang magdagdag ng mga tag."
+    "noTagsYetHelp": "Wala pang mga tag. I-click ang \"Pamahalaan ang mga tag\" upang magdagdag.",
+    "teamAttribution": "Koponan ng {name}"
   },
   "faq": {
     "title": "Mga Madalas Itanong (FAQ)",
@@ -756,7 +764,29 @@
     "typeToConfirm": "I-type ang {name} upang kumpirmahin",
     "deleteProductConfirmTitle": "Tanggalin ang {name}?",
     "deleteProductConfirmDesc": "Agad na mawawalan ng linya ang pampublikong portal nito, at hindi na magagamit muli ang URL nito. Hindi ito maaaring bawiin.",
-    "deletedSuccess": "Natanggal ang {name}"
+    "deletedSuccess": "Natanggal ang {name}",
+    "productSettingsTitle": "Mga setting ng produkto",
+    "productSettingsDesc": "Lalabas agad ang mga pagbabago sa pampublikong portal.",
+    "featureFeedbackBoardName": "Feedback board",
+    "featureFeedbackBoardDesc": "Ang mga customer ay nagpapadala ng mga ideya, bumoboto, at nagkokomento. Ang pag-off nito ay magpapahinto rin sa mga notification ng customer tungkol sa feedback.",
+    "featureRoadmapName": "Roadmap",
+    "featureRoadmapDesc": "Nakikita ng mga customer ang nakaplano at isinasagawa.",
+    "featureChangelogName": "Changelog",
+    "featureChangelogDesc": "Binabasa ng mga customer ang iyong release notes.",
+    "featureFaqName": "FAQ",
+    "featureFaqDesc": "Naghahanap ang mga customer ng mga sagot sa mga karaniwang katanungan.",
+    "allFeaturesOffWarning": "Kapag naka-off ang bawat feature, makakakita ang mga customer ng hindi available na page sa {url}.",
+    "keepVisible": "Panatilihing nakikita",
+    "hideAllConfirmTitle": "Itago ang lahat mula sa mga customer?",
+    "hideSingleConfirmTitle": "Itago ang {name} mula sa mga customer?",
+    "hideMultipleConfirmTitle": "Itago ang {count} mga feature mula sa mga customer?",
+    "hideAllConfirmDesc": "Makakakita ang mga customer ng hindi available na page sa halip na ang iyong portal. Napananatili ang iyong nilalaman, at maaari mong i-on muli ang mga feature anumang oras.",
+    "hideSingleConfirmDesc": "Hindi na makikita ng mga customer ang {name} o magbubukas ng mga link dito. Napananatili ang iyong nilalaman, at maaari mong i-on muli ang {name} anumang oras.",
+    "hideMultipleConfirmDesc": "Hindi na makikita ng mga customer ang {names}. Napananatili ang iyong nilalaman, at maaari mong i-on muli ang mga ito anumang oras.",
+    "hideBoardNotice": " Hihinto rin ang mga customer sa pagtanggap ng mga notification tungkol sa feedback. Ang mga notification para sa aktibidad habang naka-off ay hindi ipapadala sa ibang pagkakataon.",
+    "hideAllAction": "Itago ang lahat",
+    "hideSingleAction": "Itago ang {name}",
+    "hideMultipleAction": "Itago ang {count} mga feature"
   },
   "landing": {
     "heroHeading": "Nagsisimula ang mahuhusay na produkto sa pakikinig.",
@@ -834,7 +864,15 @@
     "searchPlaceholder": "Maghanap ng feedback...",
     "comments": "mga komento",
     "showcaseViews": "Mga View ng Showcase ng Produkto",
-    "interactivePreview": "Interactive na Preview ng Produkto"
+    "interactivePreview": "Interactive na Preview ng Produkto",
+    "faqQ1": "Paano makakakuha ang aming koponan ng imbitasyon sa UserHQ?",
+    "faqA1": "Ang paglikha ng workspace ay kasalukuyang invite-only sa aming preview period. Kung interesado ang iyong koponan na maglunsad ng portal, makipag-ugnayan sa Increasing Labs sa hello@increasinglab.com upang humiling ng maagang access.",
+    "faqQ2": "Paano gumagana ang pagboto sa mga pampublikong customer portal?",
+    "faqA2": "Nag-sign in ang mga customer gamit ang kanilang Google o GitHub account upang magbigay ng isang boto bawat post. Maaari nilang bawiin ang kanilang boto anumang oras, at makakatanggap sila ng mga awtomatikong update sa katayuan habang umuusad ang post sa roadmap.",
+    "faqQ3": "Maaari ba nating panatilihing pribado ang mga panloob na item sa roadmap ng koponan?",
+    "faqA3": "Oo. Nagbibigay ang UserHQ sa iyong koponan ng mga pribadong backlog board at mga draft na katayuan. Pipiliin mo nang eksakto kung aling mga item at katayuan ang nai-publish sa pampublikong portal at alin ang mananatiling panloob.",
+    "faqQ4": "Paano inaabisuhan ang mga subscriber kapag nai-publish ang isang entry sa changelog?",
+    "faqA4": "Kapag nag-publish ka ng entry sa changelog, nagpapadala ang UserHQ ng mga update sa email sa mga naka-subscribe na customer at sa lahat ng bumoto para sa mga naka-link na item sa roadmap, na awtomatikong nagsasara ng loop ng feedback."
   },
   "board": {
     "category": "Kategorya",
@@ -1268,7 +1306,8 @@
     "makeDefault": "Gawing default",
     "defaultStatusCannotBeDeleted": "Hindi maaaring tanggalin ang default na status",
     "needAtLeastOneStatus": "Kailangan ng produkto ng kahit isang status",
-    "showOnPublicRoadmapHelp": "Kapag may check, lilitaw ang mga item sa yugtong ito bilang column sa pampublikong roadmap ng iyong produkto."
+    "showOnPublicRoadmapHelp": "Kapag may check, lilitaw ang mga item sa yugtong ito bilang column sa pampublikong roadmap ng iyong produkto.",
+    "typeHelper": "Ang uri ay nagpapasya kung paano kumikilos ang katayuan, halimbawa kung aling mga post ang bibilangin bilang tapos na."
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1324,7 +1363,14 @@
     "antiSpoofingSecretLabel": "Anti-Spoofing HMAC Secret (Opsyonal)",
     "antiSpoofingSecretPlaceholder": "Ilagay ang secret token para sa pag-check ng HMAC-SHA256",
     "antiSpoofingSecretHelp": "Kapag nakatakda, isama ang parehong parameter ng signature at timestamp. Ang {sigParam} ay ang HMAC-SHA256 hex ng value + '.' + {tsParam}. Ang {tsParam} ay ang mga segundong Unix kung kailan nilagdaan ang link, valid nang 30 araw.",
-    "deleteRuleAria": "Tanggalin ang panuntunan"
+    "deleteRuleAria": "Tanggalin ang panuntunan",
+    "slugLabel": "Slug (natatanging pagkakakilanlan)",
+    "descriptionLabel": "Deskripsyon (panloob na tala)",
+    "textColorLabel": "Kulay ng Teksto",
+    "priorityLabel": "Priyoridad (Mas Mataas = Una)",
+    "slugPrefix": "slug:",
+    "priorityPrefix": "priyoridad:",
+    "hmacVerified": "Na-verify sa HMAC"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1490,10 +1536,11 @@
     "postsFound": "{count} mga post ang natagpuan",
     "noPostsMatch": "Walang post na tumutugma sa \"{query}\".",
     "chooseAnotherPost": "Pumili ng isa pang post",
-    "openPublicPortalPost": "Buksan ang pampublikong portal post",
+    "openPublicPortalPost": "Buksan ang post sa pampublikong portal",
     "statusLockedHelp": "Naka-lock ang status sa naka-link na roadmap item. Ilipat ang item sa roadmap upang baguhin ang status.",
     "editedSuffix": "· na-edit",
-    "publicNoteHelper": "Ipinapakita sa post kasama ang iyong pangalan."
+    "publicNoteHelper": "Ipinapakita sa post kasama ang iyong pangalan.",
+    "mergeConfirmNotice": "Ililipat ang mga boto at komento sa “{target}”. Ang mga taong bumoto sa pareho ay bibilangin nang isang beses. Ang link sa “{source}” ay magbubukas sa “{target}”. Hindi ito maaaring bawiin."
   },
   "productUsers": {
     "badgeGranted": "Naigawad ang badge",
@@ -1547,6 +1594,72 @@
     "copyResponse": "Kopyahin ang Tugon",
     "copyCode": "Kopyahin ang Code",
     "workspace": "Workspace",
-    "category": "Kategorya"
+    "category": "Kategorya",
+    "searchPlaceholder": "Maghanap ng mga endpoint ayon sa path, pandiwa, saklaw, o keyword...",
+    "scope": "Saklaw:",
+    "defaultPrefix": "Default:"
+  },
+  "devUpload": {
+    "title": "Pagsubok sa pag-upload",
+    "devOnly": "Dev lamang",
+    "description": "Sinusuri ang pipeline ng imahe sa kabuuan. Tumatanggap ng mga PNG, JPEG, WebP, at GIF file hanggang 2 MB. Ang bawat pag-upload ay na-convert sa WebP, binago ang laki sa maximum na 1600 px ang lapad, at tinanggal ang metadata. Ang mga animated na GIF ay nagpapanatili lamang ng kanilang unang frame.",
+    "imageFileLabel": "File ng imahe",
+    "fileTypesHelp": "PNG, JPEG, WebP, o GIF, hanggang 2 MB.",
+    "uploadImage": "I-upload ang imahe",
+    "signInAgain": "Mag-sign in muli",
+    "uploadComplete": "Kumpleto ang pag-upload",
+    "uploadSucceeded": "Matagumpay ang pag-upload",
+    "format": "Format",
+    "dimensions": "Mga Sukat",
+    "size": "Laki",
+    "url": "URL",
+    "copied": "Nakopya",
+    "copyUrl": "Kopyahin ang URL",
+    "noImageYet": "Wala pang na-upload na imahe",
+    "noImageDesc": "Pumili ng imahe at piliin ang I-upload ang imahe. Lalabas dito ang na-convert na WebP."
+  },
+  "privacy": {
+    "title": "Patakaran sa Privacy",
+    "updated": "Oktubre 23, 2026",
+    "intro": "Ang UserHQ ay pinatatakbo ng Increasing Labs. Ipinapaliwanag ng patakarang ito kung ano ang aming kinokolekta kapag ginagamit mo ang UserHQ, bakit, at ang mga pagpipilian na mayroon ka.",
+    "h2Collect": "Impormasyong kinokolekta namin",
+    "accountInfoTitle": "Impormasyon ng account.",
+    "accountInfoDesc": "Kapag nag-sign in ka gamit ang Google o GitHub natatanggap namin ang iyong pangalan, email address, at larawan sa profile. Hindi namin natatanggap ang iyong password.",
+    "contentSubmitTitle": "Nilalaman na iyong isinumite.",
+    "contentSubmitDesc": "Mga post ng feedback, komento, boto, at mga larawang ina-upload mo sa portal ng produkto.",
+    "deviceInfoTitle": "Impormasyon ng aparato.",
+    "deviceInfoDesc": "Pangunahing mga detalye ng browser at device (tulad ng browser at operating system) na naka-attach sa mga post at komento upang matulungan ang mga koponan ng produkto na kopyahin ang mga isyu.",
+    "cookiesTitle": "Mga cookie ng sesyon.",
+    "cookiesDesc": "Gumagamit kami ng cookie upang panatilihin kang naka-sign in. Hindi kami gumagamit ng mga cookie sa advertising o cross-site tracking.",
+    "h2Use": "Paano namin ito ginagamit",
+    "useDesc": "Upang patakbuhin ang serbisyo: i-authenticate ka, ipakita ang iyong mga post at komento, magpadala ng mga abiso tungkol sa aktibidad na sinusunod mo, at panatilihing ligtas ang serbisyo. Hindi namin ibinebenta ang iyong impormasyon.",
+    "h2WhoCanSee": "Sino ang makakakita nito",
+    "whoCanSeeDesc": "Ang mga post, komento, at ang iyong display name ay makikita ng iba sa portal ng produkto kung saan ka nag-post, at sa koponan ng produktong iyon. Ang iyong email address ay makikita ng koponan ng produkto kung saan ka nakikipag-ugnayan, ngunit hindi sa ibang mga gumagamit.",
+    "h2Providers": "Mga tagapagbigay ng serbisyo",
+    "providersDesc": "Gumagamit kami ng Google at GitHub para sa pag-sign in at Brevo upang maghatid ng email. Ang data ay nakaimbak sa mga server na pinatatakbo ng Increasing Labs.",
+    "h2Email": "Email",
+    "emailDesc": "Kasama sa mga email ng notification ang isang one-click na link sa pag-unsubscribe. Maaari pa ring ipadala ang mahahalagang email sa account.",
+    "h2Retention": "Pagpapanatili at pagtanggal",
+    "retentionDesc": "Itinatago namin ang iyong data habang aktibo ang iyong account. Maaari mong tanggalin ang iyong account mula sa iyong page ng account, na nag-aalis ng iyong personal na impormasyon; makipag-ugnayan sa amin kung kailangan mo ng tulong.",
+    "h2Contact": "Makipag-ugnayan",
+    "contactDesc": "Mga tanong o kahilingan:"
+  },
+  "terms": {
+    "title": "Mga Tuntunin ng Serbisyo",
+    "updated": "Oktubre 23, 2026",
+    "intro": "Sa pamamagitan ng paggamit ng UserHQ, na pinatatakbo ng Increasing Labs, sumasang-ayon ka sa mga tuntuning ito. Kung hindi ka sumasang-ayon, mangyaring huwag gamitin ang serbisyo.",
+    "h2Account": "Ang iyong account",
+    "accountDesc": "Nag-sign in ka gamit ang Google o GitHub at responsable ka sa aktibidad sa iyong account. Ang paggawa ng workspace ay sa pamamagitan ng imbitasyon.",
+    "h2Content": "Ang iyong nilalaman",
+    "contentDesc": "Pagmamay-ari mo ang iyong nai-post. Binibigyan mo kami at ang nauugnay na koponan ng produkto ng lisensya na i-host at ipakita ito bilang bahagi ng serbisyo. Huwag mag-post ng anumang labag sa batas o mapaminsala.",
+    "h2Acceptable": "Katanggap-tanggap na paggamit",
+    "acceptableDesc": "Huwag guluhin ang serbisyo, mag-probe para sa mga kahinaan nang walang pahintulot, o gamitin ito upang magpadala ng spam. Maaari naming alisin ang nilalaman o suspindihin ang mga account na lumalabag sa mga tuntuning ito.",
+    "h2Availability": "Availability",
+    "availabilityDesc": "Nagsusumikap kaming panatilihing tumatakbo ang UserHQ ngunit ibinibigay ito \"as is\" nang walang mga garantiya. Maaari naming baguhin o ihinto ang mga feature anumang oras.",
+    "h2Liability": "Pananagutan",
+    "liabilityDesc": "Sa lawak na pinahihintulutan ng batas, ang Increasing Labs ay hindi mananagot para sa hindi direkta o kahihinatnang mga pinsala na nagmumula sa iyong paggamit ng serbisyo.",
+    "h2Changes": "Mga Pagbabago",
+    "changesDesc": "Maaari naming i-update ang mga tuntuning ito; ang patuloy na paggamit pagkatapos ng pagbabago ay nangangahulugang tinatanggap mo ito. Tingnan din ang aming",
+    "h2Contact": "Makipag-ugnayan"
   }
 }

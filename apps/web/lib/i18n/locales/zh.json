@@ -70,7 +70,10 @@
     "copyLink": "复制链接",
     "uploading": "上传中...",
     "deletedUser": "已删除的用户",
-    "anonymous": "匿名"
+    "anonymous": "匿名",
+    "byAuthor": "由 {author} 提供",
+    "voteCount": "{count} 票",
+    "votesCount": "{count} 票"
   },
   "portal": {
     "submitFeedback": "提交反馈",
@@ -103,7 +106,9 @@
     "emptyBody": "{name} 目前未对访问者开放。请稍后查看。",
     "visitCompany": "访问 {company}",
     "backToCompany": "返回 {name}",
-    "activitySubtitle": "您为 {name} 创建、点赞或评论过的帖子。"
+    "activitySubtitle": "您为 {name} 创建、点赞或评论过的帖子。",
+    "noProductsYet": "暂无产品",
+    "noProductsYetDesc": "{name} 尚未发布任何产品。"
   },
   "dashboard": {
     "workspaces": "工作区",
@@ -348,7 +353,9 @@
     "linkedPostSuccess": "已关联 #{number}",
     "deleteItemError": "无法删除条目。请重试。",
     "loadingLinkedPosts": "正在加载关联帖子…",
-    "unlinkPostAria": "取消关联帖子 #{number}"
+    "unlinkPostAria": "取消关联帖子 #{number}",
+    "alreadyLinked": "已关联",
+    "linkedElsewhere": "已在别处关联"
   },
   "changelog": {
     "title": "更新日志",
@@ -413,14 +420,15 @@
     "allUpdates": "所有更新",
     "previewTitle": "更新日志预览",
     "previewDesc": "这是该发布说明在公开读者端展示效果的预览。",
-    "publishedBy": "{name} 团队",
+    "publishedBy": "由 {name} 发布",
     "failedToUnpublish": "撤回发布条目失败",
     "scheduledNotice": "将在发布日期当天于门户上线",
     "tagNameRequired": "标签名称为必填项",
     "failedToCreateTag": "创建标签失败",
     "failedToDeleteTag": "删除标签失败",
     "deleteTagAria": "删除标签 {name}",
-    "noTagsYetHelp": "尚无标签。点击“管理标签”以添加标签。"
+    "noTagsYetHelp": "暂无标签。点击“管理标签”即可添加新标签。",
+    "teamAttribution": "{name} 团队"
   },
   "faq": {
     "title": "常见问题 (FAQ)",
@@ -756,7 +764,29 @@
     "typeToConfirm": "输入 {name} 进行确认",
     "deleteProductConfirmTitle": "删除 {name}？",
     "deleteProductConfirmDesc": "其公共门户将立即下线，且其 URL 无法再次使用。此操作无法撤消。",
-    "deletedSuccess": "{name} 已删除"
+    "deletedSuccess": "{name} 已删除",
+    "productSettingsTitle": "产品设置",
+    "productSettingsDesc": "更改将立即同步显示在公开门户中。",
+    "featureFeedbackBoardName": "反馈看板",
+    "featureFeedbackBoardDesc": "客户可以提交想法、投票并发表评论。将其关闭也会停止向客户发送有关反馈的通知。",
+    "featureRoadmapName": "路线图",
+    "featureRoadmapDesc": "客户可以查看已规划和进行中的功能。",
+    "featureChangelogName": "更新日志",
+    "featureChangelogDesc": "客户可以阅读您的版本发布说明。",
+    "featureFaqName": "常见问题",
+    "featureFaqDesc": "客户可以搜索常见问题的解答。",
+    "allFeaturesOffWarning": "当关闭所有功能时，客户在 {url} 将看到不可用页面。",
+    "keepVisible": "保持可见",
+    "hideAllConfirmTitle": "向客户隐藏所有功能？",
+    "hideSingleConfirmTitle": "向客户隐藏 {name}？",
+    "hideMultipleConfirmTitle": "向客户隐藏 {count} 项功能？",
+    "hideAllConfirmDesc": "客户将看到不可用页面而非您的门户。您的内容将被完整保留，您可以随时重新开启功能。",
+    "hideSingleConfirmDesc": "客户将无法再看到 {name} 或打开相关链接。您的内容将被完整保留，您可以随时重新开启 {name}。",
+    "hideMultipleConfirmDesc": "客户将无法再看到 {names}。您的内容将被完整保留，您可以随时重新开启它们。",
+    "hideBoardNotice": " 客户也将停止接收有关反馈的通知。关闭期间产生的新活动通知不会在稍后补发。",
+    "hideAllAction": "隐藏全部",
+    "hideSingleAction": "隐藏 {name}",
+    "hideMultipleAction": "隐藏 {count} 项功能"
   },
   "landing": {
     "heroHeading": "优秀的优秀产品始于认真倾听。",
@@ -834,7 +864,15 @@
     "searchPlaceholder": "搜索反馈...",
     "comments": "条评论",
     "showcaseViews": "产品展示视图",
-    "interactivePreview": "交互式产品预览"
+    "interactivePreview": "交互式产品预览",
+    "faqQ1": "我们的团队如何获取 UserHQ 的邀请？",
+    "faqA1": "在目前的公测预览期间，工作区创建仅限受邀开放。如果您的团队有意上线专属客户门户，请联系 Increasing Labs (hello@increasinglab.com) 申请早期体验资格。",
+    "faqQ2": "公开客户门户的投票机制是如何运行的？",
+    "faqA2": "客户可以使用其 Google 或 GitHub 账号登录，每个反馈帖子限投一票。客户可随时撤回投票，并随着帖子在路线图中的推进自动接收状态更新通知。",
+    "faqQ3": "我们可以将团队内部的路线图事项设为私密吗？",
+    "faqA3": "可以。UserHQ 为您的团队提供了私密积压看板和草稿状态。您可以自由决定哪些项目与状态向公开门户发布，哪些仅保留在内部。",
+    "faqQ4": "发布更新日志时如何通知订阅客户？",
+    "faqA4": "当您发布更新日志条目时，UserHQ 会向订阅的客户以及所有曾为关联路线图事项投票的用户发送邮件通知，全自动完成反馈闭环。"
   },
   "board": {
     "category": "类别",
@@ -1268,7 +1306,8 @@
     "makeDefault": "设为默认",
     "defaultStatusCannotBeDeleted": "无法删除默认状态",
     "needAtLeastOneStatus": "产品至少需要一个状态",
-    "showOnPublicRoadmapHelp": "勾选后，该阶段的条目将作为一列显示在公开产品路线图上。"
+    "showOnPublicRoadmapHelp": "勾选后，该阶段的条目将作为一列显示在公开产品路线图上。",
+    "typeHelper": "状态类型决定其行为方式，例如哪些帖子会被标记为已完成。"
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1324,7 +1363,14 @@
     "antiSpoofingSecretLabel": "防伪造 HMAC 密钥（可选）",
     "antiSpoofingSecretPlaceholder": "输入用于 HMAC-SHA256 校验的密钥令牌",
     "antiSpoofingSecretHelp": "设置后，请同时包含签名和时间戳参数。{sigParam} 是 value + '.' + {tsParam} 的 HMAC-SHA256 十六进制值。{tsParam} 是签署链接时的 Unix 秒数，有效期 30 天。",
-    "deleteRuleAria": "删除规则"
+    "deleteRuleAria": "删除规则",
+    "slugLabel": "标识符 Slug (唯一识别码)",
+    "descriptionLabel": "描述 (内部备注)",
+    "textColorLabel": "文本颜色",
+    "priorityLabel": "优先级 (数值越高 = 越前)",
+    "slugPrefix": "slug:",
+    "priorityPrefix": "优先级:",
+    "hmacVerified": "已通过 HMAC 验证"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1490,10 +1536,11 @@
     "postsFound": "找到 {count} 篇帖子",
     "noPostsMatch": "没有匹配“{query}”的帖子。",
     "chooseAnotherPost": "选择另一篇帖子",
-    "openPublicPortalPost": "打开公开门户帖子",
+    "openPublicPortalPost": "在公开门户中打开帖子",
     "statusLockedHelp": "状态已锁定至关联的路线图条目。请在路线图上移动该条目以更改状态。",
     "editedSuffix": "· 已编辑",
-    "publicNoteHelper": "与您的姓名一起显示在帖子中。"
+    "publicNoteHelper": "与您的姓名一起显示在帖子中。",
+    "mergeConfirmNotice": "投票和评论将迁移合并至“{target}”。在两处均投票的用户仅计为一票。访问“{source}”的链接将自动重定向打开“{target}”。此操作无法撤销。"
   },
   "productUsers": {
     "badgeGranted": "徽章已授予",
@@ -1547,6 +1594,72 @@
     "copyResponse": "复制响应",
     "copyCode": "复制代码",
     "workspace": "工作区",
-    "category": "分类"
+    "category": "分类",
+    "searchPlaceholder": "按路径、请求方式、权限范围或关键词搜索接口...",
+    "scope": "权限范围:",
+    "defaultPrefix": "默认值:"
+  },
+  "devUpload": {
+    "title": "上传测试",
+    "devOnly": "仅开发模式",
+    "description": "端到端测试图像上传与处理流水线。支持最大 2 MB 的 PNG、JPEG、WebP 和 GIF 文件。所有上传文件均自动转换为 WebP 格式，最大宽度限制为 1600 像素并剥离元数据。动图 GIF 仅保留第一帧。",
+    "imageFileLabel": "图像文件",
+    "fileTypesHelp": "PNG, JPEG, WebP 或 GIF，最大 2 MB。",
+    "uploadImage": "上传图像",
+    "signInAgain": "重新登录",
+    "uploadComplete": "上传完成",
+    "uploadSucceeded": "上传成功",
+    "format": "格式",
+    "dimensions": "尺寸",
+    "size": "大小",
+    "url": "URL",
+    "copied": "已复制",
+    "copyUrl": "复制 URL",
+    "noImageYet": "尚未上传图像",
+    "noImageDesc": "选择一张图片并点击“上传图像”，转换后的 WebP 图像将显示在这里。"
+  },
+  "privacy": {
+    "title": "隐私政策",
+    "updated": "2026年10月23日",
+    "intro": "UserHQ 由 Increasing Labs 运营。本政策阐明您在使用 UserHQ 时我们收集的信息、原因以及您享有的选择权。",
+    "h2Collect": "我们收集的信息",
+    "accountInfoTitle": "账户信息。",
+    "accountInfoDesc": "当您使用 Google 或 GitHub 登录时，我们会接收您的姓名、电子邮件地址和个人资料头像。我们不会接收您的密码。",
+    "contentSubmitTitle": "您提交的内容。",
+    "contentSubmitDesc": "您上传到产品门户的反馈帖子、评论、投票和图片。",
+    "deviceInfoTitle": "设备信息。",
+    "deviceInfoDesc": "附加在帖子和评论中的基础浏览器与设备详细信息（例如浏览器类型和操作系统），帮助产品团队重现问题。",
+    "cookiesTitle": "会话 Cookie。",
+    "cookiesDesc": "我们使用 Cookie 保持您的登录状态。我们不使用任何广告或跨站追踪 Cookie。",
+    "h2Use": "我们如何使用信息",
+    "useDesc": "用于运营服务：验证您的身份、展示您的帖子和评论、发送您关注动态的通知并确保系统安全。我们绝不出售您的个人信息。",
+    "h2WhoCanSee": "信息的可见范围",
+    "whoCanSeeDesc": "您发布的帖子、评论及显示昵称对该产品门户的其他用户以及产品团队公开可见。您的邮箱地址仅对该产品团队可见，对其他用户保密。",
+    "h2Providers": "服务提供商",
+    "providersDesc": "我们使用 Google 和 GitHub 进行身份验证，使用 Brevo 发送电子邮件。数据存储在由 Increasing Labs 运营的服务器上。",
+    "h2Email": "电子邮件",
+    "emailDesc": "通知邮件均包含一键退订链接。重要的账户必要邮件仍可能正常发送。",
+    "h2Retention": "数据保留与删除",
+    "retentionDesc": "在您的账户处于活跃状态期间我们将保留您的数据。您可以随时在账户设置页面删除账户以销毁个人信息；如需协助请联系我们。",
+    "h2Contact": "联系我们",
+    "contactDesc": "疑问或请求："
+  },
+  "terms": {
+    "title": "服务条款",
+    "updated": "2026年10月23日",
+    "intro": "使用由 Increasing Labs 运营的 UserHQ，即表示您同意本条款。如不同意，请勿使用本服务。",
+    "h2Account": "您的账户",
+    "accountDesc": "您使用 Google 或 GitHub 登录，并对该账户下的所有操作承担责任。工作区创建仅限邀请开放。",
+    "h2Content": "您的内容",
+    "contentDesc": "您保留对发布内容的全部所有权。您授予我们及相关产品团队托管和展示该内容的许可。禁止发布任何违法、侵权或恶意内容。",
+    "h2Acceptable": "合规使用",
+    "acceptableDesc": "不得干扰服务正常运行、未经授权探测漏洞、大规模爬取数据或发送垃圾信息。违规账户可能会被暂停或终止。",
+    "h2Availability": "服务可用性",
+    "availabilityDesc": "我们全力保障 UserHQ 的稳定运行，但服务按“现状”提供，不作任何明示或默示保证。我们可随时调整或下线功能。",
+    "h2Liability": "责任限制",
+    "liabilityDesc": "在法律允许的最大范围内，Increasing Labs 不对因使用本服务引起的任何间接或连带损失承担责任。",
+    "h2Changes": "条款变更",
+    "changesDesc": "我们可能会更新本条款；在变更后继续使用本服务即视为接受新条款。另请参阅我们的",
+    "h2Contact": "联系我们"
   }
 }

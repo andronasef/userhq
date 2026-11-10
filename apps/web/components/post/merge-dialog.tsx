@@ -237,7 +237,9 @@ export function MergeDialog({
                   &ldquo;{post.title}&rdquo;
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  {post.voteCount} {post.voteCount === 1 ? "vote" : "votes"}
+                  {post.voteCount === 1
+                    ? t("common.voteCount", { count: post.voteCount })
+                    : t("common.votesCount", { count: post.voteCount })}
                 </div>
               </div>
 
@@ -251,8 +253,9 @@ export function MergeDialog({
                     &ldquo;{selectedTarget.title}&rdquo;
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    {selectedTarget.voteCount}{" "}
-                    {selectedTarget.voteCount === 1 ? "vote" : "votes"}
+                    {selectedTarget.voteCount === 1
+                      ? t("common.voteCount", { count: selectedTarget.voteCount })
+                      : t("common.votesCount", { count: selectedTarget.voteCount })}
                   </div>
                 </div>
               )}
@@ -260,10 +263,10 @@ export function MergeDialog({
 
             {selectedTarget && (
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Votes and comments move to &ldquo;{selectedTarget.title}&rdquo;.
-                People who voted on both are counted once. The link to &ldquo;
-                {post.title}&rdquo; will open &ldquo;{selectedTarget.title}
-                &rdquo; instead. This can&rsquo;t be undone.
+                {t("posts.mergeConfirmNotice", {
+                  target: selectedTarget.title,
+                  source: post.title,
+                })}
               </p>
             )}
 

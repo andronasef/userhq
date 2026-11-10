@@ -165,7 +165,7 @@ export function FaqCategoryItem({
         >
           {category.questions.length === 0 ? (
             <div className="border border-dashed border-border/80 rounded-md p-6 text-center text-xs text-muted-foreground flex flex-col items-center justify-center gap-1.5">
-              <span>No questions in this category yet.</span>
+              <span>{t("faq.noQuestionsInCategory")}</span>
               <Button
                 type="button"
                 variant="ghost"

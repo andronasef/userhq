@@ -123,41 +123,6 @@ const ROADMAP_COLUMNS = [
   },
 ];
 
-const FAQ_ITEMS: { question: string; answer: React.ReactNode }[] = [
-  {
-    question: "How can our team get an invitation to UserHQ?",
-    answer: (
-      <span>
-        Workspace creation is currently invite-only during our preview period. If your team is interested in launching a portal, contact{" "}
-        <a
-          href="https://increasinglabs.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-medium text-foreground underline underline-offset-2 hover:text-[var(--primary-text)] transition-colors"
-        >
-          Increasing Labs
-        </a>{" "}
-        at hello@increasinglab.com to request early access.
-      </span>
-    ),
-  },
-  {
-    question: "How does voting work on public customer portals?",
-    answer:
-      "Customers sign in with their Google or GitHub account to cast one vote per post. They can withdraw their vote anytime, and they receive automated status updates as the post progresses through the roadmap.",
-  },
-  {
-    question: "Can we keep internal team roadmap items private?",
-    answer:
-      "Yes. UserHQ gives your team private backlog boards and draft statuses. You choose exactly which items and statuses are published to the public portal and which remain internal.",
-  },
-  {
-    question: "How are subscribers notified when a changelog entry is published?",
-    answer:
-      "When you publish a changelog entry, UserHQ sends email updates to subscribed customers and everyone who voted for linked roadmap items, closing the feedback loop automatically.",
-  },
-];
-
 export function ProductShowcase(): React.JSX.Element {
   const { t } = useI18n();
   const [activeTab, setActiveTab] = React.useState<ShowcaseTab>("feedback");
@@ -170,6 +135,25 @@ export function ProductShowcase(): React.JSX.Element {
   const [selectedCategory, setSelectedCategory] = React.useState<string>("All");
   const [subscribed, setSubscribed] = React.useState<boolean>(false);
   const [openFaqIndex, setOpenFaqIndex] = React.useState<number | null>(0);
+
+  const faqItems = [
+    {
+      question: t("showcase.faqQ1"),
+      answer: t("showcase.faqA1"),
+    },
+    {
+      question: t("showcase.faqQ2"),
+      answer: t("showcase.faqA2"),
+    },
+    {
+      question: t("showcase.faqQ3"),
+      answer: t("showcase.faqA3"),
+    },
+    {
+      question: t("showcase.faqQ4"),
+      answer: t("showcase.faqA4"),
+    },
+  ];
 
   const toggleVote = (id: string) => {
     const isVoted = !!votedPosts[id];
@@ -448,7 +432,7 @@ export function ProductShowcase(): React.JSX.Element {
                   v2.4.0
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Published October 2026
+                  {t("showcase.publishedDate")}
                 </span>
               </div>
               <button
@@ -518,7 +502,7 @@ export function ProductShowcase(): React.JSX.Element {
             </div>
 
             <div className="flex flex-col divide-y divide-border rounded-lg border border-border bg-card overflow-hidden">
-              {FAQ_ITEMS.map((item, idx) => {
+              {faqItems.map((item, idx) => {
                 const isOpen = openFaqIndex === idx;
                 return (
                   <div key={item.question} className="flex flex-col">

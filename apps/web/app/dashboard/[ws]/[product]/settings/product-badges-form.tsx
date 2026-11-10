@@ -251,10 +251,10 @@ function ProductBadgesFormInner({
                 <div className="flex items-center gap-2">
                   <BadgeChip badge={badge} />
                   <span className="text-xs font-mono text-muted-foreground">
-                    slug: {badge.slug}
+                    {t("badges.slugPrefix")} {badge.slug}
                   </span>
                   <span className="text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground">
-                    priority: {badge.priority}
+                    {t("badges.priorityPrefix")} {badge.priority}
                   </span>
                 </div>
                 {badge.description && (
@@ -282,7 +282,7 @@ function ProductBadgesFormInner({
                           : rule.matchValue}
                         {rule.hasSecretToken && (
                           <span
-                            title="HMAC verified"
+                            title={t("badges.hmacVerified")}
                             className="text-foreground font-bold"
                           >
                             *
@@ -386,7 +386,7 @@ function ProductBadgesFormInner({
                 htmlFor="badge-slug"
                 className="text-sm font-semibold text-foreground"
               >
-                Slug (unique identifier)
+                {t("badges.slugLabel")}
               </label>
               <Input
                 id="badge-slug"
@@ -402,7 +402,7 @@ function ProductBadgesFormInner({
                 htmlFor="badge-desc"
                 className="text-sm font-semibold text-foreground"
               >
-                Description (internal note)
+                {t("badges.descriptionLabel")}
               </label>
               <Input
                 id="badge-desc"
@@ -441,7 +441,7 @@ function ProductBadgesFormInner({
                   htmlFor="badge-text-color"
                   className="text-sm font-semibold text-foreground"
                 >
-                  Text Color
+                  {t("badges.textColorLabel")}
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -486,7 +486,7 @@ function ProductBadgesFormInner({
                   htmlFor="badge-priority"
                   className="text-sm font-semibold text-foreground"
                 >
-                  Priority (Higher = First)
+                  {t("badges.priorityLabel")}
                 </label>
                 <Input
                   id="badge-priority"

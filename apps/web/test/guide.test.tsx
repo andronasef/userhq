@@ -203,8 +203,8 @@ describe("GuideView Rubix-style documentation", () => {
     expect(html).toContain("مستعرض API التفاعلي");
     expect(html).toContain("الـ Webhooks والتحقق من توقيع HMAC");
 
-    // Interactive Swagger explorer still embedded in Arabic view
-    expect(html).toContain("Search endpoints by path, verb, scope, or keyword");
+    // Interactive Swagger explorer embedded in Arabic view
+    expect(html).toContain("البحث في نقاط النهاية");
   });
 
   it("renders localized guide across all 13 supported locales", () => {

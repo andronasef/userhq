@@ -134,7 +134,7 @@ export function RoadmapView({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <label htmlFor="filter-assignee" className="sr-only">
-            Filter by assignee
+            {t("roadmap.filterByAssignee")}
           </label>
           <NativeSelect
             id="filter-assignee"

@@ -70,7 +70,10 @@
     "copyLink": "Link kopieren",
     "uploading": "Wird hochgeladen...",
     "deletedUser": "Gelöschter Benutzer",
-    "anonymous": "Anonym"
+    "anonymous": "Anonym",
+    "byAuthor": "von {author}",
+    "voteCount": "{count} Stimme",
+    "votesCount": "{count} Stimmen"
   },
   "portal": {
     "submitFeedback": "Idee einreichen",
@@ -103,7 +106,9 @@
     "emptyBody": "{name} ist derzeit nicht für Besucher geöffnet. Bitte schauen Sie später wieder vorbei.",
     "visitCompany": "{company} besuchen",
     "backToCompany": "Zurück zu {name}",
-    "activitySubtitle": "Beiträge, die Sie für {name} erstellt, bewertet oder kommentiert haben."
+    "activitySubtitle": "Beiträge, die Sie für {name} erstellt, bewertet oder kommentiert haben.",
+    "noProductsYet": "Noch keine Produkte",
+    "noProductsYetDesc": "{name} hat noch keine Produkte veröffentlicht."
   },
   "dashboard": {
     "workspaces": "Arbeitsbereiche",
@@ -348,7 +353,9 @@
     "linkedPostSuccess": "#{number} verknüpft",
     "deleteItemError": "Element konnte nicht gelöscht werden. Bitte erneut versuchen.",
     "loadingLinkedPosts": "Verknüpfte Beiträge werden geladen…",
-    "unlinkPostAria": "Verknüpfung von Beitrag #{number} aufheben"
+    "unlinkPostAria": "Verknüpfung von Beitrag #{number} aufheben",
+    "alreadyLinked": "Bereits verknüpft",
+    "linkedElsewhere": "Anderweitig verknüpft"
   },
   "changelog": {
     "title": "Changelog",
@@ -413,14 +420,15 @@
     "allUpdates": "Alle Aktualisierungen",
     "previewTitle": "Changelog-Vorschau",
     "previewDesc": "Dies ist eine Vorschau, wie dieser Versionshinweis für öffentliche Leser angezeigt wird.",
-    "publishedBy": "{name}-Team",
+    "publishedBy": "Veröffentlicht von {name}",
     "failedToUnpublish": "Eintrag konnte nicht zurückgezogen werden",
     "scheduledNotice": "Wird am Veröffentlichungsdatum im Portal freigeschaltet",
     "tagNameRequired": "Tag-Name ist erforderlich",
     "failedToCreateTag": "Tag konnte nicht erstellt werden",
     "failedToDeleteTag": "Tag konnte nicht gelöscht werden",
     "deleteTagAria": "Tag {name} löschen",
-    "noTagsYetHelp": "Noch keine Tags vorhanden. Klicken Sie auf „Tags verwalten“, um Tags hinzuzufügen."
+    "noTagsYetHelp": "Noch keine Tags. Klicken Sie auf \"Tags verwalten\", um Tags hinzuzufügen.",
+    "teamAttribution": "Team {name}"
   },
   "faq": {
     "title": "Häufig gestellte Fragen (FAQ)",
@@ -475,7 +483,7 @@
     "categoryOptions": "Kategorieoptionen",
     "faqCategoriesNav": "FAQ-Kategorien",
     "questionLinkCopied": "Fragelink kopiert",
-    "noQuestionsInCategory": "Noch keine Fragen in dieser Kategorie vorhanden.",
+    "noQuestionsInCategory": "Noch keine Fragen in dieser Kategorie.",
     "detailedAnswerPlaceholder": "Schreiben Sie die detaillierte Antwort hier...",
     "writeAnswerInLocale": "Antwort auf {locale} verfassen...",
     "reorderCategoryError": "FAQ-Kategorie konnte nicht neu geordnet werden. Verbindung prüfen und erneut versuchen.",
@@ -756,7 +764,29 @@
     "typeToConfirm": "Geben Sie {name} ein, um zu bestätigen",
     "deleteProductConfirmTitle": "{name} löschen?",
     "deleteProductConfirmDesc": "Das öffentliche Portal geht sofort offline und die URL kann nicht wiederverwendet werden. Dies kann nicht rückgängig gemacht werden.",
-    "deletedSuccess": "{name} gelöscht"
+    "deletedSuccess": "{name} gelöscht",
+    "productSettingsTitle": "Produkteinstellungen",
+    "productSettingsDesc": "Änderungen werden sofort im öffentlichen Portal sichtbar.",
+    "featureFeedbackBoardName": "Feedback-Board",
+    "featureFeedbackBoardDesc": "Kunden reichen Ideen ein, stimmen ab und kommentieren. Das Ausschalten stoppt auch Kundenbenachrichtigungen zu Feedback.",
+    "featureRoadmapName": "Roadmap",
+    "featureRoadmapDesc": "Kunden sehen, was geplant und in Arbeit ist.",
+    "featureChangelogName": "Changelog",
+    "featureChangelogDesc": "Kunden lesen Ihre Versionshinweise.",
+    "featureFaqName": "FAQ",
+    "featureFaqDesc": "Kunden finden Antworten auf häufige Fragen.",
+    "allFeaturesOffWarning": "Wenn alle Funktionen deaktiviert sind, sehen Kunden eine Nicht-verfügbar-Seite unter {url}.",
+    "keepVisible": "Sichtbar lassen",
+    "hideAllConfirmTitle": "Alles vor Kunden verbergen?",
+    "hideSingleConfirmTitle": "{name} vor Kunden verbergen?",
+    "hideMultipleConfirmTitle": "{count} Funktionen vor Kunden verbergen?",
+    "hideAllConfirmDesc": "Kunden sehen anstelle Ihres Portals eine Nicht-verfügbar-Seite. Ihre Inhalte bleiben erhalten und Sie können Funktionen jederzeit wieder aktivieren.",
+    "hideSingleConfirmDesc": "Kunden können {name} nicht mehr sehen oder Links dazu öffnen. Ihre Inhalte bleiben erhalten und Sie können {name} jederzeit wieder aktivieren.",
+    "hideMultipleConfirmDesc": "Kunden werden {names} nicht mehr sehen. Ihre Inhalte bleiben erhalten und Sie können sie jederzeit wieder aktivieren.",
+    "hideBoardNotice": " Kunden erhalten auch keine Benachrichtigungen mehr zu Feedback. Benachrichtigungen für Aktivitäten während der Deaktivierung werden nicht nachgesendet.",
+    "hideAllAction": "Alles verbergen",
+    "hideSingleAction": "{name} verbergen",
+    "hideMultipleAction": "{count} Funktionen verbergen"
   },
   "landing": {
     "heroHeading": "Gute Produkte beginnen mit Zuhören.",
@@ -834,7 +864,15 @@
     "searchPlaceholder": "Feedback suchen...",
     "comments": "Kommentare",
     "showcaseViews": "Produkt-Showcase-Ansichten",
-    "interactivePreview": "Interaktive Produktvorschau"
+    "interactivePreview": "Interaktive Produktvorschau",
+    "faqQ1": "Wie kann unser Team eine Einladung zu UserHQ erhalten?",
+    "faqA1": "Die Erstellung von Arbeitsbereichen ist während der Vorschauphase derzeit nur auf Einladung möglich. Wenn Ihr Team an einem Portal interessiert ist, wenden Sie sich an Increasing Labs unter hello@increasinglab.com, um Vorabzugang anzufragen.",
+    "faqQ2": "Wie funktioniert die Abstimmung auf öffentlichen Kundenportalen?",
+    "faqA2": "Kunden melden sich mit ihrem Google- oder GitHub-Konto an, um eine Stimme pro Beitrag abzugeben. Sie können ihre Stimme jederzeit zurückziehen und erhalten automatische Status-Updates, während der Beitrag in der Roadmap voranschreitet.",
+    "faqQ3": "Können wir interne Roadmap-Einträge des Teams privat halten?",
+    "faqA3": "Ja. UserHQ bietet Ihrem Team private Backlog-Boards und Entwurfsstatus. Sie wählen genau aus, welche Einträge und Status im öffentlichen Portal veröffentlicht werden und welche intern bleiben.",
+    "faqQ4": "Wie werden Abonnenten benachrichtigt, wenn ein Changelog-Eintrag veröffentlicht wird?",
+    "faqA4": "Wenn Sie einen Changelog-Eintrag veröffentlichen, sendet UserHQ E-Mail-Updates an abonnierte Kunden und alle, die für verknüpfte Roadmap-Einträge gestimmt haben, und schließt so automatisch die Feedback-Schleife."
   },
   "board": {
     "category": "Kategorie",
@@ -1268,7 +1306,8 @@
     "makeDefault": "Als Standard festlegen",
     "defaultStatusCannotBeDeleted": "Der Standardstatus kann nicht gelöscht werden",
     "needAtLeastOneStatus": "Ein Produkt benötigt mindestens einen Status",
-    "showOnPublicRoadmapHelp": "Wenn aktiviert, erscheinen Einträge in dieser Phase als Spalte auf Ihrer öffentlichen Roadmap."
+    "showOnPublicRoadmapHelp": "Wenn aktiviert, erscheinen Einträge in dieser Phase als Spalte auf Ihrer öffentlichen Roadmap.",
+    "typeHelper": "Der Typ bestimmt, wie sich der Status verhält, z. B. welche Beiträge als erledigt gelten."
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1324,7 +1363,14 @@
     "antiSpoofingSecretLabel": "Anti-Spoofing-HMAC-Geheimnis (optional)",
     "antiSpoofingSecretPlaceholder": "Geheimen Token für die HMAC-SHA256-Prüfung eingeben",
     "antiSpoofingSecretHelp": "Wenn festgelegt, sowohl Signatur- als auch Zeitstempel-Parameter einbeziehen. {sigParam} ist das HMAC-SHA256-Hexadezimal von value + '.' + {tsParam}. {tsParam} sind die Unix-Sekunden bei der Signierung, 30 Tage gültig.",
-    "deleteRuleAria": "Regel löschen"
+    "deleteRuleAria": "Regel löschen",
+    "slugLabel": "Slug (eindeutiger Bezeichner)",
+    "descriptionLabel": "Beschreibung (interne Notiz)",
+    "textColorLabel": "Textfarbe",
+    "priorityLabel": "Priorität (Höher = Zuerst)",
+    "slugPrefix": "Slug:",
+    "priorityPrefix": "Priorität:",
+    "hmacVerified": "HMAC verifiziert"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1490,10 +1536,11 @@
     "postsFound": "{count} Beiträge gefunden",
     "noPostsMatch": "Keine Beiträge stimmen mit „{query}“ überein.",
     "chooseAnotherPost": "Anderen Beitrag wählen",
-    "openPublicPortalPost": "Öffentlichen Portal-Beitrag öffnen",
+    "openPublicPortalPost": "Beitrag im öffentlichen Portal öffnen",
     "statusLockedHelp": "Der Status ist an das verknüpfte Roadmap-Element gebunden. Verschieben Sie das Element auf der Roadmap, um den Status zu ändern.",
     "editedSuffix": "· bearbeitet",
-    "publicNoteHelper": "Wird auf dem Beitrag mit Ihrem Namen angezeigt."
+    "publicNoteHelper": "Wird auf dem Beitrag mit Ihrem Namen angezeigt.",
+    "mergeConfirmNotice": "Stimmen und Kommentare werden zu „{target}“ verschoben. Personen, die für beides gestimmt haben, werden einfach gezählt. Der Link zu „{source}“ öffnet stattdessen „{target}“. Dies kann nicht rückgängig gemacht werden."
   },
   "productUsers": {
     "badgeGranted": "Abzeichen verliehen",
@@ -1547,6 +1594,72 @@
     "copyResponse": "Antwort kopieren",
     "copyCode": "Code kopieren",
     "workspace": "Arbeitsbereich",
-    "category": "Kategorie"
+    "category": "Kategorie",
+    "searchPlaceholder": "Endpunkte nach Pfad, Verb, Bereich oder Schlüsselwort durchsuchen...",
+    "scope": "Bereich:",
+    "defaultPrefix": "Standard:"
+  },
+  "devUpload": {
+    "title": "Upload-Test",
+    "devOnly": "Nur Dev",
+    "description": "Prüft die Bild-Pipeline durchgehend. PNG-, JPEG-, WebP- und GIF-Dateien bis zu 2 MB werden akzeptiert. Jeder Upload wird in WebP konvertiert, auf maximal 1600 px Breite verkleinert und von Metadaten befreit. Animierte GIFs behalten nur ihren ersten Frame.",
+    "imageFileLabel": "Bilddatei",
+    "fileTypesHelp": "PNG, JPEG, WebP oder GIF, bis zu 2 MB.",
+    "uploadImage": "Bild hochladen",
+    "signInAgain": "Erneut anmelden",
+    "uploadComplete": "Upload abgeschlossen",
+    "uploadSucceeded": "Upload erfolgreich",
+    "format": "Format",
+    "dimensions": "Abmessungen",
+    "size": "Größe",
+    "url": "URL",
+    "copied": "Kopiert",
+    "copyUrl": "URL kopieren",
+    "noImageYet": "Noch kein Bild hochgeladen",
+    "noImageDesc": "Wählen Sie ein Bild aus und klicken Sie auf Bild hochladen. Das konvertierte WebP wird hier angezeigt."
+  },
+  "privacy": {
+    "title": "Datenschutzerklärung",
+    "updated": "23. Oktober 2026",
+    "intro": "UserHQ wird von Increasing Labs betrieben. Diese Richtlinie erklärt, was wir erfassen, wenn Sie UserHQ nutzen, warum und welche Wahlmöglichkeiten Sie haben.",
+    "h2Collect": "Informationen, die wir erfassen",
+    "accountInfoTitle": "Kontoinformationen.",
+    "accountInfoDesc": "Wenn Sie sich mit Google oder GitHub anmelden, erhalten wir Ihren Namen, Ihre E-Mail-Adresse und Ihr Profilbild. Wir erhalten kein Passwort.",
+    "contentSubmitTitle": "Von Ihnen übermittelte Inhalte.",
+    "contentSubmitDesc": "Feedback-Beiträge, Kommentare, Stimmen und Bilder, die Sie in ein Produktportal hochladen.",
+    "deviceInfoTitle": "Geräteinformationen.",
+    "deviceInfoDesc": "Grundlegende Browser- und Gerätedetails (wie Browser und Betriebssystem), die Beiträgen und Kommentaren beigefügt sind, um Produktteams bei der Reproduktion von Problemen zu helfen.",
+    "cookiesTitle": "Sitzungs-Cookies.",
+    "cookiesDesc": "Wir verwenden ein Cookie, um Sie angemeldet zu halten. Wir verwenden keine Werbe- oder Cross-Site-Tracking-Cookies.",
+    "h2Use": "Wie wir sie verwenden",
+    "useDesc": "Um den Dienst bereitzustellen: Sie zu authentifizieren, Ihre Beiträge und Kommentare anzuzeigen, Benachrichtigungen zu Aktivitäten zu senden, denen Sie folgen, und den Dienst sicher zu halten. Wir verkaufen Ihre Daten nicht.",
+    "h2WhoCanSee": "Wer sie sehen kann",
+    "whoCanSeeDesc": "Beiträge, Kommentare und Ihr Anzeigename sind für andere im Produktportal sichtbar, auf dem Sie posten, sowie für das Team dieses Produkts. Ihre E-Mail-Adresse ist für das Produktteam sichtbar, aber nicht für andere Benutzer.",
+    "h2Providers": "Dienstleister",
+    "providersDesc": "Wir nutzen Google und GitHub für die Anmeldung und Brevo für den E-Mail-Versand. Die Daten werden auf von Increasing Labs betriebenen Servern gespeichert.",
+    "h2Email": "E-Mail",
+    "emailDesc": "Benachrichtigungs-E-Mails enthalten einen Abmeldelink mit einem Klick. Wichtige Konto-E-Mails können weiterhin gesendet werden.",
+    "h2Retention": "Aufbewahrung und Löschung",
+    "retentionDesc": "Wir bewahren Ihre Daten auf, solange Ihr Konto aktiv ist. Sie können Ihr Konto auf Ihrer Kontoseite löschen, wodurch Ihre persönlichen Daten entfernt werden. Kontaktieren Sie uns bei Fragen.",
+    "h2Contact": "Kontakt",
+    "contactDesc": "Fragen oder Anfragen:"
+  },
+  "terms": {
+    "title": "Nutzungsbedingungen",
+    "updated": "23. Oktober 2026",
+    "intro": "Durch die Nutzung von UserHQ, betrieben von Increasing Labs, stimmen Sie diesen Bedingungen zu. Wenn Sie nicht einverstanden sind, nutzen Sie den Dienst bitte nicht.",
+    "h2Account": "Ihr Konto",
+    "accountDesc": "Sie melden sich mit Google oder GitHub an und sind für Aktivitäten auf Ihrem Konto verantwortlich. Die Erstellung von Arbeitsbereichen erfolgt auf Einladung.",
+    "h2Content": "Ihre Inhalte",
+    "contentDesc": "Sie besitzen, was Sie veröffentlichen. Sie gewähren uns und dem jeweiligen Produktteam eine Lizenz zum Hosten und Anzeigen im Rahmen des Dienstes. Veröffentlichen Sie nichts Rechtswidriges, Beleidigendes oder Schädliches.",
+    "h2Acceptable": "Zulässige Nutzung",
+    "acceptableDesc": "Stören Sie den Dienst nicht, suchen Sie nicht ohne Genehmigung nach Schwachstellen, scrapen Sie nicht in großem Maßstab und versenden Sie keinen Spam. Wir können Inhalte entfernen oder Konten sperren, die gegen diese Bedingungen verstoßen.",
+    "h2Availability": "Verfügbarkeit",
+    "availabilityDesc": "Wir bemühen uns, UserHQ am Laufen zu halten, stellen es jedoch „wie besehen“ ohne Garantien zur Verfügung. Wir können Funktionen jederzeit ändern oder einstellen.",
+    "h2Liability": "Haftung",
+    "liabilityDesc": "Soweit gesetzlich zulässig, haftet Increasing Labs nicht für indirekte oder Folgeschäden, die sich aus Ihrer Nutzung des Dienstes ergeben.",
+    "h2Changes": "Änderungen",
+    "changesDesc": "Wir können diese Bedingungen aktualisieren; die fortgesetzte Nutzung nach einer Änderung bedeutet Ihre Zustimmung. Siehe auch unsere",
+    "h2Contact": "Kontakt"
   }
 }

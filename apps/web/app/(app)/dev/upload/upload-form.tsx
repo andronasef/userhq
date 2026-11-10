@@ -15,6 +15,7 @@ import {
   formatFileSize,
   type UploadErrorCopy,
 } from "../../../../lib/upload-errors";
+import { useI18n } from "../../../../lib/i18n/context";
 
 interface MutationError {
   status?: number;
@@ -23,6 +24,7 @@ interface MutationError {
 }
 
 export function UploadForm(): React.JSX.Element {
+  const { t } = useI18n();
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [successResult, setSuccessResult] =
     React.useState<UploadResponse | null>(null);
@@ -112,7 +114,7 @@ export function UploadForm(): React.JSX.Element {
             htmlFor="upload-file"
             className="text-sm font-semibold text-foreground"
           >
-            Image file
+            {t("devUpload.imageFileLabel")}
           </label>
           <input
             ref={fileInputRef}
@@ -133,7 +135,7 @@ export function UploadForm(): React.JSX.Element {
             </p>
           ) : (
             <p className="text-sm text-muted-foreground">
-              PNG, JPEG, WebP, or GIF, up to 2 MB.
+              {t("devUpload.fileTypesHelp")}
             </p>
           )}
         </div>
@@ -150,10 +152,10 @@ export function UploadForm(): React.JSX.Element {
                   className="size-4 animate-spin shrink-0"
                   aria-hidden="true"
                 />
-                <span>Uploading…</span>
+                <span>{t("common.uploading")}</span>
               </>
             ) : (
-              <span>Upload image</span>
+              <span>{t("devUpload.uploadImage")}</span>
             )}
           </Button>
         </div>
@@ -168,7 +170,7 @@ export function UploadForm(): React.JSX.Element {
                 href="/login?next=%2Fdev%2Fupload"
                 className="text-foreground underline font-semibold inline-block"
               >
-                Sign in again
+                {t("devUpload.signInAgain")}
               </Link>
             </div>
           )}
@@ -177,33 +179,33 @@ export function UploadForm(): React.JSX.Element {
 
       {successResult ? (
         <div className="bg-muted rounded-lg p-4 flex flex-col gap-4">
-          <Alert variant="success" title="Upload complete">
-            <span className="sr-only">Upload succeeded</span>
+          <Alert variant="success" title={t("devUpload.uploadComplete")}>
+            <span className="sr-only">{t("devUpload.uploadSucceeded")}</span>
           </Alert>
 
           <div className="bg-background border border-border rounded-md p-2 flex items-center justify-center">
             <img
               src={successResult.url}
-              alt="Uploaded image preview"
+              alt={t("changelog.preview")}
               className="max-h-80 object-contain rounded"
             />
           </div>
 
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-            <dt className="font-semibold text-muted-foreground">Format</dt>
+            <dt className="font-semibold text-muted-foreground">{t("devUpload.format")}</dt>
             <dd className="text-foreground">WebP</dd>
 
-            <dt className="font-semibold text-muted-foreground">Dimensions</dt>
+            <dt className="font-semibold text-muted-foreground">{t("devUpload.dimensions")}</dt>
             <dd className="text-foreground">
               {successResult.width} × {successResult.height} px
             </dd>
 
-            <dt className="font-semibold text-muted-foreground">Size</dt>
+            <dt className="font-semibold text-muted-foreground">{t("devUpload.size")}</dt>
             <dd className="text-foreground">
               {formatFileSize(successResult.bytes)}
             </dd>
 
-            <dt className="font-semibold text-muted-foreground">URL</dt>
+            <dt className="font-semibold text-muted-foreground">{t("devUpload.url")}</dt>
             <dd>
               <a
                 href={successResult.url}
@@ -225,12 +227,12 @@ export function UploadForm(): React.JSX.Element {
             {copied ? (
               <>
                 <Check className="size-4 shrink-0" aria-hidden="true" />
-                <span>Copied</span>
+                <span>{t("devUpload.copied")}</span>
               </>
             ) : (
               <>
                 <Copy className="size-4 shrink-0" aria-hidden="true" />
-                <span>Copy URL</span>
+                <span>{t("devUpload.copyUrl")}</span>
               </>
             )}
           </Button>
@@ -238,10 +240,10 @@ export function UploadForm(): React.JSX.Element {
       ) : (
         <div className="border border-dashed border-border rounded-lg p-8 text-center flex flex-col items-center justify-center gap-2">
           <h2 className="text-base font-semibold text-foreground">
-            No image uploaded yet
+            {t("devUpload.noImageYet")}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Choose an image and select Upload image. The converted WebP will appear here.
+            {t("devUpload.noImageDesc")}
           </p>
         </div>
       )}

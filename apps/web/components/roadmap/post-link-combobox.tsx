@@ -150,13 +150,13 @@ export function PostLinkCombobox({
 
                     {isAlreadyLinkedHere && (
                       <Badge variant="neutral" className="text-[10px] py-0 h-5">
-                        Already linked
+                        {t("roadmap.alreadyLinked")}
                       </Badge>
                     )}
 
                     {isLinkedElsewhere && (
                       <Badge variant="danger" className="text-[10px] py-0 h-5">
-                        Linked elsewhere
+                        {t("roadmap.linkedElsewhere")}
                       </Badge>
                     )}
                   </div>

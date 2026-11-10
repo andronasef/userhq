@@ -70,7 +70,10 @@
     "copyLink": "リンクをコピー",
     "uploading": "アップロード中...",
     "deletedUser": "削除されたユーザー",
-    "anonymous": "匿名"
+    "anonymous": "匿名",
+    "byAuthor": "{author} 提供",
+    "voteCount": "{count} 票",
+    "votesCount": "{count} 票"
   },
   "portal": {
     "submitFeedback": "フィードバックを投稿",
@@ -103,7 +106,9 @@
     "emptyBody": "{name} は現在一般公開されていません。後でもう一度ご確認ください。",
     "visitCompany": "{company} を訪問",
     "backToCompany": "{name} に戻る",
-    "activitySubtitle": "{name} についてあなたが作成、投票、またはコメントした投稿。"
+    "activitySubtitle": "{name} についてあなたが作成、投票、またはコメントした投稿。",
+    "noProductsYet": "まだ製品がありません",
+    "noProductsYetDesc": "{name} はまだ製品を公開していません。"
   },
   "dashboard": {
     "workspaces": "ワークスペース",
@@ -347,8 +352,10 @@
     "moveItemError": "項目を移動できませんでした。接続を確認して再試行してください。",
     "linkedPostSuccess": "#{number} をリンクしました",
     "deleteItemError": "項目を削除できませんでした。再試行してください。",
-    "loadingLinkedPosts": "関連する投稿を読み込み中…",
-    "unlinkPostAria": "投稿 #{number} のリンクを解除"
+    "loadingLinkedPosts": "リンクされた投稿を読み込み中…",
+    "unlinkPostAria": "投稿 #{number} のリンクを解除",
+    "alreadyLinked": "リンク済み",
+    "linkedElsewhere": "他でリンク済み"
   },
   "changelog": {
     "title": "チェンジログ",
@@ -413,14 +420,15 @@
     "allUpdates": "すべての更新",
     "previewTitle": "変更履歴のプレビュー",
     "previewDesc": "公開読者にこのリリースノートがどのように表示されるかのプレビューです。",
-    "publishedBy": "{name} チーム",
+    "publishedBy": "{name} が公開",
     "failedToUnpublish": "エントリの非公開化に失敗しました",
     "scheduledNotice": "リリース日にポータル上で自動的に公開されます",
     "tagNameRequired": "タグ名は必須です",
     "failedToCreateTag": "タグの作成に失敗しました",
     "failedToDeleteTag": "タグの削除に失敗しました",
     "deleteTagAria": "タグ {name} を削除",
-    "noTagsYetHelp": "タグがまだありません。「タグの管理」をクリックして追加してください。"
+    "noTagsYetHelp": "タグがまだありません。「タグの管理」をクリックして追加してください。",
+    "teamAttribution": "{name} チーム"
   },
   "faq": {
     "title": "よくある質問 (FAQ)",
@@ -756,7 +764,29 @@
     "typeToConfirm": "確認のため {name} と入力してください",
     "deleteProductConfirmTitle": "{name} を削除しますか？",
     "deleteProductConfirmDesc": "公開ポータルは直ちにオフラインになり、そのURLは再利用できなくなります。この操作は取り消せません。",
-    "deletedSuccess": "{name} を削除しました"
+    "deletedSuccess": "{name} を削除しました",
+    "productSettingsTitle": "製品設定",
+    "productSettingsDesc": "変更は公開ポータルに即座に反映されます。",
+    "featureFeedbackBoardName": "フィードバックボード",
+    "featureFeedbackBoardDesc": "顧客がアイデアを投稿し、投票やコメントを行えます。無効にするとフィードバックに関する顧客通知も停止します。",
+    "featureRoadmapName": "ロードマップ",
+    "featureRoadmapDesc": "計画中および進行中の項目を顧客に公開します。",
+    "featureChangelogName": "変更履歴",
+    "featureChangelogDesc": "リリースノートを顧客が閲覧できます。",
+    "featureFaqName": "よくある質問 (FAQ)",
+    "featureFaqDesc": "一般的な質問への回答を顧客が検索できます。",
+    "allFeaturesOffWarning": "すべての機能をオフにすると、顧客には {url} で利用不可ページが表示されます。",
+    "keepVisible": "表示したままにする",
+    "hideAllConfirmTitle": "すべての機能を顧客から非表示にしますか？",
+    "hideSingleConfirmTitle": "{name} を顧客から非表示にしますか？",
+    "hideMultipleConfirmTitle": "{count} 個の機能を顧客から非表示にしますか？",
+    "hideAllConfirmDesc": "ポータルの代わりに利用不可ページが表示されます。コンテンツは保持され、いつでも機能をオンに戻せます。",
+    "hideSingleConfirmDesc": "顧客は {name} の閲覧やリンクのオープンができなくなります。コンテンツは保持され、いつでもオンに戻せます。",
+    "hideMultipleConfirmDesc": "顧客は {names} を閲覧できなくなります。コンテンツは保持され、いつでもオンに戻せます。",
+    "hideBoardNotice": " また、顧客へのフィードバック通知も停止します。オフ時のアクティビティ通知は後から送信されません。",
+    "hideAllAction": "すべて非表示",
+    "hideSingleAction": "{name} を非表示",
+    "hideMultipleAction": "{count} 個の機能を非表示"
   },
   "landing": {
     "heroHeading": "優れたプロダクトは傾聴から始まる。",
@@ -834,7 +864,15 @@
     "searchPlaceholder": "フィードバックを検索...",
     "comments": "件のコメント",
     "showcaseViews": "製品ショーケース ビュー",
-    "interactivePreview": "インタラクティブな製品プレビュー"
+    "interactivePreview": "インタラクティブな製品プレビュー",
+    "faqQ1": "私たちのチームはどのようにしてUserHQの招待を受け取れますか？",
+    "faqA1": "プレビュー期間中のワークスペース作成は現在招待制となっています。ポータルの開設に関心があるチームは、Increasing Labs (hello@increasinglab.com) まで早期アクセスをお問い合わせください。",
+    "faqQ2": "公開カスタマーポータルでの投票はどのように機能しますか？",
+    "faqA2": "顧客はGoogleまたはGitHubアカウントでサインインし、投稿ごとに1票を投じることができます。投票はいつでも取り消すことができ、投稿がロードマップを進むにつれて自動ステータス更新を受け取ります。",
+    "faqQ3": "チーム内の内部ロードマップ項目を非公開にすることはできますか？",
+    "faqA3": "はい。UserHQはプライベートなバックログボードと下書きステータスを提供します。公開ポータルに公開する項目と内部にとどめる項目を正確に選択できます。",
+    "faqQ4": "変更履歴のエントリが公開されたとき、購読者にはどのように通知されますか？",
+    "faqA4": "変更履歴のエントリを公開すると、UserHQは購読している顧客およびリンクされたロードマップ項目に投票した全員にメール更新を送信し、フィードバックループを自動的に閉じます。"
   },
   "board": {
     "category": "カテゴリー",
@@ -1268,7 +1306,8 @@
     "makeDefault": "デフォルトに設定",
     "defaultStatusCannotBeDeleted": "デフォルトのステータスは削除できません",
     "needAtLeastOneStatus": "プロダクトには少なくとも1つのステータスが必要です",
-    "showOnPublicRoadmapHelp": "チェックを入れると、このステージの項目が公開製品ロードマップに列として表示されます。"
+    "showOnPublicRoadmapHelp": "チェックを入れると、このステージの項目が公開製品ロードマップに列として表示されます。",
+    "typeHelper": "タイプによってステータスの動作（完了とみなす投稿など）が決まります。"
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1324,7 +1363,14 @@
     "antiSpoofingSecretLabel": "なりすまし防止 HMAC シークレット（任意）",
     "antiSpoofingSecretPlaceholder": "HMAC-SHA256 チェック用のシークレットトークンを入力",
     "antiSpoofingSecretHelp": "設定すると、署名とタイムスタンプの両方のパラメータが含まれます。{sigParam} は value + '.' + {tsParam} の HMAC-SHA256 16進数です。{tsParam} はリンクが署名されたUnix秒数で、30日間有効です。",
-    "deleteRuleAria": "ルールを削除"
+    "deleteRuleAria": "ルールを削除",
+    "slugLabel": "スラッグ（一意の識別子）",
+    "descriptionLabel": "説明（内部メモ）",
+    "textColorLabel": "文字色",
+    "priorityLabel": "優先度（高い = 先頭）",
+    "slugPrefix": "スラッグ:",
+    "priorityPrefix": "優先度:",
+    "hmacVerified": "HMAC検証済み"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1490,10 +1536,11 @@
     "postsFound": "{count} 件の投稿が見つかりました",
     "noPostsMatch": "「{query}」に一致する投稿はありません。",
     "chooseAnotherPost": "別の投稿を選択",
-    "openPublicPortalPost": "公開ポータルの投稿を開く",
+    "openPublicPortalPost": "公開ポータルで投稿を開く",
     "statusLockedHelp": "ステータスはリンクされたロードマップ項目に固定されています。ステータスを変更するにはロードマップ上で項目を移動してください。",
     "editedSuffix": "· 編集済み",
-    "publicNoteHelper": "あなたの名前とともに投稿に表示されます。"
+    "publicNoteHelper": "あなたの名前とともに投稿に表示されます。",
+    "mergeConfirmNotice": "投票とコメントは「{target}」に統合されます。両方に投票した人は1回としてカウントされます。「{source}」へのリンクは代わりに「{target}」を開きます。この操作は元に戻せません。"
   },
   "productUsers": {
     "badgeGranted": "バッジを付与しました",
@@ -1547,6 +1594,72 @@
     "copyResponse": "レスポンスをコピー",
     "copyCode": "コードをコピー",
     "workspace": "ワークスペース",
-    "category": "カテゴリー"
+    "category": "カテゴリー",
+    "searchPlaceholder": "パス、HTTPメソッド、スコープ、キーワードでエンドポイントを検索...",
+    "scope": "スコープ:",
+    "defaultPrefix": "デフォルト:"
+  },
+  "devUpload": {
+    "title": "アップロードテスト",
+    "devOnly": "開発者専用",
+    "description": "画像パイプラインをエンドツーエンドでテストします。最大2MBのPNG、JPEG、WebP、GIFファイルに対応しています。アップロードはWebPに変換され、最大幅1600pxにリサイズされ、メタデータが削除されます。アニメーションGIFは最初のフレームのみ保持されます。",
+    "imageFileLabel": "画像ファイル",
+    "fileTypesHelp": "PNG、JPEG、WebP、またはGIF（最大2MB）。",
+    "uploadImage": "画像をアップロード",
+    "signInAgain": "再度サインイン",
+    "uploadComplete": "アップロード完了",
+    "uploadSucceeded": "アップロード成功",
+    "format": "フォーマット",
+    "dimensions": "サイズ",
+    "size": "容量",
+    "url": "URL",
+    "copied": "コピー完了",
+    "copyUrl": "URLをコピー",
+    "noImageYet": "まだ画像がアップロードされていません",
+    "noImageDesc": "画像を選択して「画像をアップロード」を押してください。変換されたWebPがここに表示されます。"
+  },
+  "privacy": {
+    "title": "プライバシーポリシー",
+    "updated": "2026年10月23日",
+    "intro": "UserHQはIncreasing Labsによって運営されています。本ポリシーは、お客様がUserHQを利用する際に収集する情報、その理由、およびお客様の選択肢について説明します。",
+    "h2Collect": "収集する情報",
+    "accountInfoTitle": "アカウント情報。",
+    "accountInfoDesc": "GoogleまたはGitHubでサインインすると、お名前、メールアドレス、プロフィール写真を受信します。パスワードは受信しません。",
+    "contentSubmitTitle": "送信されたコンテンツ。",
+    "contentSubmitDesc": "製品ポータルにアップロードされたフィードバック投稿、コメント、投票、画像。",
+    "deviceInfoTitle": "デバイス情報。",
+    "deviceInfoDesc": "製品チームが問題を再現しやすくするために投稿やコメントに添付される基本的なブラウザおよびデバイス情報（ブラウザやOSなど）。",
+    "cookiesTitle": "セッションCookie。",
+    "cookiesDesc": "サインイン状態を維持するためにCookieを使用します。広告やクロスサイト追跡用のCookieは使用しません。",
+    "h2Use": "情報の利用目的",
+    "useDesc": "サービスの提供、認証、投稿やコメントの表示、フォローしたアクティビティに関する通知の送信、およびセキュリティの確保のため。個人情報の販売は一切行いません。",
+    "h2WhoCanSee": "情報の公開範囲",
+    "whoCanSeeDesc": "投稿、コメント、表示名は、投稿先の製品ポータルの他のユーザーおよび製品チームに公開されます。メールアドレスは対応する製品チームには表示されますが、他の一般ユーザーには非公開です。",
+    "h2Providers": "サービスプロバイダー",
+    "providersDesc": "サインインにはGoogleとGitHubを、メール配信にはBrevoを利用しています。データはIncreasing Labsが運用するサーバーに保管されます。",
+    "h2Email": "メール配信",
+    "emailDesc": "通知メールにはワンクリックで購読解除できるリンクが含まれます。アカウントに関する重要なお知らせは引き続き送信される場合があります。",
+    "h2Retention": "データの保持と削除",
+    "retentionDesc": "アカウントが有効な間、データは保持されます。アカウントページからいつでもアカウントを削除して個人情報を消去できます。サポートが必要な場合はお問い合わせください。",
+    "h2Contact": "お問い合わせ",
+    "contactDesc": "ご質問やご要望はこちら："
+  },
+  "terms": {
+    "title": "利用規約",
+    "updated": "2026年10月23日",
+    "intro": "Increasing Labsが運営するUserHQを利用することにより、本規約に同意したものとみなされます。同意いただけない場合は、サービスのご利用をお控えください。",
+    "h2Account": "アカウントについて",
+    "accountDesc": "GoogleまたはGitHubを使用してサインインし、ご自身のアカウントでの行動に責任を負います。ワークスペースの作成は招待制です。",
+    "h2Content": "ユーザーのコンテンツ",
+    "contentDesc": "投稿されたコンテンツの権利はお客様に帰属します。お客様は当社および関連する製品チームに対し、サービス提供に必要な範囲でコンテンツをホスト・表示するライセンスを付与するものとします。違法または有害な投稿は禁止されています。",
+    "h2Acceptable": "禁止事項と適切な利用",
+    "acceptableDesc": "サービスの妨害、無断での脆弱性調査、大規模なスクレイピング、スパム送信などの行為を禁止します。規約に違反したコンテンツの削除やアカウントの停止を行う場合があります。",
+    "h2Availability": "サービスの提供と免責",
+    "availabilityDesc": "安定した運用に努めますが、本サービスは「現状有姿」で提供され、保証はありません。事前の予告なく機能を変更または終了する場合があります。",
+    "h2Liability": "責任の制限",
+    "liabilityDesc": "法律で認められる最大限の範囲において、Increasing Labsはサービス利用から生じる間接的損害について責任を負いません。",
+    "h2Changes": "規約の改定",
+    "changesDesc": "本規約は随時改定されることがあり、改定後の継続利用は同意したものとみなされます。併せてこちらもご確認ください：",
+    "h2Contact": "お問い合わせ"
   }
 }

@@ -125,7 +125,7 @@ export function ChangelogArticle({
       <div className="flex items-center gap-2">
         <EntityLogo src={productLogoUrl} name={productName} size={24} />
         <span className="text-sm font-medium text-foreground">
-          {t("changelog.publishedBy", { name: productName })}
+          {t("changelog.teamAttribution", { name: productName })}
         </span>
       </div>
 

@@ -305,7 +305,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
             <span className="font-semibold text-foreground">UserHQ</span>
             <span>·</span>
             <span>
-              by{" "}
+              {dict.common.byAuthor.split("{author}")[0]}
               <a
                 href="https://increasinglabs.com/"
                 target="_blank"
@@ -314,6 +314,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
               >
                 Increasing Labs
               </a>
+              {dict.common.byAuthor.split("{author}")[1] ?? ""}
             </span>
           </div>
 

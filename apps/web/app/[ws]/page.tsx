@@ -10,6 +10,7 @@ import { EmptyState } from "../../components/empty-state";
 import { AppShell } from "../../components/app-shell";
 import { StatePage } from "../../components/state-page";
 import { Button } from "../../components/ui/button";
+import { getRequestLocale, getDictionary } from "../../lib/i18n/server";
 
 interface WorkspaceDirectoryPageProps {
   params: Promise<{ ws: string }>;
@@ -33,6 +34,8 @@ export default async function WorkspaceDirectoryPage({
   params,
 }: WorkspaceDirectoryPageProps): Promise<React.JSX.Element> {
   const { ws } = await params;
+  const locale = await getRequestLocale();
+  const dict = await getDictionary(locale);
   const result = await getPortalDirectory(ws);
 
   if (!result.ok) {
@@ -40,11 +43,11 @@ export default async function WorkspaceDirectoryPage({
       return (
         <AppShell>
           <StatePage
-            title="This page is unavailable"
-            body="This portal isn't available right now. Check back later."
+            title={dict.portal.unavailableTitle}
+            body={dict.portal.unavailableBody}
             actions={
               <Button variant="outline" asChild>
-                <Link href="/">Go to UserHQ</Link>
+                <Link href="/">{dict.portal.goToUserHQ}</Link>
               </Button>
             }
           />
@@ -81,8 +84,8 @@ export default async function WorkspaceDirectoryPage({
 
       {products.length === 0 ? (
         <EmptyState
-          title="No products yet"
-          body={`${workspace.name} hasn't published any products.`}
+          title={dict.portal.noProductsYet}
+          body={dict.portal.noProductsYetDesc.replace("{name}", workspace.name)}
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

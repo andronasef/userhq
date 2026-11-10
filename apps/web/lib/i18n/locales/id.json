@@ -70,7 +70,10 @@
     "copyLink": "Salin tautan",
     "uploading": "Mengunggah...",
     "deletedUser": "Pengguna yang dihapus",
-    "anonymous": "Anonim"
+    "anonymous": "Anonim",
+    "byAuthor": "oleh {author}",
+    "voteCount": "{count} suara",
+    "votesCount": "{count} suara"
   },
   "portal": {
     "submitFeedback": "Kirim ide",
@@ -103,7 +106,9 @@
     "emptyBody": "{name} sedang tidak terbuka untuk pengunjung saat ini. Silakan periksa kembali nanti.",
     "visitCompany": "Kunjungi {company}",
     "backToCompany": "Kembali ke {name}",
-    "activitySubtitle": "Postingan yang Anda buat, beri suara positif, atau komentari untuk {name}."
+    "activitySubtitle": "Postingan yang Anda buat, beri suara positif, atau komentari untuk {name}.",
+    "noProductsYet": "Belum ada produk",
+    "noProductsYetDesc": "{name} belum menerbitkan produk apa pun."
   },
   "dashboard": {
     "workspaces": "Ruang Kerja",
@@ -347,8 +352,10 @@
     "moveItemError": "Tidak dapat memindahkan item. Periksa koneksi Anda dan coba lagi.",
     "linkedPostSuccess": "Tertaut #{number}",
     "deleteItemError": "Tidak dapat menghapus item. Coba lagi.",
-    "loadingLinkedPosts": "Memuat postingan tertaut…",
-    "unlinkPostAria": "Putuskan tautan postingan #{number}"
+    "loadingLinkedPosts": "Memuat postingan yang ditautkan…",
+    "unlinkPostAria": "Putuskan tautan postingan #{number}",
+    "alreadyLinked": "Sudah ditautkan",
+    "linkedElsewhere": "Ditautkan di tempat lain"
   },
   "changelog": {
     "title": "Catatan Perubahan",
@@ -413,14 +420,15 @@
     "allUpdates": "Semua pembaruan",
     "previewTitle": "Pratinjau Catatan Perubahan",
     "previewDesc": "Ini adalah pratinjau tampilan catatan rilis ini bagi pembaca publik.",
-    "publishedBy": "Tim {name}",
+    "publishedBy": "Diterbitkan oleh {name}",
     "failedToUnpublish": "Gagal membatalkan publikasi entri",
     "scheduledNotice": "Akan tayang di portal pada tanggal perilisannya",
     "tagNameRequired": "Nama tag wajib diisi",
     "failedToCreateTag": "Gagal membuat tag",
     "failedToDeleteTag": "Gagal menghapus tag",
     "deleteTagAria": "Hapus tag {name}",
-    "noTagsYetHelp": "Belum ada tag. Klik \"Kelola tag\" untuk menambahkan tag."
+    "noTagsYetHelp": "Belum ada tag. Klik \"Kelola tag\" untuk menambahkan tag.",
+    "teamAttribution": "Tim {name}"
   },
   "faq": {
     "title": "Pertanyaan yang Sering Diajukan (FAQ)",
@@ -756,7 +764,29 @@
     "typeToConfirm": "Ketik {name} untuk mengonfirmasi",
     "deleteProductConfirmTitle": "Hapus {name}?",
     "deleteProductConfirmDesc": "Portal publiknya langsung offline, dan URL-nya tidak dapat digunakan lagi. Tindakan ini tidak dapat dibatalkan.",
-    "deletedSuccess": "{name} dihapus"
+    "deletedSuccess": "{name} dihapus",
+    "productSettingsTitle": "Pengaturan produk",
+    "productSettingsDesc": "Perubahan langsung muncul di portal publik.",
+    "featureFeedbackBoardName": "Papan masukan",
+    "featureFeedbackBoardDesc": "Pelanggan mengirimkan ide, memberikan suara, dan berkomentar. Menonaktifkannya juga menghentikan notifikasi pelanggan tentang masukan.",
+    "featureRoadmapName": "Peta jalan",
+    "featureRoadmapDesc": "Pelanggan melihat apa yang direncanakan dan sedang berlangsung.",
+    "featureChangelogName": "Catatan perubahan",
+    "featureChangelogDesc": "Pelanggan membaca catatan rilis Anda.",
+    "featureFaqName": "Tanya Jawab",
+    "featureFaqDesc": "Pelanggan mencari jawaban atas pertanyaan umum.",
+    "allFeaturesOffWarning": "Dengan setiap fitur nonaktif, pelanggan melihat halaman tidak tersedia di {url}.",
+    "keepVisible": "Tetap terlihat",
+    "hideAllConfirmTitle": "Sembunyikan semua dari pelanggan?",
+    "hideSingleConfirmTitle": "Sembunyikan {name} dari pelanggan?",
+    "hideMultipleConfirmTitle": "Sembunyikan {count} fitur dari pelanggan?",
+    "hideAllConfirmDesc": "Pelanggan akan melihat halaman tidak tersedia, bukan portal Anda. Konten Anda tetap disimpan, dan Anda dapat mengaktifkan kembali fitur kapan saja.",
+    "hideSingleConfirmDesc": "Pelanggan tidak akan lagi melihat {name} atau membuka tautan ke sana. Konten Anda tetap disimpan, dan Anda dapat mengaktifkan kembali {name} kapan saja.",
+    "hideMultipleConfirmDesc": "Pelanggan tidak akan lagi melihat {names}. Konten Anda tetap disimpan, dan Anda dapat mengaktifkannya kembali kapan saja.",
+    "hideBoardNotice": " Pelanggan juga berhenti mendapatkan notifikasi tentang masukan. Notifikasi untuk aktivitas saat dinonaktifkan tidak akan dikirim nanti.",
+    "hideAllAction": "Sembunyikan semuanya",
+    "hideSingleAction": "Sembunyikan {name}",
+    "hideMultipleAction": "Sembunyikan {count} fitur"
   },
   "landing": {
     "heroHeading": "Produk hebat dimulai dari mendengarkan.",
@@ -834,7 +864,15 @@
     "searchPlaceholder": "Cari umpan balik...",
     "comments": "komentar",
     "showcaseViews": "Tampilan Showcase Produk",
-    "interactivePreview": "Pratinjau Produk Interaktif"
+    "interactivePreview": "Pratinjau Produk Interaktif",
+    "faqQ1": "Bagaimana tim kami bisa mendapatkan undangan ke UserHQ?",
+    "faqA1": "Pembuatan ruang kerja saat ini hanya melalui undangan selama periode pratinjau kami. Jika tim Anda tertarik untuk meluncurkan portal, hubungi Increasing Labs di hello@increasinglab.com untuk meminta akses awal.",
+    "faqQ2": "Bagaimana cara kerja pemungutan suara di portal pelanggan publik?",
+    "faqA2": "Pelanggan masuk dengan akun Google atau GitHub mereka untuk memberikan satu suara per postingan. Mereka dapat menarik kembali suara mereka kapan saja, dan mereka menerima pembaruan status otomatis saat postingan berkembang melalui peta jalan.",
+    "faqQ3": "Bisakah kami merahasiakan item peta jalan tim internal?",
+    "faqA3": "Ya. UserHQ memberi tim Anda papan backlog pribadi dan status draf. Anda memilih dengan tepat item dan status mana yang dipublikasikan ke portal publik dan mana yang tetap internal.",
+    "faqQ4": "Bagaimana pelanggan diberitahu saat entri changelog diterbitkan?",
+    "faqA4": "Saat Anda menerbitkan entri changelog, UserHQ mengirimkan pembaruan email ke pelanggan yang berlangganan dan semua orang yang memilih item peta jalan yang ditautkan, menutup siklus umpan balik secara otomatis."
   },
   "board": {
     "category": "Kategori",
@@ -1268,7 +1306,8 @@
     "makeDefault": "Jadikan default",
     "defaultStatusCannotBeDeleted": "Status default tidak dapat dihapus",
     "needAtLeastOneStatus": "Produk memerlukan setidaknya satu status",
-    "showOnPublicRoadmapHelp": "Saat dicentang, item dalam tahap ini muncul sebagai kolom di roadmap publik produk Anda."
+    "showOnPublicRoadmapHelp": "Saat dicentang, item dalam tahap ini muncul sebagai kolom di roadmap publik produk Anda.",
+    "typeHelper": "Jenis menentukan bagaimana status berperilaku, misalnya postingan mana yang dianggap selesai."
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1324,7 +1363,14 @@
     "antiSpoofingSecretLabel": "Rahasia HMAC Anti-Spoofing (Opsional)",
     "antiSpoofingSecretPlaceholder": "Masukkan token rahasia untuk pemeriksaan HMAC-SHA256",
     "antiSpoofingSecretHelp": "Saat disetel, sertakan parameter tanda tangan dan stempel waktu. {sigParam} adalah heksadesimal HMAC-SHA256 dari value + '.' + {tsParam}. {tsParam} adalah detik Unix saat tautan ditandatangani, berlaku selama 30 hari.",
-    "deleteRuleAria": "Hapus aturan"
+    "deleteRuleAria": "Hapus aturan",
+    "slugLabel": "Slug (pengidentifikasi unik)",
+    "descriptionLabel": "Deskripsi (catatan internal)",
+    "textColorLabel": "Warna Teks",
+    "priorityLabel": "Prioritas (Lebih Tinggi = Pertama)",
+    "slugPrefix": "slug:",
+    "priorityPrefix": "prioritas:",
+    "hmacVerified": "Terverifikasi HMAC"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1490,10 +1536,11 @@
     "postsFound": "{count} postingan ditemukan",
     "noPostsMatch": "Tidak ada postingan yang cocok dengan \"{query}\".",
     "chooseAnotherPost": "Pilih postingan lain",
-    "openPublicPortalPost": "Buka postingan portal publik",
+    "openPublicPortalPost": "Buka postingan di portal publik",
     "statusLockedHelp": "Status dikunci ke item roadmap yang ditautkan. Pindahkan item di roadmap untuk mengubah status.",
     "editedSuffix": "· diedit",
-    "publicNoteHelper": "Ditampilkan di postingan dengan nama Anda."
+    "publicNoteHelper": "Ditampilkan di postingan dengan nama Anda.",
+    "mergeConfirmNotice": "Suara dan komentar berpindah ke “{target}”. Orang yang memilih keduanya dihitung satu kali. Tautan ke “{source}” akan membuka “{target}”. Tindakan ini tidak dapat dibatalkan."
   },
   "productUsers": {
     "badgeGranted": "Lencana diberikan",
@@ -1547,6 +1594,72 @@
     "copyResponse": "Salin Respons",
     "copyCode": "Salin Kode",
     "workspace": "Ruang kerja",
-    "category": "Kategori"
+    "category": "Kategori",
+    "searchPlaceholder": "Cari endpoint berdasarkan jalur, kata kerja, cakupan, atau kata kunci...",
+    "scope": "Cakupan:",
+    "defaultPrefix": "Bawaan:"
+  },
+  "devUpload": {
+    "title": "Uji unggah",
+    "devOnly": "Hanya dev",
+    "description": "Memeriksa pipeline gambar dari ujung ke ujung. File PNG, JPEG, WebP, dan GIF hingga 2 MB diterima. Setiap unggahan dikonversi ke WebP, diubah ukurannya maksimal lebar 1600 px, dan dihapus metadatanya. GIF animasi hanya menyimpan bingkai pertamanya.",
+    "imageFileLabel": "File gambar",
+    "fileTypesHelp": "PNG, JPEG, WebP, atau GIF, hingga 2 MB.",
+    "uploadImage": "Unggah gambar",
+    "signInAgain": "Masuk lagi",
+    "uploadComplete": "Unggahan selesai",
+    "uploadSucceeded": "Unggahan berhasil",
+    "format": "Format",
+    "dimensions": "Dimensi",
+    "size": "Ukuran",
+    "url": "URL",
+    "copied": "Disalin",
+    "copyUrl": "Salin URL",
+    "noImageYet": "Belum ada gambar yang diunggah",
+    "noImageDesc": "Pilih gambar dan pilih Unggah gambar. WebP yang dikonversi akan muncul di sini."
+  },
+  "privacy": {
+    "title": "Kebijakan Privasi",
+    "updated": "23 Oktober 2026",
+    "intro": "UserHQ dioperasikan oleh Increasing Labs. Kebijakan ini menjelaskan apa yang kami kumpulkan saat Anda menggunakan UserHQ, alasannya, dan pilihan yang Anda miliki.",
+    "h2Collect": "Informasi yang kami kumpulkan",
+    "accountInfoTitle": "Informasi akun.",
+    "accountInfoDesc": "Saat Anda masuk dengan Google atau GitHub, kami menerima nama, alamat email, dan foto profil Anda. Kami tidak menerima kata sandi Anda.",
+    "contentSubmitTitle": "Konten yang Anda kirimkan.",
+    "contentSubmitDesc": "Postingan masukan, komentar, suara, dan gambar yang Anda unggah ke portal produk.",
+    "deviceInfoTitle": "Informasi perangkat.",
+    "deviceInfoDesc": "Detail dasar browser dan perangkat (seperti browser dan sistem operasi) yang dilampirkan pada postingan dan komentar untuk membantu tim produk mereproduksi masalah.",
+    "cookiesTitle": "Cookie sesi.",
+    "cookiesDesc": "Kami menggunakan cookie untuk membuat Anda tetap masuk. Kami tidak menggunakan cookie iklan atau pelacakan lintas situs.",
+    "h2Use": "Bagaimana kami menggunakannya",
+    "useDesc": "Untuk menjalankan layanan: mengautentikasi Anda, menampilkan postingan dan komentar Anda, mengirim pemberitahuan tentang aktivitas yang Anda ikuti, dan menjaga keamanan layanan. Kami tidak menjual informasi Anda.",
+    "h2WhoCanSee": "Siapa yang dapat melihatnya",
+    "whoCanSeeDesc": "Postingan, komentar, dan nama tampilan Anda dapat dilihat oleh orang lain di portal produk tempat Anda memposting, dan oleh tim produk tersebut. Alamat email Anda terlihat oleh tim produk yang berinteraksi dengan Anda, tetapi tidak untuk pengguna lain.",
+    "h2Providers": "Penyedia layanan",
+    "providersDesc": "Kami menggunakan Google dan GitHub untuk masuk dan Brevo untuk mengirim email. Data disimpan di server yang dioperasikan oleh Increasing Labs.",
+    "h2Email": "Email",
+    "emailDesc": "Email pemberitahuan menyertakan tautan berhenti berlangganan satu kali klik. Email akun penting mungkin masih dikirim.",
+    "h2Retention": "Penyimpanan dan penghapusan",
+    "retentionDesc": "Kami menyimpan data Anda saat akun Anda aktif. Anda dapat menghapus akun Anda dari halaman akun Anda, yang menghapus informasi pribadi Anda; hubungi kami jika Anda membutuhkan bantuan.",
+    "h2Contact": "Kontak",
+    "contactDesc": "Pertanyaan atau permintaan:"
+  },
+  "terms": {
+    "title": "Ketentuan Layanan",
+    "updated": "23 Oktober 2026",
+    "intro": "Dengan menggunakan UserHQ, yang dioperasikan oleh Increasing Labs, Anda menyetujui ketentuan ini. Jika Anda tidak setuju, mohon untuk tidak menggunakan layanan ini.",
+    "h2Account": "Akun Anda",
+    "accountDesc": "Anda masuk dengan Google atau GitHub dan bertanggung jawab atas aktivitas di akun Anda. Pembuatan ruang kerja dilakukan melalui undangan.",
+    "h2Content": "Konten Anda",
+    "contentDesc": "Anda memiliki apa yang Anda posting. Anda memberi kami dan tim produk yang relevan lisensi untuk menghosting dan menampilkannya sebagai bagian dari layanan. Jangan memposting apa pun yang melanggar hukum atau berbahaya.",
+    "h2Acceptable": "Penggunaan yang dapat diterima",
+    "acceptableDesc": "Jangan mengganggu layanan, menyelidiki kerentanan tanpa izin, mengikisnya dalam skala besar, atau menggunakannya untuk mengirim spam. Kami dapat menghapus konten atau menangguhkan akun yang melanggar ketentuan ini.",
+    "h2Availability": "Ketersediaan",
+    "availabilityDesc": "Kami berupaya menjaga UserHQ tetap berjalan tetapi menyediakannya \"sebagaimana adanya\" tanpa jaminan. Kami dapat mengubah atau menghentikan fitur kapan saja.",
+    "h2Liability": "Kewajiban",
+    "liabilityDesc": "Sejauh diizinkan oleh hukum, Increasing Labs tidak bertanggung jawab atas kerusakan tidak langsung atau konsekuensial yang timbul dari penggunaan layanan oleh Anda.",
+    "h2Changes": "Perubahan",
+    "changesDesc": "Kami dapat memperbarui ketentuan ini; penggunaan berkelanjutan setelah perubahan berarti Anda menerimanya. Lihat juga",
+    "h2Contact": "Kontak"
   }
 }

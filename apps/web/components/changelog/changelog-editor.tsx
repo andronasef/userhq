@@ -694,7 +694,7 @@ export function ChangelogEditor({
           <div className="flex flex-wrap items-center gap-2">
             {tags.length === 0 ? (
               <span className="text-xs text-muted-foreground">
-                No tags yet. Click &quot;Manage tags&quot; to add tags.
+                {t("changelog.noTagsYetHelp")}
               </span>
             ) : (
               tags.map((tag) => {

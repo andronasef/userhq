@@ -70,7 +70,10 @@
     "copyLink": "Copy link",
     "uploading": "Uploading...",
     "deletedUser": "Deleted user",
-    "anonymous": "Anonymous"
+    "anonymous": "Anonymous",
+    "byAuthor": "by {author}",
+    "voteCount": "{count} vote",
+    "votesCount": "{count} votes"
   },
   "portal": {
     "submitFeedback": "Submit idea",
@@ -103,7 +106,9 @@
     "emptyBody": "{name} isn't open to visitors at the moment. Please check back later.",
     "visitCompany": "Visit {company}",
     "backToCompany": "Back to {name}",
-    "activitySubtitle": "Posts you created, upvoted, or commented on for {name}."
+    "activitySubtitle": "Posts you created, upvoted, or commented on for {name}.",
+    "noProductsYet": "No products yet",
+    "noProductsYetDesc": "{name} hasn't published any products."
   },
   "dashboard": {
     "workspaces": "Workspaces",
@@ -348,7 +353,9 @@
     "linkedPostSuccess": "Linked #{number}",
     "deleteItemError": "Couldn't delete item. Try again.",
     "loadingLinkedPosts": "Loading linked posts…",
-    "unlinkPostAria": "Unlink post #{number}"
+    "unlinkPostAria": "Unlink post #{number}",
+    "alreadyLinked": "Already linked",
+    "linkedElsewhere": "Linked elsewhere"
   },
   "changelog": {
     "title": "Changelog",
@@ -413,14 +420,15 @@
     "allUpdates": "All updates",
     "previewTitle": "Changelog Preview",
     "previewDesc": "This is a preview of how this release note will appear to public readers.",
-    "publishedBy": "{name} team",
+    "publishedBy": "Published by {name}",
     "failedToUnpublish": "Failed to unpublish entry",
     "scheduledNotice": "Goes live on the portal on its release date",
     "tagNameRequired": "Tag name is required",
     "failedToCreateTag": "Failed to create tag",
     "failedToDeleteTag": "Failed to delete tag",
     "deleteTagAria": "Delete tag {name}",
-    "noTagsYetHelp": "No tags yet. Click \"Manage tags\" to add tags."
+    "noTagsYetHelp": "No tags yet. Click \"Manage tags\" to add tags.",
+    "teamAttribution": "{name} team"
   },
   "faq": {
     "title": "Frequently Asked Questions",
@@ -756,7 +764,29 @@
     "typeToConfirm": "Type {name} to confirm",
     "deleteProductConfirmTitle": "Delete {name}?",
     "deleteProductConfirmDesc": "Its public portal goes offline right away, and its URL can't be used again. This can't be undone.",
-    "deletedSuccess": "{name} deleted"
+    "deletedSuccess": "{name} deleted",
+    "productSettingsTitle": "Product settings",
+    "productSettingsDesc": "Changes appear on the public portal right away.",
+    "featureFeedbackBoardName": "Feedback board",
+    "featureFeedbackBoardDesc": "Customers submit ideas, vote, and comment. Turning it off also stops customer notifications about feedback.",
+    "featureRoadmapName": "Roadmap",
+    "featureRoadmapDesc": "Customers see what is planned and in progress.",
+    "featureChangelogName": "Changelog",
+    "featureChangelogDesc": "Customers read your release notes.",
+    "featureFaqName": "FAQ",
+    "featureFaqDesc": "Customers search answers to common questions.",
+    "allFeaturesOffWarning": "With every feature off, customers see an unavailable page at {url}.",
+    "keepVisible": "Keep visible",
+    "hideAllConfirmTitle": "Hide everything from customers?",
+    "hideSingleConfirmTitle": "Hide {name} from customers?",
+    "hideMultipleConfirmTitle": "Hide {count} features from customers?",
+    "hideAllConfirmDesc": "Customers will see an unavailable page instead of your portal. Your content is kept, and you can turn features back on at any time.",
+    "hideSingleConfirmDesc": "Customers will no longer see {name} or open links to it. Your content is kept, and you can turn {name} back on at any time.",
+    "hideMultipleConfirmDesc": "Customers will no longer see {names}. Your content is kept, and you can turn them back on at any time.",
+    "hideBoardNotice": " Customers also stop getting notifications about feedback. Notifications for activity while it is off are not sent later.",
+    "hideAllAction": "Hide everything",
+    "hideSingleAction": "Hide {name}",
+    "hideMultipleAction": "Hide {count} features"
   },
   "landing": {
     "heroHeading": "Good products start with listening.",
@@ -834,7 +864,15 @@
     "searchPlaceholder": "Search feedback...",
     "comments": "comments",
     "showcaseViews": "Product Showcase Views",
-    "interactivePreview": "Interactive Product Preview"
+    "interactivePreview": "Interactive Product Preview",
+    "faqQ1": "How can our team get an invitation to UserHQ?",
+    "faqA1": "Workspace creation is currently invite-only during our preview period. If your team is interested in launching a portal, contact Increasing Labs at hello@increasinglab.com to request early access.",
+    "faqQ2": "How does voting work on public customer portals?",
+    "faqA2": "Customers sign in with their Google or GitHub account to cast one vote per post. They can withdraw their vote anytime, and they receive automated status updates as the post progresses through the roadmap.",
+    "faqQ3": "Can we keep internal team roadmap items private?",
+    "faqA3": "Yes. UserHQ gives your team private backlog boards and draft statuses. You choose exactly which items and statuses are published to the public portal and which remain internal.",
+    "faqQ4": "How are subscribers notified when a changelog entry is published?",
+    "faqA4": "When you publish a changelog entry, UserHQ sends email updates to subscribed customers and everyone who voted for linked roadmap items, closing the feedback loop automatically."
   },
   "board": {
     "category": "Category",
@@ -1268,7 +1306,8 @@
     "makeDefault": "Make default",
     "defaultStatusCannotBeDeleted": "The default status can't be deleted",
     "needAtLeastOneStatus": "A product needs at least one status",
-    "showOnPublicRoadmapHelp": "When checked, items in this stage appear as a column on your public product roadmap."
+    "showOnPublicRoadmapHelp": "When checked, items in this stage appear as a column on your public product roadmap.",
+    "typeHelper": "The type decides how the status behaves, for example which posts count as done."
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1324,7 +1363,14 @@
     "antiSpoofingSecretLabel": "Anti-Spoofing HMAC Secret (Optional)",
     "antiSpoofingSecretPlaceholder": "Enter secret token for HMAC-SHA256 checking",
     "antiSpoofingSecretHelp": "When set, include both signature and timestamp parameters. {sigParam} is the HMAC-SHA256 hex of value + '.' + {tsParam}. {tsParam} is the Unix seconds when the link was signed, valid for 30 days.",
-    "deleteRuleAria": "Delete rule"
+    "deleteRuleAria": "Delete rule",
+    "slugLabel": "Slug (unique identifier)",
+    "descriptionLabel": "Description (internal note)",
+    "textColorLabel": "Text Color",
+    "priorityLabel": "Priority (Higher = First)",
+    "slugPrefix": "slug:",
+    "priorityPrefix": "priority:",
+    "hmacVerified": "HMAC verified"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1493,7 +1539,8 @@
     "openPublicPortalPost": "Open public portal post",
     "statusLockedHelp": "Status is locked to the linked roadmap item. Move the item on the roadmap to change status.",
     "editedSuffix": "· edited",
-    "publicNoteHelper": "Shown on the post with your name."
+    "publicNoteHelper": "Shown on the post with your name.",
+    "mergeConfirmNotice": "Votes and comments move to “{target}”. People who voted on both are counted once. The link to “{source}” will open “{target}” instead. This can’t be undone."
   },
   "productUsers": {
     "badgeGranted": "Badge granted",
@@ -1547,6 +1594,72 @@
     "copyResponse": "Copy Response",
     "copyCode": "Copy Code",
     "workspace": "Workspace",
-    "category": "Category"
+    "category": "Category",
+    "searchPlaceholder": "Search endpoints by path, verb, scope, or keyword...",
+    "scope": "Scope:",
+    "defaultPrefix": "Default:"
+  },
+  "devUpload": {
+    "title": "Upload test",
+    "devOnly": "Dev only",
+    "description": "Checks the image pipeline end to end. PNG, JPEG, WebP, and GIF files up to 2 MB are accepted. Each upload is converted to WebP, resized to at most 1600 px wide, and stripped of metadata. Animated GIFs keep only their first frame.",
+    "imageFileLabel": "Image file",
+    "fileTypesHelp": "PNG, JPEG, WebP, or GIF, up to 2 MB.",
+    "uploadImage": "Upload image",
+    "signInAgain": "Sign in again",
+    "uploadComplete": "Upload complete",
+    "uploadSucceeded": "Upload succeeded",
+    "format": "Format",
+    "dimensions": "Dimensions",
+    "size": "Size",
+    "url": "URL",
+    "copied": "Copied",
+    "copyUrl": "Copy URL",
+    "noImageYet": "No image uploaded yet",
+    "noImageDesc": "Choose an image and select Upload image. The converted WebP will appear here."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "updated": "October 23, 2026",
+    "intro": "UserHQ is operated by Increasing Labs. This policy explains what we collect when you use UserHQ, why, and the choices you have.",
+    "h2Collect": "Information we collect",
+    "accountInfoTitle": "Account information.",
+    "accountInfoDesc": "When you sign in with Google or GitHub we receive your name, email address, and profile picture. We do not receive your password.",
+    "contentSubmitTitle": "Content you submit.",
+    "contentSubmitDesc": "Feedback posts, comments, votes, and images you upload to a product portal.",
+    "deviceInfoTitle": "Device information.",
+    "deviceInfoDesc": "Basic browser and device details (such as browser and operating system) attached to posts and comments to help product teams reproduce issues.",
+    "cookiesTitle": "Session cookies.",
+    "cookiesDesc": "We use a cookie to keep you signed in. We do not use advertising or cross-site tracking cookies.",
+    "h2Use": "How we use it",
+    "useDesc": "To run the service: authenticate you, display your posts and comments, send notifications about activity you follow, and keep the service secure. We do not sell your information.",
+    "h2WhoCanSee": "Who can see it",
+    "whoCanSeeDesc": "Posts, comments, and your display name are visible to others on the product portal where you post, and to that product's team. Your email address is visible to the team of the product you interact with, but not to other users.",
+    "h2Providers": "Service providers",
+    "providersDesc": "We use Google and GitHub for sign-in and Brevo to deliver email. Data is stored on servers operated by Increasing Labs.",
+    "h2Email": "Email",
+    "emailDesc": "Notification emails include a one-click unsubscribe link. Essential account emails may still be sent.",
+    "h2Retention": "Retention and deletion",
+    "retentionDesc": "We keep your data while your account is active. You can delete your account from your account page, which removes your personal information; contact us if you need help.",
+    "h2Contact": "Contact",
+    "contactDesc": "Questions or requests:"
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "updated": "October 23, 2026",
+    "intro": "By using UserHQ, operated by Increasing Labs, you agree to these terms. If you do not agree, please do not use the service.",
+    "h2Account": "Your account",
+    "accountDesc": "You sign in with Google or GitHub and are responsible for activity on your account. Workspace creation is by invitation.",
+    "h2Content": "Your content",
+    "contentDesc": "You own what you post. You grant us and the relevant product team a license to host and display it as part of the service. Do not post anything unlawful, abusive, infringing, or malicious, or attempt to access data that is not yours.",
+    "h2Acceptable": "Acceptable use",
+    "acceptableDesc": "Do not disrupt the service, probe for vulnerabilities without permission, scrape it at scale, or use it to send spam. We may remove content or suspend accounts that violate these terms.",
+    "h2Availability": "Availability",
+    "availabilityDesc": "We work to keep UserHQ running but provide it “as is” without warranties. We may change or discontinue features at any time.",
+    "h2Liability": "Liability",
+    "liabilityDesc": "To the extent permitted by law, Increasing Labs is not liable for indirect or consequential damages arising from your use of the service.",
+    "h2Changes": "Changes",
+    "changesDesc": "We may update these terms; continued use after a change means you accept it. See also our",
+    "h2Contact": "Contact"
   }
 }

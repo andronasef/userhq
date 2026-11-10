@@ -140,7 +140,7 @@ export function SwaggerExplorer({ workspaces = [] }: SwaggerExplorerProps) {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search endpoints by path, verb, scope, or keyword..."
+              placeholder={t("swagger.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-sm bg-background border border-border rounded-lg placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40 focus:border-border transition-all"
@@ -471,7 +471,7 @@ print(data)`;
                   </code>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">Scope:</span>
+                  <span className="text-muted-foreground">{t("swagger.scope")}</span>
                   <code className="px-1.5 py-0.5 rounded bg-muted text-[var(--primary-text)] font-mono font-semibold">
                     {endpoint.scope}
                   </code>
@@ -529,7 +529,7 @@ print(data)`;
                               <div>{p.description}</div>
                               {p.default && (
                                 <div className="text-[11px] text-muted-foreground mt-0.5">
-                                  Default: <code className="px-1 py-0.2 rounded bg-muted">{p.default}</code>
+                                  {t("swagger.defaultPrefix")} <code className="px-1 py-0.2 rounded bg-muted">{p.default}</code>
                                 </div>
                               )}
                             </td>

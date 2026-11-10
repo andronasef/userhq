@@ -1,74 +1,58 @@
 import type { Metadata } from "next";
 import { LegalPage } from "../../../components/legal-page";
+import { getRequestLocale, getDictionary } from "../../../lib/i18n/server";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy · UserHQ",
-  description: "How UserHQ collects, uses, and protects your information.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale();
+  const dict = await getDictionary(locale);
+  return {
+    title: `${dict.privacy.title} · UserHQ`,
+    description: dict.privacy.intro,
+  };
+}
 
-export default function PrivacyPage(): React.JSX.Element {
+export default async function PrivacyPage(): Promise<React.JSX.Element> {
+  const locale = await getRequestLocale();
+  const dict = await getDictionary(locale);
+
   return (
-    <LegalPage title="Privacy Policy" updated="October 23, 2026">
-      <p>
-        UserHQ is operated by Increasing Labs. This policy explains what we collect when you use
-        UserHQ, why, and the choices you have.
-      </p>
+    <LegalPage title={dict.privacy.title} updated={dict.privacy.updated}>
+      <p>{dict.privacy.intro}</p>
 
-      <h2>Information we collect</h2>
+      <h2>{dict.privacy.h2Collect}</h2>
       <ul>
         <li>
-          <strong>Account information.</strong> When you sign in with Google or GitHub we receive
-          your name, email address, and profile picture. We do not receive your password.
+          <strong>{dict.privacy.accountInfoTitle}</strong> {dict.privacy.accountInfoDesc}
         </li>
         <li>
-          <strong>Content you submit.</strong> Feedback posts, comments, votes, and images you
-          upload to a product portal.
+          <strong>{dict.privacy.contentSubmitTitle}</strong> {dict.privacy.contentSubmitDesc}
         </li>
         <li>
-          <strong>Device information.</strong> Basic browser and device details (such as browser
-          and operating system) attached to posts and comments to help product teams reproduce
-          issues.
+          <strong>{dict.privacy.deviceInfoTitle}</strong> {dict.privacy.deviceInfoDesc}
         </li>
         <li>
-          <strong>Session cookies.</strong> We use a cookie to keep you signed in. We do not use
-          advertising or cross-site tracking cookies.
+          <strong>{dict.privacy.cookiesTitle}</strong> {dict.privacy.cookiesDesc}
         </li>
       </ul>
 
-      <h2>How we use it</h2>
-      <p>
-        To run the service: authenticate you, display your posts and comments, send notifications
-        about activity you follow, and keep the service secure. We do not sell your information.
-      </p>
+      <h2>{dict.privacy.h2Use}</h2>
+      <p>{dict.privacy.useDesc}</p>
 
-      <h2>Who can see it</h2>
-      <p>
-        Posts, comments, and your display name are visible to others on the product portal where
-        you post, and to that product&apos;s team. Your email address is visible to the team of the
-        product you interact with, but not to other users.
-      </p>
+      <h2>{dict.privacy.h2WhoCanSee}</h2>
+      <p>{dict.privacy.whoCanSeeDesc}</p>
 
-      <h2>Service providers</h2>
-      <p>
-        We use Google and GitHub for sign-in and Brevo to deliver email. Data is stored on servers
-        operated by Increasing Labs.
-      </p>
+      <h2>{dict.privacy.h2Providers}</h2>
+      <p>{dict.privacy.providersDesc}</p>
 
-      <h2>Email</h2>
-      <p>
-        Notification emails include a one-click unsubscribe link. Essential account emails may
-        still be sent.
-      </p>
+      <h2>{dict.privacy.h2Email}</h2>
+      <p>{dict.privacy.emailDesc}</p>
 
-      <h2>Retention and deletion</h2>
-      <p>
-        We keep your data while your account is active. You can delete your account from your
-        account page, which removes your personal information; contact us if you need help.
-      </p>
+      <h2>{dict.privacy.h2Retention}</h2>
+      <p>{dict.privacy.retentionDesc}</p>
 
-      <h2>Contact</h2>
+      <h2>{dict.privacy.h2Contact}</h2>
       <p>
-        Questions or requests:{" "}
+        {dict.privacy.contactDesc}{" "}
         <a href="mailto:hello@increasinglab.com">hello@increasinglab.com</a>.
       </p>
     </LegalPage>

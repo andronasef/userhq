@@ -147,7 +147,7 @@ export function PostDetailView({
                   href={postHref(ws, product, post.number, post.slug)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="Open public portal post"
+                  title={t("posts.openPublicPortalPost")}
                 >
                   <span>{t("board.viewPortal")}</span>
                   <ExternalLink className="size-3.5" aria-hidden="true" />
@@ -158,7 +158,7 @@ export function PostDetailView({
               variant="outline"
               onClick={() => setStatusDialogOpen(true)}
               disabled={isStatusLocked}
-              title={isStatusLocked ? "Status is locked to the linked roadmap item. Move the item on the roadmap to change status." : undefined}
+              title={isStatusLocked ? t("posts.statusLockedHelp") : undefined}
             >
               {t("postDetail.changeStatus")}
             </Button>
@@ -185,7 +185,7 @@ export function PostDetailView({
           <Badge variant="neutral">{post.category.name}</Badge>
         )}
         {post.editedAt && (
-          <span className="text-sm text-muted-foreground">· edited</span>
+          <span className="text-sm text-muted-foreground">{t("posts.editedSuffix")}</span>
         )}
         {post.deviceInfo && (
           <DeviceBadge deviceInfo={post.deviceInfo} />

@@ -24,26 +24,7 @@ import { errorCopy } from "../../../../../lib/api-errors";
 import { QueryProvider } from "../../../../../lib/query-client";
 
 type FeatureKey = (typeof PRODUCT_FEATURE_KEYS)[number];
-const FEATURE_COPY: Record<FeatureKey, { name: string; description: string }> =
-  {
-    board: {
-      name: "Feedback board",
-      description:
-        "Customers submit ideas, vote, and comment. Turning it off also stops customer notifications about feedback.",
-    },
-    roadmap: {
-      name: "Roadmap",
-      description: "Customers see what is planned and in progress.",
-    },
-    changelog: {
-      name: "Changelog",
-      description: "Customers read your release notes.",
-    },
-    faq: {
-      name: "FAQ",
-      description: "Customers search answers to common questions.",
-    },
-  };
+
 interface ProductFeaturesFormProps {
   ws: string;
   product: ProductDetail;
@@ -60,7 +41,7 @@ function ProductFeaturesFormInner({
   product,
   host,
 }: ProductFeaturesFormProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const router = useRouter();
   const [ready, setReady] = React.useState(false);
   React.useEffect(() => setReady(true), []);
@@ -69,6 +50,26 @@ function ProductFeaturesFormInner({
     null,
   );
   const [alertError, setAlertError] = React.useState<string | null>(null);
+
+  const featureCopy: Record<FeatureKey, { name: string; description: string }> = {
+    board: {
+      name: t("settings.featureFeedbackBoardName"),
+      description: t("settings.featureFeedbackBoardDesc"),
+    },
+    roadmap: {
+      name: t("settings.featureRoadmapName"),
+      description: t("settings.featureRoadmapDesc"),
+    },
+    changelog: {
+      name: t("settings.featureChangelogName"),
+      description: t("settings.featureChangelogDesc"),
+    },
+    faq: {
+      name: t("settings.featureFaqName"),
+      description: t("settings.featureFaqDesc"),
+    },
+  };
+
   const {
     register,
     handleSubmit,
@@ -117,24 +118,24 @@ function ProductFeaturesFormInner({
     else mutation.mutate(features);
   };
   const names =
-    pendingSave?.turningOff.map((key) => FEATURE_COPY[key].name) ?? [];
-  const nameList = new Intl.ListFormat("en", {
+    pendingSave?.turningOff.map((key) => featureCopy[key].name) ?? [];
+  const nameList = new Intl.ListFormat(locale || "en", {
     style: "long",
     type: "conjunction",
   }).format(names);
   const confirmTitle = pendingSave?.allOff
-    ? "Hide everything from customers?"
+    ? t("settings.hideAllConfirmTitle")
     : names.length === 1
-      ? `Hide ${names[0]} from customers?`
-      : `Hide ${names.length} features from customers?`;
+      ? t("settings.hideSingleConfirmTitle", { name: names[0] })
+      : t("settings.hideMultipleConfirmTitle", { count: names.length });
   const confirmDescription =
     (pendingSave?.allOff
-      ? "Customers will see an unavailable page instead of your portal. Your content is kept, and you can turn features back on at any time."
+      ? t("settings.hideAllConfirmDesc")
       : names.length === 1
-        ? `Customers will no longer see ${names[0]} or open links to it. Your content is kept, and you can turn ${names[0]} back on at any time.`
-        : `Customers will no longer see ${nameList}. Your content is kept, and you can turn them back on at any time.`) +
+        ? t("settings.hideSingleConfirmDesc", { name: names[0] })
+        : t("settings.hideMultipleConfirmDesc", { names: nameList })) +
     (pendingSave?.turningOff.includes("board")
-      ? " Customers also stop getting notifications about feedback. Notifications for activity while it is off are not sent later."
+      ? t("settings.hideBoardNotice")
       : "");
 
   return (
@@ -175,7 +176,7 @@ function ProductFeaturesFormInner({
                       id={`feature-${key}-name`}
                       className="text-sm font-semibold text-foreground"
                     >
-                      {FEATURE_COPY[key].name}
+                      {featureCopy[key].name}
                     </span>
                     {!savedFeatures[key] && (
                       <Badge variant="outline">
@@ -188,7 +189,7 @@ function ProductFeaturesFormInner({
                     id={`feature-${key}-desc`}
                     className="text-sm text-muted-foreground"
                   >
-                    {FEATURE_COPY[key].description}
+                    {featureCopy[key].description}
                   </span>
                 </span>
               </label>
@@ -201,8 +202,9 @@ function ProductFeaturesFormInner({
             >
               <Info className="size-4 shrink-0 mt-0.5" aria-hidden />
               <span>
-                With every feature off, customers see an unavailable page at{" "}
-                {host}/{ws}/{product.slug}.
+                {t("settings.allFeaturesOffWarning", {
+                  url: `${host}/${ws}/${product.slug}`,
+                })}
               </span>
             </p>
           )}
@@ -230,16 +232,16 @@ function ProductFeaturesFormInner({
         }}
         title={confirmTitle}
         description={confirmDescription}
-        dismissLabel="Keep visible"
+        dismissLabel={t("settings.keepVisible")}
         confirmVariant="default"
         confirmLabel={
           pendingSave?.allOff
-            ? "Hide everything"
+            ? t("settings.hideAllAction")
             : names.length === 1
-              ? `Hide ${names[0]}`
-              : `Hide ${names.length} features`
+              ? t("settings.hideSingleAction", { name: names[0] })
+              : t("settings.hideMultipleAction", { count: names.length })
         }
-        pendingLabel="Saving…"
+        pendingLabel={t("settings.saving")}
         onConfirm={async () => {
           if (pendingSave) await mutation.mutateAsync(pendingSave.features);
         }}

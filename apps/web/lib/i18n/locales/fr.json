@@ -70,7 +70,10 @@
     "copyLink": "Copier le lien",
     "uploading": "Téléversement...",
     "deletedUser": "Utilisateur supprimé",
-    "anonymous": "Anonyme"
+    "anonymous": "Anonyme",
+    "byAuthor": "par {author}",
+    "voteCount": "{count} vote",
+    "votesCount": "{count} votes"
   },
   "portal": {
     "submitFeedback": "Proposer une idée",
@@ -103,7 +106,9 @@
     "emptyBody": "{name} n'est pas ouvert aux visiteurs pour le moment. Veuillez réessayer plus tard.",
     "visitCompany": "Visiter {company}",
     "backToCompany": "Retour à {name}",
-    "activitySubtitle": "Publications que vous avez créées, votées ou commentées pour {name}."
+    "activitySubtitle": "Publications que vous avez créées, votées ou commentées pour {name}.",
+    "noProductsYet": "Aucun produit pour le moment",
+    "noProductsYetDesc": "{name} n'a encore publié aucun produit."
   },
   "dashboard": {
     "workspaces": "Espaces de travail",
@@ -348,7 +353,9 @@
     "linkedPostSuccess": "#{number} lié",
     "deleteItemError": "Impossible de supprimer l'élément. Réessayez.",
     "loadingLinkedPosts": "Chargement des publications liées…",
-    "unlinkPostAria": "Délier la publication #{number}"
+    "unlinkPostAria": "Délier la publication #{number}",
+    "alreadyLinked": "Déjà lié",
+    "linkedElsewhere": "Lié ailleurs"
   },
   "changelog": {
     "title": "Journal des modifications",
@@ -413,14 +420,15 @@
     "allUpdates": "Toutes les mises à jour",
     "previewTitle": "Aperçu du journal des modifications",
     "previewDesc": "Ceci est un aperçu de la façon dont cette note de version apparaîtra aux lecteurs publics.",
-    "publishedBy": "Équipe {name}",
+    "publishedBy": "Publié par {name}",
     "failedToUnpublish": "Échec de la dépublication de l'entrée",
     "scheduledNotice": "Sera mis en ligne sur le portail à la date de sortie",
     "tagNameRequired": "Le nom de l'étiquette est requis",
     "failedToCreateTag": "Échec de la création de l'étiquette",
     "failedToDeleteTag": "Échec de la suppression de l'étiquette",
     "deleteTagAria": "Supprimer l'étiquette {name}",
-    "noTagsYetHelp": "Aucune étiquette pour l'instant. Cliquez sur « Gérer les étiquettes » pour en ajouter."
+    "noTagsYetHelp": "Aucun tag pour le moment. Cliquez sur \"Gérer les tags\" pour en ajouter.",
+    "teamAttribution": "Équipe {name}"
   },
   "faq": {
     "title": "Foire Aux Questions (FAQ)",
@@ -756,7 +764,29 @@
     "typeToConfirm": "Tapez {name} pour confirmer",
     "deleteProductConfirmTitle": "Supprimer {name} ?",
     "deleteProductConfirmDesc": "Son portail public est immédiatement mis hors ligne et son URL ne peut plus être réutilisée. Cette action est irréversible.",
-    "deletedSuccess": "{name} supprimé"
+    "deletedSuccess": "{name} supprimé",
+    "productSettingsTitle": "Paramètres du produit",
+    "productSettingsDesc": "Les modifications apparaissent immédiatement sur le portail public.",
+    "featureFeedbackBoardName": "Tableau de retours",
+    "featureFeedbackBoardDesc": "Les clients soumettent des idées, votent et commentent. Le désactiver arrête également les notifications des clients concernant les retours.",
+    "featureRoadmapName": "Feuille de route",
+    "featureRoadmapDesc": "Les clients voient ce qui est prévu et en cours.",
+    "featureChangelogName": "Journal des modifications",
+    "featureChangelogDesc": "Les clients lisent vos notes de version.",
+    "featureFaqName": "FAQ",
+    "featureFaqDesc": "Les clients recherchent des réponses aux questions fréquentes.",
+    "allFeaturesOffWarning": "Avec toutes les fonctionnalités désactivées, les clients voient une page indisponible à {url}.",
+    "keepVisible": "Garder visible",
+    "hideAllConfirmTitle": "Tout masquer aux clients ?",
+    "hideSingleConfirmTitle": "Masquer {name} aux clients ?",
+    "hideMultipleConfirmTitle": "Masquer {count} fonctionnalités aux clients ?",
+    "hideAllConfirmDesc": "Les clients verront une page indisponible au lieu de votre portail. Votre contenu est conservé et vous pouvez réactiver les fonctionnalités à tout moment.",
+    "hideSingleConfirmDesc": "Les clients ne verront plus {name} et ne pourront plus ouvrir ses liens. Votre contenu est conservé et vous pouvez réactiver {name} à tout moment.",
+    "hideMultipleConfirmDesc": "Les clients ne verront plus {names}. Votre contenu est conservé et vous pouvez les réactiver à tout moment.",
+    "hideBoardNotice": " Les clients ne reçoivent plus non plus de notifications sur les retours. Les notifications pour l'activité pendant la désactivation ne sont pas envoyées plus tard.",
+    "hideAllAction": "Tout masquer",
+    "hideSingleAction": "Masquer {name}",
+    "hideMultipleAction": "Masquer {count} fonctionnalités"
   },
   "landing": {
     "heroHeading": "Les grands produits naissent de l'écoute.",
@@ -834,7 +864,15 @@
     "searchPlaceholder": "Rechercher des retours...",
     "comments": "commentaires",
     "showcaseViews": "Vues de présentation du produit",
-    "interactivePreview": "Aperçu interactif du produit"
+    "interactivePreview": "Aperçu interactif du produit",
+    "faqQ1": "Comment notre équipe peut-elle obtenir une invitation à UserHQ ?",
+    "faqA1": "La création d'espace de travail est actuellement sur invitation uniquement pendant notre phase d'aperçu. Si votre équipe souhaite lancer un portail, contactez Increasing Labs à hello@increasinglab.com pour demander un accès anticipé.",
+    "faqQ2": "Comment fonctionne le vote sur les portails clients publics ?",
+    "faqA2": "Les clients se connectent avec leur compte Google ou GitHub pour exprimer un vote par publication. Ils peuvent retirer leur vote à tout moment et reçoivent des mises à jour automatiques du statut à mesure que la publication progresse.",
+    "faqQ3": "Pouvons-nous garder privés les éléments internes de la feuille de route ?",
+    "faqA3": "Oui. UserHQ fournit à votre équipe des tableaux de tâches privées et des statuts de brouillon. Vous choisissez exactement quels éléments et statuts sont publiés sur le portail public et lesquels restent internes.",
+    "faqQ4": "Comment les abonnés sont-ils informés lors de la publication d'un journal des modifications ?",
+    "faqA4": "Lorsque vous publiez une entrée, UserHQ envoie des mises à jour par e-mail aux clients abonnés et à tous ceux qui ont voté pour les éléments liés, fermant ainsi automatiquement la boucle de rétroaction."
   },
   "board": {
     "category": "Catégorie",
@@ -1268,7 +1306,8 @@
     "makeDefault": "Définir par défaut",
     "defaultStatusCannotBeDeleted": "Le statut par défaut ne peut pas être supprimé",
     "needAtLeastOneStatus": "Un produit doit avoir au moins un statut",
-    "showOnPublicRoadmapHelp": "Lorsque cette option est cochée, les éléments de cette étape apparaissent sous forme de colonne sur votre feuille de route publique."
+    "showOnPublicRoadmapHelp": "Lorsque cette option est cochée, les éléments de cette étape apparaissent sous forme de colonne sur votre feuille de route publique.",
+    "typeHelper": "Le type détermine le comportement du statut, par exemple quelles publications sont considérées comme terminées."
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1324,7 +1363,14 @@
     "antiSpoofingSecretLabel": "Secret HMAC anti-usurpation (facultatif)",
     "antiSpoofingSecretPlaceholder": "Entrez le jeton secret pour la vérification HMAC-SHA256",
     "antiSpoofingSecretHelp": "Lorsqu'il est défini, incluez les paramètres de signature et d'horodatage. {sigParam} est l'hexadécimal HMAC-SHA256 de value + '.' + {tsParam}. {tsParam} correspond aux secondes Unix lors de la signature, valable 30 jours.",
-    "deleteRuleAria": "Supprimer la règle"
+    "deleteRuleAria": "Supprimer la règle",
+    "slugLabel": "Slug (identifiant unique)",
+    "descriptionLabel": "Description (note interne)",
+    "textColorLabel": "Couleur du texte",
+    "priorityLabel": "Priorité (Plus élevé = En premier)",
+    "slugPrefix": "slug :",
+    "priorityPrefix": "priorité :",
+    "hmacVerified": "Vérifié par HMAC"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1493,7 +1539,8 @@
     "openPublicPortalPost": "Ouvrir la publication sur le portail public",
     "statusLockedHelp": "Le statut est lié à l'élément de la feuille de route. Déplacez l'élément sur la feuille de route pour modifier son statut.",
     "editedSuffix": "· modifié",
-    "publicNoteHelper": "Affiché sur la publication avec votre nom."
+    "publicNoteHelper": "Affiché sur la publication avec votre nom.",
+    "mergeConfirmNotice": "Les votes et commentaires sont transférés vers « {target} ». Les personnes ayant voté sur les deux sont comptées une seule fois. Le lien vers « {source} » ouvrira désormais « {target} ». Cette action est irréversible."
   },
   "productUsers": {
     "badgeGranted": "Badge accordé",
@@ -1547,6 +1594,72 @@
     "copyResponse": "Copier la réponse",
     "copyCode": "Copier le code",
     "workspace": "Espace de travail",
-    "category": "Catégorie"
+    "category": "Catégorie",
+    "searchPlaceholder": "Rechercher des points de terminaison par chemin, verbe, portée ou mot-clé...",
+    "scope": "Portée :",
+    "defaultPrefix": "Par défaut :"
+  },
+  "devUpload": {
+    "title": "Test de téléversement",
+    "devOnly": "Dév uniquement",
+    "description": "Vérifie le traitement des images de bout en bout. Fichiers PNG, JPEG, WebP et GIF jusqu'à 2 Mo acceptés. Chaque téléversement est converti en WebP, redimensionné à 1600 px de large max et débarrassé des métadonnées. Les GIF animés ne conservent que leur première image.",
+    "imageFileLabel": "Fichier image",
+    "fileTypesHelp": "PNG, JPEG, WebP ou GIF, jusqu'à 2 Mo.",
+    "uploadImage": "Téléverser l'image",
+    "signInAgain": "Se reconnecter",
+    "uploadComplete": "Téléversement terminé",
+    "uploadSucceeded": "Téléversement réussi",
+    "format": "Format",
+    "dimensions": "Dimensions",
+    "size": "Taille",
+    "url": "URL",
+    "copied": "Copié",
+    "copyUrl": "Copier l'URL",
+    "noImageYet": "Aucune image téléversée",
+    "noImageDesc": "Choisissez une image et sélectionnez Téléverser l'image. Le WebP converti apparaîtra ici."
+  },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "updated": "23 octobre 2026",
+    "intro": "UserHQ est exploité par Increasing Labs. Cette politique explique ce que nous collectons lorsque vous utilisez UserHQ, pourquoi et les choix dont vous disposez.",
+    "h2Collect": "Informations que nous collectons",
+    "accountInfoTitle": "Informations de compte.",
+    "accountInfoDesc": "Lorsque vous vous connectez avec Google ou GitHub, nous recevons votre nom, votre adresse e-mail et votre photo de profil. Nous ne recevons pas votre mot de passe.",
+    "contentSubmitTitle": "Contenu que vous soumettez.",
+    "contentSubmitDesc": "Publications de retours, commentaires, votes et images que vous téléversez sur un portail de produit.",
+    "deviceInfoTitle": "Informations sur l'appareil.",
+    "deviceInfoDesc": "Détails de base sur le navigateur et l'appareil (tels que le navigateur et le système d'exploitation) joints aux publications et commentaires pour aider les équipes de produit à reproduire les problèmes.",
+    "cookiesTitle": "Cookies de session.",
+    "cookiesDesc": "Nous utilisons un cookie pour vous maintenir connecté. Nous n'utilisons aucun cookie publicitaire ou de suivi intersite.",
+    "h2Use": "Comment nous les utilisons",
+    "useDesc": "Pour faire fonctionner le service : vous authentifier, afficher vos publications et commentaires, envoyer des notifications sur les activités que vous suivez et sécuriser le service. Nous ne vendons pas vos informations.",
+    "h2WhoCanSee": "Qui peut les voir",
+    "whoCanSeeDesc": "Les publications, les commentaires et votre nom d'affichage sont visibles par les autres sur le portail du produit où vous publiez, ainsi que par l'équipe de ce produit. Votre adresse e-mail est visible par l'équipe du produit concerné, mais pas par les autres utilisateurs.",
+    "h2Providers": "Fournisseurs de services",
+    "providersDesc": "Nous utilisons Google et GitHub pour la connexion et Brevo pour la distribution des e-mails. Les données sont stockées sur des serveurs gérés par Increasing Labs.",
+    "h2Email": "E-mail",
+    "emailDesc": "Les e-mails de notification incluent un lien de désinscription en un clic. Les e-mails essentiels relatifs au compte peuvent toujours être envoyés.",
+    "h2Retention": "Conservation et suppression",
+    "retentionDesc": "Nous conservons vos données tant que votre compte est actif. Vous pouvez supprimer votre compte depuis votre page de compte, ce qui supprime vos informations personnelles ; contactez-nous si vous avez besoin d'aide.",
+    "h2Contact": "Contact",
+    "contactDesc": "Questions ou demandes :"
+  },
+  "terms": {
+    "title": "Conditions d'utilisation",
+    "updated": "23 octobre 2026",
+    "intro": "En utilisant UserHQ, exploité par Increasing Labs, vous acceptez ces conditions. Si vous n'êtes pas d'accord, veuillez ne pas utiliser le service.",
+    "h2Account": "Votre compte",
+    "accountDesc": "Vous vous connectez avec Google ou GitHub et êtes responsable de l'activité sur votre compte. La création d'espace de travail se fait sur invitation.",
+    "h2Content": "Votre contenu",
+    "contentDesc": "Vous êtes propriétaire de ce que vous publiez. Vous nous accordez, ainsi qu'à l'équipe du produit concerné, une licence pour l'héberger et l'afficher dans le cadre du service. Ne publiez rien d'illégal ou de malveillant.",
+    "h2Acceptable": "Utilisation acceptable",
+    "acceptableDesc": "Ne perturbez pas le service, ne recherchez pas de vulnérabilités sans autorisation, n'effectuez pas de scraping à grande échelle et n'envoyez pas de spam. Nous pouvons supprimer du contenu ou suspendre des comptes qui enfreignent ces conditions.",
+    "h2Availability": "Disponibilité",
+    "availabilityDesc": "Nous veillons à maintenir UserHQ opérationnel, mais nous le fournissons « en l'état » sans garantie. Nous pouvons modifier ou interrompre des fonctionnalités à tout moment.",
+    "h2Liability": "Responsabilité",
+    "liabilityDesc": "Dans la mesure permise par la loi, Increasing Labs n'est pas responsable des dommages indirects ou consécutifs résultant de votre utilisation du service.",
+    "h2Changes": "Modifications",
+    "changesDesc": "Nous pouvons mettre à jour ces conditions ; l'utilisation continue après une modification vaut acceptation. Consultez également notre",
+    "h2Contact": "Contact"
   }
 }

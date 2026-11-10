@@ -179,19 +179,19 @@ export function MergeDialog({
               aria-live="polite"
               className="sr-only"
             >
-              {`${results.length} posts found`}
+              {t("posts.postsFound", { count: results.length })}
             </div>
 
             <div className="max-h-72 overflow-y-auto flex flex-col gap-2">
               {loading ? (
                 <div className="py-6 text-center text-sm text-muted-foreground">
-                  Searching…
+                  {t("common.searching")}
                 </div>
               ) : results.length === 0 ? (
                 <div className="py-6 text-center text-sm text-muted-foreground">
                   {query.trim()
-                    ? `No posts match "${query.trim()}".`
-                    : "No posts yet."}
+                    ? t("posts.noPostsMatch", { query: query.trim() })
+                    : t("board.noPostsYet")}
                 </div>
               ) : (
                 results.map((r) => (
@@ -274,7 +274,7 @@ export function MergeDialog({
                 onClick={() => setStep(1)}
                 disabled={isMerging}
               >
-                Choose another post
+                {t("posts.chooseAnotherPost")}
               </Button>
               <Button
                 type="button"

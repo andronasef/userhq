@@ -125,7 +125,7 @@ export function ChangelogArticle({
       <div className="flex items-center gap-2">
         <EntityLogo src={productLogoUrl} name={productName} size={24} />
         <span className="text-sm font-medium text-foreground">
-          {productName} team
+          {t("changelog.publishedBy", { name: productName })}
         </span>
       </div>
 
@@ -143,7 +143,7 @@ export function ChangelogArticle({
           href={`/${ws}/${product}/changelog`}
           className="text-sm font-medium text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 transition-colors"
         >
-          ← Back to changelog
+          {t("changelog.backToChangelog")}
         </Link>
       </div>
     </div>

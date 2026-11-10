@@ -60,7 +60,17 @@
     "goToHome": "返回首页",
     "tryAgain": "重试",
     "reset": "重置",
-    "actions": "操作"
+    "actions": "操作",
+    "account": "账户",
+    "pressToCopy": "按 Ctrl+C 或 ⌘C 复制。",
+    "internal": "内部",
+    "searching": "正在搜索…",
+    "goToUserhq": "前往 UserHQ",
+    "public": "公开",
+    "copyLink": "复制链接",
+    "uploading": "上传中...",
+    "deletedUser": "已删除的用户",
+    "anonymous": "匿名"
   },
   "portal": {
     "submitFeedback": "提交反馈",
@@ -269,7 +279,7 @@
     "title": "路线图",
     "description": "规划接下来要构建的功能。在列之间拖动条目以更新其状态。",
     "newItem": "新建条目",
-    "filterByAssignee": "按负责人筛选",
+    "filterByAssignee": "按指派人筛选",
     "allAssignees": "所有负责人",
     "unassigned": "未分配",
     "addItem": "添加条目",
@@ -330,7 +340,15 @@
     "internalNotesPlaceholder": "添加内部链接、客户原话或实现说明…",
     "translationForTitle": "公开标题的翻译 ({locale})...",
     "translationForDesc": "公开描述的翻译 ({locale})...",
-    "publicTitleHelper": "在公开路线图上展示的面向客户的标题。"
+    "publicTitleHelper": "在公开路线图上展示的面向客户的标题。",
+    "linkedFeedbackPosts": "{count} 个关联的反馈帖子",
+    "assignedTo": "已指派给 {name}",
+    "addItemToStatus": "添加条目至 {name}",
+    "moveItemError": "无法移动条目。请检查网络连接后重试。",
+    "linkedPostSuccess": "已关联 #{number}",
+    "deleteItemError": "无法删除条目。请重试。",
+    "loadingLinkedPosts": "正在加载关联帖子…",
+    "unlinkPostAria": "取消关联帖子 #{number}"
   },
   "changelog": {
     "title": "更新日志",
@@ -355,7 +373,7 @@
     "deleteEntryDesc": "此条目将被永久移除。此操作无法撤销。",
     "entryUnpublished": "条目已取消发布",
     "entryDeleted": "条目已删除",
-    "backToChangelog": "返回更新日志",
+    "backToChangelog": "← 返回更新日志",
     "unsavedChanges": "未保存的修改",
     "savingDraft": "保存中...",
     "draftSaved": "草稿已保存",
@@ -392,7 +410,17 @@
     "subtitle": "{name} 的新功能、改进和缺陷修复。",
     "noUpdatesBody": "请稍后查看公告、新功能和改进。",
     "linkCopied": "链接已复制到剪贴板",
-    "allUpdates": "所有更新"
+    "allUpdates": "所有更新",
+    "previewTitle": "更新日志预览",
+    "previewDesc": "这是该发布说明在公开读者端展示效果的预览。",
+    "publishedBy": "{name} 团队",
+    "failedToUnpublish": "撤回发布条目失败",
+    "scheduledNotice": "将在发布日期当天于门户上线",
+    "tagNameRequired": "标签名称为必填项",
+    "failedToCreateTag": "创建标签失败",
+    "failedToDeleteTag": "删除标签失败",
+    "deleteTagAria": "删除标签 {name}",
+    "noTagsYetHelp": "尚无标签。点击“管理标签”以添加标签。"
   },
   "faq": {
     "title": "常见问题 (FAQ)",
@@ -445,7 +473,13 @@
     "questionActions": "问题操作",
     "dragToReorderCategory": "拖动以重新排序分类",
     "categoryOptions": "分类选项",
-    "faqCategoriesNav": "常见问题分类"
+    "faqCategoriesNav": "常见问题分类",
+    "questionLinkCopied": "问题链接已复制",
+    "noQuestionsInCategory": "该分类下暂无问题。",
+    "detailedAnswerPlaceholder": "在此编写详细解答...",
+    "writeAnswerInLocale": "用 {locale} 编写解答...",
+    "reorderCategoryError": "无法对常见问题分类重新排序。请检查网络连接后重试。",
+    "reorderQuestionError": "无法对常见问题重新排序。请检查网络连接后重试。"
   },
   "apiKeys": {
     "title": "API 密钥",
@@ -719,7 +753,10 @@
     "workspaceDeleted": "已删除 {name}",
     "deleteWorkspaceTitle": "删除 {name}？",
     "deleteWorkspaceConfirmDesc": "此工作区中的所有产品将立即下线，且工作区 URL 无法再次使用。此操作无法撤销。",
-    "typeToConfirm": "输入 {name} 以确认"
+    "typeToConfirm": "输入 {name} 进行确认",
+    "deleteProductConfirmTitle": "删除 {name}？",
+    "deleteProductConfirmDesc": "其公共门户将立即下线，且其 URL 无法再次使用。此操作无法撤消。",
+    "deletedSuccess": "{name} 已删除"
   },
   "landing": {
     "heroHeading": "优秀的优秀产品始于认真倾听。",
@@ -1225,7 +1262,13 @@
     "typePlanned": "Planned",
     "typeActive": "In Progress",
     "typeCompleted": "Completed",
-    "typeClosed": "Closed"
+    "typeClosed": "Closed",
+    "reorderStatus": "重新排序 {name}",
+    "actionsForStatus": "{name} 的操作",
+    "makeDefault": "设为默认",
+    "defaultStatusCannotBeDeleted": "无法删除默认状态",
+    "needAtLeastOneStatus": "产品至少需要一个状态",
+    "showOnPublicRoadmapHelp": "勾选后，该阶段的条目将作为一列显示在公开产品路线图上。"
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1422,5 +1465,88 @@
     "destinationUrlLabel": "目标 URL",
     "invalidLinkProtocol": "URL 必须以 http://、https:// 或 mailto: 开头",
     "invalidLinkUrl": "请输入有效的 URL。"
+  },
+  "legal": {
+    "lastUpdated": "最近更新于 {date}"
+  },
+  "branding": {
+    "customHex": "{label} 自定义十六进制值",
+    "uploadLogo": "上传标志",
+    "removeLogo": "移除标志",
+    "logoRequirements": "PNG、JPEG、WebP 或 GIF，最大 2 MB。正方形图片效果最佳。",
+    "buttonTextColorLabel": "按钮文本颜色",
+    "buttonTextColorDesc": "按钮和强调色表面上显示的文本及图标颜色。",
+    "autoFg": "自动 ({fg})",
+    "livePreview": "实时预览",
+    "primaryButton": "主要按钮",
+    "outlineButton": "描边按钮",
+    "sampleLink": "示例链接",
+    "lowContrastWarning": "对比度较低 ({ratio}:1)。访客可能难以辨认按钮上的文本。建议选择“自动”或更高对比度的颜色。",
+    "lightAccentWarning": "此强调色在白色表面上偏浅，因此独立链接将使用深色文本，而按钮将使用您的主背景色。"
+  },
+  "posts": {
+    "publicNoteOptional": "公开备注（可选）",
+    "changedStatusTo": "已将状态更改为",
+    "postsFound": "找到 {count} 篇帖子",
+    "noPostsMatch": "没有匹配“{query}”的帖子。",
+    "chooseAnotherPost": "选择另一篇帖子",
+    "openPublicPortalPost": "打开公开门户帖子",
+    "statusLockedHelp": "状态已锁定至关联的路线图条目。请在路线图上移动该条目以更改状态。",
+    "editedSuffix": "· 已编辑",
+    "publicNoteHelper": "与您的姓名一起显示在帖子中。"
+  },
+  "productUsers": {
+    "badgeGranted": "徽章已授予",
+    "failedToGrantBadge": "授予徽章失败",
+    "badgeRevoked": "徽章已撤销",
+    "failedToRevokeBadge": "撤销徽章失败",
+    "activity": "活跃度",
+    "unnamedUser": "未命名用户",
+    "postsSubmitted": "已提交帖子",
+    "commentsWritten": "已撰写评论",
+    "votesCast": "已投出票数",
+    "showingRange": "显示第 {start}–{end} 项，共 {total} 项",
+    "pageOf": "第 {page} 页，共 {totalPages} 页",
+    "noBadgesAssigned": "当前未分配任何徽章给该用户。",
+    "allBadgesGranted": "该用户已拥有为该产品创建的所有徽章。",
+    "selectBadge": "选择要授予的徽章...",
+    "expirationDateOptional": "过期日期（可选）",
+    "granting": "正在授予..."
+  },
+  "invites": {
+    "invalidTitle": "此邀请链接无效",
+    "invalidDesc": "请检查是否复制了完整链接，或索取新链接。",
+    "wrongEmailTitle": "此邀请是发给其他邮箱地址的",
+    "expiredTitle": "此邀请已过期",
+    "expiredDesc": "邀请链接有效期为 7 天。请让邀请您的人发送新链接。",
+    "usedTitle": "此邀请已被使用",
+    "usedDesc": "每个邀请链接仅限使用一次。如果需要访问权限，请让邀请您的人发送新链接。",
+    "canceledTitle": "此邀请已被撤销",
+    "canceledDesc": "创建此链接的用户已将其撤销。请向其索取新链接。",
+    "workspaceUnavailableTitle": "该工作区不可用"
+  },
+  "swagger": {
+    "expandAll": "全部展开",
+    "collapseAll": "全部折叠",
+    "noEndpointsMatching": "没有匹配“{query}”的端点",
+    "noEndpointsHelp": "请尝试调整搜索词或切换上方的分类。",
+    "requiredScope": "所需权限范围：{scope}",
+    "specification": "接口规范",
+    "codeExamples": "代码示例",
+    "requiredAuth": "所需身份验证：",
+    "productRestrictable": "可按产品限制",
+    "parameters": "参数",
+    "noParametersRequired": "无需查询或路径参数。",
+    "colName": "名称",
+    "colIn": "位置",
+    "colType": "类型",
+    "colDescription": "描述",
+    "requestBody": "请求体 ({contentType})",
+    "copyPayload": "复制载荷",
+    "responses": "响应",
+    "copyResponse": "复制响应",
+    "copyCode": "复制代码",
+    "workspace": "工作区",
+    "category": "分类"
   }
 }

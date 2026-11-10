@@ -11,6 +11,7 @@ import {
 } from "@userhq/types";
 import { KanbanColumn } from "./kanban-column";
 import { apiFetch } from "../../lib/api-client";
+import { useI18n } from "../../lib/i18n/context";
 
 export interface KanbanBoardProps {
   ws: string;
@@ -33,6 +34,7 @@ export function KanbanBoard({
   onAddItem,
   onSelectItem,
 }: KanbanBoardProps) {
+  const { t } = useI18n();
   // Filter items by assignee if an assignee filter is selected
   const displayedItems = React.useMemo(() => {
     if (!selectedAssigneeId) return items;
@@ -144,7 +146,7 @@ export function KanbanBoard({
     } catch {
       // Rollback on failure
       onItemsChange(previousItems);
-      toast.error("Couldn't move item. Check your connection and try again.");
+      toast.error(t("roadmap.moveItemError"));
     }
   };
 

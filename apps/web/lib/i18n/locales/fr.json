@@ -60,7 +60,17 @@
     "goToHome": "Aller à l accueil",
     "tryAgain": "Réessayer",
     "reset": "Réinitialiser",
-    "actions": "Actions"
+    "actions": "Actions",
+    "account": "Compte",
+    "pressToCopy": "Appuyez sur Ctrl+C ou ⌘C pour copier.",
+    "internal": "Interne",
+    "searching": "Recherche…",
+    "goToUserhq": "Aller sur UserHQ",
+    "public": "Public",
+    "copyLink": "Copier le lien",
+    "uploading": "Téléversement...",
+    "deletedUser": "Utilisateur supprimé",
+    "anonymous": "Anonyme"
   },
   "portal": {
     "submitFeedback": "Proposer une idée",
@@ -330,7 +340,15 @@
     "internalNotesPlaceholder": "Ajoutez des liens privés, des citations de clients ou des notes de mise en œuvre…",
     "translationForTitle": "Traduction du titre public ({locale})...",
     "translationForDesc": "Traduction de la description publique ({locale})...",
-    "publicTitleHelper": "Titre destiné aux clients affiché sur la feuille de route publique."
+    "publicTitleHelper": "Titre destiné aux clients affiché sur la feuille de route publique.",
+    "linkedFeedbackPosts": "{count} {count, plural, one {publication} other {publications}} de retour liée(s)",
+    "assignedTo": "Assigné à {name}",
+    "addItemToStatus": "Ajouter un élément à {name}",
+    "moveItemError": "Impossible de déplacer l'élément. Vérifiez votre connexion et réessayez.",
+    "linkedPostSuccess": "#{number} lié",
+    "deleteItemError": "Impossible de supprimer l'élément. Réessayez.",
+    "loadingLinkedPosts": "Chargement des publications liées…",
+    "unlinkPostAria": "Délier la publication #{number}"
   },
   "changelog": {
     "title": "Journal des modifications",
@@ -355,7 +373,7 @@
     "deleteEntryDesc": "Cette entrée sera définitivement supprimée. Cette action est irréversible.",
     "entryUnpublished": "Entrée dépubliée",
     "entryDeleted": "Entrée supprimée",
-    "backToChangelog": "Retour au journal des modifications",
+    "backToChangelog": "← Retour au journal des modifications",
     "unsavedChanges": "Modifications non enregistrées",
     "savingDraft": "Enregistrement...",
     "draftSaved": "Brouillon enregistré",
@@ -392,7 +410,17 @@
     "subtitle": "Nouvelles fonctionnalités, améliorations et corrections de bugs pour {name}.",
     "noUpdatesBody": "Revenez bientôt pour des annonces, des nouvelles fonctionnalités et des améliorations.",
     "linkCopied": "Lien copié dans le presse-papiers",
-    "allUpdates": "Toutes les mises à jour"
+    "allUpdates": "Toutes les mises à jour",
+    "previewTitle": "Aperçu du journal des modifications",
+    "previewDesc": "Ceci est un aperçu de la façon dont cette note de version apparaîtra aux lecteurs publics.",
+    "publishedBy": "Équipe {name}",
+    "failedToUnpublish": "Échec de la dépublication de l'entrée",
+    "scheduledNotice": "Sera mis en ligne sur le portail à la date de sortie",
+    "tagNameRequired": "Le nom de l'étiquette est requis",
+    "failedToCreateTag": "Échec de la création de l'étiquette",
+    "failedToDeleteTag": "Échec de la suppression de l'étiquette",
+    "deleteTagAria": "Supprimer l'étiquette {name}",
+    "noTagsYetHelp": "Aucune étiquette pour l'instant. Cliquez sur « Gérer les étiquettes » pour en ajouter."
   },
   "faq": {
     "title": "Foire Aux Questions (FAQ)",
@@ -445,7 +473,13 @@
     "questionActions": "Actions de la question",
     "dragToReorderCategory": "Faire glisser pour réorganiser la catégorie",
     "categoryOptions": "Options de catégorie",
-    "faqCategoriesNav": "Catégories de FAQ"
+    "faqCategoriesNav": "Catégories de FAQ",
+    "questionLinkCopied": "Lien de la question copié",
+    "noQuestionsInCategory": "Aucune question dans cette catégorie pour le moment.",
+    "detailedAnswerPlaceholder": "Rédigez la réponse détaillée ici...",
+    "writeAnswerInLocale": "Rédigez la réponse en {locale}...",
+    "reorderCategoryError": "Impossible de réorganiser la catégorie de FAQ. Vérifiez votre connexion et réessayez.",
+    "reorderQuestionError": "Impossible de réorganiser la question de FAQ. Vérifiez votre connexion et réessayez."
   },
   "apiKeys": {
     "title": "Clés d'API",
@@ -719,7 +753,10 @@
     "workspaceDeleted": "{name} supprimé",
     "deleteWorkspaceTitle": "Supprimer {name} ?",
     "deleteWorkspaceConfirmDesc": "Tous les produits de cet espace seront immédiatement mis hors ligne et l'URL ne pourra plus être réutilisée. Cette action est irréversible.",
-    "typeToConfirm": "Tapez {name} pour confirmer"
+    "typeToConfirm": "Tapez {name} pour confirmer",
+    "deleteProductConfirmTitle": "Supprimer {name} ?",
+    "deleteProductConfirmDesc": "Son portail public est immédiatement mis hors ligne et son URL ne peut plus être réutilisée. Cette action est irréversible.",
+    "deletedSuccess": "{name} supprimé"
   },
   "landing": {
     "heroHeading": "Les grands produits naissent de l'écoute.",
@@ -1225,7 +1262,13 @@
     "typePlanned": "Planned",
     "typeActive": "In Progress",
     "typeCompleted": "Completed",
-    "typeClosed": "Closed"
+    "typeClosed": "Closed",
+    "reorderStatus": "Réorganiser {name}",
+    "actionsForStatus": "Actions pour {name}",
+    "makeDefault": "Définir par défaut",
+    "defaultStatusCannotBeDeleted": "Le statut par défaut ne peut pas être supprimé",
+    "needAtLeastOneStatus": "Un produit doit avoir au moins un statut",
+    "showOnPublicRoadmapHelp": "Lorsque cette option est cochée, les éléments de cette étape apparaissent sous forme de colonne sur votre feuille de route publique."
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1422,5 +1465,88 @@
     "destinationUrlLabel": "URL de destination",
     "invalidLinkProtocol": "L'URL doit commencer par http://, https:// ou mailto:",
     "invalidLinkUrl": "Veuillez entrer une URL valide."
+  },
+  "legal": {
+    "lastUpdated": "Dernière mise à jour le {date}"
+  },
+  "branding": {
+    "customHex": "Hexadécimal personnalisé pour {label}",
+    "uploadLogo": "Téléverser le logo",
+    "removeLogo": "Supprimer le logo",
+    "logoRequirements": "PNG, JPEG, WebP ou GIF, jusqu'à 2 Mo. Les images carrées sont préférables.",
+    "buttonTextColorLabel": "Couleur du texte du bouton",
+    "buttonTextColorDesc": "Couleur du texte et des icônes apparaissant sur les boutons et les surfaces d'accent.",
+    "autoFg": "Auto ({fg})",
+    "livePreview": "Aperçu en direct",
+    "primaryButton": "Bouton principal",
+    "outlineButton": "Bouton avec contour",
+    "sampleLink": "Exemple de lien",
+    "lowContrastWarning": "Faible contraste ({ratio}:1). Les visiteurs peuvent avoir des difficultés à lire le texte. Envisagez de choisir Auto ou une couleur plus contrastée.",
+    "lightAccentWarning": "Cette couleur d'accent est claire sur fond blanc ; les liens autonomes utiliseront donc du texte sombre tandis que les boutons utiliseront votre arrière-plan principal."
+  },
+  "posts": {
+    "publicNoteOptional": "Note publique (facultatif)",
+    "changedStatusTo": "a changé le statut en",
+    "postsFound": "{count} publications trouvées",
+    "noPostsMatch": "Aucune publication ne correspond à « {query} ».",
+    "chooseAnotherPost": "Choisir une autre publication",
+    "openPublicPortalPost": "Ouvrir la publication sur le portail public",
+    "statusLockedHelp": "Le statut est lié à l'élément de la feuille de route. Déplacez l'élément sur la feuille de route pour modifier son statut.",
+    "editedSuffix": "· modifié",
+    "publicNoteHelper": "Affiché sur la publication avec votre nom."
+  },
+  "productUsers": {
+    "badgeGranted": "Badge accordé",
+    "failedToGrantBadge": "Échec de l'attribution du badge",
+    "badgeRevoked": "Badge révoqué",
+    "failedToRevokeBadge": "Échec de la révocation du badge",
+    "activity": "Activité",
+    "unnamedUser": "Utilisateur sans nom",
+    "postsSubmitted": "Publications soumises",
+    "commentsWritten": "Commentaires rédigés",
+    "votesCast": "Votes exprimés",
+    "showingRange": "Affichage de {start} à {end} sur {total}",
+    "pageOf": "Page {page} sur {totalPages}",
+    "noBadgesAssigned": "Aucun badge n'est actuellement attribué à cet utilisateur.",
+    "allBadgesGranted": "L'utilisateur possède déjà tous les badges créés pour ce produit.",
+    "selectBadge": "Sélectionnez un badge à accorder...",
+    "expirationDateOptional": "Date d'expiration (facultatif)",
+    "granting": "Attribution en cours..."
+  },
+  "invites": {
+    "invalidTitle": "Ce lien d'invitation n'est pas valide",
+    "invalidDesc": "Vérifiez que vous avez copié le lien entier ou demandez-en un nouveau.",
+    "wrongEmailTitle": "Cette invitation est destinée à une autre adresse e-mail",
+    "expiredTitle": "Cette invitation a expiré",
+    "expiredDesc": "Les liens d'invitation sont valables 7 jours. Demandez un nouveau lien à la personne qui vous a invité.",
+    "usedTitle": "Cette invitation a déjà été utilisée",
+    "usedDesc": "Chaque lien d'invitation ne fonctionne qu'une fois. Si vous avez besoin d'un accès, demandez un nouveau lien.",
+    "canceledTitle": "Cette invitation a été annulée",
+    "canceledDesc": "La personne qui a créé ce lien l'a révoqué. Demandez-lui en un nouveau.",
+    "workspaceUnavailableTitle": "Cet espace de travail est indisponible"
+  },
+  "swagger": {
+    "expandAll": "Tout développer",
+    "collapseAll": "Tout réduire",
+    "noEndpointsMatching": "Aucun point de terminaison ne correspond à « {query} »",
+    "noEndpointsHelp": "Essayez d'ajuster votre recherche ou de changer de catégorie ci-dessus.",
+    "requiredScope": "Portée requise : {scope}",
+    "specification": "Spécification",
+    "codeExamples": "Exemples de code",
+    "requiredAuth": "Autorisation requise :",
+    "productRestrictable": "Restreignable par produit",
+    "parameters": "Paramètres",
+    "noParametersRequired": "Aucun paramètre de requête ou de chemin requis.",
+    "colName": "Nom",
+    "colIn": "Dans",
+    "colType": "Type",
+    "colDescription": "Description",
+    "requestBody": "Corps de la requête ({contentType})",
+    "copyPayload": "Copier la charge utile",
+    "responses": "Réponses",
+    "copyResponse": "Copier la réponse",
+    "copyCode": "Copier le code",
+    "workspace": "Espace de travail",
+    "category": "Catégorie"
   }
 }

@@ -54,7 +54,7 @@ export function ChangelogTagDialog({
     e.preventDefault();
     const trimmed = tagName.trim();
     if (!trimmed) {
-      toast.error("Tag name is required");
+      toast.error(t("changelog.tagNameRequired"));
       return;
     }
 
@@ -74,7 +74,7 @@ export function ChangelogTagDialog({
       setTagName("");
       toast.success(t("changelog.tagCreated"));
     } catch (err: any) {
-      toast.error(err.message || "Failed to create tag");
+      toast.error(err.message || t("changelog.failedToCreateTag"));
     } finally {
       setIsSubmitting(false);
     }
@@ -93,7 +93,7 @@ export function ChangelogTagDialog({
       onTagsChange(nextTags);
       toast.success(t("changelog.tagDeleted"));
     } catch (err: any) {
-      toast.error(err.message || "Failed to delete tag");
+      toast.error(err.message || t("changelog.failedToDeleteTag"));
     } finally {
       setDeletingId(null);
     }
@@ -143,7 +143,7 @@ export function ChangelogTagDialog({
                     type="button"
                     disabled={deletingId === tag.id}
                     onClick={() => handleDeleteTag(tag)}
-                    aria-label={`Delete tag ${tag.name}`}
+                    aria-label={t("changelog.deleteTagAria", { name: tag.name })}
                     className="text-muted-foreground hover:text-destructive p-1 rounded-sm transition-colors disabled:opacity-50"
                   >
                     <Trash2 className="size-3.5" />

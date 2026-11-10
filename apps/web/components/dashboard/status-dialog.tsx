@@ -209,7 +209,7 @@ function StatusDialogInner({
                   {t("statuses.showOnRoadmap")}
                 </label>
                 <p className="text-xs text-muted-foreground">
-                  When checked, items in this stage appear as a column on your public product roadmap.
+                  {t("statuses.showOnPublicRoadmapHelp")}
                 </p>
               </div>
             </div>

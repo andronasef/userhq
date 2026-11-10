@@ -60,7 +60,17 @@
     "goToHome": "Ir al inicio",
     "tryAgain": "Reintentar",
     "reset": "Restablecer",
-    "actions": "Acciones"
+    "actions": "Acciones",
+    "account": "Cuenta",
+    "pressToCopy": "Presiona Ctrl+C o ⌘C para copiar.",
+    "internal": "Interno",
+    "searching": "Buscando…",
+    "goToUserhq": "Ir a UserHQ",
+    "public": "Público",
+    "copyLink": "Copiar enlace",
+    "uploading": "Subiendo...",
+    "deletedUser": "Usuario eliminado",
+    "anonymous": "Anónimo"
   },
   "portal": {
     "submitFeedback": "Enviar sugerencia",
@@ -330,7 +340,15 @@
     "internalNotesPlaceholder": "Añade enlaces privados, citas de clientes o notas de implementación…",
     "translationForTitle": "Traducción para el título público ({locale})...",
     "translationForDesc": "Traducción para la descripción pública ({locale})...",
-    "publicTitleHelper": "Título para los clientes que se muestra en la hoja de ruta pública."
+    "publicTitleHelper": "Título para los clientes que se muestra en la hoja de ruta pública.",
+    "linkedFeedbackPosts": "{count} {count, plural, one {publicación} other {publicaciones}} de comentarios vinculadas",
+    "assignedTo": "Asignado a {name}",
+    "addItemToStatus": "Agregar elemento a {name}",
+    "moveItemError": "No se pudo mover el elemento. Comprueba tu conexión e inténtalo de nuevo.",
+    "linkedPostSuccess": "#{number} vinculado",
+    "deleteItemError": "No se pudo eliminar el elemento. Inténtalo de nuevo.",
+    "loadingLinkedPosts": "Cargando publicaciones vinculadas…",
+    "unlinkPostAria": "Desvincular publicación #{number}"
   },
   "changelog": {
     "title": "Registro de cambios",
@@ -355,7 +373,7 @@
     "deleteEntryDesc": "Esta entrada se eliminará permanentemente. Esto no se puede deshacer.",
     "entryUnpublished": "Entrada despublicada",
     "entryDeleted": "Entrada eliminada",
-    "backToChangelog": "Volver al registro de cambios",
+    "backToChangelog": "← Volver al registro de cambios",
     "unsavedChanges": "Cambios no guardados",
     "savingDraft": "Guardando...",
     "draftSaved": "Borrador guardado",
@@ -392,7 +410,17 @@
     "subtitle": "Nuevas funciones, mejoras y corrección de errores para {name}.",
     "noUpdatesBody": "Vuelve pronto para ver anuncios, nuevas funciones y mejoras.",
     "linkCopied": "Enlace copiado al portapapeles",
-    "allUpdates": "Todas las actualizaciones"
+    "allUpdates": "Todas las actualizaciones",
+    "previewTitle": "Vista previa del registro de cambios",
+    "previewDesc": "Esta es una vista previa de cómo aparecerá esta nota de versión para el público.",
+    "publishedBy": "Equipo de {name}",
+    "failedToUnpublish": "Error al despublicar la entrada",
+    "scheduledNotice": "Se publicará en el portal en su fecha de lanzamiento",
+    "tagNameRequired": "El nombre de la etiqueta es obligatorio",
+    "failedToCreateTag": "Error al crear la etiqueta",
+    "failedToDeleteTag": "Error al eliminar la etiqueta",
+    "deleteTagAria": "Eliminar etiqueta {name}",
+    "noTagsYetHelp": "Aún no hay etiquetas. Haz clic en \"Administrar etiquetas\" para agregar etiquetas."
   },
   "faq": {
     "title": "Preguntas frecuentes",
@@ -445,7 +473,13 @@
     "questionActions": "Acciones de pregunta",
     "dragToReorderCategory": "Arrastrar para reordenar la categoría",
     "categoryOptions": "Opciones de categoría",
-    "faqCategoriesNav": "Categorías de preguntas frecuentes"
+    "faqCategoriesNav": "Categorías de preguntas frecuentes",
+    "questionLinkCopied": "Enlace de la pregunta copiado",
+    "noQuestionsInCategory": "Aún no hay preguntas en esta categoría.",
+    "detailedAnswerPlaceholder": "Escribe la respuesta detallada aquí...",
+    "writeAnswerInLocale": "Escribe la respuesta en {locale}...",
+    "reorderCategoryError": "No se pudo reordenar la categoría de preguntas frecuentes. Comprueba tu conexión e inténtalo de nuevo.",
+    "reorderQuestionError": "No se pudo reordenar la pregunta frecuente. Comprueba tu conexión e inténtalo de nuevo."
   },
   "apiKeys": {
     "title": "Claves de API",
@@ -719,7 +753,10 @@
     "workspaceDeleted": "{name} eliminado",
     "deleteWorkspaceTitle": "¿Eliminar {name}?",
     "deleteWorkspaceConfirmDesc": "Todos los productos de este espacio de trabajo quedarán fuera de línea de inmediato y la URL no podrá volver a usarse. Esta acción no se puede deshacer.",
-    "typeToConfirm": "Escribe {name} para confirmar"
+    "typeToConfirm": "Escribe {name} para confirmar",
+    "deleteProductConfirmTitle": "¿Eliminar {name}?",
+    "deleteProductConfirmDesc": "Su portal público se desconectará de inmediato y su URL no se podrá volver a usar. Esto no se puede deshacer.",
+    "deletedSuccess": "{name} eliminado"
   },
   "landing": {
     "heroHeading": "Los grandes productos comienzan escuchando.",
@@ -1225,7 +1262,13 @@
     "typePlanned": "Planned",
     "typeActive": "In Progress",
     "typeCompleted": "Completed",
-    "typeClosed": "Closed"
+    "typeClosed": "Closed",
+    "reorderStatus": "Reordenar {name}",
+    "actionsForStatus": "Acciones para {name}",
+    "makeDefault": "Hacer predeterminado",
+    "defaultStatusCannotBeDeleted": "El estado predeterminado no se puede eliminar",
+    "needAtLeastOneStatus": "Un producto necesita al menos un estado",
+    "showOnPublicRoadmapHelp": "Al marcarlo, los elementos en esta etapa aparecen como una columna en tu hoja de ruta pública."
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1422,5 +1465,88 @@
     "destinationUrlLabel": "URL de destino",
     "invalidLinkProtocol": "La URL debe comenzar con http://, https:// o mailto:",
     "invalidLinkUrl": "Introduce una URL válida."
+  },
+  "legal": {
+    "lastUpdated": "Última actualización {date}"
+  },
+  "branding": {
+    "customHex": "Hex personalizado de {label}",
+    "uploadLogo": "Subir logo",
+    "removeLogo": "Eliminar logo",
+    "logoRequirements": "PNG, JPEG, WebP o GIF, hasta 2 MB. Las imágenes cuadradas se ven mejor.",
+    "buttonTextColorLabel": "Color del texto del botón",
+    "buttonTextColorDesc": "Color del texto e iconos que aparecen en botones y superficies con acento.",
+    "autoFg": "Automático ({fg})",
+    "livePreview": "Vista previa en vivo",
+    "primaryButton": "Botón principal",
+    "outlineButton": "Botón de contorno",
+    "sampleLink": "Enlace de ejemplo",
+    "lowContrastWarning": "Bajo contraste ({ratio}:1). Los visitantes pueden tener dificultades para leer el texto del botón. Considera elegir Automático o un color de mayor contraste.",
+    "lightAccentWarning": "Este color de acento es claro en superficies blancas, por lo que los enlaces independientes usarán texto oscuro mientras los botones usan tu fondo principal."
+  },
+  "posts": {
+    "publicNoteOptional": "Nota pública (opcional)",
+    "changedStatusTo": "cambió el estado a",
+    "postsFound": "{count} publicaciones encontradas",
+    "noPostsMatch": "Ninguna publicación coincide con \"{query}\".",
+    "chooseAnotherPost": "Elegir otra publicación",
+    "openPublicPortalPost": "Abrir publicación en el portal público",
+    "statusLockedHelp": "El estado está bloqueado al elemento vinculado en la hoja de ruta. Mueve el elemento en la hoja de ruta para cambiar de estado.",
+    "editedSuffix": "· editado",
+    "publicNoteHelper": "Se muestra en la publicación con tu nombre."
+  },
+  "productUsers": {
+    "badgeGranted": "Insignia otorgada",
+    "failedToGrantBadge": "Error al otorgar la insignia",
+    "badgeRevoked": "Insignia revocada",
+    "failedToRevokeBadge": "Error al revocar la insignia",
+    "activity": "Actividad",
+    "unnamedUser": "Usuario sin nombre",
+    "postsSubmitted": "Publicaciones enviadas",
+    "commentsWritten": "Comentarios escritos",
+    "votesCast": "Votos emitidos",
+    "showingRange": "Mostrando {start}–{end} de {total}",
+    "pageOf": "Página {page} de {totalPages}",
+    "noBadgesAssigned": "No hay insignias asignadas actualmente a este usuario.",
+    "allBadgesGranted": "El usuario ya tiene todas las insignias creadas para este producto.",
+    "selectBadge": "Selecciona una insignia para otorgar...",
+    "expirationDateOptional": "Fecha de caducidad (opcional)",
+    "granting": "Otorgando..."
+  },
+  "invites": {
+    "invalidTitle": "Este enlace de invitación no es válido",
+    "invalidDesc": "Comprueba que hayas copiado el enlace completo o pide uno nuevo.",
+    "wrongEmailTitle": "Esta invitación es para otra dirección de correo electrónico",
+    "expiredTitle": "Esta invitación ha caducado",
+    "expiredDesc": "Los enlaces de invitación duran 7 días. Pídele un nuevo enlace a la persona que te invitó.",
+    "usedTitle": "Esta invitación ya se ha utilizado",
+    "usedDesc": "Cada enlace funciona una sola vez. Si necesitas acceso, pide un nuevo enlace a quien te invitó.",
+    "canceledTitle": "Esta invitación fue cancelada",
+    "canceledDesc": "La persona que creó este enlace lo revocó. Pídele uno nuevo.",
+    "workspaceUnavailableTitle": "Este espacio de trabajo no está disponible"
+  },
+  "swagger": {
+    "expandAll": "Expandir todo",
+    "collapseAll": "Contraer todo",
+    "noEndpointsMatching": "No hay extremos que coincidan con \"{query}\"",
+    "noEndpointsHelp": "Intenta ajustar tu búsqueda o cambiar de categoría arriba.",
+    "requiredScope": "Ámbito requerido: {scope}",
+    "specification": "Especificación",
+    "codeExamples": "Ejemplos de código",
+    "requiredAuth": "Autorización requerida:",
+    "productRestrictable": "Restringible por producto",
+    "parameters": "Parámetros",
+    "noParametersRequired": "No se requieren parámetros de consulta ni de ruta.",
+    "colName": "Nombre",
+    "colIn": "En",
+    "colType": "Tipo",
+    "colDescription": "Descripción",
+    "requestBody": "Cuerpo de la solicitud ({contentType})",
+    "copyPayload": "Copiar carga",
+    "responses": "Respuestas",
+    "copyResponse": "Copiar respuesta",
+    "copyCode": "Copiar código",
+    "workspace": "Espacio de trabajo",
+    "category": "Categoría"
   }
 }

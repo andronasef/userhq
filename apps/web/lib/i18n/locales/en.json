@@ -60,7 +60,17 @@
     "goToHome": "Go to home",
     "tryAgain": "Try again",
     "reset": "Reset",
-    "actions": "Actions"
+    "actions": "Actions",
+    "account": "Account",
+    "pressToCopy": "Press Ctrl+C or ⌘C to copy.",
+    "internal": "Internal",
+    "searching": "Searching…",
+    "goToUserhq": "Go to UserHQ",
+    "public": "Public",
+    "copyLink": "Copy link",
+    "uploading": "Uploading...",
+    "deletedUser": "Deleted user",
+    "anonymous": "Anonymous"
   },
   "portal": {
     "submitFeedback": "Submit idea",
@@ -330,7 +340,15 @@
     "internalNotesPlaceholder": "Add private links, customer quotes, or implementation notes…",
     "translationForTitle": "Translation for public title ({locale})...",
     "translationForDesc": "Translation for public description ({locale})...",
-    "publicTitleHelper": "Customer-facing title shown on the public roadmap."
+    "publicTitleHelper": "Customer-facing title shown on the public roadmap.",
+    "linkedFeedbackPosts": "{count} linked feedback {count, plural, one {post} other {posts}}",
+    "assignedTo": "Assigned to {name}",
+    "addItemToStatus": "Add item to {name}",
+    "moveItemError": "Couldn't move item. Check your connection and try again.",
+    "linkedPostSuccess": "Linked #{number}",
+    "deleteItemError": "Couldn't delete item. Try again.",
+    "loadingLinkedPosts": "Loading linked posts…",
+    "unlinkPostAria": "Unlink post #{number}"
   },
   "changelog": {
     "title": "Changelog",
@@ -355,7 +373,7 @@
     "deleteEntryDesc": "This entry will be permanently removed. This cannot be undone.",
     "entryUnpublished": "Entry unpublished",
     "entryDeleted": "Entry deleted",
-    "backToChangelog": "Back to changelog",
+    "backToChangelog": "← Back to changelog",
     "unsavedChanges": "Unsaved changes",
     "savingDraft": "Saving...",
     "draftSaved": "Draft saved",
@@ -392,7 +410,17 @@
     "subtitle": "New features, improvements, and bug fixes for {name}.",
     "noUpdatesBody": "Check back soon for announcements, new features, and improvements.",
     "linkCopied": "Link copied to clipboard",
-    "allUpdates": "All updates"
+    "allUpdates": "All updates",
+    "previewTitle": "Changelog Preview",
+    "previewDesc": "This is a preview of how this release note will appear to public readers.",
+    "publishedBy": "{name} team",
+    "failedToUnpublish": "Failed to unpublish entry",
+    "scheduledNotice": "Goes live on the portal on its release date",
+    "tagNameRequired": "Tag name is required",
+    "failedToCreateTag": "Failed to create tag",
+    "failedToDeleteTag": "Failed to delete tag",
+    "deleteTagAria": "Delete tag {name}",
+    "noTagsYetHelp": "No tags yet. Click \"Manage tags\" to add tags."
   },
   "faq": {
     "title": "Frequently Asked Questions",
@@ -445,7 +473,13 @@
     "questionActions": "Question actions",
     "dragToReorderCategory": "Drag to reorder category",
     "categoryOptions": "Category options",
-    "faqCategoriesNav": "FAQ categories"
+    "faqCategoriesNav": "FAQ categories",
+    "questionLinkCopied": "Question link copied",
+    "noQuestionsInCategory": "No questions in this category yet.",
+    "detailedAnswerPlaceholder": "Write the detailed answer here...",
+    "writeAnswerInLocale": "Write answer in {locale}...",
+    "reorderCategoryError": "Couldn't reorder FAQ category. Check your connection and try again.",
+    "reorderQuestionError": "Couldn't reorder FAQ question. Check your connection and try again."
   },
   "apiKeys": {
     "title": "API Keys",
@@ -719,7 +753,10 @@
     "workspaceDeleted": "{name} deleted",
     "deleteWorkspaceTitle": "Delete {name}?",
     "deleteWorkspaceConfirmDesc": "All products in this workspace will be taken offline immediately, and the workspace URL cannot be used again. This cannot be undone.",
-    "typeToConfirm": "Type {name} to confirm"
+    "typeToConfirm": "Type {name} to confirm",
+    "deleteProductConfirmTitle": "Delete {name}?",
+    "deleteProductConfirmDesc": "Its public portal goes offline right away, and its URL can't be used again. This can't be undone.",
+    "deletedSuccess": "{name} deleted"
   },
   "landing": {
     "heroHeading": "Good products start with listening.",
@@ -1225,7 +1262,13 @@
     "typePlanned": "Planned",
     "typeActive": "In Progress",
     "typeCompleted": "Completed",
-    "typeClosed": "Closed"
+    "typeClosed": "Closed",
+    "reorderStatus": "Reorder {name}",
+    "actionsForStatus": "Actions for {name}",
+    "makeDefault": "Make default",
+    "defaultStatusCannotBeDeleted": "The default status can't be deleted",
+    "needAtLeastOneStatus": "A product needs at least one status",
+    "showOnPublicRoadmapHelp": "When checked, items in this stage appear as a column on your public product roadmap."
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1422,5 +1465,88 @@
     "destinationUrlLabel": "Destination URL",
     "invalidLinkProtocol": "URL must start with http://, https://, or mailto:",
     "invalidLinkUrl": "Please enter a valid URL."
+  },
+  "legal": {
+    "lastUpdated": "Last updated {date}"
+  },
+  "branding": {
+    "customHex": "{label} custom hex",
+    "uploadLogo": "Upload logo",
+    "removeLogo": "Remove logo",
+    "logoRequirements": "PNG, JPEG, WebP, or GIF, up to 2 MB. Square images look best.",
+    "buttonTextColorLabel": "Button text color",
+    "buttonTextColorDesc": "Color of text and icons appearing on buttons and accent-filled surfaces.",
+    "autoFg": "Auto ({fg})",
+    "livePreview": "Live Preview",
+    "primaryButton": "Primary Button",
+    "outlineButton": "Outline Button",
+    "sampleLink": "Sample link",
+    "lowContrastWarning": "Low contrast ({ratio}:1). Visitors may have difficulty reading button text. Consider choosing Auto or a higher contrast color.",
+    "lightAccentWarning": "This accent color is light on white surfaces, so standalone links will use dark text while buttons use your primary background."
+  },
+  "posts": {
+    "publicNoteOptional": "Public note (optional)",
+    "changedStatusTo": "changed the status to",
+    "postsFound": "{count} posts found",
+    "noPostsMatch": "No posts match \"{query}\".",
+    "chooseAnotherPost": "Choose another post",
+    "openPublicPortalPost": "Open public portal post",
+    "statusLockedHelp": "Status is locked to the linked roadmap item. Move the item on the roadmap to change status.",
+    "editedSuffix": "· edited",
+    "publicNoteHelper": "Shown on the post with your name."
+  },
+  "productUsers": {
+    "badgeGranted": "Badge granted",
+    "failedToGrantBadge": "Failed to grant badge",
+    "badgeRevoked": "Badge revoked",
+    "failedToRevokeBadge": "Failed to revoke badge",
+    "activity": "Activity",
+    "unnamedUser": "Unnamed user",
+    "postsSubmitted": "Posts submitted",
+    "commentsWritten": "Comments written",
+    "votesCast": "Votes cast",
+    "showingRange": "Showing {start}–{end} of {total}",
+    "pageOf": "Page {page} of {totalPages}",
+    "noBadgesAssigned": "No badges currently assigned to this user.",
+    "allBadgesGranted": "User already has all badges created for this product.",
+    "selectBadge": "Select a badge to grant...",
+    "expirationDateOptional": "Expiration Date (Optional)",
+    "granting": "Granting..."
+  },
+  "invites": {
+    "invalidTitle": "This invite link isn't valid",
+    "invalidDesc": "Check that you copied the whole link, or ask for a new one.",
+    "wrongEmailTitle": "This invite is for another email address",
+    "expiredTitle": "This invite has expired",
+    "expiredDesc": "Invite links work for 7 days. Ask the person who invited you for a new link.",
+    "usedTitle": "This invite has already been used",
+    "usedDesc": "Each invite link works once. If you need access, ask the person who invited you for a new link.",
+    "canceledTitle": "This invite was canceled",
+    "canceledDesc": "The person who created this link revoked it. Ask them for a new one.",
+    "workspaceUnavailableTitle": "This workspace is unavailable"
+  },
+  "swagger": {
+    "expandAll": "Expand All",
+    "collapseAll": "Collapse All",
+    "noEndpointsMatching": "No endpoints matching \"{query}\"",
+    "noEndpointsHelp": "Try adjusting your search query or switching categories above.",
+    "requiredScope": "Required Scope: {scope}",
+    "specification": "Specification",
+    "codeExamples": "Code Examples",
+    "requiredAuth": "Required Authorization:",
+    "productRestrictable": "Product Restrictable",
+    "parameters": "Parameters",
+    "noParametersRequired": "No query or path parameters required.",
+    "colName": "Name",
+    "colIn": "In",
+    "colType": "Type",
+    "colDescription": "Description",
+    "requestBody": "Request Body ({contentType})",
+    "copyPayload": "Copy payload",
+    "responses": "Responses",
+    "copyResponse": "Copy Response",
+    "copyCode": "Copy Code",
+    "workspace": "Workspace",
+    "category": "Category"
   }
 }

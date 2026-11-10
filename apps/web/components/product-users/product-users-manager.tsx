@@ -55,7 +55,7 @@ function ProductUsersManagerInner({
   ws,
   product,
 }: ProductUsersManagerProps): React.JSX.Element {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const queryClient = useQueryClient();
 
   const [query, setQuery] = React.useState("");
@@ -141,7 +141,7 @@ function ProductUsersManagerInner({
       queryClient.invalidateQueries({
         queryKey: ["product-users", ws, product],
       });
-      toast.success("Badge granted");
+      toast.success(t("productUsers.badgeGranted"));
       setSelectedBadgeToGrant("");
       setExpiresAt("");
       // Update managing user badges locally
@@ -173,7 +173,7 @@ function ProductUsersManagerInner({
       }
     },
     onError: (err: any) => {
-      toast.error(err?.message || "Failed to grant badge");
+      toast.error(err?.message || t("productUsers.failedToGrantBadge"));
     },
   });
 
@@ -196,7 +196,7 @@ function ProductUsersManagerInner({
       queryClient.invalidateQueries({
         queryKey: ["product-users", ws, product],
       });
-      toast.success("Badge revoked");
+      toast.success(t("productUsers.badgeRevoked"));
       if (managingUser) {
         setManagingUser({
           ...managingUser,
@@ -207,7 +207,7 @@ function ProductUsersManagerInner({
       }
     },
     onError: (err: any) => {
-      toast.error(err?.message || "Failed to revoke badge");
+      toast.error(err?.message || t("productUsers.failedToRevokeBadge"));
     },
   });
 
@@ -273,7 +273,7 @@ function ProductUsersManagerInner({
             <TR>
               <TH>{t("users.colUser")}</TH>
               <TH>{t("users.colBadges")}</TH>
-              <TH>Activity</TH>
+              <TH>{t("productUsers.activity")}</TH>
               <TH>{t("users.colJoined")}</TH>
               <TH className="text-right">{t("users.colActions")}</TH>
             </TR>
@@ -290,7 +290,7 @@ function ProductUsersManagerInner({
                     />
                     <div className="flex flex-col min-w-0">
                       <span className="font-semibold text-foreground truncate">
-                        {u.name || "Unnamed user"}
+                        {u.name || t("productUsers.unnamedUser")}
                       </span>
                       <span className="text-xs text-muted-foreground truncate">
                         {u.email}
@@ -307,7 +307,7 @@ function ProductUsersManagerInner({
                       ))
                     ) : (
                       <span className="text-xs text-muted-foreground italic">
-                        None
+                        {t("common.none")}
                       </span>
                     )}
                   </div>
@@ -316,21 +316,21 @@ function ProductUsersManagerInner({
                 <TD>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span
-                      title="Posts submitted"
+                      title={t("productUsers.postsSubmitted")}
                       className="flex items-center gap-1"
                     >
                       <FileText className="size-3.5 text-muted-foreground/70" />
                       {u.postsCount}
                     </span>
                     <span
-                      title="Comments written"
+                      title={t("productUsers.commentsWritten")}
                       className="flex items-center gap-1"
                     >
                       <MessageSquare className="size-3.5 text-muted-foreground/70" />
                       {u.commentsCount}
                     </span>
                     <span
-                      title="Votes cast"
+                      title={t("productUsers.votesCast")}
                       className="flex items-center gap-1"
                     >
                       <ThumbsUp className="size-3.5 text-muted-foreground/70" />
@@ -341,7 +341,7 @@ function ProductUsersManagerInner({
 
                 <TD>
                   <span className="text-xs text-muted-foreground">
-                    {formatDate(u.firstSeenAt)}
+                    {formatDate(u.firstSeenAt, locale)}
                   </span>
                 </TD>
 
@@ -370,8 +370,11 @@ function ProductUsersManagerInner({
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-2">
           <span className="text-xs text-muted-foreground">
-            Showing {(page - 1) * 25 + 1}–{Math.min(page * 25, total)} of{" "}
-            {total} users
+            {t("productUsers.showingRange", {
+              start: (page - 1) * 25 + 1,
+              end: Math.min(page * 25, total),
+              total,
+            })}
           </span>
           <div className="flex items-center gap-2">
             <Button
@@ -384,7 +387,7 @@ function ProductUsersManagerInner({
               <span>{t("common.previous")}</span>
             </Button>
             <span className="text-xs text-muted-foreground px-2">
-              Page {page} of {totalPages}
+              {t("productUsers.pageOf", { page, totalPages })}
             </span>
             <Button
               variant="outline"
@@ -452,7 +455,7 @@ function ProductUsersManagerInner({
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground italic">
-                  No badges currently assigned to this user.
+                  {t("productUsers.noBadgesAssigned")}
                 </p>
               )}
             </div>
@@ -465,7 +468,7 @@ function ProductUsersManagerInner({
 
               {availableToGrant.length === 0 ? (
                 <p className="text-xs text-muted-foreground italic">
-                  User already has all badges created for this product.
+                  {t("productUsers.allBadgesGranted")}
                 </p>
               ) : (
                 <div className="space-y-3">
@@ -473,7 +476,7 @@ function ProductUsersManagerInner({
                     value={selectedBadgeToGrant}
                     onChange={(e) => setSelectedBadgeToGrant(e.target.value)}
                   >
-                    <option value="">Select a badge to grant...</option>
+                    <option value="">{t("productUsers.selectBadge")}</option>
                     {availableToGrant.map((badge) => (
                       <option key={badge.id} value={badge.id}>
                         {badge.name} ({badge.slug})
@@ -483,7 +486,7 @@ function ProductUsersManagerInner({
 
                   <div>
                     <label className="text-xs text-muted-foreground block mb-1">
-                      Expiration Date (Optional)
+                      {t("productUsers.expirationDateOptional")}
                     </label>
                     <Input
                       type="date"
@@ -507,7 +510,7 @@ function ProductUsersManagerInner({
                   >
                     <Plus className="size-4" />
                     <span>
-                      {assignMutation.isPending ? "Granting..." : t("users.grantBadge")}
+                      {assignMutation.isPending ? t("productUsers.granting") : t("users.grantBadge")}
                     </span>
                   </Button>
                 </div>

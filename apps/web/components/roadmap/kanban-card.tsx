@@ -7,6 +7,7 @@ import type { AdminRoadmapItem } from "@userhq/types";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { cn } from "../../lib/utils";
+import { useI18n } from "../../lib/i18n/context";
 
 export interface KanbanCardProps {
   item: AdminRoadmapItem;
@@ -15,6 +16,7 @@ export interface KanbanCardProps {
 }
 
 export function KanbanCard({ item, index, onSelect }: KanbanCardProps) {
+  const { t } = useI18n();
   const { ref, isDragging } = useSortable({
     id: item.id,
     index,
@@ -63,7 +65,7 @@ export function KanbanCard({ item, index, onSelect }: KanbanCardProps) {
             className="gap-1 text-[11px] font-normal text-muted-foreground border-border py-0 h-5"
           >
             <Globe className="size-3 text-muted-foreground" aria-hidden="true" />
-            <span>Public</span>
+            <span>{t("common.public")}</span>
           </Badge>
         ) : (
           <Badge
@@ -71,7 +73,7 @@ export function KanbanCard({ item, index, onSelect }: KanbanCardProps) {
             className="gap-1 text-[11px] font-normal text-muted-foreground py-0 h-5"
           >
             <Lock className="size-3 text-muted-foreground" aria-hidden="true" />
-            <span>Internal</span>
+            <span>{t("common.internal")}</span>
           </Badge>
         )}
 
@@ -79,7 +81,7 @@ export function KanbanCard({ item, index, onSelect }: KanbanCardProps) {
           <Badge
             variant="neutral"
             className="gap-1 text-[11px] font-normal text-muted-foreground py-0 h-5"
-            title={`${item.linkedPostCount} linked feedback ${item.linkedPostCount === 1 ? "post" : "posts"}`}
+            title={t("roadmap.linkedFeedbackPosts", { count: item.linkedPostCount })}
           >
             <Link2 className="size-3 text-muted-foreground" aria-hidden="true" />
             <span>
@@ -110,7 +112,7 @@ export function KanbanCard({ item, index, onSelect }: KanbanCardProps) {
           )}
 
           {item.assignee?.name && (
-            <div className="shrink-0" title={`Assigned to ${item.assignee?.name}`}>
+            <div className="shrink-0" title={t("roadmap.assignedTo", { name: item.assignee.name })}>
               <Avatar className="size-5 text-[10px]">
                 <AvatarFallback className="bg-muted text-muted-foreground font-medium">
                   {getInitials(item.assignee?.name)}

@@ -123,7 +123,7 @@ export function StatusChangeDialog({
                     size="sm"
                     onClick={() => router.refresh()}
                   >
-                    Reload
+                    {t("common.reload")}
                   </Button>
                 )}
               </div>
@@ -147,8 +147,8 @@ export function StatusChangeDialog({
 
             <Field
               id="status-note"
-              label="Public note (optional)"
-              helper="Shown on the post with your name."
+              label={t("posts.publicNoteOptional")}
+              helper={t("posts.publicNoteHelper")}
             >
               <Textarea
                 rows={3}

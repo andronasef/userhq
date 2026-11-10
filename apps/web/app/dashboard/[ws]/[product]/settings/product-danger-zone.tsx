@@ -31,7 +31,7 @@ export function ProductDangerZone({ ws, product }: ProductDangerZoneProps) {
     await apiFetch(`/api/v1/workspaces/${ws}/products/${product.slug}`, {
       method: "DELETE",
     });
-    flash(`${product.name} deleted`);
+    flash(t("settings.deletedSuccess", { name: product.name }));
     window.location.assign(`/dashboard/${ws}`);
   };
 
@@ -62,8 +62,8 @@ export function ProductDangerZone({ ws, product }: ProductDangerZoneProps) {
       <ConfirmDialog
         open={dialogOpen}
         onOpenChange={handleOpenChange}
-        title={`Delete ${product.name}?`}
-        description="Its public portal goes offline right away, and its URL can't be used again. This can't be undone."
+        title={t("settings.deleteProductConfirmTitle", { name: product.name })}
+        description={t("settings.deleteProductConfirmDesc")}
         dismissLabel={t("settings.keepProduct")}
         confirmLabel={t("settings.deleteProduct")}
         pendingLabel={t("settings.deleting")}
@@ -72,7 +72,7 @@ export function ProductDangerZone({ ws, product }: ProductDangerZoneProps) {
       >
         <Field
           id="confirm-delete-product"
-          label={`Type ${product.name} to confirm`}
+          label={t("settings.typeToConfirm", { name: product.name })}
         >
           <Input
             id="confirm-delete-product"

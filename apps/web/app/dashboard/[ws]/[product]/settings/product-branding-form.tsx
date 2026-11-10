@@ -126,8 +126,8 @@ function ProductBrandingFormInner({
         />
 
         <ColorField
-          label="Button text color"
-          description="Color of text and icons appearing on buttons and accent-filled surfaces."
+          label={t("branding.buttonTextColorLabel")}
+          description={t("branding.buttonTextColorDesc")}
           value={accentTextColor}
           onChange={(hex) => {
             setAccentTextColor(hex);
@@ -135,9 +135,9 @@ function ProductBrandingFormInner({
           }}
           presets={BUTTON_TEXT_PRESETS}
           allowAuto={true}
-          autoLabel="Auto"
+          autoLabel={t("branding.autoFg")}
           autoValue={autoFg}
-          placeholder={`Auto (${autoFg})`}
+          placeholder={`${t("branding.autoFg")} (${autoFg})`}
         />
 
         <div
@@ -150,21 +150,21 @@ function ProductBrandingFormInner({
           }
         >
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Live Preview
+            {t("branding.livePreview")}
           </span>
           <div className="flex flex-wrap items-center gap-4">
             <Button type="button" size="sm">
-              Primary Button
+              {t("branding.primaryButton")}
             </Button>
             <Button type="button" size="sm" variant="outline">
-              Outline Button
+              {t("branding.outlineButton")}
             </Button>
             <a
               href="#"
               onClick={(e) => e.preventDefault()}
               className="text-sm font-semibold underline text-[var(--primary-text)]"
             >
-              Sample link
+              {t("branding.sampleLink")}
             </a>
           </div>
 
@@ -172,17 +172,14 @@ function ProductBrandingFormInner({
             <div className="flex items-start gap-2 text-xs text-amber-600 dark:text-amber-400 mt-1">
               <AlertTriangle className="size-4 shrink-0 mt-0.5" />
               <span>
-                Low contrast ({fgRatio.toFixed(1)}:1). Visitors may have
-                difficulty reading button text. Consider choosing Auto or a
-                higher contrast color.
+                {t("branding.lowContrastWarning", { ratio: fgRatio.toFixed(1) })}
               </span>
             </div>
           )}
 
           {tokens.primaryText === "#171717" && (
             <p className="text-xs text-muted-foreground">
-              This accent color is light on white surfaces, so standalone links
-              will use dark text while buttons use your primary background.
+              {t("branding.lightAccentWarning")}
             </p>
           )}
         </div>

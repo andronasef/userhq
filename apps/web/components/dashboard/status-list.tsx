@@ -79,7 +79,7 @@ function StatusRow({
       <button
         type="button"
         ref={handleRef}
-        aria-label={`Reorder ${status.name}`}
+        aria-label={t("statuses.reorderStatus", { name: status.name })}
         className="size-8 inline-flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing hover:bg-muted shrink-0"
       >
         <GripVertical className="size-4" aria-hidden="true" />
@@ -104,13 +104,13 @@ function StatusRow({
 
       {status.isDefault && (
         <Badge variant="neutral" className="shrink-0 font-normal">
-          Default
+          {t("common.default")}
         </Badge>
       )}
 
       {status.isPublicRoadmap && (
         <Badge variant="outline" className="shrink-0 text-[var(--primary-text)] border-primary/30">
-          Public
+          {t("common.public")}
         </Badge>
       )}
 
@@ -120,7 +120,7 @@ function StatusRow({
             variant="ghost"
             size="icon"
             className="size-8 shrink-0 text-muted-foreground hover:text-foreground"
-            aria-label={`Actions for ${status.name}`}
+            aria-label={t("statuses.actionsForStatus", { name: status.name })}
           >
             <Ellipsis className="size-4" aria-hidden="true" />
           </Button>
@@ -132,7 +132,7 @@ function StatusRow({
 
           {!status.isDefault && (
             <DropdownMenuItem onClick={() => onMakeDefault(status)}>
-              Make default
+              {t("statuses.makeDefault")}
             </DropdownMenuItem>
           )}
 
@@ -144,7 +144,7 @@ function StatusRow({
                 {t("statuses.deleteStatusNamed", { name: "" }).replace(/\?$/, "").trim()}
               </div>
               <div className="text-xs text-muted-foreground">
-                The default status can&apos;t be deleted
+                {t("statuses.defaultStatusCannotBeDeleted")}
               </div>
             </div>
           ) : total <= 1 ? (
@@ -153,7 +153,7 @@ function StatusRow({
                 {t("statuses.deleteStatusNamed", { name: "" }).replace(/\?$/, "").trim()}
               </div>
               <div className="text-xs text-muted-foreground">
-                A product needs at least one status
+                {t("statuses.needAtLeastOneStatus")}
               </div>
             </div>
           ) : (

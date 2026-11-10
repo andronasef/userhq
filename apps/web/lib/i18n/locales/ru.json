@@ -60,7 +60,17 @@
     "goToHome": "На главную",
     "tryAgain": "Повторить попытку",
     "reset": "Сбросить",
-    "actions": "Действия"
+    "actions": "Действия",
+    "account": "Аккаунт",
+    "pressToCopy": "Нажмите Ctrl+C или ⌘C для копирования.",
+    "internal": "Внутренний",
+    "searching": "Поиск…",
+    "goToUserhq": "Перейти в UserHQ",
+    "public": "Публичный",
+    "copyLink": "Скопировать ссылку",
+    "uploading": "Загрузка...",
+    "deletedUser": "Удаленный пользователь",
+    "anonymous": "Анонимно"
   },
   "portal": {
     "submitFeedback": "Предложить идею",
@@ -330,7 +340,15 @@
     "internalNotesPlaceholder": "Добавляйте личные ссылки, цитаты клиентов или заметки по реализации…",
     "translationForTitle": "Перевод общедоступного заголовка ({locale})...",
     "translationForDesc": "Перевод общедоступного описания ({locale})...",
-    "publicTitleHelper": "Заголовок для клиентов, отображаемый на публичной дорожной карте."
+    "publicTitleHelper": "Заголовок для клиентов, отображаемый на публичной дорожной карте.",
+    "linkedFeedbackPosts": "{count} связанных отзывов",
+    "assignedTo": "Назначено: {name}",
+    "addItemToStatus": "Добавить элемент в {name}",
+    "moveItemError": "Не удалось переместить элемент. Проверьте соединение и попробуйте снова.",
+    "linkedPostSuccess": "Привязан #{number}",
+    "deleteItemError": "Не удалось удалить элемент. Попробуйте снова.",
+    "loadingLinkedPosts": "Загрузка связанных постов…",
+    "unlinkPostAria": "Отвязать пост #{number}"
   },
   "changelog": {
     "title": "История изменений",
@@ -355,7 +373,7 @@
     "deleteEntryDesc": "Эта запись будет удалена безвозвратно. Это действие нельзя отменить.",
     "entryUnpublished": "Запись снята с публикации",
     "entryDeleted": "Запись удалена",
-    "backToChangelog": "Назад к истории изменений",
+    "backToChangelog": "← Назад к списку изменений",
     "unsavedChanges": "Несохраненные изменения",
     "savingDraft": "Сохранение...",
     "draftSaved": "Черновик сохранен",
@@ -392,7 +410,17 @@
     "subtitle": "Новые функции, улучшения и исправления ошибок для {name}.",
     "noUpdatesBody": "Загляните сюда позже, чтобы узнать об объявлениях, новых функциях и улучшениях.",
     "linkCopied": "Ссылка скопирована в буфер обмена",
-    "allUpdates": "Все обновления"
+    "allUpdates": "Все обновления",
+    "previewTitle": "Предпросмотр списка изменений",
+    "previewDesc": "Это предпросмотр того, как примечания к выпуску будут выглядеть для читателей.",
+    "publishedBy": "Команда {name}",
+    "failedToUnpublish": "Не удалось отменить публикацию записи",
+    "scheduledNotice": "Будет опубликовано на портале в дату выпуска",
+    "tagNameRequired": "Имя тега обязательно",
+    "failedToCreateTag": "Не удалось создать тег",
+    "failedToDeleteTag": "Не удалось удалить тег",
+    "deleteTagAria": "Удалить тег {name}",
+    "noTagsYetHelp": "Тегов пока нет. Нажмите «Управление тегами», чтобы добавить их."
   },
   "faq": {
     "title": "Часто задаваемые вопросы (FAQ)",
@@ -445,7 +473,13 @@
     "questionActions": "Действия с вопросом",
     "dragToReorderCategory": "Перетащите, чтобы изменить порядок категорий",
     "categoryOptions": "Параметры категории",
-    "faqCategoriesNav": "Категории FAQ"
+    "faqCategoriesNav": "Категории FAQ",
+    "questionLinkCopied": "Ссылка на вопрос скопирована",
+    "noQuestionsInCategory": "В этой категории пока нет вопросов.",
+    "detailedAnswerPlaceholder": "Напишите подробный ответ здесь...",
+    "writeAnswerInLocale": "Напишите ответ на {locale}...",
+    "reorderCategoryError": "Не удалось изменить порядок категорий FAQ. Проверьте соединение и попробуйте снова.",
+    "reorderQuestionError": "Не удалось изменить порядок вопросов FAQ. Проверьте соединение и попробуйте снова."
   },
   "apiKeys": {
     "title": "API-ключи",
@@ -719,7 +753,10 @@
     "workspaceDeleted": "{name} удален",
     "deleteWorkspaceTitle": "Удалить {name}?",
     "deleteWorkspaceConfirmDesc": "Все продукты в этом рабочем пространстве будут немедленно отключены, и этот URL нельзя будет использовать снова. Это действие нельзя отменить.",
-    "typeToConfirm": "Введите {name} для подтверждения"
+    "typeToConfirm": "Введите {name} для подтверждения",
+    "deleteProductConfirmTitle": "Удалить {name}?",
+    "deleteProductConfirmDesc": "Публичный портал немедленно перейдет в автономный режим, а его URL-адрес нельзя будет использовать снова. Это действие нельзя отменить.",
+    "deletedSuccess": "{name} удалено"
   },
   "landing": {
     "heroHeading": "Хорошие продукты начинаются с внимания к пользователям.",
@@ -1225,7 +1262,13 @@
     "typePlanned": "Planned",
     "typeActive": "In Progress",
     "typeCompleted": "Completed",
-    "typeClosed": "Closed"
+    "typeClosed": "Closed",
+    "reorderStatus": "Изменить порядок {name}",
+    "actionsForStatus": "Действия для {name}",
+    "makeDefault": "Сделать по умолчанию",
+    "defaultStatusCannotBeDeleted": "Статус по умолчанию нельзя удалить",
+    "needAtLeastOneStatus": "У продукта должен быть как минимум один статус",
+    "showOnPublicRoadmapHelp": "Если флажок установлен, элементы на этом этапе отображаются в виде колонки в публичной дорожной карте."
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1422,5 +1465,88 @@
     "destinationUrlLabel": "Целевой URL",
     "invalidLinkProtocol": "URL должен начинаться с http://, https:// или mailto:",
     "invalidLinkUrl": "Пожалуйста, введите действительный URL."
+  },
+  "legal": {
+    "lastUpdated": "Последнее обновление: {date}"
+  },
+  "branding": {
+    "customHex": "Пользовательский hex для {label}",
+    "uploadLogo": "Загрузить логотип",
+    "removeLogo": "Удалить логотип",
+    "logoRequirements": "PNG, JPEG, WebP или GIF, до 2 МБ. Лучше всего подходят квадратные изображения.",
+    "buttonTextColorLabel": "Цвет текста кнопки",
+    "buttonTextColorDesc": "Цвет текста и значков на кнопках и поверхностях с акцентным цветом.",
+    "autoFg": "Авто ({fg})",
+    "livePreview": "Предпросмотр",
+    "primaryButton": "Основная кнопка",
+    "outlineButton": "Контурная кнопка",
+    "sampleLink": "Пример ссылки",
+    "lowContrastWarning": "Низкий контраст ({ratio}:1). Посетителям может быть трудно читать текст на кнопке. Рекомендуется выбрать Авто или более контрастный цвет.",
+    "lightAccentWarning": "Этот акцентный цвет светлый на белом фоне, поэтому отдельные ссылки будут использовать темный текст, а кнопки — ваш основной фон."
+  },
+  "posts": {
+    "publicNoteOptional": "Публичная заметка (необязательно)",
+    "changedStatusTo": "изменил статус на",
+    "postsFound": "Найдено постов: {count}",
+    "noPostsMatch": "Нет постов, соответствующих «{query}».",
+    "chooseAnotherPost": "Выбрать другой пост",
+    "openPublicPortalPost": "Открыть пост в публичном портале",
+    "statusLockedHelp": "Статус заблокирован связанным элементом дорожной карты. Переместите элемент в дорожной карте, чтобы изменить статус.",
+    "editedSuffix": "· изменено",
+    "publicNoteHelper": "Отображается в публикации с вашим именем."
+  },
+  "productUsers": {
+    "badgeGranted": "Значок выдан",
+    "failedToGrantBadge": "Не удалось выдать значок",
+    "badgeRevoked": "Значок отозван",
+    "failedToRevokeBadge": "Не удалось отозвать значок",
+    "activity": "Активность",
+    "unnamedUser": "Пользователь без имени",
+    "postsSubmitted": "Отправлено постов",
+    "commentsWritten": "Написано комментариев",
+    "votesCast": "Отдано голосов",
+    "showingRange": "Показано {start}–{end} из {total}",
+    "pageOf": "Страница {page} из {totalPages}",
+    "noBadgesAssigned": "Этому пользователю пока не назначено значков.",
+    "allBadgesGranted": "У пользователя уже есть все созданные для этого продукта значки.",
+    "selectBadge": "Выберите значок для выдачи...",
+    "expirationDateOptional": "Срок действия (необязательно)",
+    "granting": "Выдача..."
+  },
+  "invites": {
+    "invalidTitle": "Эта ссылка-приглашение недействительна",
+    "invalidDesc": "Убедитесь, что вы скопировали ссылку целиком, или запросите новую.",
+    "wrongEmailTitle": "Это приглашение предназначено для другого адреса эл. почты",
+    "expiredTitle": "Срок действия приглашения истек",
+    "expiredDesc": "Ссылки-приглашения действуют 7 дней. Попросите пригласившего отправить новую.",
+    "usedTitle": "Это приглашение уже было использовано",
+    "usedDesc": "Каждая ссылка действует только один раз. Если вам нужен доступ, попросите новую ссылку.",
+    "canceledTitle": "Это приглашение было отменено",
+    "canceledDesc": "Пользователь, создавший эту ссылку, отозвал её. Попросите выслать новую.",
+    "workspaceUnavailableTitle": "Это рабочее пространство недоступно"
+  },
+  "swagger": {
+    "expandAll": "Развернуть все",
+    "collapseAll": "Свернуть все",
+    "noEndpointsMatching": "Нет эндпоинтов, соответствующих «{query}»",
+    "noEndpointsHelp": "Попробуйте изменить поисковый запрос или выбрать другую категорию выше.",
+    "requiredScope": "Требуемая область: {scope}",
+    "specification": "Спецификация",
+    "codeExamples": "Примеры кода",
+    "requiredAuth": "Требуемая авторизация:",
+    "productRestrictable": "Ограничиваемый продуктом",
+    "parameters": "Параметры",
+    "noParametersRequired": "Параметры запроса или пути не требуются.",
+    "colName": "Имя",
+    "colIn": "В",
+    "colType": "Тип",
+    "colDescription": "Описание",
+    "requestBody": "Тело запроса ({contentType})",
+    "copyPayload": "Скопировать payload",
+    "responses": "Ответы",
+    "copyResponse": "Скопировать ответ",
+    "copyCode": "Скопировать код",
+    "workspace": "Рабочая область",
+    "category": "Категория"
   }
 }

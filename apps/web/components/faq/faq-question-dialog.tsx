@@ -285,8 +285,8 @@ export function FaqQuestionDialog({
                 onChange={handleCurrentAnswerChange}
                 placeholder={
                   activeLocale === defaultLocale
-                    ? "Write the detailed answer here..."
-                    : `Write answer in ${activeLocale}...`
+                    ? t("faq.detailedAnswerPlaceholder")
+                    : t("faq.writeAnswerInLocale", { locale: activeLocale })
                 }
               />
             </div>

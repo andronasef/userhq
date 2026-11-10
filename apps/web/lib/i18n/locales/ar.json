@@ -60,7 +60,17 @@
     "goToHome": "الذهاب إلى الرئيسية",
     "tryAgain": "حاول مرة أخرى",
     "reset": "إعادة ضبط",
-    "actions": "إجراءات"
+    "actions": "إجراءات",
+    "account": "الحساب",
+    "pressToCopy": "اضغط على Ctrl+C أو ⌘C للنسخ.",
+    "internal": "داخلي",
+    "searching": "جارٍ البحث…",
+    "goToUserhq": "الانتقال إلى UserHQ",
+    "public": "عام",
+    "copyLink": "نسخ الرابط",
+    "uploading": "جارٍ الرفع...",
+    "deletedUser": "مستخدم محذوف",
+    "anonymous": "مجهول"
   },
   "portal": {
     "submitFeedback": "أرسل فكرة",
@@ -269,7 +279,7 @@
     "title": "خارطة الطريق",
     "description": "خطط لما سيتم بناؤه لاحقاً. اسحب العناصر بين الأعمدة لتحديث حالتها.",
     "newItem": "عنصر جديد",
-    "filterByAssignee": "تصفية حسب المسؤول",
+    "filterByAssignee": "تصفية حسب المعين",
     "allAssignees": "جميع المسؤولين",
     "unassigned": "غير محدد",
     "addItem": "إضافة عنصر",
@@ -330,7 +340,15 @@
     "internalNotesPlaceholder": "أضف روابط خاصة أو اقتباسات من العملاء أو ملاحظات التنفيذ...",
     "translationForTitle": "ترجمة العنوان العام ({locale})...",
     "translationForDesc": "ترجمة الوصف العام ({locale})...",
-    "publicTitleHelper": "العنوان الموجه للعملاء والمعروض في خريطة الطريق العامة."
+    "publicTitleHelper": "العنوان الموجه للعملاء والمعروض في خريطة الطريق العامة.",
+    "linkedFeedbackPosts": "{count} من منشورات الملاحظات المرتبطة",
+    "assignedTo": "معين إلى {name}",
+    "addItemToStatus": "إضافة عنصر إلى {name}",
+    "moveItemError": "تعذر نقل العنصر. تحقق من اتصالك وحاول مرة أخرى.",
+    "linkedPostSuccess": "تم ربط #{number}",
+    "deleteItemError": "تعذر حذف العنصر. حاول مرة أخرى.",
+    "loadingLinkedPosts": "جارٍ تحميل المنشورات المرتبطة…",
+    "unlinkPostAria": "إلغاء ربط المنشور #{number}"
   },
   "changelog": {
     "title": "سجل التغييرات",
@@ -355,7 +373,7 @@
     "deleteEntryDesc": "سيتم حذف هذا التحديث نهائياً. لا يمكن التراجع عن هذا الإجراء.",
     "entryUnpublished": "تم إلغاء نشر التحديث",
     "entryDeleted": "تم حذف التحديث",
-    "backToChangelog": "العودة إلى سجل التغييرات",
+    "backToChangelog": "← العودة إلى سجل التغييرات",
     "unsavedChanges": "تغييرات غير محفوظة",
     "savingDraft": "جاري الحفظ...",
     "draftSaved": "تم حفظ المسودة",
@@ -392,7 +410,17 @@
     "subtitle": "ميزات جديدة وتحسينات وإصلاحات الأخطاء لـ {name}.",
     "noUpdatesBody": "تحقق مرة أخرى قريباً للاطلاع على الإعلانات والميزات الجديدة والتحسينات.",
     "linkCopied": "تم نسخ الرابط إلى الحافظة",
-    "allUpdates": "جميع التحديثات"
+    "allUpdates": "جميع التحديثات",
+    "previewTitle": "معاينة سجل التغييرات",
+    "previewDesc": "هذه معاينة لكيفية ظهور ملاحظات الإصدار هذه للقراء من الجمهور.",
+    "publishedBy": "فريق {name}",
+    "failedToUnpublish": "فشل إلغاء نشر الإدخال",
+    "scheduledNotice": "سيتم نشره مباشرة على البوابة في تاريخ إصداره",
+    "tagNameRequired": "اسم العلامة مطلوب",
+    "failedToCreateTag": "فشل إنشاء العلامة",
+    "failedToDeleteTag": "فشل حذف العلامة",
+    "deleteTagAria": "حذف العلامة {name}",
+    "noTagsYetHelp": "لا توجد علامات حتى الآن. انقر على \"إدارة العلامات\" لإضافة علامات."
   },
   "faq": {
     "title": "الأسئلة الشائعة",
@@ -445,7 +473,13 @@
     "questionActions": "إجراءات السؤال",
     "dragToReorderCategory": "اسحب لإعادة ترتيب الفئة",
     "categoryOptions": "خيارات الفئة",
-    "faqCategoriesNav": "فئات الأسئلة الشائعة"
+    "faqCategoriesNav": "فئات الأسئلة الشائعة",
+    "questionLinkCopied": "تم نسخ رابط السؤال",
+    "noQuestionsInCategory": "لا توجد أسئلة في هذه الفئة حتى الآن.",
+    "detailedAnswerPlaceholder": "اكتب الإجابة المفصلة هنا...",
+    "writeAnswerInLocale": "اكتب الإجابة باللغة {locale}...",
+    "reorderCategoryError": "تعذر إعادة ترتيب فئة الأسئلة الشائعة. تحقق من اتصالك وحاول مرة أخرى.",
+    "reorderQuestionError": "تعذر إعادة ترتيب سؤال الأسئلة الشائعة. تحقق من اتصالك وحاول مرة أخرى."
   },
   "apiKeys": {
     "title": "مفاتيح API",
@@ -719,7 +753,10 @@
     "workspaceDeleted": "تم حذف {name}",
     "deleteWorkspaceTitle": "حذف {name}؟",
     "deleteWorkspaceConfirmDesc": "سيتم إيقاف تشغيل جميع المنتجات في مساحة العمل هذه على الفور، ولا يمكن استخدام رابط مساحة العمل مرة أخرى. لا يمكن التراجع عن هذا الإجراء.",
-    "typeToConfirm": "اكتب {name} للتأكيد"
+    "typeToConfirm": "اكتب {name} للتأكيد",
+    "deleteProductConfirmTitle": "هل تريد حذف {name}؟",
+    "deleteProductConfirmDesc": "سيتم إيقاف بوابتها العامة فورًا، ولا يمكن إعادة استخدام عنوان URL الخاص بها. لا يمكن التراجع عن هذا الإجراء.",
+    "deletedSuccess": "تم حذف {name}"
   },
   "landing": {
     "heroHeading": "المنتجات الرائعة تبدأ بالاستماع.",
@@ -1225,7 +1262,13 @@
     "typePlanned": "مخطط لها",
     "typeActive": "قيد التنفيذ",
     "typeCompleted": "مكتمل",
-    "typeClosed": "مغلق"
+    "typeClosed": "مغلق",
+    "reorderStatus": "إعادة ترتيب {name}",
+    "actionsForStatus": "إجراءات لـ {name}",
+    "makeDefault": "تعيين كافتراضي",
+    "defaultStatusCannotBeDeleted": "لا يمكن حذف الحالة الافتراضية",
+    "needAtLeastOneStatus": "يحتاج المنتج إلى حالة واحدة على الأقل",
+    "showOnPublicRoadmapHelp": "عند التحديد، ستظهر العناصر في هذه المرحلة كعمود في خارطة طريق المنتج العامة الخاصة بك."
   },
   "deletedItems": {
     "title": "العناصر المحذوفة",
@@ -1422,5 +1465,88 @@
     "destinationUrlLabel": "عنوان URL الوجهة",
     "invalidLinkProtocol": "يجب أن يبدأ عنوان URL بـ http:// أو https:// أو mailto:",
     "invalidLinkUrl": "يرجى إدخال عنوان URL صالح."
+  },
+  "legal": {
+    "lastUpdated": "آخر تحديث {date}"
+  },
+  "branding": {
+    "customHex": "رمز hex المخصص لـ {label}",
+    "uploadLogo": "رفع الشعار",
+    "removeLogo": "إزالة الشعار",
+    "logoRequirements": "PNG أو JPEG أو WebP أو GIF، حتى 2 ميغابايت. الصور المربعة هي الأفضل.",
+    "buttonTextColorLabel": "لون نص الزر",
+    "buttonTextColorDesc": "لون النص والأيقونات التي تظهر على الأزرار والأسطح الملونة بتمييز.",
+    "autoFg": "تلقائي ({fg})",
+    "livePreview": "معاينة مباشرة",
+    "primaryButton": "الزر الأساسي",
+    "outlineButton": "زر بإطار",
+    "sampleLink": "رابط تجريبي",
+    "lowContrastWarning": "تباين منخفض ({ratio}:1). قد يواجه الزوار صعوبة في قراءة نص الزر. ضع في اعتبارك اختيار تلقائي أو لون ذي تباين أعلى.",
+    "lightAccentWarning": "لون التمييز هذا فاتح على الأسطح البيضاء، لذا ستستخدم الروابط المنفصلة نصاً غامقاً بينما تستخدم الأزرار خلفيتك الأساسية."
+  },
+  "posts": {
+    "publicNoteOptional": "ملاحظة عامة (اختياري)",
+    "changedStatusTo": "غيّر الحالة إلى",
+    "postsFound": "تم العثور على {count} منشور",
+    "noPostsMatch": "لا توجد منشورات تطابق \"{query}\".",
+    "chooseAnotherPost": "اختيار منشور آخر",
+    "openPublicPortalPost": "فتح منشور البوابة العامة",
+    "statusLockedHelp": "الحالة مقفلة ومرتبطة بعنصر خارطة الطريق. انقل العنصر في خارطة الطريق لتغيير الحالة.",
+    "editedSuffix": "· تم التعديل",
+    "publicNoteHelper": "يظهر في المنشور مع اسمك."
+  },
+  "productUsers": {
+    "badgeGranted": "تم منح الشارة",
+    "failedToGrantBadge": "فشل منح الشارة",
+    "badgeRevoked": "تم إلغاء الشارة",
+    "failedToRevokeBadge": "فشل إلغاء الشارة",
+    "activity": "النشاط",
+    "unnamedUser": "مستخدم بدون اسم",
+    "postsSubmitted": "المنشورات المقدمة",
+    "commentsWritten": "التعليقات المكتوبة",
+    "votesCast": "الأصوات المسجلة",
+    "showingRange": "عرض {start}–{end} من {total}",
+    "pageOf": "الصفحة {page} من {totalPages}",
+    "noBadgesAssigned": "لا توجد شارات معينة حالياً لهذا المستخدم.",
+    "allBadgesGranted": "يمتلك المستخدم بالفعل جميع الشارات المنشأة لهذا المنتج.",
+    "selectBadge": "حدد شارة لمنحها...",
+    "expirationDateOptional": "تاريخ انتهاء الصلاحية (اختياري)",
+    "granting": "جارٍ المنح..."
+  },
+  "invites": {
+    "invalidTitle": "رابط الدعوة هذا غير صالح",
+    "invalidDesc": "تأكد من أنك قمت بنسخ الرابط بأكمله، أو اطلب رابطاً جديداً.",
+    "wrongEmailTitle": "هذه الدعوة مخصصة لعنوان بريد إلكتروني آخر",
+    "expiredTitle": "انتهت صلاحية هذه الدعوة",
+    "expiredDesc": "روابط الدعوة صالحة لمدة 7 أيام. اطلب من الشخص الذي دعاك رابطاً جديداً.",
+    "usedTitle": "تم استخدام هذه الدعوة بالفعل",
+    "usedDesc": "كل رابط دعوة يعمل لمرة واحدة فقط. إذا كنت بحاجة للوصول، فاطلب من الشخص الذي دعاك رابطاً جديداً.",
+    "canceledTitle": "تم إلغاء هذه الدعوة",
+    "canceledDesc": "الشخص الذي أنشأ هذا الرابط قام بإلغائه. اطلب منه رابطاً جديداً.",
+    "workspaceUnavailableTitle": "مساحة العمل هذه غير متاحة"
+  },
+  "swagger": {
+    "expandAll": "توسيع الكل",
+    "collapseAll": "طي الكل",
+    "noEndpointsMatching": "لا توجد نقاط نهاية تطابق \"{query}\"",
+    "noEndpointsHelp": "حاول تعديل استعلام البحث أو تبديل الفئات أعلاه.",
+    "requiredScope": "النطاق المطلوب: {scope}",
+    "specification": "المواصفات",
+    "codeExamples": "أمثلة برمجية",
+    "requiredAuth": "المصادقة المطلوبة:",
+    "productRestrictable": "قابل للتقييد حسب المنتج",
+    "parameters": "المعلمات",
+    "noParametersRequired": "لا يلزم وجود معلمات استعلام أو مسار.",
+    "colName": "الاسم",
+    "colIn": "الموقع",
+    "colType": "النوع",
+    "colDescription": "الوصف",
+    "requestBody": "نص الطلب ({contentType})",
+    "copyPayload": "نسخ الحمولة",
+    "responses": "الاستجابات",
+    "copyResponse": "نسخ الاستجابة",
+    "copyCode": "نسخ الكود",
+    "workspace": "مساحة العمل",
+    "category": "الفئة"
   }
 }

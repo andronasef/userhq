@@ -46,7 +46,7 @@ export function FaqAccordionItem({
     if (typeof window !== "undefined") {
       window.history.pushState(null, "", `#q-${question.id}`);
     }
-    toast.success("Question link copied");
+    toast.success(t("faq.questionLinkCopied"));
   };
 
   return (

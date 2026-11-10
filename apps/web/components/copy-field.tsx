@@ -5,6 +5,7 @@ import { Check, Copy } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface CopyFieldProps {
   value: string;
@@ -14,9 +15,10 @@ export interface CopyFieldProps {
 
 export function CopyField({
   value,
-  buttonLabel = "Copy link",
+  buttonLabel,
   className,
 }: CopyFieldProps) {
+  const { t } = useI18n();
   const [copied, setCopied] = React.useState(false);
   const [fallbackHelp, setFallbackHelp] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -52,19 +54,19 @@ export function CopyField({
           {copied ? (
             <>
               <Check className="size-4" />
-              <span>Copied</span>
+              <span>{t("common.copied")}</span>
             </>
           ) : (
             <>
               <Copy className="size-4" />
-              <span>{buttonLabel}</span>
+              <span>{buttonLabel ?? t("common.copyLink")}</span>
             </>
           )}
         </Button>
       </div>
       {fallbackHelp && (
         <p className="text-xs text-muted-foreground">
-          Press Ctrl+C or ⌘C to copy.
+          {t("common.pressToCopy")}
         </p>
       )}
     </div>

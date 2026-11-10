@@ -111,7 +111,7 @@ export function FaqManager({
         setCategories(previousCategories);
         toast.error(
           errorCopy(err, undefined) ||
-            "Couldn't reorder FAQ category. Check your connection and try again.",
+            t("faq.reorderCategoryError"),
         );
       }
       return;
@@ -228,7 +228,7 @@ export function FaqManager({
       setCategories(previousCategories);
       toast.error(
         errorCopy(err, undefined) ||
-          "Couldn't reorder FAQ question. Check your connection and try again.",
+          t("faq.reorderQuestionError"),
       );
     }
   };

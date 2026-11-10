@@ -1,18 +1,22 @@
+"use client";
+
 import * as React from "react";
 import { CircleDot } from "lucide-react";
 import type { ActivityEntry } from "@userhq/types";
 import { StatusBadge } from "@/components/status-badge";
 import { PlainText } from "@/components/plain-text";
 import { formatDate } from "@/lib/format";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface ActivityItemProps {
   activity: ActivityEntry;
 }
 
 export function ActivityItem({ activity }: ActivityItemProps): React.JSX.Element {
+  const { t, locale } = useI18n();
   const actorName = activity.actor.deleted
-    ? "Deleted user"
-    : (activity.actor.name ?? "Anonymous");
+    ? t("common.deletedUser")
+    : (activity.actor.name ?? t("common.anonymous"));
 
   return (
     <li className="flex gap-4">
@@ -22,7 +26,7 @@ export function ActivityItem({ activity }: ActivityItemProps): React.JSX.Element
       <div className="flex-1 min-w-0">
         <div className="text-sm flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="font-semibold text-foreground">{actorName}</span>
-          <span className="text-muted-foreground">changed the status to</span>
+          <span className="text-muted-foreground">{t("posts.changedStatusTo")}</span>
           <StatusBadge name={activity.statusName} color={activity.statusColor} />
           <span className="text-muted-foreground">·</span>
           <time
@@ -30,7 +34,7 @@ export function ActivityItem({ activity }: ActivityItemProps): React.JSX.Element
             title={activity.createdAt}
             className="text-muted-foreground"
           >
-            {formatDate(activity.createdAt)}
+            {formatDate(activity.createdAt, locale)}
           </time>
         </div>
         {activity.note && (

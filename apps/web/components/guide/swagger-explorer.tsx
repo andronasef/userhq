@@ -22,6 +22,7 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/context";
 
 interface SwaggerExplorerProps {
   workspaces?: Array<{ slug: string; name: string }>;
@@ -74,6 +75,7 @@ const METHOD_STYLES: Record<
 };
 
 export function SwaggerExplorer({ workspaces = [] }: SwaggerExplorerProps) {
+  const { t } = useI18n();
   const [selectedTag, setSelectedTag] = React.useState<ApiTag>("All");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [expandedEndpoints, setExpandedEndpoints] = React.useState<
@@ -148,7 +150,7 @@ export function SwaggerExplorer({ workspaces = [] }: SwaggerExplorerProps) {
           {workspaces.length > 0 && (
             <div className="flex items-center gap-2 text-xs">
               <span className="text-muted-foreground whitespace-nowrap font-medium">
-                Workspace:
+                {t("swagger.workspace")}:
               </span>
               <select
                 value={activeWsSlug}
@@ -170,14 +172,14 @@ export function SwaggerExplorer({ workspaces = [] }: SwaggerExplorerProps) {
               onClick={expandAll}
               className="px-2.5 py-1 rounded bg-muted hover:bg-muted/80 text-foreground transition-colors font-medium"
             >
-              Expand All
+              {t("swagger.expandAll")}
             </button>
             <button
               type="button"
               onClick={collapseAll}
               className="px-2.5 py-1 rounded bg-muted hover:bg-muted/80 text-foreground transition-colors font-medium"
             >
-              Collapse All
+              {t("swagger.collapseAll")}
             </button>
           </div>
         </div>
@@ -186,7 +188,7 @@ export function SwaggerExplorer({ workspaces = [] }: SwaggerExplorerProps) {
         <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-border/60">
           <span className="text-xs font-semibold text-muted-foreground mr-1.5 flex items-center gap-1">
             <Filter className="size-3" />
-            Category:
+            {t("swagger.category")}:
           </span>
           {API_TAGS.map((tag) => {
             const isSelected = selectedTag === tag;
@@ -228,10 +230,10 @@ export function SwaggerExplorer({ workspaces = [] }: SwaggerExplorerProps) {
         {filteredEndpoints.length === 0 ? (
           <div className="p-8 text-center rounded-xl border border-dashed border-border bg-card/40 space-y-2">
             <p className="text-sm font-medium text-foreground">
-              No endpoints matching &quot;{searchQuery}&quot;
+              {t("swagger.noEndpointsMatching", { query: searchQuery })}
             </p>
             <p className="text-xs text-muted-foreground">
-              Try adjusting your search query or switching categories above.
+              {t("swagger.noEndpointsHelp")}
             </p>
           </div>
         ) : (
@@ -263,6 +265,7 @@ function EndpointCard({
   onToggle,
   wsSlug,
 }: EndpointCardProps) {
+  const { t } = useI18n();
   const styles = METHOD_STYLES[endpoint.method];
   const [activeTab, setActiveTab] = React.useState<"docs" | "snippets" | "try">(
     "docs"
@@ -398,7 +401,7 @@ print(data)`;
         <div className="flex items-center gap-2 flex-shrink-0">
           <span
             className="inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded-full border border-border/80 bg-muted/60 text-muted-foreground"
-            title={`Required Scope: ${endpoint.scope}`}
+            title={t("swagger.requiredScope", { scope: endpoint.scope })}
           >
             <Lock className="size-3 text-muted-foreground" />
             <span className="hidden md:inline">{endpoint.scope}</span>
@@ -436,7 +439,7 @@ print(data)`;
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                Specification
+                {t("swagger.specification")}
               </button>
               <button
                 type="button"
@@ -449,7 +452,7 @@ print(data)`;
                 )}
               >
                 <Code2 className="size-3.5" />
-                <span>Code Examples</span>
+                <span>{t("swagger.codeExamples")}</span>
               </button>
             </div>
           </div>
@@ -461,7 +464,7 @@ print(data)`;
                 <div className="flex items-center gap-2">
                   <KeyRound className="size-4 text-amber-500" />
                   <span className="font-semibold text-foreground">
-                    Required Authorization:
+                    {t("swagger.requiredAuth")}
                   </span>
                   <code className="px-1.5 py-0.5 rounded bg-muted font-mono font-bold text-foreground">
                     Bearer &lt;YOUR_API_KEY&gt;
@@ -474,7 +477,7 @@ print(data)`;
                   </code>
                   {endpoint.productRestrictedCapable && (
                     <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-medium">
-                      Product Restrictable
+                      {t("swagger.productRestrictable")}
                     </span>
                   )}
                 </div>
@@ -484,21 +487,21 @@ print(data)`;
               <div className="space-y-2">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                   <Terminal className="size-3.5" />
-                  Parameters
+                  {t("swagger.parameters")}
                 </h4>
                 {endpoint.parameters.length === 0 ? (
                   <p className="text-xs text-muted-foreground italic">
-                    No query or path parameters required.
+                    {t("swagger.noParametersRequired")}
                   </p>
                 ) : (
                   <div className="border border-border rounded-lg overflow-x-auto bg-card">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
                         <tr className="border-b border-border bg-muted/40 font-semibold text-muted-foreground">
-                          <th className="py-2 px-3">Name</th>
-                          <th className="py-2 px-3">In</th>
-                          <th className="py-2 px-3">Type</th>
-                          <th className="py-2 px-3">Description</th>
+                          <th className="py-2 px-3">{t("swagger.colName")}</th>
+                          <th className="py-2 px-3">{t("swagger.colIn")}</th>
+                          <th className="py-2 px-3">{t("swagger.colType")}</th>
+                          <th className="py-2 px-3">{t("swagger.colDescription")}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/60">
@@ -544,7 +547,7 @@ print(data)`;
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                       <Zap className="size-3.5" />
-                      Request Body ({endpoint.requestBody.contentType})
+                      {t("swagger.requestBody", { contentType: endpoint.requestBody.contentType })}
                     </h4>
                     <button
                       type="button"
@@ -560,7 +563,7 @@ print(data)`;
                       ) : (
                         <Copy className="size-3" />
                       )}
-                      <span>Copy payload</span>
+                      <span>{t("swagger.copyPayload")}</span>
                     </button>
                   </div>
                   <pre className="p-3.5 rounded-lg border border-border bg-muted/40 font-mono text-xs text-foreground overflow-x-auto">
@@ -572,7 +575,7 @@ print(data)`;
               {/* Responses Section */}
               <div className="space-y-3">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  Responses
+                  {t("swagger.responses")}
                 </h4>
                 <div className="flex items-center gap-2 flex-wrap">
                   {endpoint.responses.map((resp) => {
@@ -626,7 +629,7 @@ print(data)`;
                           ) : (
                             <Copy className="size-3" />
                           )}
-                          <span>Copy Response</span>
+                          <span>{t("swagger.copyResponse")}</span>
                         </button>
                       </div>
                       <pre className="p-3.5 font-mono text-xs text-foreground overflow-x-auto bg-muted/10">
@@ -684,7 +687,7 @@ print(data)`;
                   ) : (
                     <Copy className="size-3.5" />
                   )}
-                  <span>{copied ? "Copied!" : "Copy Code"}</span>
+                  <span>{copied ? t("common.copied") : t("swagger.copyCode")}</span>
                 </button>
               </div>
 

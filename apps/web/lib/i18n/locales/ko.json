@@ -60,7 +60,17 @@
     "goToHome": "홈으로 이동",
     "tryAgain": "다시 시도",
     "reset": "초기화",
-    "actions": "동작"
+    "actions": "동작",
+    "account": "계정",
+    "pressToCopy": "복사하려면 Ctrl+C 또는 ⌘C를 누르세요.",
+    "internal": "내부",
+    "searching": "검색 중…",
+    "goToUserhq": "UserHQ로 이동",
+    "public": "공개",
+    "copyLink": "링크 복사",
+    "uploading": "업로드 중...",
+    "deletedUser": "삭제된 사용자",
+    "anonymous": "익명"
   },
   "portal": {
     "submitFeedback": "새로운 아이디어 제안",
@@ -330,7 +340,15 @@
     "internalNotesPlaceholder": "비공개 링크, 고객 인용구 또는 구현 노트 추가…",
     "translationForTitle": "공개 제목 번역 ({locale})...",
     "translationForDesc": "공개 설명 번역 ({locale})...",
-    "publicTitleHelper": "공개 로드맵에 표시되는 고객용 제목입니다."
+    "publicTitleHelper": "공개 로드맵에 표시되는 고객용 제목입니다.",
+    "linkedFeedbackPosts": "{count}개의 연결된 피드백 게시물",
+    "assignedTo": "{name}에게 할당됨",
+    "addItemToStatus": "{name}에 항목 추가",
+    "moveItemError": "항목을 이동할 수 없습니다. 인터넷 연결을 확인하고 다시 시도하세요.",
+    "linkedPostSuccess": "#{number} 연결됨",
+    "deleteItemError": "항목을 삭제할 수 없습니다. 다시 시도하세요.",
+    "loadingLinkedPosts": "연결된 게시물을 불러오는 중…",
+    "unlinkPostAria": "게시물 #{number} 연결 해제"
   },
   "changelog": {
     "title": "변경 로그",
@@ -355,7 +373,7 @@
     "deleteEntryDesc": "이 항목은 영구적으로 제거됩니다. 취소할 수 없습니다.",
     "entryUnpublished": "항목 게시가 취소되었습니다",
     "entryDeleted": "항목이 삭제되었습니다",
-    "backToChangelog": "변경 로그로 돌아가기",
+    "backToChangelog": "← 변경 로그로 돌아가기",
     "unsavedChanges": "저장되지 않은 변경 사항",
     "savingDraft": "저장 중...",
     "draftSaved": "임시저장 완료",
@@ -392,7 +410,17 @@
     "subtitle": "{name}의 새로운 기능, 개선 사항 및 버그 수정입니다.",
     "noUpdatesBody": "공지사항, 새로운 기능 및 개선 사항을 곧 다시 확인해 주세요.",
     "linkCopied": "링크가 클립보드에 복사되었습니다",
-    "allUpdates": "모든 업데이트"
+    "allUpdates": "모든 업데이트",
+    "previewTitle": "변경 로그 미리보기",
+    "previewDesc": "이 릴리스 노트가 일반 독자에게 어떻게 표시되는지 보여주는 미리보기입니다.",
+    "publishedBy": "{name} 팀",
+    "failedToUnpublish": "항목 게시 취소 실패",
+    "scheduledNotice": "출시일에 포털에 공개됩니다",
+    "tagNameRequired": "태그 이름이 필요합니다",
+    "failedToCreateTag": "태그 생성 실패",
+    "failedToDeleteTag": "태그 삭제 실패",
+    "deleteTagAria": "태그 {name} 삭제",
+    "noTagsYetHelp": "아직 태그가 없습니다. 태그를 추가하려면 \"태그 관리\"를 클릭하세요."
   },
   "faq": {
     "title": "자주 묻는 질문 (FAQ)",
@@ -445,7 +473,13 @@
     "questionActions": "질문 동작",
     "dragToReorderCategory": "카테고리 순서를 변경하려면 드래그하세요",
     "categoryOptions": "카테고리 옵션",
-    "faqCategoriesNav": "자주 묻는 질문 카테고리"
+    "faqCategoriesNav": "자주 묻는 질문 카테고리",
+    "questionLinkCopied": "질문 링크가 복사되었습니다",
+    "noQuestionsInCategory": "이 카테고리에는 아직 질문이 없습니다.",
+    "detailedAnswerPlaceholder": "자세한 답변을 여기에 입력하세요...",
+    "writeAnswerInLocale": "{locale}로 답변 입력...",
+    "reorderCategoryError": "FAQ 카테고리 순서를 변경할 수 없습니다. 연결 상태를 확인하고 다시 시도하세요.",
+    "reorderQuestionError": "FAQ 질문 순서를 변경할 수 없습니다. 연결 상태를 확인하고 다시 시도하세요."
   },
   "apiKeys": {
     "title": "API 키",
@@ -719,7 +753,10 @@
     "workspaceDeleted": "{name} 삭제됨",
     "deleteWorkspaceTitle": "{name}을(를) 삭제하시겠습니까?",
     "deleteWorkspaceConfirmDesc": "이 워크스페이스의 모든 제품이 즉시 오프라인으로 전환되며 워크스페이스 URL은 다시 사용할 수 없습니다. 이 작업은 되돌릴 수 없습니다.",
-    "typeToConfirm": "확인을 위해 {name} 입력"
+    "typeToConfirm": "확인하려면 {name}을(를) 입력하세요",
+    "deleteProductConfirmTitle": "{name}을(를) 삭제하시겠습니까?",
+    "deleteProductConfirmDesc": "공개 포털이 즉시 오프라인 상태가 되며 URL을 다시 사용할 수 없습니다. 이 작업은 취소할 수 없습니다.",
+    "deletedSuccess": "{name} 삭제됨"
   },
   "landing": {
     "heroHeading": "좋은 제품은 경청에서 시작됩니다.",
@@ -1225,7 +1262,13 @@
     "typePlanned": "Planned",
     "typeActive": "In Progress",
     "typeCompleted": "Completed",
-    "typeClosed": "Closed"
+    "typeClosed": "Closed",
+    "reorderStatus": "{name} 순서 변경",
+    "actionsForStatus": "{name}에 대한 작업",
+    "makeDefault": "기본값으로 설정",
+    "defaultStatusCannotBeDeleted": "기본 상태는 삭제할 수 없습니다",
+    "needAtLeastOneStatus": "제품에는 하나 이상의 상태가 필요합니다",
+    "showOnPublicRoadmapHelp": "선택하면 이 단계의 항목이 공개 제품 로드맵에 열로 표시됩니다."
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1422,5 +1465,88 @@
     "destinationUrlLabel": "대상 URL",
     "invalidLinkProtocol": "URL은 http://, https:// 또는 mailto: 로 시작해야 합니다",
     "invalidLinkUrl": "유효한 URL을 입력하세요."
+  },
+  "legal": {
+    "lastUpdated": "최종 업데이트: {date}"
+  },
+  "branding": {
+    "customHex": "{label} 커스텀 16진수",
+    "uploadLogo": "로고 업로드",
+    "removeLogo": "로고 제거",
+    "logoRequirements": "PNG, JPEG, WebP 또는 GIF, 최대 2MB. 정사각형 이미지가 가장 좋습니다.",
+    "buttonTextColorLabel": "버튼 텍스트 색상",
+    "buttonTextColorDesc": "버튼 및 강조 표면에 표시되는 텍스트 및 아이콘의 색상입니다.",
+    "autoFg": "자동 ({fg})",
+    "livePreview": "실시간 미리보기",
+    "primaryButton": "기본 버튼",
+    "outlineButton": "아웃라인 버튼",
+    "sampleLink": "샘플 링크",
+    "lowContrastWarning": "낮은 대비 ({ratio}:1). 방문자가 버튼 텍스트를 읽기 어려울 수 있습니다. 자동으로 설정하거나 더 높은 대비의 색상을 고려하세요.",
+    "lightAccentWarning": "이 강조 색상은 흰색 표면에서 밝으므로 독립 실행형 링크에는 어두운 텍스트가 사용되고 버튼에는 기본 배경이 사용됩니다."
+  },
+  "posts": {
+    "publicNoteOptional": "공개 메모 (선택사항)",
+    "changedStatusTo": "상태를 변경함:",
+    "postsFound": "{count}개의 게시물을 찾았습니다",
+    "noPostsMatch": "\"{query}\"와 일치하는 게시물이 없습니다.",
+    "chooseAnotherPost": "다른 게시물 선택",
+    "openPublicPortalPost": "공개 포털 게시물 열기",
+    "statusLockedHelp": "상태가 연결된 로드맵 항목에 고정되어 있습니다. 상태를 변경하려면 로드맵에서 항목을 이동하세요.",
+    "editedSuffix": "· 수정됨",
+    "publicNoteHelper": "귀하의 이름과 함께 게시물에 표시됩니다."
+  },
+  "productUsers": {
+    "badgeGranted": "배지가 부여되었습니다",
+    "failedToGrantBadge": "배지 부여 실패",
+    "badgeRevoked": "배지가 취소되었습니다",
+    "failedToRevokeBadge": "배지 취소 실패",
+    "activity": "활동",
+    "unnamedUser": "이름 없는 사용자",
+    "postsSubmitted": "제출된 게시물",
+    "commentsWritten": "작성된 댓글",
+    "votesCast": "행사된 투표",
+    "showingRange": "{total}개 중 {start}–{end} 표시 중",
+    "pageOf": "페이지 {page} / {totalPages}",
+    "noBadgesAssigned": "현재 이 사용자에게 할당된 배지가 없습니다.",
+    "allBadgesGranted": "사용자가 이미 이 제품에 생성된 모든 배지를 보유하고 있습니다.",
+    "selectBadge": "부여할 배지 선택...",
+    "expirationDateOptional": "만료일 (선택사항)",
+    "granting": "부여 중..."
+  },
+  "invites": {
+    "invalidTitle": "이 초대 링크는 유효하지 않습니다",
+    "invalidDesc": "링크 전체를 복사했는지 확인하거나 새 링크를 요청하세요.",
+    "wrongEmailTitle": "이 초대는 다른 이메일 주소용입니다",
+    "expiredTitle": "이 초대는 만료되었습니다",
+    "expiredDesc": "초대 링크는 7일 동안 유효합니다. 초대한 사람에게 새 링크를 요청하세요.",
+    "usedTitle": "이 초대는 이미 사용되었습니다",
+    "usedDesc": "초대 링크는 한 번만 사용할 수 있습니다. 접근 권한이 필요한 경우 초대한 사람에게 새 링크를 요청하세요.",
+    "canceledTitle": "이 초대는 취소되었습니다",
+    "canceledDesc": "링크를 생성한 사람이 취소했습니다. 새 링크를 요청하세요.",
+    "workspaceUnavailableTitle": "이 워크스페이스를 사용할 수 없습니다"
+  },
+  "swagger": {
+    "expandAll": "모두 펼치기",
+    "collapseAll": "모두 접기",
+    "noEndpointsMatching": "\"{query}\"와 일치하는 엔드포인트가 없습니다",
+    "noEndpointsHelp": "검색어를 조정하거나 상단의 카테고리를 변경해 보세요.",
+    "requiredScope": "필요한 범위: {scope}",
+    "specification": "사양",
+    "codeExamples": "코드 예제",
+    "requiredAuth": "필요한 인증:",
+    "productRestrictable": "제품별 제한 가능",
+    "parameters": "매개변수",
+    "noParametersRequired": "쿼리 또는 경로 매개변수가 필요하지 않습니다.",
+    "colName": "이름",
+    "colIn": "위치",
+    "colType": "유형",
+    "colDescription": "설명",
+    "requestBody": "요청 본문 ({contentType})",
+    "copyPayload": "페이로드 복사",
+    "responses": "응답",
+    "copyResponse": "응답 복사",
+    "copyCode": "코드 복사",
+    "workspace": "워크스페이스",
+    "category": "카테고리"
   }
 }

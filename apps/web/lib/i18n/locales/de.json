@@ -60,7 +60,17 @@
     "goToHome": "Zur Startseite",
     "tryAgain": "Erneut versuchen",
     "reset": "Zurücksetzen",
-    "actions": "Aktionen"
+    "actions": "Aktionen",
+    "account": "Konto",
+    "pressToCopy": "Drücken Sie Strg+C oder ⌘C zum Kopieren.",
+    "internal": "Intern",
+    "searching": "Wird gesucht…",
+    "goToUserhq": "Zu UserHQ gehen",
+    "public": "Öffentlich",
+    "copyLink": "Link kopieren",
+    "uploading": "Wird hochgeladen...",
+    "deletedUser": "Gelöschter Benutzer",
+    "anonymous": "Anonym"
   },
   "portal": {
     "submitFeedback": "Idee einreichen",
@@ -269,7 +279,7 @@
     "title": "Roadmap",
     "description": "Planen Sie, was als Nächstes gebaut werden soll. Ziehen Sie Elemente zwischen den Spalten, um deren Status zu aktualisieren.",
     "newItem": "Neues Element",
-    "filterByAssignee": "Nach Zuständigem filtern",
+    "filterByAssignee": "Nach Beauftragtem filtern",
     "allAssignees": "Alle Zuständigen",
     "unassigned": "Nicht zugewiesen",
     "addItem": "Element hinzufügen",
@@ -330,7 +340,15 @@
     "internalNotesPlaceholder": "Private Links, Kunden-Zitate oder Implementierungsnotizen hinzufügen…",
     "translationForTitle": "Übersetzung für öffentlichen Titel ({locale})…",
     "translationForDesc": "Übersetzung für öffentliche Beschreibung ({locale})…",
-    "publicTitleHelper": "Kundenorientierter Titel, der auf der öffentlichen Roadmap angezeigt wird."
+    "publicTitleHelper": "Kundenorientierter Titel, der auf der öffentlichen Roadmap angezeigt wird.",
+    "linkedFeedbackPosts": "{count} verknüpfte Feedback-{count, plural, one {Beitrag} other {Beiträge}}",
+    "assignedTo": "Zugewiesen an {name}",
+    "addItemToStatus": "Element zu {name} hinzufügen",
+    "moveItemError": "Element konnte nicht verschoben werden. Verbindung prüfen und erneut versuchen.",
+    "linkedPostSuccess": "#{number} verknüpft",
+    "deleteItemError": "Element konnte nicht gelöscht werden. Bitte erneut versuchen.",
+    "loadingLinkedPosts": "Verknüpfte Beiträge werden geladen…",
+    "unlinkPostAria": "Verknüpfung von Beitrag #{number} aufheben"
   },
   "changelog": {
     "title": "Changelog",
@@ -355,7 +373,7 @@
     "deleteEntryDesc": "Dieser Eintrag wird dauerhaft entfernt. Dies kann nicht rückgängig gemacht werden.",
     "entryUnpublished": "Eintragsveröffentlichung zurückgenommen",
     "entryDeleted": "Eintrag gelöscht",
-    "backToChangelog": "Zurück zum Changelog",
+    "backToChangelog": "← Zurück zum Changelog",
     "unsavedChanges": "Ungespeicherte Änderungen",
     "savingDraft": "Speichern...",
     "draftSaved": "Entwurf gespeichert",
@@ -392,7 +410,17 @@
     "subtitle": "Neue Funktionen, Verbesserungen und Fehlerbehebungen für {name}.",
     "noUpdatesBody": "Schauen Sie bald wieder vorbei für Ankündigungen, neue Funktionen und Verbesserungen.",
     "linkCopied": "Link in die Zwischenablage kopiert",
-    "allUpdates": "Alle Aktualisierungen"
+    "allUpdates": "Alle Aktualisierungen",
+    "previewTitle": "Changelog-Vorschau",
+    "previewDesc": "Dies ist eine Vorschau, wie dieser Versionshinweis für öffentliche Leser angezeigt wird.",
+    "publishedBy": "{name}-Team",
+    "failedToUnpublish": "Eintrag konnte nicht zurückgezogen werden",
+    "scheduledNotice": "Wird am Veröffentlichungsdatum im Portal freigeschaltet",
+    "tagNameRequired": "Tag-Name ist erforderlich",
+    "failedToCreateTag": "Tag konnte nicht erstellt werden",
+    "failedToDeleteTag": "Tag konnte nicht gelöscht werden",
+    "deleteTagAria": "Tag {name} löschen",
+    "noTagsYetHelp": "Noch keine Tags vorhanden. Klicken Sie auf „Tags verwalten“, um Tags hinzuzufügen."
   },
   "faq": {
     "title": "Häufig gestellte Fragen (FAQ)",
@@ -445,7 +473,13 @@
     "questionActions": "Frage-Aktionen",
     "dragToReorderCategory": "Ziehen, um Kategorie neu anzuordnen",
     "categoryOptions": "Kategorieoptionen",
-    "faqCategoriesNav": "FAQ-Kategorien"
+    "faqCategoriesNav": "FAQ-Kategorien",
+    "questionLinkCopied": "Fragelink kopiert",
+    "noQuestionsInCategory": "Noch keine Fragen in dieser Kategorie vorhanden.",
+    "detailedAnswerPlaceholder": "Schreiben Sie die detaillierte Antwort hier...",
+    "writeAnswerInLocale": "Antwort auf {locale} verfassen...",
+    "reorderCategoryError": "FAQ-Kategorie konnte nicht neu geordnet werden. Verbindung prüfen und erneut versuchen.",
+    "reorderQuestionError": "FAQ-Frage konnte nicht neu geordnet werden. Verbindung prüfen und erneut versuchen."
   },
   "apiKeys": {
     "title": "API-Schlüssel",
@@ -719,7 +753,10 @@
     "workspaceDeleted": "{name} gelöscht",
     "deleteWorkspaceTitle": "{name} löschen?",
     "deleteWorkspaceConfirmDesc": "Alle Produkte in diesem Workspace werden sofort offline genommen und die Workspace-URL kann nicht erneut verwendet werden. Dies kann nicht rückgängig gemacht werden.",
-    "typeToConfirm": "Tippen Sie {name} zur Bestätigung"
+    "typeToConfirm": "Geben Sie {name} ein, um zu bestätigen",
+    "deleteProductConfirmTitle": "{name} löschen?",
+    "deleteProductConfirmDesc": "Das öffentliche Portal geht sofort offline und die URL kann nicht wiederverwendet werden. Dies kann nicht rückgängig gemacht werden.",
+    "deletedSuccess": "{name} gelöscht"
   },
   "landing": {
     "heroHeading": "Gute Produkte beginnen mit Zuhören.",
@@ -1225,7 +1262,13 @@
     "typePlanned": "Planned",
     "typeActive": "In Progress",
     "typeCompleted": "Completed",
-    "typeClosed": "Closed"
+    "typeClosed": "Closed",
+    "reorderStatus": "{name} neu anordnen",
+    "actionsForStatus": "Aktionen für {name}",
+    "makeDefault": "Als Standard festlegen",
+    "defaultStatusCannotBeDeleted": "Der Standardstatus kann nicht gelöscht werden",
+    "needAtLeastOneStatus": "Ein Produkt benötigt mindestens einen Status",
+    "showOnPublicRoadmapHelp": "Wenn aktiviert, erscheinen Einträge in dieser Phase als Spalte auf Ihrer öffentlichen Roadmap."
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1422,5 +1465,88 @@
     "destinationUrlLabel": "Ziel-URL",
     "invalidLinkProtocol": "URL muss mit http://, https:// oder mailto: beginnen",
     "invalidLinkUrl": "Bitte geben Sie eine gültige URL ein."
+  },
+  "legal": {
+    "lastUpdated": "Zuletzt aktualisiert am {date}"
+  },
+  "branding": {
+    "customHex": "{label} benutzerdefinierter Hex-Wert",
+    "uploadLogo": "Logo hochladen",
+    "removeLogo": "Logo entfernen",
+    "logoRequirements": "PNG, JPEG, WebP oder GIF, bis zu 2 MB. Quadratische Bilder sehen am besten aus.",
+    "buttonTextColorLabel": "Schaltflächen-Textfarbe",
+    "buttonTextColorDesc": "Farbe von Text und Symbolen auf Schaltflächen und Akzentflächen.",
+    "autoFg": "Automatisch ({fg})",
+    "livePreview": "Live-Vorschau",
+    "primaryButton": "Primäre Schaltfläche",
+    "outlineButton": "Umrandete Schaltfläche",
+    "sampleLink": "Beispiellink",
+    "lowContrastWarning": "Geringer Kontrast ({ratio}:1). Besucher könnten Schwierigkeiten beim Lesen des Texts haben. Wählen Sie Automatisch oder eine kontrastreichere Farbe.",
+    "lightAccentWarning": "Diese Akzentfarbe ist hell auf weißen Flächen, daher verwenden eigenständige Links dunklen Text, während Schaltflächen Ihren primären Hintergrund nutzen."
+  },
+  "posts": {
+    "publicNoteOptional": "Öffentliche Notiz (optional)",
+    "changedStatusTo": "änderte den Status zu",
+    "postsFound": "{count} Beiträge gefunden",
+    "noPostsMatch": "Keine Beiträge stimmen mit „{query}“ überein.",
+    "chooseAnotherPost": "Anderen Beitrag wählen",
+    "openPublicPortalPost": "Öffentlichen Portal-Beitrag öffnen",
+    "statusLockedHelp": "Der Status ist an das verknüpfte Roadmap-Element gebunden. Verschieben Sie das Element auf der Roadmap, um den Status zu ändern.",
+    "editedSuffix": "· bearbeitet",
+    "publicNoteHelper": "Wird auf dem Beitrag mit Ihrem Namen angezeigt."
+  },
+  "productUsers": {
+    "badgeGranted": "Abzeichen verliehen",
+    "failedToGrantBadge": "Abzeichen konnte nicht verliehen werden",
+    "badgeRevoked": "Abzeichen widerrufen",
+    "failedToRevokeBadge": "Abzeichen konnte nicht widerrufen werden",
+    "activity": "Aktivität",
+    "unnamedUser": "Unbenannter Benutzer",
+    "postsSubmitted": "Eingereichte Beiträge",
+    "commentsWritten": "Verfasste Kommentare",
+    "votesCast": "Abgegebene Stimmen",
+    "showingRange": "Zeige {start}–{end} von {total}",
+    "pageOf": "Seite {page} von {totalPages}",
+    "noBadgesAssigned": "Diesem Benutzer sind derzeit keine Abzeichen zugewiesen.",
+    "allBadgesGranted": "Der Benutzer besitzt bereits alle für dieses Produkt erstellten Abzeichen.",
+    "selectBadge": "Abzeichen zum Verleihen auswählen...",
+    "expirationDateOptional": "Ablaufdatum (optional)",
+    "granting": "Wird verliehen..."
+  },
+  "invites": {
+    "invalidTitle": "Dieser Einladungslink ist ungültig",
+    "invalidDesc": "Überprüfen Sie, ob Sie den gesamten Link kopiert haben, oder fordern Sie einen neuen an.",
+    "wrongEmailTitle": "Diese Einladung ist für eine andere E-Mail-Adresse bestimmt",
+    "expiredTitle": "Diese Einladung ist abgelaufen",
+    "expiredDesc": "Einladungslinks sind 7 Tage gültig. Bitten Sie die Person, die Sie eingeladen hat, um einen neuen Link.",
+    "usedTitle": "Diese Einladung wurde bereits verwendet",
+    "usedDesc": "Jeder Einladungslink funktioniert nur einmal. Wenn Sie Zugriff benötigen, bitten Sie um einen neuen Link.",
+    "canceledTitle": "Diese Einladung wurde storniert",
+    "canceledDesc": "Die Person, die diesen Link erstellt hat, hat ihn widerrufen. Bitten Sie um einen neuen.",
+    "workspaceUnavailableTitle": "Dieser Arbeitsbereich ist nicht verfügbar"
+  },
+  "swagger": {
+    "expandAll": "Alle erweitern",
+    "collapseAll": "Alle einklappen",
+    "noEndpointsMatching": "Keine Endpunkte stimmen mit „{query}“ überein",
+    "noEndpointsHelp": "Versuchen Sie, die Suche anzupassen oder oben die Kategorie zu wechseln.",
+    "requiredScope": "Erforderlicher Bereich: {scope}",
+    "specification": "Spezifikation",
+    "codeExamples": "Codebeispiele",
+    "requiredAuth": "Erforderliche Autorisierung:",
+    "productRestrictable": "Auf Produktebene einschränkbar",
+    "parameters": "Parameter",
+    "noParametersRequired": "Keine Abfrage- oder Pfadparameter erforderlich.",
+    "colName": "Name",
+    "colIn": "In",
+    "colType": "Typ",
+    "colDescription": "Beschreibung",
+    "requestBody": "Anforderungstext ({contentType})",
+    "copyPayload": "Payload kopieren",
+    "responses": "Antworten",
+    "copyResponse": "Antwort kopieren",
+    "copyCode": "Code kopieren",
+    "workspace": "Arbeitsbereich",
+    "category": "Kategorie"
   }
 }

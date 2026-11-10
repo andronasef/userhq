@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import { PALETTE } from "@userhq/types";
 import { accentTokens } from "@/lib/accent";
 import { Input } from "./ui/input";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface ColorPreset {
   name: string;
@@ -40,6 +41,7 @@ export function ColorField({
   placeholder,
   id,
 }: ColorFieldProps) {
+  const { t } = useI18n();
   const normValue = value?.toUpperCase() ?? "";
   const isAutoSelected = allowAuto && (!normValue || normValue === "AUTO");
   const fieldId = id || React.useId();
@@ -153,7 +155,7 @@ export function ColorField({
             aria-hidden="true"
           />
           <div className="flex flex-col">
-            <span className="sr-only">{label} custom hex</span>
+            <span className="sr-only">{t("branding.customHex", { label })}</span>
             <Input
               id={fieldId}
               type="text"
@@ -174,7 +176,7 @@ export function ColorField({
                     : "Auto"
                   : "#2563EB")
               }
-              aria-label={`${label} custom hex`}
+              aria-label={t("branding.customHex", { label })}
               className="w-36 font-mono text-xs"
             />
           </div>

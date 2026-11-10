@@ -60,7 +60,17 @@
     "goToHome": "होम पर जाएं",
     "tryAgain": "पुनः प्रयास करें",
     "reset": "रीसेट",
-    "actions": "क्रियाएं"
+    "actions": "क्रियाएं",
+    "account": "खाता",
+    "pressToCopy": "कॉपी करने के लिए Ctrl+C या ⌘C दबाएं।",
+    "internal": "आंतरिक",
+    "searching": "खोज रहा है…",
+    "goToUserhq": "UserHQ पर जाएं",
+    "public": "सार्वजनिक",
+    "copyLink": "लिंक कॉपी करें",
+    "uploading": "अपलोड हो रहा है...",
+    "deletedUser": "हटाया गया उपयोगकर्ता",
+    "anonymous": "गुमनाम"
   },
   "portal": {
     "submitFeedback": "सुझाव दें",
@@ -269,7 +279,7 @@
     "title": "रोडमैप",
     "description": "योजना बनाएं कि आगे क्या बनाना है। स्थिति अपडेट करने के लिए आइटम को कॉलम के बीच खींचें।",
     "newItem": "नया आइटम",
-    "filterByAssignee": "प्रभारी द्वारा फ़िल्टर करें",
+    "filterByAssignee": "सौंपे गए व्यक्ति के अनुसार फ़िल्टर करें",
     "allAssignees": "सभी प्रभारी",
     "unassigned": "असाइन नहीं किया गया",
     "addItem": "आइटम जोड़ें",
@@ -330,7 +340,15 @@
     "internalNotesPlaceholder": "निजी लिंक, ग्राहक उद्धरण, या कार्यान्वयन नोट्स जोड़ें…",
     "translationForTitle": "सार्वजनिक शीर्षक के लिए अनुवाद ({locale})...",
     "translationForDesc": "सार्वजनिक विवरण के लिए अनुवाद ({locale})...",
-    "publicTitleHelper": "सार्वजनिक रोडमैप पर दिखाया जाने वाला ग्राहक-उन्मुख शीर्षक।"
+    "publicTitleHelper": "सार्वजनिक रोडमैप पर दिखाया जाने वाला ग्राहक-उन्मुख शीर्षक।",
+    "linkedFeedbackPosts": "{count} लिंक किया गया फ़ीडबैक {count, plural, one {पोस्ट} other {पोस्ट}}",
+    "assignedTo": "{name} को सौंपा गया",
+    "addItemToStatus": "{name} में आइटम जोड़ें",
+    "moveItemError": "आइटम को स्थानांतरित नहीं किया जा सका। कनेक्शन जांचें और पुनः प्रयास करें।",
+    "linkedPostSuccess": "#{number} लिंक किया गया",
+    "deleteItemError": "आइटम हटाया नहीं जा सका। पुनः प्रयास करें।",
+    "loadingLinkedPosts": "लिंक किए गए पोस्ट लोड हो रहे हैं…",
+    "unlinkPostAria": "पोस्ट #{number} को अनलिंक करें"
   },
   "changelog": {
     "title": "परिवर्तन सूची (Changelog)",
@@ -355,7 +373,7 @@
     "deleteEntryDesc": "यह प्रविष्टि स्थायी रूप से हटा दी जाएगी। इसे पूर्ववत नहीं किया जा सकता।",
     "entryUnpublished": "प्रविष्टि अप्रकाशित की गई",
     "entryDeleted": "प्रविष्टि हटाई गई",
-    "backToChangelog": "परिवर्तन सूची पर वापस जाएं",
+    "backToChangelog": "← चेंजलॉग पर वापस जाएं",
     "unsavedChanges": "असहेजे गए परिवर्तन",
     "savingDraft": "सहेज रहा है...",
     "draftSaved": "ड्राफ्ट सहेजा गया",
@@ -392,7 +410,17 @@
     "subtitle": "{name} के लिए नई सुविधाएं, सुधार और बग समाधान।",
     "noUpdatesBody": "घोषणाओं, नई सुविधाओं और सुधारों के लिए जल्द ही फिर से देखें।",
     "linkCopied": "लिंक क्लिपबोर्ड पर कॉपी किया गया",
-    "allUpdates": "सभी अपडेट"
+    "allUpdates": "सभी अपडेट",
+    "previewTitle": "चेंजलॉग पूर्वावलोकन",
+    "previewDesc": "यह इस बात का पूर्वावलोकन है कि यह रिलीज़ नोट सार्वजनिक पाठकों को कैसा दिखाई देगा।",
+    "publishedBy": "{name} टीम",
+    "failedToUnpublish": "प्रविष्टि को अप्रकाशित करने में विफल",
+    "scheduledNotice": "इसकी रिलीज़ तिथि पर पोर्टल पर लाइव होगा",
+    "tagNameRequired": "टैग का नाम आवश्यक है",
+    "failedToCreateTag": "टैग बनाने में विफल",
+    "failedToDeleteTag": "टैग हटाने में विफल",
+    "deleteTagAria": "टैग {name} हटाएं",
+    "noTagsYetHelp": "अभी तक कोई टैग नहीं है। टैग जोड़ने के लिए \"टैग प्रबंधित करें\" पर क्लिक करें।"
   },
   "faq": {
     "title": "अक्सर पूछे जाने वाले प्रश्न (FAQ)",
@@ -445,7 +473,13 @@
     "questionActions": "प्रश्न क्रियाएं",
     "dragToReorderCategory": "श्रेणी को पुनर्व्यवस्थित करने के लिए खींचें",
     "categoryOptions": "श्रेणी विकल्प",
-    "faqCategoriesNav": "अक्सर पूछे जाने वाले प्रश्नों की श्रेणियां"
+    "faqCategoriesNav": "अक्सर पूछे जाने वाले प्रश्नों की श्रेणियां",
+    "questionLinkCopied": "प्रश्न लिंक कॉपी किया गया",
+    "noQuestionsInCategory": "इस श्रेणी में अभी तक कोई प्रश्न नहीं है।",
+    "detailedAnswerPlaceholder": "विस्तृत उत्तर यहाँ लिखें...",
+    "writeAnswerInLocale": "{locale} में उत्तर लिखें...",
+    "reorderCategoryError": "FAQ श्रेणी का क्रम नहीं बदला जा सका। अपना कनेक्शन जांचें और पुनः प्रयास करें।",
+    "reorderQuestionError": "FAQ प्रश्न का क्रम नहीं बदला जा सका। अपना कनेक्शन जांचें और पुनः प्रयास करें।"
   },
   "apiKeys": {
     "title": "API कुंजियाँ",
@@ -719,7 +753,10 @@
     "workspaceDeleted": "{name} हटाया गया",
     "deleteWorkspaceTitle": "{name} हटाएं?",
     "deleteWorkspaceConfirmDesc": "इस कार्यस्थान के सभी उत्पाद तुरंत ऑफ़लाइन कर दिए जाएंगे, और इस URL का पुनः उपयोग नहीं किया जा सकेगा। इसे पूर्ववत नहीं किया जा सकता।",
-    "typeToConfirm": "पुष्टि के लिए {name} लिखें"
+    "typeToConfirm": "पुष्टि करने के लिए {name} टाइप करें",
+    "deleteProductConfirmTitle": "क्या {name} हटाएं?",
+    "deleteProductConfirmDesc": "इसका सार्वजनिक पोर्टल तुरंत ऑफ़लाइन हो जाता है, और इसके URL का पुन: उपयोग नहीं किया जा सकता है। इसे पूर्ववत नहीं किया जा सकता।",
+    "deletedSuccess": "{name} हटा दिया गया"
   },
   "landing": {
     "heroHeading": "बेहतरीन उत्पाद सुनने से शुरू होते हैं।",
@@ -1225,7 +1262,13 @@
     "typePlanned": "Planned",
     "typeActive": "In Progress",
     "typeCompleted": "Completed",
-    "typeClosed": "Closed"
+    "typeClosed": "Closed",
+    "reorderStatus": "{name} का क्रम बदलें",
+    "actionsForStatus": "{name} के लिए कार्रवाइयां",
+    "makeDefault": "डिफ़ॉल्ट बनाएं",
+    "defaultStatusCannotBeDeleted": "डिफ़ॉल्ट स्थिति को हटाया नहीं जा सकता",
+    "needAtLeastOneStatus": "उत्पाद के लिए कम से कम एक स्थिति आवश्यक है",
+    "showOnPublicRoadmapHelp": "चेक किए जाने पर, इस चरण के आइटम आपके सार्वजनिक उत्पाद रोडमैप पर एक कॉलम के रूप में दिखाई देंगे।"
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1422,5 +1465,88 @@
     "destinationUrlLabel": "गंतव्य URL",
     "invalidLinkProtocol": "URL http://, https://, या mailto: से शुरू होना चाहिए",
     "invalidLinkUrl": "कृपया एक मान्य URL दर्ज करें।"
+  },
+  "legal": {
+    "lastUpdated": "अंतिम बार अपडेट किया गया: {date}"
+  },
+  "branding": {
+    "customHex": "{label} कस्टम हेक्स",
+    "uploadLogo": "लोगो अपलोड करें",
+    "removeLogo": "लोगो हटाएं",
+    "logoRequirements": "PNG, JPEG, WebP या GIF, अधिकतम 2 MB। वर्गाकार चित्र सबसे अच्छे दिखते हैं।",
+    "buttonTextColorLabel": "बटन टेक्स्ट का रंग",
+    "buttonTextColorDesc": "बटन और एक्सेंट-युक्त सतहों पर दिखने वाले टेक्स्ट और आइकन का रंग।",
+    "autoFg": "स्वतः ({fg})",
+    "livePreview": "लाइव पूर्वावलोकन",
+    "primaryButton": "प्राथमिक बटन",
+    "outlineButton": "आउटलाइन बटन",
+    "sampleLink": "नमूना लिंक",
+    "lowContrastWarning": "कम कंट्रास्ट ({ratio}:1)। आगंतुकों को बटन टेक्स्ट पढ़ने में कठिनाई हो सकती है। स्वतः या उच्च कंट्रास्ट रंग चुनने पर विचार करें।",
+    "lightAccentWarning": "यह एक्सेंट रंग सफेद सतहों पर हल्का है, इसलिए स्टैंडअलोन लिंक गहरे टेक्स्ट का उपयोग करेंगे जबकि बटन आपकी प्राथमिक पृष्ठभूमि का उपयोग करेंगे।"
+  },
+  "posts": {
+    "publicNoteOptional": "सार्वजनिक नोट (वैकल्पिक)",
+    "changedStatusTo": "स्थिति को बदल दिया",
+    "postsFound": "{count} पोस्ट मिले",
+    "noPostsMatch": "\"{query}\" से कोई पोस्ट मेल नहीं खाता।",
+    "chooseAnotherPost": "अन्य पोस्ट चुनें",
+    "openPublicPortalPost": "सार्वजनिक पोर्टल पोस्ट खोलें",
+    "statusLockedHelp": "स्थिति लिंक किए गए रोडमैप आइटम से लॉक है। स्थिति बदलने के लिए रोडमैप पर आइटम को स्थानांतरित करें।",
+    "editedSuffix": "· संपादित",
+    "publicNoteHelper": "आपकी पोस्ट पर आपके नाम के साथ दिखाया गया।"
+  },
+  "productUsers": {
+    "badgeGranted": "बैज प्रदान किया गया",
+    "failedToGrantBadge": "बैज प्रदान करने में विफल",
+    "badgeRevoked": "बैज वापस लिया गया",
+    "failedToRevokeBadge": "बैज वापस लेने में विफल",
+    "activity": "गतिविधि",
+    "unnamedUser": "अनाम उपयोगकर्ता",
+    "postsSubmitted": "सबमिट किए गए पोस्ट",
+    "commentsWritten": "लिखी गई टिप्पणियाँ",
+    "votesCast": "दिए गए वोट",
+    "showingRange": "{total} में से {start}–{end} दिखाया जा रहा है",
+    "pageOf": "पृष्ठ {page} / {totalPages}",
+    "noBadgesAssigned": "वर्तमान में इस उपयोगकर्ता को कोई बैज नहीं सौंपा गया है।",
+    "allBadgesGranted": "उपयोगकर्ता के पास इस उत्पाद के लिए बनाए गए सभी बैज पहले से मौजूद हैं।",
+    "selectBadge": "प्रदान करने के लिए बैज चुनें...",
+    "expirationDateOptional": "समाप्ति तिथि (वैकल्पिक)",
+    "granting": "प्रदान किया जा रहा है..."
+  },
+  "invites": {
+    "invalidTitle": "यह आमंत्रण लिंक अमान्य है",
+    "invalidDesc": "जांचें कि आपने पूरा लिंक कॉपी किया है, या नया लिंक मांगें।",
+    "wrongEmailTitle": "यह आमंत्रण किसी अन्य ईमेल पते के लिए है",
+    "expiredTitle": "इस आमंत्रण की समय सीमा समाप्त हो गई है",
+    "expiredDesc": "आमंत्रण लिंक 7 दिनों तक काम करते हैं। जिसने आपको आमंत्रित किया था उससे नया लिंक मांगें।",
+    "usedTitle": "इस आमंत्रण का पहले ही उपयोग किया जा चुका है",
+    "usedDesc": "प्रत्येक आमंत्रण लिंक एक बार काम करता है। यदि आपको पहुंच की आवश्यकता है, तो आमंत्रित करने वाले से नया लिंक मांगें।",
+    "canceledTitle": "यह आमंत्रण रद्द कर दिया गया था",
+    "canceledDesc": "जिस व्यक्ति ने यह लिंक बनाया था उसने इसे रद्द कर दिया। उनसे नया लिंक मांगें।",
+    "workspaceUnavailableTitle": "यह कार्यक्षेत्र अनुपलब्ध है"
+  },
+  "swagger": {
+    "expandAll": "सभी का विस्तार करें",
+    "collapseAll": "सभी को संक्षिप्त करें",
+    "noEndpointsMatching": "\"{query}\" से मेल खाने वाले कोई समापन बिंदु नहीं हैं",
+    "noEndpointsHelp": "अपनी खोज क्वेरी समायोजित करने या ऊपर श्रेणियां बदलने का प्रयास करें।",
+    "requiredScope": "आवश्यक स्कोप: {scope}",
+    "specification": "विनिर्देश",
+    "codeExamples": "कोड उदाहरण",
+    "requiredAuth": "आवश्यक प्राधिकरण:",
+    "productRestrictable": "उत्पाद के अनुसार प्रतिबंधित करने योग्य",
+    "parameters": "पैरामीटर",
+    "noParametersRequired": "कोई क्वेरी या पथ पैरामीटर आवश्यक नहीं है।",
+    "colName": "नाम",
+    "colIn": "स्थान",
+    "colType": "प्रकार",
+    "colDescription": "विवरण",
+    "requestBody": "अनुरोध बॉडी ({contentType})",
+    "copyPayload": "पेलोड कॉपी करें",
+    "responses": "प्रतिक्रियाएं",
+    "copyResponse": "प्रतिक्रिया कॉपी करें",
+    "copyCode": "कोड कॉपी करें",
+    "workspace": "कार्यस्थान",
+    "category": "श्रेणी"
   }
 }

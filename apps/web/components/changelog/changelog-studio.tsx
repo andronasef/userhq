@@ -83,7 +83,7 @@ export function ChangelogStudio({
       );
       toast.success(t("changelog.entryUnpublished"));
     } catch (err: any) {
-      toast.error(err.message || "Failed to unpublish entry");
+      toast.error(err.message || t("changelog.failedToUnpublish"));
     }
   };
 
@@ -238,7 +238,7 @@ export function ChangelogStudio({
                           variant="ghost"
                           size="sm"
                           className="size-8 p-0"
-                          aria-label="Actions"
+                          aria-label={t("common.actions")}
                         >
                           <MoreHorizontal className="size-4" />
                         </Button>

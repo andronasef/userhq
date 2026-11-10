@@ -60,7 +60,17 @@
     "goToHome": "ホームへ移動",
     "tryAgain": "もう一度試す",
     "reset": "リセット",
-    "actions": "アクション"
+    "actions": "アクション",
+    "account": "アカウント",
+    "pressToCopy": "コピーするには Ctrl+C または ⌘C を押してください。",
+    "internal": "内部",
+    "searching": "検索中…",
+    "goToUserhq": "UserHQ に移動",
+    "public": "公開",
+    "copyLink": "リンクをコピー",
+    "uploading": "アップロード中...",
+    "deletedUser": "削除されたユーザー",
+    "anonymous": "匿名"
   },
   "portal": {
     "submitFeedback": "フィードバックを投稿",
@@ -330,7 +340,15 @@
     "internalNotesPlaceholder": "非公開リンク、顧客の引用、または実装ノートを追加…",
     "translationForTitle": "公開タイトルの翻訳 ({locale})...",
     "translationForDesc": "公開説明の翻訳 ({locale})...",
-    "publicTitleHelper": "公開ロードマップに表示される顧客向けタイトル。"
+    "publicTitleHelper": "公開ロードマップに表示される顧客向けタイトル。",
+    "linkedFeedbackPosts": "{count} 件の関連フィードバック投稿",
+    "assignedTo": "{name} に割り当て済み",
+    "addItemToStatus": "{name} に項目を追加",
+    "moveItemError": "項目を移動できませんでした。接続を確認して再試行してください。",
+    "linkedPostSuccess": "#{number} をリンクしました",
+    "deleteItemError": "項目を削除できませんでした。再試行してください。",
+    "loadingLinkedPosts": "関連する投稿を読み込み中…",
+    "unlinkPostAria": "投稿 #{number} のリンクを解除"
   },
   "changelog": {
     "title": "チェンジログ",
@@ -355,7 +373,7 @@
     "deleteEntryDesc": "このエントリは完全に削除されます。この操作は取り消せません。",
     "entryUnpublished": "エントリを非公開にしました",
     "entryDeleted": "エントリを削除しました",
-    "backToChangelog": "チェンジログに戻る",
+    "backToChangelog": "← 変更履歴に戻る",
     "unsavedChanges": "未保存の変更",
     "savingDraft": "保存中...",
     "draftSaved": "下書きを保存しました",
@@ -392,7 +410,17 @@
     "subtitle": "{name} の新機能、改善点、およびバグ修正。",
     "noUpdatesBody": "お知らせ、新機能、改善点については近日中に再度ご確認ください。",
     "linkCopied": "リンクをクリップボードにコピーしました",
-    "allUpdates": "すべての更新"
+    "allUpdates": "すべての更新",
+    "previewTitle": "変更履歴のプレビュー",
+    "previewDesc": "公開読者にこのリリースノートがどのように表示されるかのプレビューです。",
+    "publishedBy": "{name} チーム",
+    "failedToUnpublish": "エントリの非公開化に失敗しました",
+    "scheduledNotice": "リリース日にポータル上で自動的に公開されます",
+    "tagNameRequired": "タグ名は必須です",
+    "failedToCreateTag": "タグの作成に失敗しました",
+    "failedToDeleteTag": "タグの削除に失敗しました",
+    "deleteTagAria": "タグ {name} を削除",
+    "noTagsYetHelp": "タグがまだありません。「タグの管理」をクリックして追加してください。"
   },
   "faq": {
     "title": "よくある質問 (FAQ)",
@@ -445,7 +473,13 @@
     "questionActions": "質問のアクション",
     "dragToReorderCategory": "ドラッグしてカテゴリを並べ替え",
     "categoryOptions": "カテゴリオプション",
-    "faqCategoriesNav": "FAQカテゴリ"
+    "faqCategoriesNav": "FAQカテゴリ",
+    "questionLinkCopied": "質問のリンクをコピーしました",
+    "noQuestionsInCategory": "このカテゴリにはまだ質問がありません。",
+    "detailedAnswerPlaceholder": "詳しい回答をここに入力してください...",
+    "writeAnswerInLocale": "{locale} で回答を入力...",
+    "reorderCategoryError": "FAQカテゴリの順序を変更できませんでした。接続を確認して再試行してください。",
+    "reorderQuestionError": "FAQの質問順序を変更できませんでした。接続を確認して再試行してください。"
   },
   "apiKeys": {
     "title": "APIキー",
@@ -719,7 +753,10 @@
     "workspaceDeleted": "{name} を削除しました",
     "deleteWorkspaceTitle": "{name} を削除しますか？",
     "deleteWorkspaceConfirmDesc": "このワークスペース内のすべてのプロダクトが直ちに非公開となり、URLは再利用できなくなります。この操作は取り消せません。",
-    "typeToConfirm": "確認のため {name} と入力してください"
+    "typeToConfirm": "確認のため {name} と入力してください",
+    "deleteProductConfirmTitle": "{name} を削除しますか？",
+    "deleteProductConfirmDesc": "公開ポータルは直ちにオフラインになり、そのURLは再利用できなくなります。この操作は取り消せません。",
+    "deletedSuccess": "{name} を削除しました"
   },
   "landing": {
     "heroHeading": "優れたプロダクトは傾聴から始まる。",
@@ -1225,7 +1262,13 @@
     "typePlanned": "Planned",
     "typeActive": "In Progress",
     "typeCompleted": "Completed",
-    "typeClosed": "Closed"
+    "typeClosed": "Closed",
+    "reorderStatus": "{name} の順序を変更",
+    "actionsForStatus": "{name} のアクション",
+    "makeDefault": "デフォルトに設定",
+    "defaultStatusCannotBeDeleted": "デフォルトのステータスは削除できません",
+    "needAtLeastOneStatus": "プロダクトには少なくとも1つのステータスが必要です",
+    "showOnPublicRoadmapHelp": "チェックを入れると、このステージの項目が公開製品ロードマップに列として表示されます。"
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1422,5 +1465,88 @@
     "destinationUrlLabel": "リンク先URL",
     "invalidLinkProtocol": "URLは http://、https://、または mailto: で始まる必要があります",
     "invalidLinkUrl": "有効なURLを入力してください。"
+  },
+  "legal": {
+    "lastUpdated": "最終更新日: {date}"
+  },
+  "branding": {
+    "customHex": "{label} カスタム16進コード",
+    "uploadLogo": "ロゴをアップロード",
+    "removeLogo": "ロゴを削除",
+    "logoRequirements": "PNG、JPEG、WebP、またはGIF（最大2MB）。正方形の画像が最適です。",
+    "buttonTextColorLabel": "ボタンのテキスト色",
+    "buttonTextColorDesc": "ボタンやアクセントカラーの面に表示されるテキストとアイコンの色。",
+    "autoFg": "自動 ({fg})",
+    "livePreview": "ライブプレビュー",
+    "primaryButton": "プライマリボタン",
+    "outlineButton": "アウトラインボタン",
+    "sampleLink": "サンプルリンク",
+    "lowContrastWarning": "コントラストが低いです（{ratio}:1）。ボタンの文字が読みづらい可能性があります。「自動」またはよりコントラストの高い色をおすすめします。",
+    "lightAccentWarning": "このアクセントカラーは白色の背景上で明るいため、通常のリンクは濃い色のテキストになり、ボタンにはプライマリ背景色が適用されます。"
+  },
+  "posts": {
+    "publicNoteOptional": "公開メモ（任意）",
+    "changedStatusTo": "ステータスを変更しました:",
+    "postsFound": "{count} 件の投稿が見つかりました",
+    "noPostsMatch": "「{query}」に一致する投稿はありません。",
+    "chooseAnotherPost": "別の投稿を選択",
+    "openPublicPortalPost": "公開ポータルの投稿を開く",
+    "statusLockedHelp": "ステータスはリンクされたロードマップ項目に固定されています。ステータスを変更するにはロードマップ上で項目を移動してください。",
+    "editedSuffix": "· 編集済み",
+    "publicNoteHelper": "あなたの名前とともに投稿に表示されます。"
+  },
+  "productUsers": {
+    "badgeGranted": "バッジを付与しました",
+    "failedToGrantBadge": "バッジの付与に失敗しました",
+    "badgeRevoked": "バッジを取り消しました",
+    "failedToRevokeBadge": "バッジの取り消しに失敗しました",
+    "activity": "アクティビティ",
+    "unnamedUser": "名称未設定のユーザー",
+    "postsSubmitted": "投稿された件数",
+    "commentsWritten": "投稿されたコメント数",
+    "votesCast": "投票数",
+    "showingRange": "{total} 件中 {start}〜{end} 件を表示",
+    "pageOf": "ページ {page} / {totalPages}",
+    "noBadgesAssigned": "現在このユーザーに割り当てられているバッジはありません。",
+    "allBadgesGranted": "ユーザーはこのプロダクト用に作成されたすべてのバッジを既に所持しています。",
+    "selectBadge": "付与するバッジを選択...",
+    "expirationDateOptional": "有効期限（任意）",
+    "granting": "付与中..."
+  },
+  "invites": {
+    "invalidTitle": "この招待リンクは無効です",
+    "invalidDesc": "リンク全体をコピーしたか確認するか、新しいリンクを依頼してください。",
+    "wrongEmailTitle": "この招待は別のメールアドレス宛てです",
+    "expiredTitle": "この招待は期限切れです",
+    "expiredDesc": "招待リンクの有効期限は7日間です。招待してくれた方に新しいリンクを依頼してください。",
+    "usedTitle": "この招待は既に使用されています",
+    "usedDesc": "招待リンクは1回のみ有効です。アクセスが必要な場合は、招待してくれた方に新しいリンクを依頼してください。",
+    "canceledTitle": "この招待は取り消されました",
+    "canceledDesc": "リンク作成者により取り消されました。新しいリンクを依頼してください。",
+    "workspaceUnavailableTitle": "このワークスペースは利用できません"
+  },
+  "swagger": {
+    "expandAll": "すべて展開",
+    "collapseAll": "すべて折りたたむ",
+    "noEndpointsMatching": "「{query}」に一致するエンドポイントはありません",
+    "noEndpointsHelp": "検索クエリを調整するか、上のカテゴリを切り替えてみてください。",
+    "requiredScope": "必要なスコープ: {scope}",
+    "specification": "仕様",
+    "codeExamples": "コード例",
+    "requiredAuth": "必要な認証:",
+    "productRestrictable": "プロダクト制限可能",
+    "parameters": "パラメータ",
+    "noParametersRequired": "クエリまたはパスパラメータは必要ありません。",
+    "colName": "名前",
+    "colIn": "位置",
+    "colType": "タイプ",
+    "colDescription": "説明",
+    "requestBody": "リクエスト本文 ({contentType})",
+    "copyPayload": "ペイロードをコピー",
+    "responses": "レスポンス",
+    "copyResponse": "レスポンスをコピー",
+    "copyCode": "コードをコピー",
+    "workspace": "ワークスペース",
+    "category": "カテゴリー"
   }
 }

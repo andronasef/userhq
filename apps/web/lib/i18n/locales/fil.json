@@ -60,7 +60,17 @@
     "goToHome": "Pumunta sa home",
     "tryAgain": "Subukan muli",
     "reset": "I-reset",
-    "actions": "Mga Aksyon"
+    "actions": "Mga Aksyon",
+    "account": "Account",
+    "pressToCopy": "Pindutin ang Ctrl+C o ⌘C upang kopyahin.",
+    "internal": "Panloob",
+    "searching": "Naghahanap…",
+    "goToUserhq": "Pumunta sa UserHQ",
+    "public": "Pampubliko",
+    "copyLink": "Kopyahin ang link",
+    "uploading": "Nag-a-upload...",
+    "deletedUser": "Tinanggal na user",
+    "anonymous": "Hindi nagpakilala"
   },
   "portal": {
     "submitFeedback": "Magbigay ng mungkahi",
@@ -269,7 +279,7 @@
     "title": "Roadmap",
     "description": "Planuhin ang susunod na bubuuin. I-drag ang mga item sa pagitan ng mga column upang i-update ang kanilang katayuan.",
     "newItem": "Bagong item",
-    "filterByAssignee": "Salain ayon sa nakatalaga",
+    "filterByAssignee": "I-filter ayon sa nakatalaga",
     "allAssignees": "Lahat ng nakatalaga",
     "unassigned": "Hindi nakatalaga",
     "addItem": "Magdagdag ng item",
@@ -330,7 +340,15 @@
     "internalNotesPlaceholder": "Magdagdag ng pribadong link, mga panipi ng customer, o mga tala ng pagpapatupad…",
     "translationForTitle": "Pagsasalin para sa pampublikong pamagat ({locale})...",
     "translationForDesc": "Pagsasalin para sa pampublikong paglalarawan ({locale})...",
-    "publicTitleHelper": "Pamagat para sa customer na ipinapakita sa pampublikong roadmap."
+    "publicTitleHelper": "Pamagat para sa customer na ipinapakita sa pampublikong roadmap.",
+    "linkedFeedbackPosts": "{count} naka-link na feedback {count, plural, one {post} other {mga post}}",
+    "assignedTo": "Nakatalaga kay {name}",
+    "addItemToStatus": "Magdagdag ng item sa {name}",
+    "moveItemError": "Hindi mailipat ang item. Suriin ang iyong koneksyon at subukan muli.",
+    "linkedPostSuccess": "Naka-link ang #{number}",
+    "deleteItemError": "Hindi matanggal ang item. Subukan muli.",
+    "loadingLinkedPosts": "Kinakarga ang mga naka-link na post…",
+    "unlinkPostAria": "I-unlink ang post #{number}"
   },
   "changelog": {
     "title": "Changelog",
@@ -355,7 +373,7 @@
     "deleteEntryDesc": "Permanenteng aalisin ang entry na ito. Hindi na ito mababawi.",
     "entryUnpublished": "Na-unpublish ang entry",
     "entryDeleted": "Nabura ang entry",
-    "backToChangelog": "Bumalik sa changelog",
+    "backToChangelog": "← Bumalik sa changelog",
     "unsavedChanges": "Mga hindi na-save na pagbabago",
     "savingDraft": "Sine-save...",
     "draftSaved": "Na-save ang draft",
@@ -392,7 +410,17 @@
     "subtitle": "Mga bagong feature, pagpapabuti, at pag-aayos ng bug para sa {name}.",
     "noUpdatesBody": "Bumalik muli para sa mga anunsyo, mga bagong feature, at mga pagpapabuti.",
     "linkCopied": "Nakopya ang link sa clipboard",
-    "allUpdates": "Lahat ng mga update"
+    "allUpdates": "Lahat ng mga update",
+    "previewTitle": "Preview ng Changelog",
+    "previewDesc": "Ito ay preview kung paano lilitaw ang release note na ito sa mga pampublikong mambabasa.",
+    "publishedBy": "Koponan ng {name}",
+    "failedToUnpublish": "Nabigong i-unpublish ang entry",
+    "scheduledNotice": "Mapanood/mababasa nang live sa portal sa petsa ng release nito",
+    "tagNameRequired": "Kailangan ang pangalan ng tag",
+    "failedToCreateTag": "Nabigong gumawa ng tag",
+    "failedToDeleteTag": "Nabigong burahin ang tag",
+    "deleteTagAria": "Burahin ang tag na {name}",
+    "noTagsYetHelp": "Wala pang mga tag. I-click ang \"Pamahalaan ang mga tag\" upang magdagdag ng mga tag."
   },
   "faq": {
     "title": "Mga Madalas Itanong (FAQ)",
@@ -445,7 +473,13 @@
     "questionActions": "Mga aksyon sa tanong",
     "dragToReorderCategory": "I-drag para muling ayusin ang kategorya",
     "categoryOptions": "Mga opsyon sa kategorya",
-    "faqCategoriesNav": "Mga kategorya ng FAQ"
+    "faqCategoriesNav": "Mga kategorya ng FAQ",
+    "questionLinkCopied": "Nakopya ang link ng tanong",
+    "noQuestionsInCategory": "Wala pang mga tanong sa kategoryang ito.",
+    "detailedAnswerPlaceholder": "Isulat ang detalyadong sagot dito...",
+    "writeAnswerInLocale": "Isulat ang sagot sa {locale}...",
+    "reorderCategoryError": "Hindi maayos ang pagkakasunod-sunod ng kategorya ng FAQ. Suriin ang iyong koneksyon at subukan muli.",
+    "reorderQuestionError": "Hindi maayos ang pagkakasunod-sunod ng tanong sa FAQ. Suriin ang iyong koneksyon at subukan muli."
   },
   "apiKeys": {
     "title": "Mga API Key",
@@ -719,7 +753,10 @@
     "workspaceDeleted": "Tinanggal ang {name}",
     "deleteWorkspaceTitle": "Tanggalin ang {name}?",
     "deleteWorkspaceConfirmDesc": "Lahat ng produkto sa workspace na ito ay aalisin agad sa offline, at ang URL ng workspace ay hindi na magagamit muli. Hindi na ito maibabalik.",
-    "typeToConfirm": "I-type ang {name} upang kumpirmahin"
+    "typeToConfirm": "I-type ang {name} upang kumpirmahin",
+    "deleteProductConfirmTitle": "Tanggalin ang {name}?",
+    "deleteProductConfirmDesc": "Agad na mawawalan ng linya ang pampublikong portal nito, at hindi na magagamit muli ang URL nito. Hindi ito maaaring bawiin.",
+    "deletedSuccess": "Natanggal ang {name}"
   },
   "landing": {
     "heroHeading": "Nagsisimula ang mahuhusay na produkto sa pakikinig.",
@@ -1225,7 +1262,13 @@
     "typePlanned": "Planned",
     "typeActive": "In Progress",
     "typeCompleted": "Completed",
-    "typeClosed": "Closed"
+    "typeClosed": "Closed",
+    "reorderStatus": "Muling ayusin ang {name}",
+    "actionsForStatus": "Mga aksyon para sa {name}",
+    "makeDefault": "Gawing default",
+    "defaultStatusCannotBeDeleted": "Hindi maaaring tanggalin ang default na status",
+    "needAtLeastOneStatus": "Kailangan ng produkto ng kahit isang status",
+    "showOnPublicRoadmapHelp": "Kapag may check, lilitaw ang mga item sa yugtong ito bilang column sa pampublikong roadmap ng iyong produkto."
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1422,5 +1465,88 @@
     "destinationUrlLabel": "Patutunguhang URL",
     "invalidLinkProtocol": "Dapat magsimula ang URL sa http://, https://, o mailto:",
     "invalidLinkUrl": "Mangyaring maglagay ng wastong URL."
+  },
+  "legal": {
+    "lastUpdated": "Huling na-update noong {date}"
+  },
+  "branding": {
+    "customHex": "{label} pasadyang hex",
+    "uploadLogo": "I-upload ang logo",
+    "removeLogo": "Alisin ang logo",
+    "logoRequirements": "PNG, JPEG, WebP, o GIF, hanggang 2 MB. Pinakamaganda ang mga parisukat na larawan.",
+    "buttonTextColorLabel": "Kulay ng teksto ng button",
+    "buttonTextColorDesc": "Kulay ng teksto at mga icon na lumalabas sa mga button at mga surface na may accent.",
+    "autoFg": "Awtomatiko ({fg})",
+    "livePreview": "Live Preview",
+    "primaryButton": "Pangunahing Button",
+    "outlineButton": "Outline Button",
+    "sampleLink": "Halimbawang link",
+    "lowContrastWarning": "Mababang contrast ({ratio}:1). Maaaring mahirapan ang mga bisita sa pagbasa ng teksto sa button. Isaalang-alang ang pagpili ng Awtomatiko o mas mataas na contrast na kulay.",
+    "lightAccentWarning": "Maliwanag ang kulay ng accent na ito sa mga puting surface, kaya gagamit ng madilim na teksto ang mga standalone na link habang gagamitin ng mga button ang iyong pangunahing background."
+  },
+  "posts": {
+    "publicNoteOptional": "Pampublikong tala (opsyonal)",
+    "changedStatusTo": "binago ang status sa",
+    "postsFound": "{count} mga post ang natagpuan",
+    "noPostsMatch": "Walang post na tumutugma sa \"{query}\".",
+    "chooseAnotherPost": "Pumili ng isa pang post",
+    "openPublicPortalPost": "Buksan ang pampublikong portal post",
+    "statusLockedHelp": "Naka-lock ang status sa naka-link na roadmap item. Ilipat ang item sa roadmap upang baguhin ang status.",
+    "editedSuffix": "· na-edit",
+    "publicNoteHelper": "Ipinapakita sa post kasama ang iyong pangalan."
+  },
+  "productUsers": {
+    "badgeGranted": "Naigawad ang badge",
+    "failedToGrantBadge": "Nabigong igawad ang badge",
+    "badgeRevoked": "Binawi ang badge",
+    "failedToRevokeBadge": "Nabigong bawiin ang badge",
+    "activity": "Aktibidad",
+    "unnamedUser": "Walang pangalang user",
+    "postsSubmitted": "Mga isinumiteng post",
+    "commentsWritten": "Naisulat na mga komento",
+    "votesCast": "Naibigay na boto",
+    "showingRange": "Ipinapakita ang {start}–{end} ng {total}",
+    "pageOf": "Pahina {page} ng {totalPages}",
+    "noBadgesAssigned": "Walang mga badge na kasalukuyang nakatalaga sa user na ito.",
+    "allBadgesGranted": "Nasa user na ang lahat ng badge na ginawa para sa produktong ito.",
+    "selectBadge": "Pumili ng badge na igagawad...",
+    "expirationDateOptional": "Petsa ng Pag-expire (Opsyonal)",
+    "granting": "Iginagawad..."
+  },
+  "invites": {
+    "invalidTitle": "Hindi wasto ang link ng imbitasyong ito",
+    "invalidDesc": "Tiyaking nakopya mo ang buong link, o humingi ng bago.",
+    "wrongEmailTitle": "Ang imbitasyong ito ay para sa ibang email address",
+    "expiredTitle": "Nag-expire na ang imbitasyong ito",
+    "expiredDesc": "Gumagana ang mga link ng imbitasyon sa loob ng 7 araw. Humingi ng bagong link sa nag-imbita sa iyo.",
+    "usedTitle": "Nagamit na ang imbitasyong ito",
+    "usedDesc": "Minsan lang gumagana ang bawat link ng imbitasyon. Kung kailangan mo ng access, humingi ng bagong link.",
+    "canceledTitle": "Kinansela ang imbitasyong ito",
+    "canceledDesc": "Binawi ng taong gumawa ng link na ito ang imbitasyon. Humingi sa kanila ng bago.",
+    "workspaceUnavailableTitle": "Hindi available ang workspace na ito"
+  },
+  "swagger": {
+    "expandAll": "Palawakin Lahat",
+    "collapseAll": "I-collapse Lahat",
+    "noEndpointsMatching": "Walang endpoint na tumutugma sa \"{query}\"",
+    "noEndpointsHelp": "Subukang i-adjust ang iyong query sa paghahanap o lumipat ng mga kategorya sa itaas.",
+    "requiredScope": "Kinakailangang Saklaw: {scope}",
+    "specification": "Pagtutukoy",
+    "codeExamples": "Mga Halimbawa ng Code",
+    "requiredAuth": "Kinakailangang Awtorisasyon:",
+    "productRestrictable": "Maaaring higpitan ayon sa produkto",
+    "parameters": "Mga Parameter",
+    "noParametersRequired": "Walang kinakailangang query o path parameter.",
+    "colName": "Pangalan",
+    "colIn": "Nasa",
+    "colType": "Uri",
+    "colDescription": "Paglalarawan",
+    "requestBody": "Katawan ng Kahilingan ({contentType})",
+    "copyPayload": "Kopyahin ang payload",
+    "responses": "Mga Tugon",
+    "copyResponse": "Kopyahin ang Tugon",
+    "copyCode": "Kopyahin ang Code",
+    "workspace": "Workspace",
+    "category": "Kategorya"
   }
 }

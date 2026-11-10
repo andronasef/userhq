@@ -8,6 +8,7 @@ import { EntityLogo } from "./entity-logo";
 import { Button } from "./ui/button";
 import { Alert } from "./ui/alert";
 import { uploadErrorCopy } from "@/lib/upload-errors";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface LogoValue {
   id: string;
@@ -35,6 +36,7 @@ export function LogoField({
   name,
   accent,
 }: LogoFieldProps) {
+  const { t } = useI18n();
   const [errorDetails, setErrorDetails] = React.useState<MutationError | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -126,12 +128,12 @@ export function LogoField({
               {mutation.isPending ? (
                 <>
                   <LoaderCircle className="size-4 animate-spin" />
-                  <span>Uploading…</span>
+                  <span>{t("common.uploading")}</span>
                 </>
               ) : (
                 <>
                   <Upload className="size-4" />
-                  <span>Upload logo</span>
+                  <span>{t("branding.uploadLogo")}</span>
                 </>
               )}
             </Button>
@@ -144,13 +146,13 @@ export function LogoField({
                 disabled={mutation.isPending}
                 onClick={handleRemoveClick}
               >
-                Remove logo
+                {t("branding.removeLogo")}
               </Button>
             )}
           </div>
 
           <p className="text-xs text-muted-foreground">
-            PNG, JPEG, WebP, or GIF, up to 2 MB. Square images look best.
+            {t("branding.logoRequirements")}
           </p>
         </div>
       </div>

@@ -85,7 +85,7 @@ export function KanbanColumn({
             size="icon"
             onClick={() => onAddItem(status.id)}
             className="size-7 text-muted-foreground hover:text-foreground"
-            aria-label={`Add item to ${status.name}`}
+            aria-label={t("roadmap.addItemToStatus", { status: status.name })}
           >
             <Plus className="size-4" aria-hidden="true" />
           </Button>

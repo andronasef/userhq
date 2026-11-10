@@ -60,7 +60,17 @@
     "goToHome": "Buka beranda",
     "tryAgain": "Coba lagi",
     "reset": "Atur ulang",
-    "actions": "Tindakan"
+    "actions": "Tindakan",
+    "account": "Akun",
+    "pressToCopy": "Tekan Ctrl+C atau ⌘C untuk menyalin.",
+    "internal": "Internal",
+    "searching": "Mencari…",
+    "goToUserhq": "Buka UserHQ",
+    "public": "Publik",
+    "copyLink": "Salin tautan",
+    "uploading": "Mengunggah...",
+    "deletedUser": "Pengguna yang dihapus",
+    "anonymous": "Anonim"
   },
   "portal": {
     "submitFeedback": "Kirim ide",
@@ -269,7 +279,7 @@
     "title": "Peta Jalan",
     "description": "Rencanakan apa yang akan dibuat selanjutnya. Seret item antar kolom untuk memperbarui statusnya.",
     "newItem": "Item baru",
-    "filterByAssignee": "Filter menurut penerima tugas",
+    "filterByAssignee": "Filter berdasarkan penanggung jawab",
     "allAssignees": "Semua penerima tugas",
     "unassigned": "Belum ditugaskan",
     "addItem": "Tambah item",
@@ -330,7 +340,15 @@
     "internalNotesPlaceholder": "Tambahkan tautan pribadi, kutipan pelanggan, atau catatan implementasi…",
     "translationForTitle": "Terjemahan untuk judul publik ({locale})...",
     "translationForDesc": "Terjemahan untuk deskripsi publik ({locale})...",
-    "publicTitleHelper": "Judul untuk pelanggan yang ditampilkan di roadmap publik."
+    "publicTitleHelper": "Judul untuk pelanggan yang ditampilkan di roadmap publik.",
+    "linkedFeedbackPosts": "{count} postingan masukan yang ditautkan",
+    "assignedTo": "Ditugaskan ke {name}",
+    "addItemToStatus": "Tambahkan item ke {name}",
+    "moveItemError": "Tidak dapat memindahkan item. Periksa koneksi Anda dan coba lagi.",
+    "linkedPostSuccess": "Tertaut #{number}",
+    "deleteItemError": "Tidak dapat menghapus item. Coba lagi.",
+    "loadingLinkedPosts": "Memuat postingan tertaut…",
+    "unlinkPostAria": "Putuskan tautan postingan #{number}"
   },
   "changelog": {
     "title": "Catatan Perubahan",
@@ -355,7 +373,7 @@
     "deleteEntryDesc": "Entri ini akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.",
     "entryUnpublished": "Publikasi entri dibatalkan",
     "entryDeleted": "Entri dihapus",
-    "backToChangelog": "Kembali ke catatan perubahan",
+    "backToChangelog": "← Kembali ke catatan perubahan",
     "unsavedChanges": "Perubahan belum disimpan",
     "savingDraft": "Menyimpan...",
     "draftSaved": "Draf disimpan",
@@ -392,7 +410,17 @@
     "subtitle": "Fitur baru, peningkatan, dan perbaikan bug untuk {name}.",
     "noUpdatesBody": "Periksa kembali segera untuk pengumuman, fitur baru, dan penyempurnaan.",
     "linkCopied": "Tautan disalin ke papan klip",
-    "allUpdates": "Semua pembaruan"
+    "allUpdates": "Semua pembaruan",
+    "previewTitle": "Pratinjau Catatan Perubahan",
+    "previewDesc": "Ini adalah pratinjau tampilan catatan rilis ini bagi pembaca publik.",
+    "publishedBy": "Tim {name}",
+    "failedToUnpublish": "Gagal membatalkan publikasi entri",
+    "scheduledNotice": "Akan tayang di portal pada tanggal perilisannya",
+    "tagNameRequired": "Nama tag wajib diisi",
+    "failedToCreateTag": "Gagal membuat tag",
+    "failedToDeleteTag": "Gagal menghapus tag",
+    "deleteTagAria": "Hapus tag {name}",
+    "noTagsYetHelp": "Belum ada tag. Klik \"Kelola tag\" untuk menambahkan tag."
   },
   "faq": {
     "title": "Pertanyaan yang Sering Diajukan (FAQ)",
@@ -445,7 +473,13 @@
     "questionActions": "Tindakan pertanyaan",
     "dragToReorderCategory": "Tarik untuk mengatur ulang kategori",
     "categoryOptions": "Opsi kategori",
-    "faqCategoriesNav": "Kategori FAQ"
+    "faqCategoriesNav": "Kategori FAQ",
+    "questionLinkCopied": "Tautan pertanyaan disalin",
+    "noQuestionsInCategory": "Belum ada pertanyaan dalam kategori ini.",
+    "detailedAnswerPlaceholder": "Tulis jawaban mendetail di sini...",
+    "writeAnswerInLocale": "Tulis jawaban dalam {locale}...",
+    "reorderCategoryError": "Tidak dapat mengatur ulang kategori FAQ. Periksa koneksi Anda dan coba lagi.",
+    "reorderQuestionError": "Tidak dapat mengatur ulang pertanyaan FAQ. Periksa koneksi Anda dan coba lagi."
   },
   "apiKeys": {
     "title": "Kunci API",
@@ -719,7 +753,10 @@
     "workspaceDeleted": "{name} dihapus",
     "deleteWorkspaceTitle": "Hapus {name}?",
     "deleteWorkspaceConfirmDesc": "Semua produk di ruang kerja ini akan dinonaktifkan segera, dan URL ruang kerja tidak dapat digunakan kembali. Ini tidak dapat dibatalkan.",
-    "typeToConfirm": "Ketik {name} untuk mengonfirmasi"
+    "typeToConfirm": "Ketik {name} untuk mengonfirmasi",
+    "deleteProductConfirmTitle": "Hapus {name}?",
+    "deleteProductConfirmDesc": "Portal publiknya langsung offline, dan URL-nya tidak dapat digunakan lagi. Tindakan ini tidak dapat dibatalkan.",
+    "deletedSuccess": "{name} dihapus"
   },
   "landing": {
     "heroHeading": "Produk hebat dimulai dari mendengarkan.",
@@ -1225,7 +1262,13 @@
     "typePlanned": "Planned",
     "typeActive": "In Progress",
     "typeCompleted": "Completed",
-    "typeClosed": "Closed"
+    "typeClosed": "Closed",
+    "reorderStatus": "Atur ulang urutan {name}",
+    "actionsForStatus": "Tindakan untuk {name}",
+    "makeDefault": "Jadikan default",
+    "defaultStatusCannotBeDeleted": "Status default tidak dapat dihapus",
+    "needAtLeastOneStatus": "Produk memerlukan setidaknya satu status",
+    "showOnPublicRoadmapHelp": "Saat dicentang, item dalam tahap ini muncul sebagai kolom di roadmap publik produk Anda."
   },
   "deletedItems": {
     "title": "Deleted items",
@@ -1422,5 +1465,88 @@
     "destinationUrlLabel": "URL Tujuan",
     "invalidLinkProtocol": "URL harus dimulai dengan http://, https://, atau mailto:",
     "invalidLinkUrl": "Harap masukkan URL yang valid."
+  },
+  "legal": {
+    "lastUpdated": "Terakhir diperbarui {date}"
+  },
+  "branding": {
+    "customHex": "Hex kustom {label}",
+    "uploadLogo": "Unggah logo",
+    "removeLogo": "Hapus logo",
+    "logoRequirements": "PNG, JPEG, WebP, atau GIF, hingga 2 MB. Gambar persegi terlihat paling baik.",
+    "buttonTextColorLabel": "Warna teks tombol",
+    "buttonTextColorDesc": "Warna teks dan ikon yang muncul pada tombol dan permukaan beraksen.",
+    "autoFg": "Otomatis ({fg})",
+    "livePreview": "Pratinjau Langsung",
+    "primaryButton": "Tombol Utama",
+    "outlineButton": "Tombol Garis Luar",
+    "sampleLink": "Contoh tautan",
+    "lowContrastWarning": "Kontras rendah ({ratio}:1). Pengunjung mungkin kesulitan membaca teks tombol. Pertimbangkan untuk memilih Otomatis atau warna kontras yang lebih tinggi.",
+    "lightAccentWarning": "Warna aksen ini terang pada permukaan putih, sehingga tautan mandiri akan menggunakan teks gelap sementara tombol menggunakan latar belakang utama Anda."
+  },
+  "posts": {
+    "publicNoteOptional": "Catatan publik (opsional)",
+    "changedStatusTo": "mengubah status menjadi",
+    "postsFound": "{count} postingan ditemukan",
+    "noPostsMatch": "Tidak ada postingan yang cocok dengan \"{query}\".",
+    "chooseAnotherPost": "Pilih postingan lain",
+    "openPublicPortalPost": "Buka postingan portal publik",
+    "statusLockedHelp": "Status dikunci ke item roadmap yang ditautkan. Pindahkan item di roadmap untuk mengubah status.",
+    "editedSuffix": "· diedit",
+    "publicNoteHelper": "Ditampilkan di postingan dengan nama Anda."
+  },
+  "productUsers": {
+    "badgeGranted": "Lencana diberikan",
+    "failedToGrantBadge": "Gagal memberikan lencana",
+    "badgeRevoked": "Lencana dicabut",
+    "failedToRevokeBadge": "Gagal mencabut lencana",
+    "activity": "Aktivitas",
+    "unnamedUser": "Pengguna tanpa nama",
+    "postsSubmitted": "Postingan dikirim",
+    "commentsWritten": "Komentar ditulis",
+    "votesCast": "Suara diberikan",
+    "showingRange": "Menampilkan {start}–{end} dari {total}",
+    "pageOf": "Halaman {page} dari {totalPages}",
+    "noBadgesAssigned": "Tidak ada lencana yang saat ini ditetapkan untuk pengguna ini.",
+    "allBadgesGranted": "Pengguna sudah memiliki semua lencana yang dibuat untuk produk ini.",
+    "selectBadge": "Pilih lencana untuk diberikan...",
+    "expirationDateOptional": "Tanggal Kedaluwarsa (Opsional)",
+    "granting": "Memberikan..."
+  },
+  "invites": {
+    "invalidTitle": "Tautan undangan ini tidak valid",
+    "invalidDesc": "Periksa apakah Anda menyalin seluruh tautan, atau minta tautan baru.",
+    "wrongEmailTitle": "Undangan ini ditujukan untuk alamat email lain",
+    "expiredTitle": "Undangan ini telah kedaluwarsa",
+    "expiredDesc": "Tautan undangan berlaku selama 7 hari. Minta tautan baru kepada orang yang mengundang Anda.",
+    "usedTitle": "Undangan ini sudah pernah digunakan",
+    "usedDesc": "Setiap tautan undangan hanya berlaku sekali. Jika Anda butuh akses, minta tautan baru kepada orang yang mengundang.",
+    "canceledTitle": "Undangan ini telah dibatalkan",
+    "canceledDesc": "Orang yang membuat tautan ini telah mencabutnya. Minta tautan baru kepadanya.",
+    "workspaceUnavailableTitle": "Ruang kerja ini tidak tersedia"
+  },
+  "swagger": {
+    "expandAll": "Perluas Semua",
+    "collapseAll": "Ciutkan Semua",
+    "noEndpointsMatching": "Tidak ada endpoint yang cocok dengan \"{query}\"",
+    "noEndpointsHelp": "Coba sesuaikan kueri pencarian atau beralih kategori di atas.",
+    "requiredScope": "Cakupan yang Diperlukan: {scope}",
+    "specification": "Spesifikasi",
+    "codeExamples": "Contoh Kode",
+    "requiredAuth": "Otorisasi yang Diperlukan:",
+    "productRestrictable": "Dapat dibatasi per produk",
+    "parameters": "Parameter",
+    "noParametersRequired": "Tidak diperlukan parameter kueri atau jalur.",
+    "colName": "Nama",
+    "colIn": "Di",
+    "colType": "Tipe",
+    "colDescription": "Deskripsi",
+    "requestBody": "Isi Permintaan ({contentType})",
+    "copyPayload": "Salin payload",
+    "responses": "Respons",
+    "copyResponse": "Salin Respons",
+    "copyCode": "Salin Kode",
+    "workspace": "Ruang kerja",
+    "category": "Kategori"
   }
 }

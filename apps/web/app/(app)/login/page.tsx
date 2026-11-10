@@ -7,6 +7,7 @@ import {
   loginErrorCopy,
   isDisplayableErrorCode,
 } from "../../../lib/login-errors";
+import { getRequestLocale, getDictionary } from "@/lib/i18n/server";
 
 export const metadata = {
   title: "Sign in · UserHQ",
@@ -22,7 +23,11 @@ interface LoginPageProps {
 export default async function LoginPage({
   searchParams,
 }: LoginPageProps): Promise<React.JSX.Element> {
-  const params = await searchParams;
+  const [params, locale] = await Promise.all([
+    searchParams,
+    getRequestLocale(),
+  ]);
+  const dict = await getDictionary(locale);
   const safe = safeNext(params.next);
 
   const { user } = await getMe();
@@ -53,10 +58,10 @@ export default async function LoginPage({
             className="size-16 mx-auto mb-4"
           />
           <h1 className="text-2xl font-semibold leading-tight">
-            Sign in to UserHQ
+            {dict.auth?.signInHeading ?? "Sign in to UserHQ"}
           </h1>
           <p className="text-base text-muted-foreground">
-            Use your Google or GitHub account to continue.
+            {dict.auth?.signInSubtitle ?? "Use your Google or GitHub account to continue."}
           </p>
         </div>
 
@@ -65,7 +70,7 @@ export default async function LoginPage({
             <div>{errorCopy.body}</div>
             {displayCode && (
               <div className="text-muted-foreground mt-1 text-sm">
-                {`Error code: ${displayCode}`}
+                {(dict.auth?.errorCode ?? "Error code: {code}").replace("{code}", displayCode)}
               </div>
             )}
           </Alert>
@@ -73,7 +78,7 @@ export default async function LoginPage({
 
         <LoginButtons next={safe} rawErrorCode={null} />
         <p className="text-center text-sm text-muted-foreground">
-          Your feedback. Your next great idea.
+          {dict.auth?.tagline ?? "Your feedback. Your next great idea."}
         </p>
       </div>
     </div>

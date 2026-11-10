@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
+import { useI18n } from "@/lib/i18n/context";
 
 type ShowcaseTab = "feedback" | "roadmap" | "changelog" | "faq";
 
@@ -158,6 +159,7 @@ const FAQ_ITEMS: { question: string; answer: React.ReactNode }[] = [
 ];
 
 export function ProductShowcase(): React.JSX.Element {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = React.useState<ShowcaseTab>("feedback");
   const [posts, setPosts] = React.useState<MockPost[]>(INITIAL_POSTS);
   const [votedPosts, setVotedPosts] = React.useState<Record<string, boolean>>({
@@ -224,7 +226,7 @@ export function ProductShowcase(): React.JSX.Element {
               )}
             >
               <MessagesSquare className="size-3.5" aria-hidden="true" />
-              <span>Feedback</span>
+              <span>{t("showcase.tabFeedback")}</span>
             </button>
 
             <button
@@ -240,7 +242,7 @@ export function ProductShowcase(): React.JSX.Element {
               )}
             >
               <Kanban className="size-3.5" aria-hidden="true" />
-              <span>Roadmap</span>
+              <span>{t("showcase.tabRoadmap")}</span>
             </button>
 
             <button
@@ -256,7 +258,7 @@ export function ProductShowcase(): React.JSX.Element {
               )}
             >
               <Megaphone className="size-3.5" aria-hidden="true" />
-              <span>Changelog</span>
+              <span>{t("showcase.tabChangelog")}</span>
             </button>
 
             <button
@@ -272,7 +274,7 @@ export function ProductShowcase(): React.JSX.Element {
               )}
             >
               <HelpCircle className="size-3.5" aria-hidden="true" />
-              <span>Help Center</span>
+              <span>{t("showcase.tabHelpCenter")}</span>
             </button>
           </div>
         </div>
@@ -297,13 +299,13 @@ export function ProductShowcase(): React.JSX.Element {
                         : "border-border bg-card text-muted-foreground hover:text-foreground",
                     )}
                   >
-                    {cat}
+                    {cat === "All" ? t("showcase.all") : cat}
                   </button>
                 ))}
               </div>
               <div className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-xs text-muted-foreground">
                 <Search className="size-3.5" aria-hidden="true" />
-                <span>Search feedback...</span>
+                <span>{t("showcase.searchPlaceholder")}</span>
               </div>
             </div>
 
@@ -353,7 +355,7 @@ export function ProductShowcase(): React.JSX.Element {
                         />
                         <Badge variant="neutral">{post.category}</Badge>
                         <span className="text-xs text-muted-foreground ml-auto">
-                          {post.comments} comments
+                          {post.comments} {t("showcase.comments")}
                         </span>
                       </div>
                     </div>
@@ -363,9 +365,9 @@ export function ProductShowcase(): React.JSX.Element {
             </ul>
 
             <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
-              <span>Click the arrow buttons to test community voting.</span>
+              <span>{t("showcase.clickToVote")}</span>
               <span className="font-medium text-[var(--primary-text)]">
-                Try filtering categories above
+                {t("showcase.tryFilter")}
               </span>
             </div>
           </div>
@@ -376,11 +378,11 @@ export function ProductShowcase(): React.JSX.Element {
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="text-xs text-muted-foreground">
-                Public progress mapped directly to product development phases.
+                {t("showcase.roadmapSubheader")}
               </div>
               <div className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                 <span className="size-2 rounded-full bg-[#087F75]" />
-                <span>Live board</span>
+                <span>{t("showcase.liveBoard")}</span>
               </div>
             </div>
 
@@ -432,7 +434,7 @@ export function ProductShowcase(): React.JSX.Element {
             </div>
 
             <p className="text-xs text-muted-foreground text-center pt-1">
-              Teams control status definitions, column visibility, and whether items appear publicly.
+              {t("showcase.roadmapCaption")}
             </p>
           </div>
         )}
@@ -462,12 +464,12 @@ export function ProductShowcase(): React.JSX.Element {
                 {subscribed ? (
                   <>
                     <Check className="size-3.5" aria-hidden="true" />
-                    <span>Subscribed</span>
+                    <span>{t("showcase.subscribed")}</span>
                   </>
                 ) : (
                   <>
                     <Bell className="size-3.5" aria-hidden="true" />
-                    <span>Subscribe to releases</span>
+                    <span>{t("showcase.subscribe")}</span>
                   </>
                 )}
               </button>
@@ -475,30 +477,30 @@ export function ProductShowcase(): React.JSX.Element {
 
             <div className="rounded-lg border border-border bg-card p-4 sm:p-5 flex flex-col gap-3">
               <h4 className="text-base font-semibold text-foreground">
-                Automated notification digests & rich changelog notes
+                {t("showcase.changelogHeader")}
               </h4>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                When you ship features requested by your community, UserHQ now automatically notifies every customer who upvoted or commented on the linked post.
+                {t("showcase.changelogDesc")}
               </p>
 
               <div className="rounded-md border border-border/70 bg-background p-3 flex flex-col gap-1.5 text-xs text-foreground">
                 <div className="flex items-center gap-2 font-medium">
                   <span className="size-1.5 rounded-full bg-[var(--primary)]" />
-                  <span>Subscribers receive a curated summary of completed improvements</span>
+                  <span>{t("showcase.changelogFeature1")}</span>
                 </div>
                 <div className="flex items-center gap-2 font-medium">
                   <span className="size-1.5 rounded-full bg-[var(--primary)]" />
-                  <span>Inline image and video previews in release notes</span>
+                  <span>{t("showcase.changelogFeature2")}</span>
                 </div>
                 <div className="flex items-center gap-2 font-medium">
                   <span className="size-1.5 rounded-full bg-[var(--primary)]" />
-                  <span>Roadmap cards automatically reflect &quot;Shipped&quot; status</span>
+                  <span>{t("showcase.changelogFeature3")}</span>
                 </div>
               </div>
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Close the loop: your customers know their voice directly shaped the product.
+              {t("showcase.changelogCloseLoop")}
             </p>
           </div>
         )}
@@ -508,10 +510,10 @@ export function ProductShowcase(): React.JSX.Element {
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="text-xs text-muted-foreground">
-                Integrated knowledge base prevents duplicate tickets before they start.
+                {t("showcase.faqHeader")}
               </div>
               <span className="text-xs font-medium text-[var(--primary-text)]">
-                Self-service FAQ
+                {t("showcase.faqBadge")}
               </span>
             </div>
 
@@ -546,7 +548,7 @@ export function ProductShowcase(): React.JSX.Element {
             </div>
 
             <p className="text-xs text-muted-foreground text-center">
-              Categorized, searchable, and manageable right from your admin dashboard.
+              {t("showcase.faqCaption")}
             </p>
           </div>
         )}

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { safeNext } from "@/lib/safe-next";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface AccountBackButtonProps {
   initialBack?: string | null;
@@ -15,6 +16,7 @@ export function AccountBackButton({
   initialBack,
 }: AccountBackButtonProps): React.JSX.Element {
   const router = useRouter();
+  const { t } = useI18n();
   const [backHref, setBackHref] = React.useState<string | null>(() => {
     if (initialBack) {
       const sanitized = safeNext(initialBack, "");
@@ -66,8 +68,8 @@ export function AccountBackButton({
   }, [backHref]);
 
   const label = React.useMemo(() => {
-    if (!backHref) return "Back";
-    if (backHref.startsWith("/dashboard")) return "Back to dashboard";
+    if (!backHref) return t("account.back");
+    if (backHref.startsWith("/dashboard")) return t("account.backToDashboard");
     const parts = backHref.split("/").filter(Boolean);
     if (
       parts.length >= 2 &&
@@ -75,10 +77,10 @@ export function AccountBackButton({
         parts[0]
       )
     ) {
-      return "Back to portal";
+      return t("account.backToPortal");
     }
-    return "Back";
-  }, [backHref]);
+    return t("account.back");
+  }, [backHref, t]);
 
   const handleBackClick = (e: React.MouseEvent) => {
     if (!backHref) {

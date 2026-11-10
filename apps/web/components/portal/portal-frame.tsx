@@ -80,7 +80,11 @@ export function PortalFrame({
                   rel="noopener noreferrer"
                   className="hidden sm:inline-flex items-center gap-1 text-sm text-[var(--primary-text)] hover:underline"
                 >
-                  <span>Back to {companyName ?? name}</span>
+                  <span>
+                    {t("portal.backToCompany", {
+                      name: companyName ?? name,
+                    })}
+                  </span>
                   <ArrowUpRight className="size-3.5" aria-hidden="true" />
                 </a>
               )}

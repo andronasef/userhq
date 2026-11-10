@@ -56,7 +56,7 @@ export function ChangelogArticle({
     } catch {
       // ignore clipboard error
     }
-    toast("Link copied to clipboard");
+    toast(t("changelog.linkCopied"));
   };
 
   return (
@@ -66,7 +66,7 @@ export function ChangelogArticle({
         href={`/${ws}/${product}/changelog`}
         className="text-sm font-medium text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-1.5 transition-colors"
       >
-        ← All updates
+        ← {t("changelog.allUpdates")}
       </Link>
 
       {/* Header: formatted date, tag badges, permalink copy */}

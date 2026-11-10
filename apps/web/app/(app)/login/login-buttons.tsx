@@ -14,6 +14,7 @@ import {
   isDisplayableErrorCode,
   type LoginErrorCopy,
 } from "../../../lib/login-errors";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface LoginButtonsProps {
   next: string;
@@ -24,6 +25,7 @@ export function LoginButtons({
   next,
   rawErrorCode,
 }: LoginButtonsProps): React.JSX.Element {
+  const { t } = useI18n();
   const [pendingProvider, setPendingProvider] = React.useState<
     "google" | "github" | null
   >(null);
@@ -70,7 +72,7 @@ export function LoginButtons({
           <div>{activeError.body}</div>
           {displayedErrorCode && (
             <div className="text-muted-foreground mt-1 text-sm">
-              {`Error code: ${displayedErrorCode}`}
+              {t("auth.errorCode", { code: displayedErrorCode })}
             </div>
           )}
         </Alert>
@@ -90,12 +92,12 @@ export function LoginButtons({
                 className="size-4 animate-spin shrink-0"
                 aria-hidden="true"
               />
-              <span>Redirecting to Google…</span>
+              <span>{t("auth.redirectingGoogle")}</span>
             </>
           ) : (
             <>
               <GoogleIcon className="size-4 shrink-0" />
-              <span>Continue with Google</span>
+              <span>{t("auth.continueWithGoogle")}</span>
             </>
           )}
         </Button>
@@ -113,12 +115,12 @@ export function LoginButtons({
                 className="size-4 animate-spin shrink-0"
                 aria-hidden="true"
               />
-              <span>Redirecting to GitHub…</span>
+              <span>{t("auth.redirectingGithub")}</span>
             </>
           ) : (
             <>
               <GitHubIcon className="size-4 shrink-0" />
-              <span>Continue with GitHub</span>
+              <span>{t("auth.continueWithGithub")}</span>
             </>
           )}
         </Button>

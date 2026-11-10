@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { apiFetch } from "@/lib/api-client";
 import type { PushPreferences, FollowedProductItem } from "@userhq/types";
+import { useI18n } from "@/lib/i18n/context";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -19,6 +20,7 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 export function PushNotificationPreferences(): React.JSX.Element {
+  const { t } = useI18n();
   const [isSupported, setIsSupported] = React.useState<boolean>(true);
   const [permission, setPermission] = React.useState<NotificationPermission>("default");
   const [isSubscribed, setIsSubscribed] = React.useState<boolean>(false);
@@ -85,7 +87,7 @@ export function PushNotificationPreferences(): React.JSX.Element {
       setPermission(perm);
 
       if (perm !== "granted") {
-        toast.error("Notification permission was not granted.");
+        toast.error(t("account.pushPermissionDenied"));
         setActionPending(false);
         return;
       }
@@ -126,11 +128,11 @@ export function PushNotificationPreferences(): React.JSX.Element {
       });
 
       setIsSubscribed(true);
-      toast.success("Push notifications enabled!");
+      toast.success(t("account.pushEnabledSuccess"));
     } catch (err) {
       console.error(err);
-      setError("Failed to enable push notifications. Please check your browser settings.");
-      toast.error("Could not enable push notifications.");
+      setError(t("account.pushFailedEnable"));
+      toast.error(t("account.couldNotEnablePush"));
     } finally {
       setActionPending(false);
     }
@@ -154,11 +156,11 @@ export function PushNotificationPreferences(): React.JSX.Element {
       }
 
       setIsSubscribed(false);
-      toast.success("Push notifications disabled.");
+      toast.success(t("account.pushDisabledSuccess"));
     } catch (err) {
       console.error(err);
-      setError("Failed to disable push notifications.");
-      toast.error("Could not disable push notifications.");
+      setError(t("account.pushFailedDisable"));
+      toast.error(t("account.couldNotDisablePush"));
     } finally {
       setActionPending(false);
     }
@@ -175,10 +177,10 @@ export function PushNotificationPreferences(): React.JSX.Element {
         body: { [key]: nextVal },
       });
       setPreferences(updated);
-      toast.success("Preferences updated");
+      toast.success(t("account.pushPrefUpdated"));
     } catch (e) {
       setPreferences(prev);
-      toast.error("Failed to update preferences");
+      toast.error(t("account.pushPrefFailed"));
     }
   };
 
@@ -188,9 +190,9 @@ export function PushNotificationPreferences(): React.JSX.Element {
         method: "DELETE",
       });
       setFollowedProducts((list) => list.filter((p) => p.productId !== productId));
-      toast.success("Unfollowed product");
+      toast.success(t("account.pushUnfollowedProduct"));
     } catch (e) {
-      toast.error("Failed to unfollow product");
+      toast.error(t("account.pushFailedUnfollow"));
     }
   };
 
@@ -200,9 +202,9 @@ export function PushNotificationPreferences(): React.JSX.Element {
       await apiFetch<{ success: boolean; enqueuedCount: number }>("/api/v1/push/test", {
         method: "POST",
       });
-      toast.success("Test notification enqueued! Check your device notifications.");
+      toast.success(t("account.pushTestSuccess"));
     } catch (e) {
-      toast.error("Failed to send test notification.");
+      toast.error(t("account.pushTestFailed"));
     } finally {
       setActionPending(false);
     }
@@ -211,13 +213,17 @@ export function PushNotificationPreferences(): React.JSX.Element {
   if (!isSupported) {
     return (
       <div className="text-sm text-muted-foreground">
-        Web push notifications are not supported in your current browser.
+        {t("account.pushNotSupported")}
       </div>
     );
   }
 
   if (loading) {
-    return <div className="text-sm text-muted-foreground">Loading notification preferences...</div>;
+    return (
+      <div className="text-sm text-muted-foreground">
+        {t("account.pushLoading")}
+      </div>
+    );
   }
 
   return (
@@ -225,12 +231,12 @@ export function PushNotificationPreferences(): React.JSX.Element {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
         <div>
           <h3 className="text-sm font-medium text-foreground">
-            {isSubscribed ? "Push notifications are active" : "Enable browser push notifications"}
+            {isSubscribed ? t("account.pushActive") : t("account.pushEnableTitle")}
           </h3>
           <p className="text-xs text-muted-foreground mt-0.5">
             {isSubscribed
-              ? "This device is registered to receive instant updates."
-              : "Receive updates about your feedback, comments, and followed products."}
+              ? t("account.pushActiveDesc")
+              : t("account.pushEnableDesc")}
           </p>
         </div>
 
@@ -243,7 +249,7 @@ export function PushNotificationPreferences(): React.JSX.Element {
                 onClick={handleSendTest}
                 disabled={actionPending}
               >
-                Send test
+                {t("account.pushSendTest")}
               </Button>
               <Button
                 variant="destructive"
@@ -251,7 +257,7 @@ export function PushNotificationPreferences(): React.JSX.Element {
                 onClick={handleDisablePush}
                 disabled={actionPending}
               >
-                Disable
+                {t("account.pushDisableBtn")}
               </Button>
             </>
           ) : (
@@ -261,7 +267,7 @@ export function PushNotificationPreferences(): React.JSX.Element {
               onClick={handleEnablePush}
               disabled={actionPending}
             >
-              Enable push
+              {t("account.pushEnableBtn")}
             </Button>
           )}
         </div>
@@ -276,7 +282,7 @@ export function PushNotificationPreferences(): React.JSX.Element {
       {permission === "denied" && (
         <Alert variant="destructive">
           <div>
-            Notifications are blocked in your browser settings. Please allow notifications for this site to enable push updates.
+            {t("account.pushBlockedAlert")}
           </div>
         </Alert>
       )}
@@ -284,7 +290,7 @@ export function PushNotificationPreferences(): React.JSX.Element {
       {isSubscribed && (
         <div className="space-y-4">
           <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Event triggers
+            {t("account.pushEventTriggers")}
           </h4>
 
           <div className="space-y-3">
@@ -296,9 +302,11 @@ export function PushNotificationPreferences(): React.JSX.Element {
                 className="size-4 mt-0.5 rounded border-border accent-foreground cursor-pointer"
               />
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-foreground">Replies to my posts & comments</span>
+                <span className="text-sm font-medium text-foreground">
+                  {t("account.pushRepliesLabel")}
+                </span>
                 <span className="text-xs text-muted-foreground">
-                  Get notified when an admin or customer responds to your feedback.
+                  {t("account.pushRepliesDesc")}
                 </span>
               </div>
             </label>
@@ -311,9 +319,11 @@ export function PushNotificationPreferences(): React.JSX.Element {
                 className="size-4 mt-0.5 rounded border-border accent-foreground cursor-pointer"
               />
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-foreground">Status updates</span>
+                <span className="text-sm font-medium text-foreground">
+                  {t("account.pushStatusLabel")}
+                </span>
                 <span className="text-xs text-muted-foreground">
-                  Get notified when feedback you created or upvoted changes status.
+                  {t("account.pushStatusDesc")}
                 </span>
               </div>
             </label>
@@ -326,9 +336,11 @@ export function PushNotificationPreferences(): React.JSX.Element {
                 className="size-4 mt-0.5 rounded border-border accent-foreground cursor-pointer"
               />
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-foreground">New posts in followed products</span>
+                <span className="text-sm font-medium text-foreground">
+                  {t("account.pushNewPostsLabel")}
+                </span>
                 <span className="text-xs text-muted-foreground">
-                  Get notified whenever a customer submits new feedback in products you follow.
+                  {t("account.pushNewPostsDesc")}
                 </span>
               </div>
             </label>
@@ -341,9 +353,11 @@ export function PushNotificationPreferences(): React.JSX.Element {
                 className="size-4 mt-0.5 rounded border-border accent-foreground cursor-pointer"
               />
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-foreground">New comments in followed products</span>
+                <span className="text-sm font-medium text-foreground">
+                  {t("account.pushNewCommentsLabel")}
+                </span>
                 <span className="text-xs text-muted-foreground">
-                  Get notified when top-level comments are submitted in products you follow.
+                  {t("account.pushNewCommentsDesc")}
                 </span>
               </div>
             </label>
@@ -351,7 +365,7 @@ export function PushNotificationPreferences(): React.JSX.Element {
 
           <div className="pt-4 border-t border-border">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              Privacy & preview content
+              {t("account.pushPrivacyTitle")}
             </h4>
             <label className="flex items-start gap-3 cursor-pointer">
               <input
@@ -362,10 +376,10 @@ export function PushNotificationPreferences(): React.JSX.Element {
               />
               <div className="flex flex-col">
                 <span className="text-sm font-medium text-foreground">
-                  Include message preview in notifications
+                  {t("account.pushPrivacyLabel")}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  When turned off, notifications show generic text (e.g. &ldquo;Feedback status updated&rdquo;) to protect privacy on shared screens.
+                  {t("account.pushPrivacyDesc")}
                 </span>
               </div>
             </label>
@@ -374,7 +388,7 @@ export function PushNotificationPreferences(): React.JSX.Element {
           {followedProducts.length > 0 && (
             <div className="pt-4 border-t border-border">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                Followed products ({followedProducts.length})
+                {t("account.pushFollowedProducts", { count: followedProducts.length })}
               </h4>
               <div className="divide-y divide-border rounded-md border border-border">
                 {followedProducts.map((p) => (
@@ -393,7 +407,7 @@ export function PushNotificationPreferences(): React.JSX.Element {
                       size="sm"
                       onClick={() => handleUnfollowProduct(p.productId)}
                     >
-                      Unfollow
+                      {t("account.pushUnfollow")}
                     </Button>
                   </div>
                 ))}

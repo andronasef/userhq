@@ -11,6 +11,7 @@ import { apiFetch } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { StatePage } from "@/components/state-page";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface UnsubscribeViewProps {
   token: string;
@@ -21,6 +22,7 @@ export function UnsubscribeView({
   token,
   initialResult,
 }: UnsubscribeViewProps): React.JSX.Element {
+  const { t } = useI18n();
   const [data, setData] = React.useState<UnsubscribeState | null>(
     initialResult.ok ? initialResult.data : null
   );
@@ -68,11 +70,11 @@ export function UnsubscribeView({
   if (!data) {
     return (
       <StatePage
-        title="This link isn't valid"
-        body="Check that you opened the whole link from the email. You can also manage comment emails in your account settings."
+        title={t("unsubscribe.invalidLinkTitle")}
+        body={t("unsubscribe.invalidLinkBody")}
         actions={
           <Button variant="outline" asChild>
-            <Link href="/account">Go to account settings</Link>
+            <Link href="/account">{t("unsubscribe.goToAccountSettings")}</Link>
           </Button>
         }
       />
@@ -85,55 +87,54 @@ export function UnsubscribeView({
 
   if (data.scope === "all") {
     if (data.state === "subscribed") {
-      title = "Turn off comment emails?";
-      body =
-        "You'll stop getting emails about new comments on posts you're part of, from every company on UserHQ.";
+      title = t("unsubscribe.turnOffAllTitle");
+      body = t("unsubscribe.turnOffAllBody");
       actionsNode = (
         <Button onClick={handlePost} disabled={isSubmitting}>
-          {isSubmitting ? "Turning off…" : "Turn off comment emails"}
+          {isSubmitting ? t("unsubscribe.turningOff") : t("unsubscribe.turnOffAllBtn")}
         </Button>
       );
     } else {
-      title = "Comment emails are off";
-      body = "You can turn them back on here or in your account settings.";
+      title = t("unsubscribe.commentEmailsOffTitle");
+      body = t("unsubscribe.commentEmailsOffBody");
       actionsNode = (
         <Button
           variant="outline"
           onClick={handleDelete}
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Turning on…" : "Turn emails back on"}
+          {isSubmitting ? t("unsubscribe.turningOn") : t("unsubscribe.turnEmailsBackOn")}
         </Button>
       );
     }
   } else {
     // scope === "post"
     if (data.state === "post_unavailable") {
-      title = "This post is no longer available";
-      body =
-        "It may have been deleted or merged. You can manage comment emails in your account settings.";
+      title = t("unsubscribe.postUnavailableTitle");
+      body = t("unsubscribe.postUnavailableBody");
       actionsNode = (
         <Button variant="outline" asChild>
-          <Link href="/account">Go to account settings</Link>
+          <Link href="/account">{t("unsubscribe.goToAccountSettings")}</Link>
         </Button>
       );
     } else if (data.state === "subscribed") {
-      title = `Mute "${data.postTitle ?? "this post"}"?`;
-      body =
-        "You'll stop getting emails about new comments on this post. Other posts aren't affected.";
+      title = t("unsubscribe.mutePostTitle", {
+        title: data.postTitle ?? t("unsubscribe.thisPost"),
+      });
+      body = t("unsubscribe.mutePostBody");
       actionsNode = (
         <Button onClick={handlePost} disabled={isSubmitting}>
-          {isSubmitting ? "Muting…" : "Mute this post"}
+          {isSubmitting ? t("unsubscribe.muting") : t("unsubscribe.mutePostBtn")}
         </Button>
       );
     } else {
-      title = "This post is muted";
-      body = "To get emails about it again, use the bell on the post page.";
+      title = t("unsubscribe.postMutedTitle");
+      body = t("unsubscribe.postMutedBody");
       actionsNode = (
         <div className="flex flex-wrap gap-2">
           {data.postUrl && (
             <Button variant="outline" asChild>
-              <Link href={data.postUrl}>View post</Link>
+              <Link href={data.postUrl}>{t("unsubscribe.viewPost")}</Link>
             </Button>
           )}
           <Button
@@ -141,7 +142,7 @@ export function UnsubscribeView({
             onClick={handleDelete}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Unmuting…" : "Unmute"}
+            {isSubmitting ? t("unsubscribe.unmuting") : t("unsubscribe.unmute")}
           </Button>
         </div>
       );
@@ -152,7 +153,7 @@ export function UnsubscribeView({
     <div className="flex w-full flex-col gap-4">
       {hasError && (
         <Alert variant="destructive">
-          <div>Something went wrong on our end. Try again in a moment.</div>
+          <div>{t("unsubscribe.errorAlert")}</div>
         </Alert>
       )}
       <div className="flex flex-wrap gap-2">{actionsNode}</div>

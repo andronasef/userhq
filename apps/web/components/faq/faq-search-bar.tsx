@@ -5,6 +5,7 @@ import { Search, X } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
+import { useI18n } from "../../lib/i18n/context";
 
 export interface FaqSearchBarProps {
   value: string;
@@ -19,6 +20,7 @@ export function FaqSearchBar({
   matchCount,
   className,
 }: FaqSearchBarProps): React.JSX.Element {
+  const { t } = useI18n();
   const hasQuery = value.trim().length > 0;
 
   return (
@@ -31,11 +33,11 @@ export function FaqSearchBar({
         <Input
           type="search"
           role="searchbox"
-          placeholder="Search frequently asked questions..."
+          placeholder={t("faq.searchPlaceholder")}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="h-11 px-4 pl-11 pr-10 rounded-lg border border-input bg-background shadow-xs text-base"
-          aria-label="Search frequently asked questions"
+          aria-label={t("faq.searchLabel")}
         />
         {hasQuery && (
           <Button
@@ -44,7 +46,7 @@ export function FaqSearchBar({
             size="icon"
             onClick={() => onChange("")}
             className="absolute right-2 size-7 text-muted-foreground hover:text-foreground"
-            aria-label="Clear search"
+            aria-label={t("faq.clearSearch")}
           >
             <X className="size-4" aria-hidden="true" />
           </Button>
@@ -53,10 +55,10 @@ export function FaqSearchBar({
       {hasQuery && (
         <p className="text-xs text-muted-foreground mt-2 px-1">
           {matchCount === 0
-            ? "No matching questions found"
+            ? t("faq.noMatchingQuestions")
             : matchCount === 1
-            ? "Found 1 matching answer"
-            : `Found ${matchCount} matching answers`}
+            ? t("faq.foundOne")
+            : t("faq.foundMany", { count: matchCount })}
         </p>
       )}
     </div>

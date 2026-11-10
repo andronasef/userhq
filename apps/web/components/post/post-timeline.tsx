@@ -8,6 +8,7 @@ import { CommentComposer } from "@/components/post/comment-composer";
 import { SignInPrompt } from "@/components/post/sign-in-prompt";
 import { ActivityItem } from "@/components/post/activity-item";
 import type { BoardVariant } from "@/lib/tenant";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface PostTimelineProps {
   ws: string;
@@ -21,11 +22,12 @@ export interface PostTimelineProps {
 }
 
 export function DeletedStub(): React.JSX.Element {
+  const { t } = useI18n();
   return (
     <div className="flex items-center gap-4">
       <div className="size-8 rounded-full bg-muted flex-shrink-0" aria-hidden="true" />
       <span className="text-sm text-muted-foreground font-normal">
-        [Comment deleted]
+        {t("ui.deletedStub")}
       </span>
     </div>
   );
@@ -41,6 +43,7 @@ export function PostTimeline({
   signedIn,
   viewerIsAdmin = false,
 }: PostTimelineProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const [timeline, setTimeline] = React.useState<TimelineItem[]>(initialTimeline);
   const [activeReplyParentId, setActiveReplyParentId] = React.useState<string | null>(null);
@@ -168,7 +171,7 @@ export function PostTimeline({
     <div className="flex flex-col gap-6">
       {timeline.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No comments yet. Start the conversation.
+          {t("ui.noCommentsYet")}
         </p>
       ) : (
         <ol className="flex flex-col gap-6">
@@ -244,7 +247,7 @@ export function PostTimeline({
                       }
                       onSuccess={(reply) => handleReplySuccess(topLevelId, reply)}
                       onCancel={() => setActiveReplyParentId(null)}
-                      discardLabel="Discard reply"
+                      discardLabel={t("ui.discardReply")}
                     />
                   </div>
                 )}

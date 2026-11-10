@@ -10,6 +10,7 @@ import {
 } from "@userhq/types";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api-client";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface AcceptInviteProps {
   token: string;
@@ -23,6 +24,7 @@ export function AcceptInvite({
   workspaceSlug,
 }: AcceptInviteProps): React.JSX.Element {
   const router = useRouter();
+  const { t } = useI18n();
   const [hasError, setHasError] = React.useState(false);
   const attemptedRef = React.useRef(false);
 
@@ -56,15 +58,15 @@ export function AcceptInvite({
     return (
       <div className="max-w-md">
         <h1 className="text-2xl font-semibold leading-tight text-foreground">
-          Couldn&apos;t join {workspaceName}
+          {t("invite.couldNotJoin", { workspace: workspaceName })}
         </h1>
         <p className="mt-2 text-base text-muted-foreground">
-          Something went wrong on our end. Try again in a moment.
+          {t("invite.errorDesc")}
         </p>
         <div className="mt-6 flex flex-wrap gap-2">
-          <Button onClick={runAccept}>Retry joining</Button>
+          <Button onClick={runAccept}>{t("invite.retryJoining")}</Button>
           <Button variant="outline" asChild>
-            <Link href="/">Go to home</Link>
+            <Link href="/">{t("invite.goToHome")}</Link>
           </Button>
         </div>
       </div>
@@ -75,7 +77,7 @@ export function AcceptInvite({
     <div className="flex items-center gap-3">
       <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
       <h1 className="text-base font-semibold text-foreground" role="status">
-        Joining {workspaceName}…
+        {t("invite.joiningWorkspace", { workspace: workspaceName })}
       </h1>
     </div>
   );

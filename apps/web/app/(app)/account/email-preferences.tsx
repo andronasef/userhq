@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AccountSchema, type Account } from "@userhq/types";
 import { apiFetch } from "@/lib/api-client";
 import { Alert } from "@/components/ui/alert";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface EmailPreferencesProps {
   initialCommentEmails: boolean;
@@ -13,6 +14,7 @@ export interface EmailPreferencesProps {
 export function EmailPreferences({
   initialCommentEmails,
 }: EmailPreferencesProps): React.JSX.Element {
+  const { t } = useI18n();
   const [commentEmails, setCommentEmails] = React.useState(initialCommentEmails);
   const [isPending, setIsPending] = React.useState(false);
   const [alertError, setAlertError] = React.useState<string | null>(null);
@@ -30,13 +32,13 @@ export function EmailPreferences({
       });
       setCommentEmails(res.commentEmails);
       if (res.commentEmails) {
-        toast.success("Comment emails turned on");
+        toast.success(t("account.commentEmailsOn"));
       } else {
-        toast.success("Comment emails turned off");
+        toast.success(t("account.commentEmailsOff"));
       }
     } catch {
       // Revert on failure
-      setAlertError("Something went wrong on our end. Try again in a moment.");
+      setAlertError(t("account.preferencesError"));
     } finally {
       setIsPending(false);
     }
@@ -58,10 +60,10 @@ export function EmailPreferences({
             htmlFor="comment-emails-toggle"
             className="text-sm font-medium text-foreground cursor-pointer"
           >
-            {"Email me about new comments on posts I'm part of"}
+            {t("account.commentEmailsLabel")}
           </label>
           <p className="text-xs text-muted-foreground">
-            {"At most one email a day per company, grouped by post. Posts you've muted are skipped."}
+            {t("account.commentEmailsDesc")}
           </p>
         </div>
       </div>

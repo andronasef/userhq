@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Button } from "../components/ui/button";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface ErrorProps {
   error: Error & { digest?: string };
@@ -12,6 +13,8 @@ export default function ErrorBoundary({
   error,
   reset,
 }: ErrorProps): React.JSX.Element {
+  const { t } = useI18n();
+
   React.useEffect(() => {
     document.title = "Error · UserHQ";
     if (error?.digest) {
@@ -23,16 +26,16 @@ export default function ErrorBoundary({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold leading-tight">
-          Something went wrong
+          {t("errors.somethingWentWrong")}
         </h1>
         <p className="text-base text-muted-foreground">
-          This page couldn&apos;t load. Try again, or come back in a few minutes.
+          {t("errors.pageCouldNotLoad")}
         </p>
       </div>
 
       <div>
         <Button variant="outline" onClick={() => reset()}>
-          Try again
+          {t("errors.tryAgain")}
         </Button>
       </div>
     </div>

@@ -169,7 +169,7 @@ function PostFormDialogInner({
     setAlertError(null);
     setIsConflict(false);
     if (categories.length > 0 && (!data.categoryId || data.categoryId === "")) {
-      setError("categoryId", { message: "Choose a category." });
+      setError("categoryId", { message: t("ui.categoryChoose") });
       return;
     }
     mutation.mutate(data);
@@ -199,7 +199,7 @@ function PostFormDialogInner({
             {categories.length > 0 && (
               <Field
                 id="post-category"
-                label="Category"
+                label={t("board.category")}
                 error={errors.categoryId?.message}
               >
                 <NativeSelect
@@ -243,7 +243,7 @@ function PostFormDialogInner({
                       router.refresh();
                     }}
                   >
-                    Reload
+                    {t("common.reload")}
                   </Button>
                 )}
               </Alert>
@@ -304,6 +304,7 @@ export function NewPostButton({
   signedIn,
   defaultOpen = false,
 }: NewPostButtonProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -333,7 +334,7 @@ export function NewPostButton({
       <Button asChild className="shrink-0">
         <Link href={`/login?next=${nextUrl}`}>
           <Plus className="size-4" />
-          <span>New post</span>
+          <span>{t("ui.newPost")}</span>
         </Link>
       </Button>
     );
@@ -343,7 +344,7 @@ export function NewPostButton({
     <>
       <Button onClick={() => setOpen(true)} className="shrink-0">
         <Plus className="size-4" />
-        <span>New post</span>
+        <span>{t("ui.newPost")}</span>
       </Button>
       <PostFormDialog
         ws={ws}

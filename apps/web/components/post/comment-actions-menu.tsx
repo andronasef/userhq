@@ -42,7 +42,7 @@ export function CommentActionsMenu({
 
   const isAdminCopy = viewerIsAdmin && !isAuthor;
   const dialogDescription = isAdminCopy
-    ? "It disappears from the portal. You can restore it from the Deleted tab on the dashboard board."
+    ? t("post.adminDeleteCommentDesc")
     : t("ui.deleteCommentConfirmDesc");
 
   const handleConfirmDelete = async () => {
@@ -64,7 +64,7 @@ export function CommentActionsMenu({
             variant="ghost"
             size="icon"
             className="size-8 text-muted-foreground hover:text-foreground"
-            aria-label="Comment actions"
+            aria-label={t("post.commentActions")}
           >
             <Ellipsis className="size-4" aria-hidden="true" />
           </Button>
@@ -94,7 +94,7 @@ export function CommentActionsMenu({
         description={dialogDescription}
         dismissLabel={t("ui.keepComment")}
         confirmLabel={t("ui.deleteComment")}
-        pendingLabel="Deleting…"
+        pendingLabel={t("common.deleting")}
         onConfirm={handleConfirmDelete}
       />
     </>

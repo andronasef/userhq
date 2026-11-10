@@ -95,7 +95,7 @@ export function PublicRoadmapModal({
             {displayTitle}
           </DialogTitle>
           <DialogDescription className="sr-only">
-            Details for roadmap item {displayTitle}
+            {t("roadmap.itemDetails", { title: displayTitle })}
           </DialogDescription>
         </DialogHeader>
 
@@ -123,7 +123,7 @@ export function PublicRoadmapModal({
                 </div>
               ) : linkedPosts.length === 0 ? (
                 <div className="text-xs text-muted-foreground py-2">
-                  {item.postCount} linked feedback {item.postCount === 1 ? "post" : "posts"}.
+                  {t("roadmap.linkedFeedbackCount", { count: item.postCount })}
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">

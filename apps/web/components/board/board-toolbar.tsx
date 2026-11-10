@@ -177,7 +177,7 @@ export function BoardToolbar({
           className="sm:hidden shrink-0"
         >
           <SlidersHorizontal className="size-4" aria-hidden="true" />
-          <span>{diffCount > 0 ? `Filters · ${diffCount}` : "Filters"}</span>
+          <span>{diffCount > 0 ? `${t("ui.filters")} · ${diffCount}` : t("ui.filters")}</span>
         </Button>
 
         <div className="hidden sm:flex sm:items-center sm:gap-2 shrink-0">

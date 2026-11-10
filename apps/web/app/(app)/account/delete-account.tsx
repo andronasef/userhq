@@ -20,9 +20,7 @@ import { EntityLogo } from "@/components/entity-logo";
 import { apiFetch, type ApiClientError } from "@/lib/api-client";
 import { errorCopy } from "@/lib/api-errors";
 import { authClient } from "@/lib/auth-client";
-
-const PLATFORM_OWNER_COPY =
-  "This is the platform owner account. It's set in server configuration and can't be deleted here.";
+import { useI18n } from "@/lib/i18n/context";
 
 type Choice = { action: "transfer" | "delete"; toUserId: string } | undefined;
 type Step = "closed" | "workspaces" | "confirm";
@@ -36,6 +34,7 @@ export function DeleteAccount({
   isPlatformOwner,
   ownedWorkspaces,
 }: DeleteAccountProps): React.JSX.Element {
+  const { t } = useI18n();
   const [step, setStep] = React.useState<Step>("closed");
   const [typed, setTyped] = React.useState("");
   const [choices, setChoices] = React.useState<Record<string, Choice>>({});
@@ -51,9 +50,9 @@ export function DeleteAccount({
     const c = choices[w.slug];
     if (c?.action === "transfer") {
       const to = w.members.find((m) => m.userId === c.toUserId)?.name ?? "";
-      return `${w.name}: ownership goes to ${to}`;
+      return t("account.ownershipGoesTo", { name: w.name, target: to });
     }
-    return `${w.name}: deleted with all its products and content`;
+    return t("account.deletedWithContent", { name: w.name });
   });
 
   const onConfirm = async () => {
@@ -91,7 +90,7 @@ export function DeleteAccount({
     }
     // Sessions are already revoked server-side; signOut clears the client state.
     await authClient.signOut().catch(() => {});
-    flash("Your account was deleted");
+    flash(t("account.accountDeletedFlash"));
     window.location.assign("/");
   };
 
@@ -108,12 +107,12 @@ export function DeleteAccount({
   return (
     <div className="rounded-lg border border-destructive/40 p-6">
       <h2 className="text-lg font-semibold text-foreground mb-2">
-        Danger zone
+        {t("account.dangerZoneTitle")}
       </h2>
       <p className="text-sm text-muted-foreground mb-4">
         {isPlatformOwner
-          ? PLATFORM_OWNER_COPY
-          : 'Deleting your account removes your name, avatar, and email. Your posts and comments stay up as "Deleted user".'}
+          ? t("account.platformOwnerCopy")
+          : t("account.deleteAccountDesc")}
       </p>
       <Button
         type="button"
@@ -122,7 +121,7 @@ export function DeleteAccount({
         disabled={isPlatformOwner}
         onClick={start}
       >
-        Delete account
+        {t("account.deleteAccountBtn")}
       </Button>
 
       <Dialog
@@ -133,10 +132,9 @@ export function DeleteAccount({
       >
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Your workspaces</DialogTitle>
+            <DialogTitle>{t("account.workspacesModalTitle")}</DialogTitle>
             <DialogDescription>
-              You own these workspaces. Choose what happens to each one before
-              your account is deleted.
+              {t("account.workspacesModalDesc")}
             </DialogDescription>
           </DialogHeader>
 
@@ -157,14 +155,17 @@ export function DeleteAccount({
                         {w.name}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {w.productCount} products · {w.postCount} posts
+                        {t("account.productsAndPosts", {
+                          products: w.productCount,
+                          posts: w.postCount,
+                        })}
                       </div>
                     </div>
                   </div>
 
                   <div
                     role="radiogroup"
-                    aria-label={`What happens to ${w.name}`}
+                    aria-label={t("account.whatHappensTo", { name: w.name })}
                     className="flex flex-col gap-3"
                   >
                     <div className="flex flex-col gap-1.5">
@@ -181,16 +182,16 @@ export function DeleteAccount({
                             setChoice(w.slug, { action: "transfer", toUserId: "" })
                           }
                         />
-                        Transfer ownership to…
+                        {t("account.transferOwnershipTo")}
                       </label>
                       {alone ? (
                         <p className="text-xs text-muted-foreground pl-6">
-                          No other members to transfer to
+                          {t("account.noOtherMembers")}
                         </p>
                       ) : (
                         <div className="pl-6">
                           <NativeSelect
-                            aria-label={`New owner of ${w.name}`}
+                            aria-label={t("account.newOwnerAria", { name: w.name })}
                             disabled={choice?.action !== "transfer"}
                             value={choice?.toUserId ?? ""}
                             onChange={(e) =>
@@ -200,7 +201,7 @@ export function DeleteAccount({
                               })
                             }
                           >
-                            <option value="">Choose a member</option>
+                            <option value="">{t("account.chooseMember")}</option>
                             {w.members.map((m) => (
                               <option key={m.userId} value={m.userId}>
                                 {m.name}
@@ -222,11 +223,10 @@ export function DeleteAccount({
                             setChoice(w.slug, { action: "delete", toUserId: "" })
                           }
                         />
-                        Delete this workspace
+                        {t("account.deleteWorkspaceRadio")}
                       </label>
                       <p className="text-sm text-destructive pl-6">
-                        Its products, portals, posts, and comments are removed
-                        for everyone.
+                        {t("account.deleteWorkspaceWarn")}
                       </p>
                     </div>
                   </div>
@@ -243,7 +243,7 @@ export function DeleteAccount({
               variant="outline"
               onClick={() => setStep("closed")}
             >
-              Keep my account
+              {t("account.keepMyAccount")}
             </Button>
             <Button
               type="button"
@@ -253,7 +253,7 @@ export function DeleteAccount({
                 setStep("confirm");
               }}
             >
-              Continue
+              {t("account.continue")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -269,13 +269,11 @@ export function DeleteAccount({
           }
           setStep("closed");
         }}
-        title="Delete your account?"
-        description={
-          'Your posts and comments stay up, shown as "Deleted user". Your name, avatar, and email are removed, and you\'ll stop getting emails. This can\'t be undone.'
-        }
-        dismissLabel="Keep my account"
-        confirmLabel="Delete account"
-        pendingLabel="Deleting…"
+        title={t("account.confirmDeleteTitle")}
+        description={t("account.confirmDeleteDesc")}
+        dismissLabel={t("account.keepMyAccount")}
+        confirmLabel={t("account.deleteAccountBtn")}
+        pendingLabel={t("account.deletingAccount")}
         onConfirm={onConfirm}
         confirmDisabled={typed.trim() !== "DELETE"}
       >
@@ -290,7 +288,7 @@ export function DeleteAccount({
           htmlFor="delete-account-confirm"
           className="text-sm font-medium text-foreground block mb-1.5"
         >
-          Type DELETE to confirm
+          {t("account.typeDeleteToConfirm")}
         </label>
         <Input
           id="delete-account-confirm"

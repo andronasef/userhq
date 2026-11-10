@@ -4,12 +4,14 @@ import * as React from "react";
 import { LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface SwitchAccountButtonProps {
   token: string;
 }
 
 export function SwitchAccountButton({ token }: SwitchAccountButtonProps) {
+  const { t } = useI18n();
   const [isPending, setIsPending] = React.useState(false);
 
   const handleClick = async () => {
@@ -32,10 +34,10 @@ export function SwitchAccountButton({ token }: SwitchAccountButtonProps) {
       {isPending ? (
         <>
           <LoaderCircle className="size-4 animate-spin" />
-          <span>Signing out…</span>
+          <span>{t("invite.signingOut")}</span>
         </>
       ) : (
-        <span>Sign out and switch account</span>
+        <span>{t("invite.signOutSwitch")}</span>
       )}
     </Button>
   );

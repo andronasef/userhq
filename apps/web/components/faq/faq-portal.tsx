@@ -168,7 +168,7 @@ export function FaqPortal({
       <EmptyState
         icon={<HelpCircle className="size-6 text-muted-foreground" aria-hidden="true" />}
         title={t("ui.noFaqYet")}
-        body="Self-serve help articles and common questions will appear here soon."
+        body={t("faq.noFaqBody")}
         action={boardEnabled ? (
           <Button asChild variant="default">
             <Link href={`/${ws}/${product}`}>{t("ui.exploreFeedback")}</Link>

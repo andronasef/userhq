@@ -154,7 +154,7 @@ export function PostActionsMenu({
               variant="ghost"
               size="icon"
               className="size-8 text-muted-foreground hover:text-foreground"
-              aria-label="Post actions"
+              aria-label={t("post.postActions")}
             >
               <Ellipsis className="size-4" aria-hidden="true" />
             </Button>
@@ -168,7 +168,7 @@ export function PostActionsMenu({
               <span>{t("ui.editPost")}</span>
               {isLocked && (
                 <span className="text-xs text-muted-foreground font-normal">
-                  Locked after someone else voted or commented
+                  {t("post.lockedHint")}
                 </span>
               )}
             </DropdownMenuItem>
@@ -182,7 +182,7 @@ export function PostActionsMenu({
               <span>{t("ui.deletePost")}</span>
               {isLocked && (
                 <span className="text-xs text-muted-foreground font-normal">
-                  Locked after someone else voted or commented
+                  {t("post.lockedHint")}
                 </span>
               )}
             </DropdownMenuItem>
@@ -224,15 +224,15 @@ export function PostActionsMenu({
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title={adminView ? `Delete "${post.title}"?` : "Delete this post?"}
+        title={adminView ? t("post.deleteTitleNamed", { title: post.title }) : t("post.deleteTitle")}
         description={
           adminView
-            ? "It disappears from the portal. You can restore it from the Deleted tab on the dashboard board."
-            : "It'll be removed from the board, along with its votes. This can't be undone."
+            ? t("post.adminDeletePostDesc")
+            : t("post.userDeletePostDesc")
         }
         dismissLabel={t("common.cancel")}
         confirmLabel={t("ui.deletePost")}
-        pendingLabel="Deleting…"
+        pendingLabel={t("common.deleting")}
         onConfirm={handleDelete}
       />
 

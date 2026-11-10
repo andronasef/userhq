@@ -15,6 +15,7 @@ import { PostTimeline } from "@/components/post/post-timeline";
 import { PostActionsMenu } from "@/components/post/post-actions-menu";
 import { MuteToggle } from "@/components/post/mute-toggle";
 import { LinkedRoadmapBanner } from "@/components/post/linked-roadmap-banner";
+import { getRequestLocale, getDictionary } from "@/lib/i18n/server";
 
 interface PostPageProps {
   params: Promise<{ ws: string; product: string; ref: string }>;
@@ -78,8 +79,14 @@ export default async function PostPage({
 
   const productResult = await getPortalProduct(ws, product);
   if (!productResult.ok || !productResult.data.product.features.board) notFound();
-  const [postResult, me] = await Promise.all([getPost(ws, product, postNumber), getMe()]);
+  const [postResult, me, locale] = await Promise.all([
+    getPost(ws, product, postNumber),
+    getMe(),
+    getRequestLocale(),
+  ]);
   if (!postResult.ok) notFound();
+
+  const dict = getDictionary(locale);
 
   if (postResult.data.kind === "redirect") {
     permanentRedirect(
@@ -107,7 +114,7 @@ export default async function PostPage({
         >
           <Link href={portalHref(ws, product)}>
             <ArrowLeft className="size-4" aria-hidden="true" />
-            <span>All feedback</span>
+            <span>{dict.ui.allFeedback}</span>
           </Link>
         </Button>
       </div>
@@ -185,7 +192,7 @@ export default async function PostPage({
         className="border-t border-border pt-8 flex flex-col gap-6"
       >
         <h2 id="comments-heading" className="text-xl font-semibold text-foreground">
-          Comments
+          {dict.ui.commentsHeading}
         </h2>
         <PostTimeline
           ws={ws}

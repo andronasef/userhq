@@ -93,7 +93,7 @@ function PostListInner({
       )}
 
       <div className="sr-only" aria-live="polite" role="status">
-        {loadedCount > 0 ? `Loaded ${loadedCount} more posts` : ""}
+        {loadedCount > 0 ? t("board.loadedMore", { count: loadedCount }) : ""}
       </div>
     </div>
   );

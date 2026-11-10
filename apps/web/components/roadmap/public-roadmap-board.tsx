@@ -59,11 +59,11 @@ export function PublicRoadmapBoard({
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center rounded-xl border border-dashed border-border bg-card/50">
         <Kanban className="size-10 text-muted-foreground/60 mb-3" aria-hidden="true" />
-        <h3 className="text-base font-semibold text-foreground">No public roadmap yet</h3>
+        <h3 className="text-base font-semibold text-foreground">{t("roadmap.noRoadmapYet")}</h3>
         <p className="text-sm text-muted-foreground max-w-sm mt-1 mb-5">
           {boardEnabled
-            ? "Check back later or share feedback to help shape what we build next."
-            : "Check back later to see what we're working on."}
+            ? t("roadmap.checkBackFeedback")
+            : t("roadmap.checkBackSoon")}
         </p>
         {boardEnabled && <Button asChild>
           <Link href={portalHref(ws, product)}>

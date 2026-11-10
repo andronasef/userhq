@@ -18,6 +18,8 @@ import {
   isSupportedLocale,
 } from "./index";
 
+export type TranslationParams = Record<string, string | number | boolean | null | undefined>;
+
 export interface I18nContextValue {
   locale: SupportedLocale;
   currentLocale: SupportedLocale;
@@ -28,7 +30,11 @@ export interface I18nContextValue {
   contentDefaultLocale: SupportedLocale;
   setScope: (scope: LocaleScope | null) => void;
   setLocale: (newLocale: SupportedLocale) => void;
-  t: (path: DictionaryKey, fallback?: string) => string;
+  t: (
+    path: DictionaryKey,
+    paramsOrFallback?: TranslationParams | string,
+    fallback?: string
+  ) => string;
 }
 
 export interface LocaleScope {
@@ -132,7 +138,18 @@ export function I18nProvider({
   }, [locale, dir]);
 
   const t = React.useCallback(
-    (path: DictionaryKey, fallback?: string): string => {
+    (
+      path: DictionaryKey,
+      paramsOrFallback?: TranslationParams | string,
+      fallback?: string
+    ): string => {
+      const params =
+        typeof paramsOrFallback === "object" && paramsOrFallback !== null
+          ? paramsOrFallback
+          : undefined;
+      const explicitFallback =
+        typeof paramsOrFallback === "string" ? paramsOrFallback : fallback;
+
       const parts = path.split(".");
       let current: any = dictionary;
       for (const p of parts) {
@@ -144,22 +161,35 @@ export function I18nProvider({
         }
       }
 
-      if (typeof current === "string") return current;
+      let res: string | undefined =
+        typeof current === "string" ? current : undefined;
 
-      // Fallback to English dictionary if key is missing in active language
-      const enDict = DICTIONARIES[DEFAULT_LOCALE];
-      let enCurrent: any = enDict;
-      for (const p of parts) {
-        if (enCurrent && typeof enCurrent === "object" && p in enCurrent) {
-          enCurrent = enCurrent[p];
-        } else {
-          enCurrent = undefined;
-          break;
+      if (res === undefined) {
+        // Fallback to English dictionary if key is missing in active language
+        const enDict = DICTIONARIES[DEFAULT_LOCALE];
+        let enCurrent: any = enDict;
+        for (const p of parts) {
+          if (enCurrent && typeof enCurrent === "object" && p in enCurrent) {
+            enCurrent = enCurrent[p];
+          } else {
+            enCurrent = undefined;
+            break;
+          }
+        }
+        if (typeof enCurrent === "string") res = enCurrent;
+      }
+
+      if (res === undefined) {
+        res = explicitFallback ?? path;
+      }
+
+      if (params) {
+        for (const [key, val] of Object.entries(params)) {
+          res = res.replaceAll(`{${key}}`, String(val ?? ""));
         }
       }
-      if (typeof enCurrent === "string") return enCurrent;
 
-      return fallback ?? path;
+      return res;
     },
     [dictionary],
   );
@@ -195,17 +225,35 @@ export function useI18n(): I18nContextValue {
       contentDefaultLocale: DEFAULT_LOCALE,
       setScope: () => {},
       setLocale: () => {},
-      t: (path: DictionaryKey, fallback?: string) => {
+      t: (
+        path: DictionaryKey,
+        paramsOrFallback?: TranslationParams | string,
+        fallback?: string
+      ) => {
+        const params =
+          typeof paramsOrFallback === "object" && paramsOrFallback !== null
+            ? paramsOrFallback
+            : undefined;
+        const explicitFallback =
+          typeof paramsOrFallback === "string" ? paramsOrFallback : fallback;
+
         const parts = path.split(".");
         let current: any = defaultDict;
         for (const p of parts) {
           if (current && typeof current === "object" && p in current) {
             current = current[p];
           } else {
-            return fallback ?? path;
+            current = undefined;
+            break;
           }
         }
-        return typeof current === "string" ? current : (fallback ?? path);
+        let res = typeof current === "string" ? current : (explicitFallback ?? path);
+        if (params) {
+          for (const [key, val] of Object.entries(params)) {
+            res = res.replaceAll(`{${key}}`, String(val ?? ""));
+          }
+        }
+        return res;
       },
     };
   }

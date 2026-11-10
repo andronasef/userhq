@@ -21,16 +21,7 @@ export function LanguagePreference(): React.JSX.Element {
     }
   };
 
-  const description =
-    locale === "ar"
-      ? "اختر لغة العرض المفضلة لواجهة مستخدم UserHQ."
-      : locale === "fr"
-      ? "Choisissez votre langue préférée pour l'interface de UserHQ."
-      : locale === "es"
-      ? "Elige tu idioma preferido para la interfaz de UserHQ."
-      : locale === "de"
-      ? "Wählen Sie Ihre bevorzugte Sprache für die UserHQ-Oberfläche."
-      : "Choose your preferred language for the UserHQ interface.";
+  const description = t("account.languageDesc");
 
   return (
     <div>

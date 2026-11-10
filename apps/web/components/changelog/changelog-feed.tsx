@@ -61,7 +61,7 @@ export function ChangelogFeed({
       <EmptyState
         icon={<Megaphone className="size-6 text-muted-foreground" />}
         title={t("ui.noUpdatesYet")}
-        body="Check back soon for announcements, new features, and improvements."
+        body={t("changelog.noUpdatesBody")}
       />
     );
   }

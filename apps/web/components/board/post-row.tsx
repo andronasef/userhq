@@ -6,6 +6,7 @@ import { postHref } from "@/lib/tenant";
 import { VoteButton } from "./vote-button";
 import { StatusBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface PostRowProps {
   ws: string;
@@ -20,9 +21,12 @@ export function PostRow({
   post,
   signedIn,
 }: PostRowProps): React.JSX.Element {
+  const { t } = useI18n();
   const href = postHref(ws, product, post.number, post.slug);
   const commentLabel =
-    post.commentCount === 1 ? "1 comment" : `${post.commentCount} comments`;
+    post.commentCount === 1
+      ? `1 ${t("ui.commentSingular")}`
+      : `${post.commentCount} ${t("ui.commentsCount")}`;
 
   return (
     <li className="flex gap-4 p-4 bg-background">

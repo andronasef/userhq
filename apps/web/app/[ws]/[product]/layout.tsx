@@ -19,6 +19,7 @@ import { NotificationBell } from "../../../components/notifications/notification
 import { AppToaster } from "../../../components/ui/toaster";
 import { ProjectContextTracker } from "../../../components/portal/project-context-tracker";
 import { PortalBadgeAttribution } from "../../../components/portal/portal-badge-attribution";
+import { getRequestLocale, getDictionary } from "../../../lib/i18n/server";
 
 interface PortalLayoutProps {
   children: React.ReactNode;
@@ -96,10 +97,12 @@ export default async function PortalLayout({
   params,
 }: PortalLayoutProps): Promise<React.JSX.Element> {
   const { ws, product } = await params;
-  const [result, me] = await Promise.all([
+  const [result, me, locale] = await Promise.all([
     getPortalProduct(ws, product),
     getMe(),
+    getRequestLocale(),
   ]);
+  const dict = getDictionary(locale);
 
   const devUploadEnabled = isDevUploadEnabled();
 
@@ -108,11 +111,11 @@ export default async function PortalLayout({
       return (
         <AppShell>
           <StatePage
-            title="This page is unavailable"
-            body="This portal isn't available right now. Check back later."
+            title={dict.portal.unavailableTitle}
+            body={dict.portal.unavailableBody}
             actions={
               <Button variant="outline" asChild>
-                <Link href="/">Go to UserHQ</Link>
+                <Link href="/">{dict.portal.goToUserHQ}</Link>
               </Button>
             }
           />

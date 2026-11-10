@@ -51,6 +51,12 @@ export default async function PortalBoardPage({
   const productResult = await getPortalProduct(ws, product);
   if (!productResult.ok) notFound();
   const p = productResult.data.product;
+
+  const dict = getDictionary(
+    (productResult.data.product as { resolvedLocale?: string }).resolvedLocale ??
+      (typeof sp?.lang === "string" ? sp.lang : undefined)
+  );
+
   if (!p.features.board) {
     const href = landingHref(ws, product, p.features);
     if (href) redirect(href);
@@ -58,9 +64,15 @@ export default async function PortalBoardPage({
     return (
       <div className="mx-auto max-w-3xl py-12 break-words">
         <StatePage
-          title="Nothing is available here right now"
-          body={`${p.name} isn't open to visitors at the moment. Please check back later.`}
-          actions={p.websiteUrl ? <Link href={p.websiteUrl} className={buttonVariants({ variant: "outline" })}>Visit {company}</Link> : undefined}
+          title={dict.portal.emptyTitle}
+          body={dict.portal.emptyBody.replace("{name}", p.name)}
+          actions={
+            p.websiteUrl ? (
+              <Link href={p.websiteUrl} className={buttonVariants({ variant: "outline" })}>
+                {dict.portal.visitCompany.replace("{company}", company)}
+              </Link>
+            ) : undefined
+          }
         />
       </div>
     );
@@ -82,18 +94,13 @@ export default async function PortalBoardPage({
     sp?.q || sp?.category || sp?.status || (sp?.sort && sp?.sort !== "top")
   );
 
-  const dict = getDictionary(
-    (productResult.data.product as { resolvedLocale?: string }).resolvedLocale ??
-      (typeof sp.lang === "string" ? sp.lang : undefined)
-  );
-
   return (
     <div className="mx-auto max-w-3xl flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Feedback</h1>
+          <h1 className="text-2xl font-semibold text-foreground">{dict.ui.feedback}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Share ideas for {productName} and vote on the ones you want most.
+            {dict.board.feedbackSubtitle.replace("{name}", productName)}
           </p>
         </div>
         <NewPostButton

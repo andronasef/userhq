@@ -105,12 +105,12 @@ export function CommentItem({
       if (err instanceof ApiClientError && err.code === "edit_conflict") {
         setIsConflict(true);
         setAlertError(
-          "Someone else changed this while you were editing. Reload to see their version, then try again."
+          t("post.conflictError")
         );
       } else if (err instanceof ApiClientError) {
         setAlertError(errorCopy(err));
       } else {
-        setAlertError("Something went wrong on our end. Try again in a moment.");
+        setAlertError(t("common.errorGeneric"));
       }
     } finally {
       setIsSaving(false);
@@ -169,7 +169,7 @@ export function CommentItem({
                     size="sm"
                     onClick={() => router.refresh()}
                   >
-                    Reload
+                    {t("common.reload")}
                   </Button>
                 )}
               </div>

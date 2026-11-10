@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { MuteResultSchema, type MuteResult } from "@userhq/types";
 import { apiFetch } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface MuteToggleProps {
   ws: string;
@@ -20,6 +21,7 @@ export function MuteToggle({
   postNumber,
   initialMuted,
 }: MuteToggleProps): React.JSX.Element {
+  const { t } = useI18n();
   const [muted, setMuted] = React.useState(initialMuted);
   const [isPending, setIsPending] = React.useState(false);
 
@@ -36,12 +38,12 @@ export function MuteToggle({
       );
       setMuted(res.muted);
       if (res.muted) {
-        toast.success("You won't get emails about this post");
+        toast.success(t("post.muteSuccess"));
       } else {
-        toast.success("You'll get emails about new comments on this post");
+        toast.success(t("post.unmuteSuccess"));
       }
     } catch {
-      toast.error("Something went wrong on our end. Try again in a moment.");
+      toast.error(t("common.errorGeneric"));
     } finally {
       setIsPending(false);
     }
@@ -54,17 +56,17 @@ export function MuteToggle({
       onClick={handleToggle}
       disabled={isPending}
       aria-pressed={muted}
-      aria-label="Mute email for this post"
+      aria-label={t("post.muteLabel")}
     >
       {muted ? (
         <>
           <BellOff className="size-4 mr-1.5" aria-hidden="true" />
-          <span>Unmute</span>
+          <span>{t("post.unmute")}</span>
         </>
       ) : (
         <>
           <Bell className="size-4 mr-1.5" aria-hidden="true" />
-          <span>Mute</span>
+          <span>{t("post.mute")}</span>
         </>
       )}
     </Button>

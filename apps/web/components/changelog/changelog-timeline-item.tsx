@@ -88,7 +88,7 @@ export function ChangelogTimelineItem({
     } catch {
       // ignore clipboard error in unpermitted contexts
     }
-    toast("Link copied to clipboard");
+    toast(t("changelog.linkCopied"));
   };
 
   return (
@@ -164,7 +164,7 @@ export function ChangelogTimelineItem({
             onClick={() => setExpanded(!expanded)}
             className="text-sm font-semibold text-[var(--primary-text)] hover:underline flex items-center gap-1 mt-2 cursor-pointer"
           >
-            {expanded ? "Show less ↑" : "Read more ↓"}
+            {expanded ? `${t("ui.showLess")} ↑` : `${t("ui.readMore")} ↓`}
           </button>
         </div>
       ) : (

@@ -1,9 +1,12 @@
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
 import { Kanban, ArrowRight } from "lucide-react";
 import type { PostRoadmapItemRef } from "@userhq/types";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { useI18n } from "../../lib/i18n/context";
 
 export interface LinkedRoadmapBannerProps {
   ws: string;
@@ -22,6 +25,8 @@ export function LinkedRoadmapBanner({
   statusColor,
   variant = "portal",
 }: LinkedRoadmapBannerProps): React.JSX.Element | null {
+  const { t } = useI18n();
+
   if (!roadmapItem) {
     return null;
   }
@@ -33,7 +38,7 @@ export function LinkedRoadmapBanner({
           <Kanban className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
           <div className="flex flex-wrap items-center gap-2 min-w-0">
             <span className="text-foreground">
-              Linked to roadmap item:{" "}
+              {t("post.linkedToRoadmap")}{" "}
               <strong className="font-semibold text-foreground">
                 {roadmapItem.title}
               </strong>
@@ -61,7 +66,7 @@ export function LinkedRoadmapBanner({
           <Link
             href={`/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap?item=${encodeURIComponent(roadmapItem.id)}`}
           >
-            <span>View on roadmap</span>
+            <span>{t("ui.viewOnRoadmap")}</span>
             <ArrowRight className="size-3.5" aria-hidden="true" />
           </Link>
         </Button>
@@ -74,7 +79,7 @@ export function LinkedRoadmapBanner({
       <div className="flex items-center gap-2.5 min-w-0">
         <Kanban className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
         <span className="text-foreground">
-          This idea is on our roadmap:{" "}
+          {t("post.ideaOnRoadmap")}{" "}
           <strong className="font-semibold text-foreground">
             {roadmapItem.title}
           </strong>
@@ -88,7 +93,7 @@ export function LinkedRoadmapBanner({
         className="shrink-0 text-[var(--primary-text)] hover:text-[var(--primary-text)] gap-1 -ml-2 sm:ml-0 w-fit"
       >
         <Link href={`/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap`}>
-          <span>View public roadmap</span>
+          <span>{t("post.viewPublicRoadmap")}</span>
           <ArrowRight className="size-3.5" aria-hidden="true" />
         </Link>
       </Button>

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getPortalProduct, getPublicFaqTree } from "../../../../lib/api-server";
 import { FaqPortal } from "../../../../components/faq/faq-portal";
 import { PageHeader } from "../../../../components/page-header";
+import { getRequestLocale, getDictionary } from "../../../../lib/i18n/server";
 
 interface PublicFaqPageProps {
   params: Promise<{ ws: string; product: string }>;
@@ -25,8 +26,12 @@ export default async function PublicFaqPage({
   params,
 }: PublicFaqPageProps): Promise<React.JSX.Element> {
   const { ws, product } = await params;
-  const productRes = await getPortalProduct(ws, product);
+  const [productRes, locale] = await Promise.all([
+    getPortalProduct(ws, product),
+    getRequestLocale(),
+  ]);
   if (!productRes.ok || !productRes.data.product.features.faq) notFound();
+  const dict = getDictionary(locale);
   const faqRes = await getPublicFaqTree(ws, product);
   if (!faqRes.ok && faqRes.status === 404) notFound();
 
@@ -36,8 +41,8 @@ export default async function PublicFaqPage({
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6">
       <PageHeader
-        title="Frequently Asked Questions"
-        description={`Find quick answers to common questions about ${p.name}.`}
+        title={dict.faq.title}
+        description={dict.faq.subtitle.replace("{name}", p.name)}
       />
       <FaqPortal boardEnabled={p.features.board} ws={ws} product={product} categories={categories} />
     </div>

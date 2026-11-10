@@ -12,9 +12,12 @@ import {
   Mail,
 } from "lucide-react";
 import { ProductShowcase } from "../../components/home/product-showcase";
+import { getDictionary } from "../../lib/i18n";
+import { getRequestLocale } from "../../lib/i18n/server";
 
 export default async function HomePage(): Promise<React.JSX.Element> {
-  const me = await getMe();
+  const [me, locale] = await Promise.all([getMe(), getRequestLocale()]);
+  const dict = getDictionary(locale);
 
   if (!me.user) {
     return (
@@ -43,10 +46,10 @@ export default async function HomePage(): Promise<React.JSX.Element> {
               id="hero-heading"
               className="text-4xl sm:text-6xl lg:text-7xl font-bold leading-[1.06] tracking-[-0.038em] text-foreground text-balance max-w-3xl"
             >
-              Good products start with listening.
+              {dict.landing.heroHeading}
             </h1>
             <p className="max-w-[56ch] text-base sm:text-xl leading-relaxed text-muted-foreground text-balance font-normal">
-              Customer feedback, transparent roadmaps, and shipped changelogs in one calm home.
+              {dict.landing.heroSubtitle}
             </p>
           </div>
 
@@ -58,19 +61,19 @@ export default async function HomePage(): Promise<React.JSX.Element> {
               asChild
             >
               <a href="mailto:hello@increasinglab.com?subject=UserHQ%20Access%20Request">
-                Request access to UserHQ
+                {dict.landing.requestAccess}
                 <ArrowRight className="size-4 ml-2" aria-hidden="true" />
               </a>
             </Button>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span>Workspace creation is invite-only.</span>
+              <span>{dict.landing.inviteOnly}</span>
               <span className="text-border" aria-hidden="true">·</span>
-              <span>Already invited?</span>
+              <span>{dict.landing.alreadyInvited}</span>
               <Link
                 href="/login"
                 className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary-text)] transition-colors"
               >
-                Sign in
+                {dict.ui.signIn}
               </Link>
             </div>
           </div>
@@ -88,11 +91,10 @@ export default async function HomePage(): Promise<React.JSX.Element> {
               id="story-heading"
               className="text-2xl sm:text-3xl font-semibold tracking-[-0.025em] text-foreground"
             >
-              The complete feedback loop, closed.
+              {dict.landing.storyHeading}
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-              When teams collect ideas but never follow up, customers stop contributing.
-              UserHQ connects every stage of product planning directly to public delivery.
+              {dict.landing.storyLead}
             </p>
           </div>
 
@@ -101,34 +103,33 @@ export default async function HomePage(): Promise<React.JSX.Element> {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center rounded-2xl border border-border bg-card p-6 sm:p-8">
               <div className="md:col-span-6 flex flex-col gap-3">
                 <h3 className="text-lg sm:text-xl font-semibold text-foreground">
-                  Listen without the noise
+                  {dict.landing.step1Title}
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Scattered Slack messages, emails, and support tickets make customer demand impossible to quantify.
-                  UserHQ unifies incoming requests into a single, clean community board where users upvote existing ideas instead of filing duplicates.
+                  {dict.landing.step1Desc}
                 </p>
                 <div className="mt-1 flex flex-col gap-1.5 text-xs text-foreground font-medium">
                   <div className="flex items-center gap-2">
                     <Check className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
-                    <span>Single sign-on via Google & GitHub for authentic user votes</span>
+                    <span>{dict.landing.step1Feature1}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
-                    <span>Custom categories to segment requests by product area</span>
+                    <span>{dict.landing.step1Feature2}</span>
                   </div>
                 </div>
               </div>
 
               <div className="md:col-span-6 rounded-xl border border-border bg-background p-4 sm:p-5 flex flex-col gap-3 shadow-2xs">
                 <div className="flex items-center justify-between text-xs text-muted-foreground pb-2 border-b border-border">
-                  <span>Customer request</span>
-                  <span className="font-semibold text-[var(--primary-text)]">84 upvotes</span>
+                  <span>{dict.landing.step1CardLabel}</span>
+                  <span className="font-semibold text-[var(--primary-text)]">{dict.landing.step1CardVotes}</span>
                 </div>
                 <div className="text-sm font-semibold text-foreground">
-                  Webhook notifications for post status changes
+                  {dict.landing.step1MockTitle}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Requested by 12 teams · Status updated to Planned
+                  {dict.landing.step1MockMeta}
                 </p>
                 <div className="inline-flex items-center gap-2 rounded-md bg-muted px-2.5 py-1.5 text-xs text-muted-foreground font-mono">
                   <span>POST /api/v1/portal/acme/posts/142/vote</span>
@@ -140,39 +141,39 @@ export default async function HomePage(): Promise<React.JSX.Element> {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center rounded-2xl border border-border bg-card p-6 sm:p-8">
               <div className="md:col-span-6 md:order-2 flex flex-col gap-3">
                 <h3 className="text-lg sm:text-xl font-semibold text-foreground">
-                  Plan with clarity on the roadmap
+                  {dict.landing.step2Title}
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Bridge user demand with engineering reality. Move top-voted ideas onto your Kanban roadmap so customers can follow progress without cluttering your private sprint boards.
+                  {dict.landing.step2Desc}
                 </p>
                 <div className="mt-1 flex flex-col gap-1.5 text-xs text-foreground font-medium">
                   <div className="flex items-center gap-2">
                     <Check className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
-                    <span>Kanban lanes configured to match your development cycle</span>
+                    <span>{dict.landing.step2Feature1}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
-                    <span>Public roadmaps stay sanitized while internal discussions remain private</span>
+                    <span>{dict.landing.step2Feature2}</span>
                   </div>
                 </div>
               </div>
 
               <div className="md:col-span-6 md:order-1 rounded-xl border border-border bg-background p-4 sm:p-5 flex flex-col gap-3 shadow-2xs">
                 <div className="flex items-center justify-between text-xs text-muted-foreground pb-2 border-b border-border">
-                  <span>Roadmap lane</span>
+                  <span>{dict.landing.step2CardLabel}</span>
                   <span className="rounded-full bg-[var(--brand-selection)] px-2 py-0.5 text-xs font-semibold text-[var(--primary-text)]">
-                    In Progress
+                    {dict.portal.inProgress}
                   </span>
                 </div>
                 <div className="text-sm font-semibold text-foreground">
-                  Keyboard shortcuts for rapid backlog triage
+                  {dict.landing.step2MockTitle}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Assigned for Q4 2026 delivery · Linked to 62 community voters
+                  {dict.landing.step2MockMeta}
                 </p>
                 <div className="flex items-center gap-2 pt-1">
                   <span className="size-2 rounded-full bg-[var(--primary)]" />
-                  <span className="text-xs font-medium text-foreground">Active milestone</span>
+                  <span className="text-xs font-medium text-foreground">{dict.landing.step2Milestone}</span>
                 </div>
               </div>
             </div>
@@ -181,19 +182,19 @@ export default async function HomePage(): Promise<React.JSX.Element> {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center rounded-2xl border border-border bg-card p-6 sm:p-8">
               <div className="md:col-span-6 flex flex-col gap-3">
                 <h3 className="text-lg sm:text-xl font-semibold text-foreground">
-                  Ship releases and celebrate publicly
+                  {dict.landing.step3Title}
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  When work is done, publish changelog notes with rich text and images. Every customer who voted for or commented on the feature is notified automatically, proving their voice matters.
+                  {dict.landing.step3Desc}
                 </p>
                 <div className="mt-1 flex flex-col gap-1.5 text-xs text-foreground font-medium">
                   <div className="flex items-center gap-2">
                     <Check className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
-                    <span>Rich-text release notes with image attachments</span>
+                    <span>{dict.landing.step3Feature1}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="size-4 text-[var(--primary-text)] shrink-0" aria-hidden="true" />
-                    <span>Automated email notifications to release subscribers</span>
+                    <span>{dict.landing.step3Feature2}</span>
                   </div>
                 </div>
               </div>
@@ -201,18 +202,18 @@ export default async function HomePage(): Promise<React.JSX.Element> {
               <div className="md:col-span-6 rounded-xl border border-border bg-background p-4 sm:p-5 flex flex-col gap-3 shadow-2xs">
                 <div className="flex items-center justify-between text-xs text-muted-foreground pb-2 border-b border-border">
                   <span className="rounded-full bg-[var(--primary)] px-2 py-0.5 text-xs font-semibold text-white">
-                    Shipped
+                    {dict.portal.completed}
                   </span>
-                  <span>Release notification sent</span>
+                  <span>{dict.landing.step3ReleaseSent}</span>
                 </div>
                 <div className="text-sm font-semibold text-foreground">
-                  Changelog v2.4.0 published
+                  {dict.landing.step3MockTitle}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  All 84 voters notified: &quot;A feature you requested is now live!&quot;
+                  {dict.landing.step3MockMeta}
                 </p>
                 <div className="inline-flex items-center gap-2 text-xs font-medium text-[var(--primary-text)]">
-                  <span>Loop completed: Idea → Roadmap → Shipped</span>
+                  <span>{dict.landing.step3LoopCompleted}</span>
                 </div>
               </div>
             </div>
@@ -226,10 +227,10 @@ export default async function HomePage(): Promise<React.JSX.Element> {
               id="foundations-heading"
               className="text-2xl sm:text-3xl font-semibold tracking-[-0.025em] text-foreground"
             >
-              Built for clarity, trusted by your customers.
+              {dict.landing.foundationsHeading}
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-              Designed with quiet restraint so your product and your customers remain the focus.
+              {dict.landing.foundationsDesc}
             </p>
           </div>
 
@@ -240,11 +241,11 @@ export default async function HomePage(): Promise<React.JSX.Element> {
                   <Palette className="size-4" aria-hidden="true" />
                 </div>
                 <h3 className="text-base font-semibold text-foreground">
-                  Brand-first customer portals
+                  {dict.landing.brandFirstTitle}
                 </h3>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Custom brand logos, tailored accent colors, and unique workspace slugs make portals feel like native parts of your application.
+                {dict.landing.brandFirstDesc}
               </p>
             </div>
 
@@ -254,11 +255,11 @@ export default async function HomePage(): Promise<React.JSX.Element> {
                   <ShieldCheck className="size-4" aria-hidden="true" />
                 </div>
                 <h3 className="text-base font-semibold text-foreground">
-                  Public transparency, private control
+                  {dict.landing.publicTransparencyTitle}
                 </h3>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Customers see clear, curated roadmaps and release updates while internal estimation, draft statuses, and member permissions stay safe in your team dashboard.
+                {dict.landing.publicTransparencyDesc}
               </p>
             </div>
           </div>
@@ -274,32 +275,17 @@ export default async function HomePage(): Promise<React.JSX.Element> {
               id="cta-heading"
               className="text-xl sm:text-2xl font-semibold tracking-[-0.025em] text-foreground"
             >
-              Workspace creation is invite-only.
+              {dict.landing.inviteOnly}
             </h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Built with care by{" "}
-              <a
-                href="https://increasinglabs.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-foreground underline underline-offset-4 hover:text-[var(--primary-text)] transition-colors"
-              >
-                Increasing Labs
-              </a>
-              . Have an invite link? Sign in to get started. Want access for your team? Contact{" "}
-              <a
-                href="mailto:hello@increasinglab.com?subject=UserHQ%20Access%20Request"
-                className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary-text)] transition-colors"
-              >
-                hello@increasinglab.com
-              </a>.
+              {dict.landing.ctaBody}
             </p>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
             <Button size="lg" className="h-11 px-6 font-semibold" asChild>
               <a href="mailto:hello@increasinglab.com?subject=UserHQ%20Access%20Request">
-                Request access to UserHQ
+                {dict.landing.requestAccess}
                 <ArrowRight className="size-4 ml-1.5" aria-hidden="true" />
               </a>
             </Button>
@@ -340,13 +326,13 @@ export default async function HomePage(): Promise<React.JSX.Element> {
               hello@increasinglab.com
             </a>
             <Link href="/privacy" className="hover:text-foreground transition-colors">
-              Privacy
+              {dict.landing.privacy}
             </Link>
             <Link href="/terms" className="hover:text-foreground transition-colors">
-              Terms
+              {dict.landing.terms}
             </Link>
             <Link href="/login" className="hover:text-foreground transition-colors">
-              Sign in
+              {dict.ui.signIn}
             </Link>
             <span>© 2026 Increasing Labs</span>
           </div>
@@ -370,16 +356,15 @@ export default async function HomePage(): Promise<React.JSX.Element> {
         <>
           <div className="flex flex-col gap-2">
             <h1 className="text-2xl font-semibold leading-tight">
-              Set up your workspace
+              {dict.landing.setupWorkspaceHeading}
             </h1>
             <p className="text-base text-muted-foreground">
-              A workspace holds your products, your team, and the portals your
-              customers visit.
+              {dict.landing.setupWorkspaceDesc}
             </p>
           </div>
           <div>
             <Button variant="default" size="lg" asChild>
-              <Link href="/dashboard/new">Create workspace</Link>
+              <Link href="/dashboard/new">{dict.landing.createWorkspace}</Link>
             </Button>
           </div>
         </>
@@ -387,27 +372,17 @@ export default async function HomePage(): Promise<React.JSX.Element> {
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <h1 className="text-2xl font-semibold leading-tight">
-              Workspace creation is invite-only
+              {dict.landing.inviteOnly}
             </h1>
             <p className="text-base text-muted-foreground">
-              UserHQ is invite-only for now. If someone gave you an invite link,
-              open it while signed in with the email it was created for.
+              {dict.landing.inviteOnlyDesc}
             </p>
           </div>
           <div className="rounded-xl border border-border bg-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex flex-col gap-1 text-sm">
-              <span className="font-semibold text-foreground">Need an invite?</span>
+              <span className="font-semibold text-foreground">{dict.landing.needInvite}</span>
               <span className="text-muted-foreground">
-                Reach out to{" "}
-                <a
-                  href="https://increasinglabs.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-foreground underline underline-offset-4 hover:text-[var(--primary-text)] transition-colors"
-                >
-                  Increasing Labs
-                </a>{" "}
-                to request early access for your team.
+                {dict.landing.reachOutTo}
               </span>
             </div>
             <Button variant="outline" size="sm" asChild>
@@ -426,7 +401,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
             href="/dev/upload"
             className="text-foreground underline text-sm"
           >
-            Test image uploads →
+            {dict.landing.testImageUploads}
           </Link>
         </div>
       )}

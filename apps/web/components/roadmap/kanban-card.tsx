@@ -21,6 +21,9 @@ export function KanbanCard({ item, index, onSelect }: KanbanCardProps) {
     id: item.id,
     index,
     group: item.statusId,
+    // Omit OptimisticSortingPlugin: it moves DOM nodes across columns itself,
+    // which makes React's removeChild fail when state updates on drop.
+    plugins: [],
   });
 
   const getInitials = (name?: string | null) => {

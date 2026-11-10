@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useI18n } from "@/lib/i18n/context";
 import { EntityLogo } from "../entity-logo";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -29,6 +30,7 @@ export function WorkspaceDetailHeader({
   deleted,
 }: WorkspaceDetailHeaderProps) {
   const router = useRouter();
+  const { t } = useI18n();
   const [confirmOpen, setConfirmOpen] = React.useState(false);
 
   const handleSuspend = async () => {
@@ -36,11 +38,11 @@ export function WorkspaceDetailHeader({
       await apiFetch(`/api/v1/platform/workspaces/${id}/suspend`, {
         method: "POST",
       });
-      toast.success(`${name} suspended`);
+      toast.success(t("platform.workspaceSuspendedToast", { name }));
       setConfirmOpen(false);
       router.refresh();
     } catch {
-      toast.error("Failed to suspend workspace");
+      toast.error(t("platform.suspendFailedToast"));
     }
   };
 
@@ -49,10 +51,10 @@ export function WorkspaceDetailHeader({
       await apiFetch(`/api/v1/platform/workspaces/${id}/suspend`, {
         method: "DELETE",
       });
-      toast.success("Suspension lifted");
+      toast.success(t("platform.suspensionLiftedToast"));
       router.refresh();
     } catch {
-      toast.error("Failed to lift suspension");
+      toast.error(t("platform.liftSuspensionFailedToast"));
     }
   };
 
@@ -63,11 +65,11 @@ export function WorkspaceDetailHeader({
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-semibold text-foreground">{name}</h1>
-            {deleted && <Badge variant="danger">Deleted</Badge>}
+            {deleted && <Badge variant="danger">{t("platform.stateDeleted")}</Badge>}
             {suspended ? (
-              <Badge variant="danger">Suspended</Badge>
+              <Badge variant="danger">{t("platform.statusSuspended")}</Badge>
             ) : (
-              <Badge variant="outline">Active</Badge>
+              <Badge variant="outline">{t("platform.statusActive")}</Badge>
             )}
           </div>
           <Link
@@ -87,7 +89,7 @@ export function WorkspaceDetailHeader({
             size="sm"
             onClick={handleLift}
           >
-            Lift suspension
+            {t("platform.liftSuspension")}
           </Button>
         ) : (
           <Button
@@ -95,10 +97,10 @@ export function WorkspaceDetailHeader({
             variant="ghost"
             size="sm"
             className="text-destructive hover:text-destructive"
-            aria-label={`Suspend ${name}`}
+            aria-label={`${t("platform.suspendWorkspace")} ${name}`}
             onClick={() => setConfirmOpen(true)}
           >
-            Suspend workspace
+            {t("platform.suspendWorkspace")}
           </Button>
         )}
       </div>
@@ -106,11 +108,11 @@ export function WorkspaceDetailHeader({
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title={`Suspend ${name}?`}
-        description="Its portals will show an unavailable page and its admins lose dashboard access. No data is deleted, and you can lift the suspension at any time."
-        dismissLabel="Keep workspace active"
-        confirmLabel="Suspend workspace"
-        pendingLabel="Suspending…"
+        title={t("platform.suspendWorkspaceDialogTitle", { name })}
+        description={t("platform.suspendWorkspaceDialogDesc")}
+        dismissLabel={t("platform.keepWorkspaceActive")}
+        confirmLabel={t("platform.suspendWorkspace")}
+        pendingLabel={t("platform.suspending")}
         onConfirm={handleSuspend}
       />
     </div>

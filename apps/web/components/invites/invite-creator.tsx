@@ -75,9 +75,7 @@ export function InviteCreator({ kind: _kind, endpoint }: InviteCreatorProps) {
           setAlertError(errorCopy(err, { email: submittedEmail }));
         }
       } else {
-        setAlertError(
-          "Something went wrong on our end. Try again in a moment.",
-        );
+        setAlertError(t("errors.somethingWentWrong"));
       }
     } finally {
       setIsPending(false);
@@ -139,8 +137,10 @@ export function InviteCreator({ kind: _kind, endpoint }: InviteCreatorProps) {
           </h3>
           <CopyField value={createdInvite.link} />
           <p className="text-sm text-muted-foreground">
-            Only {createdInvite.email} can use this link. It works once and
-            expires on {formatDate(createdInvite.expiresAt)}.{" "}
+            {t("team.inviteCreatedInfo", {
+              email: createdInvite.email,
+              date: formatDate(createdInvite.expiresAt),
+            })}{" "}
             {t("team.inviteCreatedHelp")}
           </p>
         </div>

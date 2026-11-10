@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { PlatformWorkspaceRow } from "@userhq/types";
+import { useI18n } from "@/lib/i18n/context";
 import { Table, THead, TBody, TR, TH, TD } from "../ui/table";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -19,6 +20,7 @@ export interface WorkspacesTableProps {
 
 export function WorkspacesTable({ rows }: WorkspacesTableProps) {
   const router = useRouter();
+  const { t } = useI18n();
   const [suspendingWs, setSuspendingWs] = React.useState<PlatformWorkspaceRow | null>(null);
 
   const handleSuspend = async () => {
@@ -27,11 +29,11 @@ export function WorkspacesTable({ rows }: WorkspacesTableProps) {
       await apiFetch(`/api/v1/platform/workspaces/${suspendingWs.id}/suspend`, {
         method: "POST",
       });
-      toast.success(`${suspendingWs.name} suspended`);
+      toast.success(t("platform.workspaceSuspendedToast", { name: suspendingWs.name }));
       setSuspendingWs(null);
       router.refresh();
     } catch {
-      toast.error("Failed to suspend workspace");
+      toast.error(t("platform.suspendFailedToast"));
     }
   };
 
@@ -40,10 +42,10 @@ export function WorkspacesTable({ rows }: WorkspacesTableProps) {
       await apiFetch(`/api/v1/platform/workspaces/${row.id}/suspend`, {
         method: "DELETE",
       });
-      toast.success("Suspension lifted");
+      toast.success(t("platform.suspensionLiftedToast"));
       router.refresh();
     } catch {
-      toast.error("Failed to lift suspension");
+      toast.error(t("platform.liftSuspensionFailedToast"));
     }
   };
 
@@ -53,14 +55,14 @@ export function WorkspacesTable({ rows }: WorkspacesTableProps) {
         <Table>
           <THead>
             <TR>
-              <TH>Workspace</TH>
-              <TH>URL</TH>
-              <TH className="text-right">Products</TH>
-              <TH className="text-right">Members</TH>
-              <TH className="text-right">Posts</TH>
-              <TH className="text-right">Votes</TH>
-              <TH>Status</TH>
-              <TH className="text-right">Actions</TH>
+              <TH>{t("platform.colWorkspace")}</TH>
+              <TH>{t("platform.colUrl")}</TH>
+              <TH className="text-right">{t("platform.colProducts")}</TH>
+              <TH className="text-right">{t("platform.colMembers")}</TH>
+              <TH className="text-right">{t("platform.colPosts")}</TH>
+              <TH className="text-right">{t("platform.colVotes")}</TH>
+              <TH>{t("platform.colStatus")}</TH>
+              <TH className="text-right">{t("platform.colActions")}</TH>
             </TR>
           </THead>
           <TBody>
@@ -73,7 +75,7 @@ export function WorkspacesTable({ rows }: WorkspacesTableProps) {
                   >
                     <EntityLogo src={row.logoUrl} name={row.name} size={24} />
                     <span>{row.name}</span>
-                    {row.deleted && <Badge variant="danger">Deleted</Badge>}
+                    {row.deleted && <Badge variant="danger">{t("platform.stateDeleted")}</Badge>}
                   </Link>
                 </TD>
                 <TD>
@@ -98,9 +100,9 @@ export function WorkspacesTable({ rows }: WorkspacesTableProps) {
                 </TD>
                 <TD>
                   {row.suspended ? (
-                    <Badge variant="danger">Suspended</Badge>
+                    <Badge variant="danger">{t("platform.statusSuspended")}</Badge>
                   ) : (
-                    <Badge variant="outline">Active</Badge>
+                    <Badge variant="outline">{t("platform.statusActive")}</Badge>
                   )}
                 </TD>
                 <TD className="text-right">
@@ -111,7 +113,7 @@ export function WorkspacesTable({ rows }: WorkspacesTableProps) {
                       size="sm"
                       onClick={() => handleLift(row)}
                     >
-                      Lift suspension
+                      {t("platform.liftSuspension")}
                     </Button>
                   ) : (
                     <Button
@@ -119,10 +121,10 @@ export function WorkspacesTable({ rows }: WorkspacesTableProps) {
                       variant="ghost"
                       size="sm"
                       className="text-destructive hover:text-destructive"
-                      aria-label={`Suspend ${row.name}`}
+                      aria-label={`${t("platform.suspendWorkspace")} ${row.name}`}
                       onClick={() => setSuspendingWs(row)}
                     >
-                      Suspend workspace
+                      {t("platform.suspendWorkspace")}
                     </Button>
                   )}
                 </TD>
@@ -137,11 +139,11 @@ export function WorkspacesTable({ rows }: WorkspacesTableProps) {
         onOpenChange={(open) => {
           if (!open) setSuspendingWs(null);
         }}
-        title={suspendingWs ? `Suspend ${suspendingWs.name}?` : ""}
-        description="Its portals will show an unavailable page and its admins lose dashboard access. No data is deleted, and you can lift the suspension at any time."
-        dismissLabel="Keep workspace active"
-        confirmLabel="Suspend workspace"
-        pendingLabel="Suspending…"
+        title={suspendingWs ? t("platform.suspendWorkspaceDialogTitle", { name: suspendingWs.name }) : ""}
+        description={t("platform.suspendWorkspaceDialogDesc")}
+        dismissLabel={t("platform.keepWorkspaceActive")}
+        confirmLabel={t("platform.suspendWorkspace")}
+        pendingLabel={t("platform.suspending")}
         onConfirm={handleSuspend}
       />
     </>

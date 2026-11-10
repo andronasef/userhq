@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getServerI18n } from "@/lib/i18n/server";
 import { getMe, getPlatformWorkspaces } from "@/lib/api-server";
 import { PlatformHeader } from "@/components/platform/platform-header";
 import { WorkspacesTable } from "@/components/platform/workspaces-table";
@@ -9,9 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 
-export const metadata: Metadata = {
-  title: "Platform · UserHQ",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getServerI18n();
+  return {
+    title: t("platform.metaTitle"),
+  };
+}
 
 export default async function PlatformWorkspacesPage({
   searchParams,
@@ -23,6 +27,7 @@ export default async function PlatformWorkspacesPage({
     notFound();
   }
 
+  const { t } = await getServerI18n();
   const { q, page: pageStr } = await searchParams;
   const page = pageStr ? Math.max(1, parseInt(pageStr, 10) || 1) : 1;
   const trimmedQ = q?.trim() || "";
@@ -40,7 +45,7 @@ export default async function PlatformWorkspacesPage({
             type="search"
             name="q"
             defaultValue={trimmedQ}
-            placeholder="Search by name or URL"
+            placeholder={t("platform.searchWorkspacesPlaceholder")}
             className="w-full sm:w-72"
           />
         </form>
@@ -48,18 +53,18 @@ export default async function PlatformWorkspacesPage({
         {data.rows.length === 0 ? (
           trimmedQ ? (
             <EmptyState
-              title="No matches"
-              body={`Nothing matches "${trimmedQ}". Try a different search.`}
+              title={t("platform.noWorkspacesMatchTitle")}
+              body={t("platform.noWorkspacesMatchBody", { query: trimmedQ })}
               action={
                 <Button variant="outline" asChild>
-                  <Link href="/platform/workspaces">Clear search</Link>
+                  <Link href="/platform/workspaces">{t("platform.clearSearch")}</Link>
                 </Button>
               }
             />
           ) : (
             <EmptyState
-              title="No workspaces yet"
-              body="No workspaces have been created yet."
+              title={t("platform.noWorkspacesYetTitle")}
+              body={t("platform.noWorkspacesYetBody")}
             />
           )
         ) : (

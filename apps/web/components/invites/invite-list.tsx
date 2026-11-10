@@ -32,7 +32,7 @@ export function InviteList({ kind, rows, workspaceSlug }: InviteListProps) {
         title={t("team.noInvitesTitle")}
         body={
           kind === "platform"
-            ? "Create an invite link above to let a company set up a workspace."
+            ? t("platform.platformInviteDesc")
             : t("team.noInvitesDesc")
         }
       />
@@ -55,16 +55,22 @@ export function InviteList({ kind, rows, workspaceSlug }: InviteListProps) {
   const renderDetails = (row: InviteRow) => {
     switch (row.state) {
       case "pending":
-        return `Expires ${formatDate(row.expiresAt)}`;
+        return t("team.expiresAt", { date: formatDate(row.expiresAt) });
       case "used":
         if (kind === "platform") {
-          return `Used by ${row.usedByName ?? "Unknown"} · ${row.workspaceName ?? "Workspace"}`;
+          return t("team.usedByPlatform", {
+            name: row.usedByName ?? t("team.unknownUser"),
+            workspace: row.workspaceName ?? t("team.defaultWorkspace"),
+          });
         }
-        return `Used by ${row.usedByName ?? "Unknown"} on ${formatDate(row.usedAt ?? row.createdAt)}`;
+        return t("team.usedBy", {
+          name: row.usedByName ?? t("team.unknownUser"),
+          date: formatDate(row.usedAt ?? row.createdAt),
+        });
       case "expired":
-        return `Expired ${formatDate(row.expiresAt)}`;
+        return t("team.expiredAt", { date: formatDate(row.expiresAt) });
       case "revoked":
-        return `Revoked ${formatDate(row.revokedAt ?? row.createdAt)}`;
+        return t("team.revokedAt", { date: formatDate(row.revokedAt ?? row.createdAt) });
     }
   };
 
@@ -88,7 +94,7 @@ export function InviteList({ kind, rows, workspaceSlug }: InviteListProps) {
           <TR>
             <TH>{t("team.emailLabel")}</TH>
             <TH>{t("apiKeys.colStatus")}</TH>
-            <TH>Details</TH>
+            <TH>{t("team.colDetails")}</TH>
             <TH className="text-right">{t("team.colActions")}</TH>
           </TR>
         </THead>
@@ -127,7 +133,7 @@ export function InviteList({ kind, rows, workspaceSlug }: InviteListProps) {
         title={t("team.revokeDialogTitle")}
         description={
           selectedInvite
-            ? `The link for ${selectedInvite.email} stops working right away. You can create a new one at any time.`
+            ? t("team.revokeInviteDialogDesc", { email: selectedInvite.email })
             : ""
         }
         dismissLabel={t("common.cancel")}

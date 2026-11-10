@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getServerI18n } from "@/lib/i18n/server";
 import { getMe, getPlatformWorkspace } from "@/lib/api-server";
 import { PlatformHeader } from "@/components/platform/platform-header";
 import { WorkspaceDetailHeader } from "@/components/platform/workspace-detail-header";
@@ -9,9 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import { portalHref } from "@/lib/tenant";
 import { formatDate } from "@/lib/format";
 
-export const metadata: Metadata = {
-  title: "Platform · UserHQ",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getServerI18n();
+  return {
+    title: t("platform.metaTitle"),
+  };
+}
 
 export default async function PlatformWorkspaceDetailPage({
   params,
@@ -29,6 +33,7 @@ export default async function PlatformWorkspaceDetailPage({
     notFound();
   }
 
+  const { t } = await getServerI18n();
   const ws = result.data;
 
   return (
@@ -45,19 +50,19 @@ export default async function PlatformWorkspaceDetailPage({
       />
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold text-foreground">Products</h2>
+        <h2 className="text-lg font-semibold text-foreground">{t("platform.productsTitle")}</h2>
         {ws.products.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No products in this workspace.</p>
+          <p className="text-sm text-muted-foreground">{t("platform.noProducts")}</p>
         ) : (
           <div className="rounded-md border border-border overflow-x-auto">
             <Table>
               <THead>
                 <TR>
-                  <TH>Product</TH>
-                  <TH>URL</TH>
-                  <TH className="text-right">Posts</TH>
-                  <TH className="text-right">Votes</TH>
-                  <TH>State</TH>
+                  <TH>{t("platform.colProduct")}</TH>
+                  <TH>{t("platform.colUrl")}</TH>
+                  <TH className="text-right">{t("platform.colPosts")}</TH>
+                  <TH className="text-right">{t("platform.colVotes")}</TH>
+                  <TH>{t("platform.colState")}</TH>
                 </TR>
               </THead>
               <TBody>
@@ -80,9 +85,9 @@ export default async function PlatformWorkspaceDetailPage({
                     </TD>
                     <TD>
                       {p.live ? (
-                        <Badge variant="outline">Live</Badge>
+                        <Badge variant="outline">{t("platform.stateLive")}</Badge>
                       ) : (
-                        <Badge variant="neutral">Deleted</Badge>
+                        <Badge variant="neutral">{t("platform.stateDeleted")}</Badge>
                       )}
                     </TD>
                   </TR>
@@ -94,17 +99,17 @@ export default async function PlatformWorkspaceDetailPage({
       </section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold text-foreground">Members</h2>
+        <h2 className="text-lg font-semibold text-foreground">{t("platform.membersTitle")}</h2>
         {ws.members.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No members in this workspace.</p>
+          <p className="text-sm text-muted-foreground">{t("platform.noMembers")}</p>
         ) : (
           <div className="rounded-md border border-border overflow-x-auto">
             <Table>
               <THead>
                 <TR>
-                  <TH>Member</TH>
-                  <TH>Role</TH>
-                  <TH>Joined</TH>
+                  <TH>{t("platform.colMember")}</TH>
+                  <TH>{t("platform.colRole")}</TH>
+                  <TH>{t("platform.colJoined")}</TH>
                 </TR>
               </THead>
               <TBody>

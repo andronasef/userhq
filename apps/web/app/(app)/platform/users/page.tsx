@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getServerI18n } from "@/lib/i18n/server";
 import { getMe, getPlatformUsers } from "@/lib/api-server";
 import { PlatformHeader } from "@/components/platform/platform-header";
 import { UsersTable } from "@/components/platform/users-table";
@@ -9,9 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 
-export const metadata: Metadata = {
-  title: "Platform · UserHQ",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getServerI18n();
+  return {
+    title: t("platform.metaTitle"),
+  };
+}
 
 export default async function PlatformUsersPage({
   searchParams,
@@ -23,6 +27,7 @@ export default async function PlatformUsersPage({
     notFound();
   }
 
+  const { t } = await getServerI18n();
   const { q, page: pageStr } = await searchParams;
   const page = pageStr ? Math.max(1, parseInt(pageStr, 10) || 1) : 1;
   const trimmedQ = q?.trim() || "";
@@ -40,7 +45,7 @@ export default async function PlatformUsersPage({
             type="search"
             name="q"
             defaultValue={trimmedQ}
-            placeholder="Search by name or email"
+            placeholder={t("platform.searchUsersPlaceholder")}
             className="w-full sm:w-72"
           />
         </form>
@@ -48,18 +53,18 @@ export default async function PlatformUsersPage({
         {data.rows.length === 0 ? (
           trimmedQ ? (
             <EmptyState
-              title="No matches"
-              body={`Nothing matches "${trimmedQ}". Try a different search.`}
+              title={t("platform.noUsersMatchTitle")}
+              body={t("platform.noUsersMatchBody", { query: trimmedQ })}
               action={
                 <Button variant="outline" asChild>
-                  <Link href="/platform/users">Clear search</Link>
+                  <Link href="/platform/users">{t("platform.clearSearch")}</Link>
                 </Button>
               }
             />
           ) : (
             <EmptyState
-              title="No users yet"
-              body="No users have registered yet."
+              title={t("platform.noUsersYetTitle")}
+              body={t("platform.noUsersYetBody")}
             />
           )
         ) : (

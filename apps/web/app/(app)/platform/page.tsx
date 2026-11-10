@@ -1,13 +1,17 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { getServerI18n } from "@/lib/i18n/server";
 import { getMe, getPlatformInvites } from "@/lib/api-server";
 import { PlatformHeader } from "@/components/platform/platform-header";
 import { InviteCreator } from "@/components/invites/invite-creator";
 import { InviteList } from "@/components/invites/invite-list";
 
-export const metadata: Metadata = {
-  title: "Platform · UserHQ",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getServerI18n();
+  return {
+    title: t("platform.metaTitle"),
+  };
+}
 
 export default async function PlatformPage() {
   const me = await getMe();

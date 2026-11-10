@@ -1,5 +1,8 @@
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
+import { useI18n } from "@/lib/i18n/context";
 import { Button } from "../ui/button";
 
 export interface PagerProps {
@@ -10,6 +13,8 @@ export interface PagerProps {
 }
 
 export function Pager({ basePath, q, page, hasNext }: PagerProps) {
+  const { t } = useI18n();
+
   if (page <= 1 && !hasNext) {
     return null;
   }
@@ -27,14 +32,14 @@ export function Pager({ basePath, q, page, hasNext }: PagerProps) {
       <div>
         {page > 1 && (
           <Button variant="outline" size="sm" asChild>
-            <Link href={buildHref(page - 1)}>Previous</Link>
+            <Link href={buildHref(page - 1)}>{t("common.previous")}</Link>
           </Button>
         )}
       </div>
       <div>
         {hasNext && (
           <Button variant="outline" size="sm" asChild>
-            <Link href={buildHref(page + 1)}>Next</Link>
+            <Link href={buildHref(page + 1)}>{t("common.next")}</Link>
           </Button>
         )}
       </div>

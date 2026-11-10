@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { PlatformUserRow } from "@userhq/types";
+import { useI18n } from "@/lib/i18n/context";
 import { Table, THead, TBody, TR, TH, TD } from "../ui/table";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -18,6 +19,7 @@ export interface UsersTableProps {
 
 export function UsersTable({ rows }: UsersTableProps) {
   const router = useRouter();
+  const { t } = useI18n();
   const [banningUser, setBanningUser] = React.useState<PlatformUserRow | null>(null);
 
   const handleBan = async () => {
@@ -26,11 +28,11 @@ export function UsersTable({ rows }: UsersTableProps) {
       await apiFetch(`/api/v1/platform/users/${banningUser.id}/ban`, {
         method: "POST",
       });
-      toast.success(`${banningUser.name} banned`);
+      toast.success(t("platform.userBannedToast", { name: banningUser.name }));
       setBanningUser(null);
       router.refresh();
     } catch {
-      toast.error("Failed to ban user");
+      toast.error(t("platform.banFailedToast"));
     }
   };
 
@@ -39,10 +41,10 @@ export function UsersTable({ rows }: UsersTableProps) {
       await apiFetch(`/api/v1/platform/users/${row.id}/ban`, {
         method: "DELETE",
       });
-      toast.success("Ban lifted");
+      toast.success(t("platform.banLiftedToast"));
       router.refresh();
     } catch {
-      toast.error("Failed to lift ban");
+      toast.error(t("platform.liftBanFailedToast"));
     }
   };
 
@@ -52,13 +54,13 @@ export function UsersTable({ rows }: UsersTableProps) {
         <Table>
           <THead>
             <TR>
-              <TH>User</TH>
-              <TH className="text-right">Workspaces</TH>
-              <TH className="text-right">Posts</TH>
-              <TH className="text-right">Votes</TH>
-              <TH>Joined</TH>
-              <TH>Status</TH>
-              <TH className="text-right">Actions</TH>
+              <TH>{t("platform.colUser")}</TH>
+              <TH className="text-right">{t("platform.colWorkspaces")}</TH>
+              <TH className="text-right">{t("platform.colPosts")}</TH>
+              <TH className="text-right">{t("platform.colVotes")}</TH>
+              <TH>{t("platform.colJoined")}</TH>
+              <TH>{t("platform.colStatus")}</TH>
+              <TH className="text-right">{t("platform.colActions")}</TH>
             </TR>
           </THead>
           <TBody>
@@ -87,14 +89,14 @@ export function UsersTable({ rows }: UsersTableProps) {
                 </TD>
                 <TD>
                   {row.banned ? (
-                    <Badge variant="danger">Banned</Badge>
+                    <Badge variant="danger">{t("platform.statusBanned")}</Badge>
                   ) : (
-                    <Badge variant="outline">Active</Badge>
+                    <Badge variant="outline">{t("platform.statusActive")}</Badge>
                   )}
                 </TD>
                 <TD className="text-right">
                   {row.isPlatformOwner ? (
-                    <Badge variant="outline">You</Badge>
+                    <Badge variant="outline">{t("platform.badgeYou")}</Badge>
                   ) : row.banned ? (
                     <Button
                       type="button"
@@ -102,7 +104,7 @@ export function UsersTable({ rows }: UsersTableProps) {
                       size="sm"
                       onClick={() => handleLift(row)}
                     >
-                      Lift ban
+                      {t("platform.liftBan")}
                     </Button>
                   ) : (
                     <Button
@@ -110,10 +112,10 @@ export function UsersTable({ rows }: UsersTableProps) {
                       variant="ghost"
                       size="sm"
                       className="text-destructive hover:text-destructive"
-                      aria-label={`Ban ${row.name}`}
+                      aria-label={`${t("platform.banUser")} ${row.name}`}
                       onClick={() => setBanningUser(row)}
                     >
-                      Ban user
+                      {t("platform.banUser")}
                     </Button>
                   )}
                 </TD>
@@ -128,11 +130,11 @@ export function UsersTable({ rows }: UsersTableProps) {
         onOpenChange={(open) => {
           if (!open) setBanningUser(null);
         }}
-        title={banningUser ? `Ban ${banningUser.name}?` : ""}
-        description="They'll be signed out everywhere and can't sign in until you lift the ban. Their posts and comments stay."
-        dismissLabel="Don't ban"
-        confirmLabel="Ban user"
-        pendingLabel="Banning…"
+        title={banningUser ? t("platform.banUserDialogTitle", { name: banningUser.name }) : ""}
+        description={t("platform.banUserDialogDesc")}
+        dismissLabel={t("platform.dontBan")}
+        confirmLabel={t("platform.banUser")}
+        pendingLabel={t("platform.banning")}
         onConfirm={handleBan}
       />
     </>

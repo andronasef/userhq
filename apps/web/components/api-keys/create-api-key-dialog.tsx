@@ -32,78 +32,73 @@ export interface CreateApiKeyDialogProps {
   onKeyCreated: (key: ApiKeyMetadata) => void;
 }
 
-const SCOPE_LABELS: Record<
+const SCOPE_I18N_KEYS: Record<
   ApiKeyScope,
-  { title: string; description: string }
+  { titleKey: any; descKey: any }
 > = {
   admin: {
-    title: "Full Admin (admin)",
-    description:
-      "Unrestricted access to all workspace admin resources and operations",
+    titleKey: "apiKeys.scopeAdminTitle",
+    descKey: "apiKeys.scopeAdminDesc",
   },
   "export:read": {
-    title: "Export Feedback (export:read)",
-    description: "Export all posts, feedback items, and comments in bulk",
+    titleKey: "apiKeys.scopeExportReadTitle",
+    descKey: "apiKeys.scopeExportReadDesc",
   },
   "requests:read": {
-    title: "Read Requests (requests:read)",
-    description: "View feedback requests, votes, and status",
+    titleKey: "apiKeys.scopeRequestsReadTitle",
+    descKey: "apiKeys.scopeRequestsReadDesc",
   },
   "requests:write": {
-    title: "Manage Requests (requests:write)",
-    description: "Create posts headlessly, update status, and manage requests",
+    titleKey: "apiKeys.scopeRequestsWriteTitle",
+    descKey: "apiKeys.scopeRequestsWriteDesc",
   },
   "comments:read": {
-    title: "Read Comments (comments:read)",
-    description: "View discussions and comments across all posts",
+    titleKey: "apiKeys.scopeCommentsReadTitle",
+    descKey: "apiKeys.scopeCommentsReadDesc",
   },
   "comments:write": {
-    title: "Post Comments (comments:write)",
-    description: "Post comments and admin replies to customer feedback",
+    titleKey: "apiKeys.scopeCommentsWriteTitle",
+    descKey: "apiKeys.scopeCommentsWriteDesc",
   },
   "roadmap:read": {
-    title: "Read Roadmap (roadmap:read)",
-    description: "View roadmap columns, ranks, and planned items",
+    titleKey: "apiKeys.scopeRoadmapReadTitle",
+    descKey: "apiKeys.scopeRoadmapReadDesc",
   },
   "roadmap:write": {
-    title: "Manage Roadmap (roadmap:write)",
-    description: "Create, move, and edit roadmap cards and links",
+    titleKey: "apiKeys.scopeRoadmapWriteTitle",
+    descKey: "apiKeys.scopeRoadmapWriteDesc",
   },
   "changelog:read": {
-    title: "Read Changelog (changelog:read)",
-    description: "View published and draft changelog posts",
+    titleKey: "apiKeys.scopeChangelogReadTitle",
+    descKey: "apiKeys.scopeChangelogReadDesc",
   },
   "changelog:write": {
-    title: "Manage Changelog (changelog:write)",
-    description: "Publish, update, and categorize changelog releases",
+    titleKey: "apiKeys.scopeChangelogWriteTitle",
+    descKey: "apiKeys.scopeChangelogWriteDesc",
   },
   "webhooks:read": {
-    title: "Read Webhooks (webhooks:read)",
-    description: "View webhook subscriptions and delivery logs",
+    titleKey: "apiKeys.scopeWebhooksReadTitle",
+    descKey: "apiKeys.scopeWebhooksReadDesc",
   },
   "webhooks:write": {
-    title: "Manage Webhooks (webhooks:write)",
-    description:
-      "Create, update, and delete webhook subscriptions and redeliver events",
+    titleKey: "apiKeys.scopeWebhooksWriteTitle",
+    descKey: "apiKeys.scopeWebhooksWriteDesc",
   },
   "settings:read": {
-    title: "Read Settings (settings:read)",
-    description: "View product settings, statuses, and categories",
+    titleKey: "apiKeys.scopeSettingsReadTitle",
+    descKey: "apiKeys.scopeSettingsReadDesc",
   },
   "settings:write": {
-    title: "Manage Settings (settings:write)",
-    description:
-      "Update product settings and feature switches, and manage statuses and categories",
+    titleKey: "apiKeys.scopeSettingsWriteTitle",
+    descKey: "apiKeys.scopeSettingsWriteDesc",
   },
   "faq:read": {
-    title: "Read FAQ (faq:read)",
-    description:
-      "View FAQ categories and questions, including those of a hidden FAQ module",
+    titleKey: "apiKeys.scopeFaqReadTitle",
+    descKey: "apiKeys.scopeFaqReadDesc",
   },
   "faq:write": {
-    title: "Manage FAQ (faq:write)",
-    description:
-      "Create, edit, reorder, and delete FAQ categories and questions",
+    titleKey: "apiKeys.scopeFaqWriteTitle",
+    descKey: "apiKeys.scopeFaqWriteDesc",
   },
 };
 
@@ -184,17 +179,17 @@ export function CreateApiKeyDialog({
 
     const trimmedName = name.trim();
     if (!trimmedName) {
-      setError("Please provide a name for this API key.");
+      setError(t("apiKeys.nameRequired"));
       return;
     }
 
     if (selectedScopes.length === 0) {
-      setError("Please select at least one permission scope.");
+      setError(t("apiKeys.scopeRequired"));
       return;
     }
 
     if (restrictProducts && selectedProductIds.length === 0) {
-      setError("Please select at least one product or allow all products.");
+      setError(t("apiKeys.productRequired"));
       return;
     }
 
@@ -231,10 +226,10 @@ export function CreateApiKeyDialog({
     try {
       await navigator.clipboard.writeText(generatedToken);
       setCopied(true);
-      toast.success("API key copied to clipboard");
+      toast.success(t("apiKeys.tokenCopied"));
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("Failed to copy API key");
+      toast.error(t("apiKeys.copyFailed"));
     }
   };
 
@@ -305,12 +300,12 @@ export function CreateApiKeyDialog({
                         className="size-4 text-emerald-500"
                         aria-hidden="true"
                       />
-                      <span>Copied</span>
+                      <span>{t("common.copied")}</span>
                     </>
                   ) : (
                     <>
                       <Copy className="size-4" aria-hidden="true" />
-                      <span>Copy</span>
+                      <span>{t("common.copy")}</span>
                     </>
                   )}
                 </Button>
@@ -369,7 +364,7 @@ export function CreateApiKeyDialog({
               </p>
               <div className="space-y-2 border border-border rounded-md p-3 max-h-56 overflow-y-auto bg-muted/10">
                 {API_KEY_SCOPES.map((scope) => {
-                  const info = SCOPE_LABELS[scope];
+                  const info = SCOPE_I18N_KEYS[scope];
                   const isChecked = selectedScopes.includes(scope);
                   return (
                     <label
@@ -385,10 +380,10 @@ export function CreateApiKeyDialog({
                       />
                       <div className="flex flex-col text-xs">
                         <span className="font-semibold text-foreground">
-                          {info.title}
+                          {t(info.titleKey)}
                         </span>
                         <span className="text-muted-foreground">
-                          {info.description}
+                          {t(info.descKey)}
                         </span>
                       </div>
                     </label>

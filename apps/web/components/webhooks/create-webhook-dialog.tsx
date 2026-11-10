@@ -33,21 +33,17 @@ export interface CreateWebhookDialogProps {
   onWebhookCreated: (subscription: WebhookSubscription) => void;
 }
 
-const EVENT_DESCRIPTIONS: Record<Exclude<WebhookEvent, "*">, string> = {
-  "post.created": "Triggered whenever a feedback post is submitted or created",
-  "post.updated":
-    "Triggered whenever a post's title, description, or details are updated",
-  "post.status_changed":
-    "Triggered whenever a post's status moves across roadmap columns",
-  "post.deleted": "Triggered when a post is removed or soft-deleted",
-  "post.merged": "Triggered when a duplicate post is merged into another",
-  "post.restored": "Triggered when a deleted post is restored",
-  "comment.restored": "Triggered when a deleted comment is restored",
-  "comment.created":
-    "Triggered whenever a customer or teammate posts a comment",
-  "comment.deleted": "Triggered when a comment is deleted or moderated",
-  "changelog.published":
-    "Triggered whenever a changelog announcement is published",
+const EVENT_I18N_KEYS: Record<Exclude<WebhookEvent, "*">, any> = {
+  "post.created": "webhooks.eventPostCreated",
+  "post.updated": "webhooks.eventPostUpdated",
+  "post.status_changed": "webhooks.eventPostStatusChanged",
+  "post.deleted": "webhooks.eventPostDeleted",
+  "post.merged": "webhooks.eventPostMerged",
+  "post.restored": "webhooks.eventPostRestored",
+  "comment.restored": "webhooks.eventCommentRestored",
+  "comment.created": "webhooks.eventCommentCreated",
+  "comment.deleted": "webhooks.eventCommentDeleted",
+  "changelog.published": "webhooks.eventChangelogPublished",
 };
 
 export function CreateWebhookDialog({
@@ -122,7 +118,7 @@ export function CreateWebhookDialog({
       toast.success(t("webhooks.secretCopiedToast"));
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("Failed to copy secret");
+      toast.error(t("webhooks.copySecretFailed"));
     }
   };
 
@@ -132,16 +128,14 @@ export function CreateWebhookDialog({
 
     const trimmedUrl = url.trim();
     if (!trimmedUrl) {
-      setErrorMessage("Please enter an endpoint URL.");
+      setErrorMessage(t("webhooks.urlRequired"));
       return;
     }
 
     try {
       new URL(trimmedUrl);
     } catch {
-      setErrorMessage(
-        "Please enter a valid URL (e.g. https://api.yourdomain.com/webhook).",
-      );
+      setErrorMessage(t("webhooks.urlInvalid"));
       return;
     }
 
@@ -210,12 +204,7 @@ export function CreateWebhookDialog({
                   <p className="font-semibold text-sm mb-1">
                     {t("webhooks.saveSecretWarningTitle")}
                   </p>
-                  Store this secret securely in your server environment
-                  variables. Every request includes an{" "}
-                  <code className="bg-amber-200/50 dark:bg-amber-900/50 px-1 py-0.5 rounded font-mono">
-                    X-UserHQ-Signature
-                  </code>{" "}
-                  header computed using HMAC SHA-256 with this secret.
+                  {t("webhooks.saveSecretWarningDesc")}
                 </div>
               </div>
             </Alert>
@@ -269,7 +258,7 @@ export function CreateWebhookDialog({
             <div className="rounded-md border border-border p-3 bg-muted/20 text-xs space-y-1 text-muted-foreground">
               <p className="font-medium text-foreground flex items-center gap-1.5">
                 <ShieldCheck className="size-3.5 text-[var(--primary-text)]" />
-                Signature Verification Example:
+                {t("webhooks.signatureExample")}
               </p>
               <pre className="font-mono text-[11px] p-2 rounded bg-background border border-border overflow-x-auto">
                 {`const crypto = require("node:crypto");
@@ -332,7 +321,7 @@ const isValid = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expec
               <Field
                 id="webhook-product-scope"
                 label={t("webhooks.productScopeLabel")}
-                helper="Limit webhook deliveries to events occurring within a specific product"
+                helper={t("webhooks.productScopeHelper")}
               >
                 <select
                   value={selectedProductId}
@@ -394,7 +383,7 @@ const isValid = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expec
                             {ev}
                           </p>
                           <p className="text-muted-foreground">
-                            {EVENT_DESCRIPTIONS[ev]}
+                            {t(EVENT_I18N_KEYS[ev])}
                           </p>
                         </div>
                       </label>

@@ -42,7 +42,7 @@ export function WebhookDeliveriesDialog({
   ws,
   subscription,
 }: WebhookDeliveriesDialogProps): React.JSX.Element {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [deliveries, setDeliveries] = React.useState<WebhookDelivery[]>([]);
   const [total, setTotal] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
@@ -113,7 +113,7 @@ export function WebhookDeliveriesDialog({
             <CheckCircle2 className="size-3" />
             <span>
               {statusCode
-                ? `${statusCode} OK`
+                ? t("webhooks.statusOk", { statusCode })
                 : t("webhooks.deliveryDelivered")}
             </span>
           </Badge>
@@ -124,7 +124,7 @@ export function WebhookDeliveriesDialog({
             <XCircle className="size-3" />
             <span>
               {statusCode
-                ? `${statusCode} Error`
+                ? t("webhooks.statusError", { statusCode })
                 : t("webhooks.deliveryFailed")}
             </span>
           </Badge>
@@ -201,7 +201,7 @@ export function WebhookDeliveriesDialog({
             deliveries.map((delivery) => {
               const isExpanded = expandedDeliveryId === delivery.id;
               const formattedDate = new Date(delivery.createdAt).toLocaleString(
-                undefined,
+                locale,
                 {
                   month: "short",
                   day: "numeric",
@@ -254,7 +254,7 @@ export function WebhookDeliveriesDialog({
                             redeliveringId === delivery.id ? "animate-spin" : ""
                           }`}
                         />
-                        <span>Redeliver</span>
+                        <span>{t("webhooks.redeliverAction")}</span>
                       </Button>
                     </div>
                   </div>
@@ -264,35 +264,35 @@ export function WebhookDeliveriesDialog({
                       <div className="grid grid-cols-2 gap-2 text-muted-foreground pt-3">
                         <div>
                           <span className="font-medium text-foreground">
-                            Delivery ID:{" "}
+                            {t("webhooks.deliveryIdLabel")}{" "}
                           </span>
                           <span className="font-mono">{delivery.id}</span>
                         </div>
                         <div>
                           <span className="font-medium text-foreground">
-                            Attempts:{" "}
+                            {t("webhooks.attemptsLabel")}{" "}
                           </span>
                           <span>{delivery.attempts}</span>
                         </div>
                         {delivery.deliveredAt && (
                           <div>
                             <span className="font-medium text-foreground">
-                              Delivered at:{" "}
+                              {t("webhooks.deliveredAtLabel")}{" "}
                             </span>
                             <span>
-                              {new Date(delivery.deliveredAt).toLocaleString()}
+                              {new Date(delivery.deliveredAt).toLocaleString(locale)}
                             </span>
                           </div>
                         )}
                         {(delivery as any).lastAttemptAt && (
                           <div>
                             <span className="font-medium text-foreground">
-                              Last attempt:{" "}
+                              {t("webhooks.lastAttemptLabel")}{" "}
                             </span>
                             <span>
                               {new Date(
                                 (delivery as any).lastAttemptAt,
-                              ).toLocaleString()}
+                              ).toLocaleString(locale)}
                             </span>
                           </div>
                         )}
@@ -301,7 +301,7 @@ export function WebhookDeliveriesDialog({
                       {delivery.responseBody && (
                         <div className="space-y-1">
                           <span className="font-medium text-foreground">
-                            Response Body:
+                            {t("webhooks.responseBodyLabel")}
                           </span>
                           <pre className="p-2.5 rounded bg-background border border-border font-mono text-[11px] max-h-32 overflow-y-auto whitespace-pre-wrap">
                             {delivery.responseBody}
@@ -311,7 +311,7 @@ export function WebhookDeliveriesDialog({
 
                       <div className="space-y-1">
                         <span className="font-medium text-foreground">
-                          Dispatched Payload:
+                          {t("webhooks.dispatchedPayloadLabel")}
                         </span>
                         <pre className="p-2.5 rounded bg-background border border-border font-mono text-[11px] max-h-48 overflow-y-auto whitespace-pre-wrap">
                           {JSON.stringify(delivery.payload, null, 2)}

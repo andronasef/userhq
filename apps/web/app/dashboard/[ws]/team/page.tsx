@@ -11,8 +11,7 @@ import { PageHeader } from "../../../../components/page-header";
 import { MembersTable } from "../../../../components/team/members-table";
 import { InviteCreator } from "../../../../components/invites/invite-creator";
 import { InviteList } from "../../../../components/invites/invite-list";
-import { getRequestLocale } from "../../../../lib/i18n/server";
-import { DICTIONARIES } from "../../../../lib/i18n/dictionaries";
+import { getRequestLocale, getDictionary, formatMessage } from "../../../../lib/i18n/server";
 
 interface TeamPageProps {
   params: Promise<{ ws: string }>;
@@ -22,12 +21,14 @@ export async function generateMetadata({
   params,
 }: TeamPageProps): Promise<Metadata> {
   const { ws } = await params;
+  const locale = await getRequestLocale();
+  const dict = getDictionary(locale);
   const result = await getWorkspace(ws);
   if (!result.ok) {
-    return { title: "Team · UserHQ" };
+    return { title: dict.team.metaTitle };
   }
   return {
-    title: `Team · ${result.data.name}`,
+    title: formatMessage(dict.team.metaTitleWs, { name: result.data.name }),
   };
 }
 
@@ -36,7 +37,7 @@ export default async function TeamPage({
 }: TeamPageProps): Promise<React.JSX.Element | null> {
   const { ws } = await params;
   const locale = await getRequestLocale();
-  const dict = DICTIONARIES[locale];
+  const dict = getDictionary(locale);
   const [workspaceResult, membersResult, invitesResult, me] = await Promise.all(
     [getWorkspace(ws), getMembers(ws), getTeamInvites(ws), getMe()],
   );
@@ -60,7 +61,7 @@ export default async function TeamPage({
     <div className="flex flex-col max-w-5xl">
       <PageHeader
         title={dict.team.title}
-        description={`Everyone here is an admin of ${workspace.name}.`}
+        description={formatMessage(dict.team.description, { name: workspace.name })}
       />
 
       <section className="mt-8 flex flex-col gap-4">

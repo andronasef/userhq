@@ -4,6 +4,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { apiFetch } from "../../lib/api-client";
+import { useI18n } from "../../lib/i18n/context";
 
 export function setProductFollow(ws: string, productSlug: string, follow: boolean): Promise<unknown> {
   return apiFetch(
@@ -18,7 +19,8 @@ export async function changeFollow(
   ws: string,
   productSlug: string,
   next: boolean,
-  ui: { setFollowing(v: boolean): void; setPending(v: boolean): void; onError(message: string): void }
+  ui: { setFollowing(v: boolean): void; setPending(v: boolean): void; onError(message: string): void },
+  errorMsg?: string
 ): Promise<void> {
   ui.setPending(true);
   ui.setFollowing(next);
@@ -26,7 +28,7 @@ export async function changeFollow(
     await setProductFollow(ws, productSlug, next);
   } catch {
     ui.setFollowing(!next);
-    ui.onError(next ? "Could not follow this product." : "Could not unfollow this product.");
+    ui.onError(errorMsg ?? (next ? "Could not follow this product." : "Could not unfollow this product."));
   } finally {
     ui.setPending(false);
   }
@@ -45,6 +47,7 @@ export function ProductFollowToggle({
   productName,
   initialFollowing,
 }: ProductFollowToggleProps): React.JSX.Element {
+  const { t } = useI18n();
   const [following, setFollowing] = React.useState(initialFollowing);
   const [pending, setPending] = React.useState(false);
 
@@ -54,13 +57,19 @@ export function ProductFollowToggle({
       variant={following ? "default" : "outline"}
       size="sm"
       aria-pressed={following}
-      aria-label={`Follow ${productName}`}
+      aria-label={t("workspace.followProductAria", { name: productName })}
       disabled={pending}
       onClick={() =>
-        void changeFollow(ws, productSlug, !following, { setFollowing, setPending, onError: toast.error })
+        void changeFollow(
+          ws,
+          productSlug,
+          !following,
+          { setFollowing, setPending, onError: toast.error },
+          !following ? t("workspace.followError") : t("workspace.unfollowError")
+        )
       }
     >
-      {following ? "Following" : "Follow"}
+      {following ? t("workspace.following") : t("workspace.follow")}
     </Button>
   );
 }

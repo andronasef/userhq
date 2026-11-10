@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getWorkspace, publicHost } from "../../../../lib/api-server";
 import { PageHeader } from "../../../../components/page-header";
 import { CreateProductForm } from "./create-product-form";
+import { getRequestLocale, getDictionary, formatMessage } from "../../../../lib/i18n/server";
 
 interface NewProductPageProps {
   params: Promise<{ ws: string }>;
@@ -13,12 +14,14 @@ export async function generateMetadata({
   params,
 }: NewProductPageProps): Promise<Metadata> {
   const { ws } = await params;
+  const locale = await getRequestLocale();
+  const dict = getDictionary(locale);
   const result = await getWorkspace(ws);
   if (!result.ok) {
-    return { title: "New product · UserHQ" };
+    return { title: dict.product.newProductMeta };
   }
   return {
-    title: `New product · ${result.data.name}`,
+    title: formatMessage(dict.product.newProductWsMeta, { name: result.data.name }),
   };
 }
 
@@ -36,12 +39,14 @@ export default async function NewProductPage({
   }
 
   const host = await publicHost();
+  const locale = await getRequestLocale();
+  const dict = getDictionary(locale);
 
   return (
     <div>
       <PageHeader
-        title="New product"
-        description="Each product has its own public feedback portal."
+        title={dict.product.newProductTitle}
+        description={dict.product.newProductDesc}
       />
       <CreateProductForm ws={ws} host={host} />
     </div>

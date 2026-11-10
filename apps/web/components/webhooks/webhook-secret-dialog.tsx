@@ -43,7 +43,7 @@ export function WebhookSecretDialog({
       toast.success(t("webhooks.secretCopiedToast"));
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("Failed to copy secret");
+      toast.error(t("webhooks.copySecretFailed"));
     }
   };
 
@@ -85,7 +85,7 @@ export function WebhookSecretDialog({
             <Input
               readOnly
               value={secret}
-              aria-label="Signing secret"
+              aria-label={t("webhooks.signingSecretAria")}
               className="font-mono text-xs select-all bg-muted/50"
               data-testid="rotated-webhook-secret"
             />

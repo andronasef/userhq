@@ -9,6 +9,7 @@ import {
 import { PageHeader } from "../../../../../components/page-header";
 import { TabNav } from "../../../../../components/tab-nav";
 import { WorkspaceWebhooksManager } from "../../../../../components/webhooks/webhooks-manager";
+import { getRequestLocale, getDictionary, formatMessage } from "../../../../../lib/i18n/server";
 
 interface WorkspaceWebhooksPageProps {
   params: Promise<{ ws: string }>;
@@ -18,12 +19,14 @@ export async function generateMetadata({
   params,
 }: WorkspaceWebhooksPageProps): Promise<Metadata> {
   const { ws } = await params;
+  const locale = await getRequestLocale();
+  const dict = getDictionary(locale);
   const result = await getWorkspace(ws);
   if (!result.ok) {
-    return { title: "Webhooks · UserHQ" };
+    return { title: dict.webhooks.metaTitle };
   }
   return {
-    title: `Webhooks · ${result.data.name}`,
+    title: formatMessage(dict.webhooks.metaTitleWs, { name: result.data.name }),
   };
 }
 
@@ -31,6 +34,8 @@ export default async function WorkspaceWebhooksPage({
   params,
 }: WorkspaceWebhooksPageProps): Promise<React.JSX.Element | null> {
   const { ws } = await params;
+  const locale = await getRequestLocale();
+  const dict = getDictionary(locale);
   const [wsResult, webhooksResult, productsResult] = await Promise.all([
     getWorkspace(ws),
     getWorkspaceWebhooks(ws),
@@ -52,14 +57,14 @@ export default async function WorkspaceWebhooksPage({
   return (
     <div className="max-w-4xl">
       <PageHeader
-        title="Workspace settings"
-        description="Configure outbound webhooks, signing secrets, and delivery retry policies."
+        title={dict.settings.title}
+        description={dict.webhooks.settingsDescription}
       />
       <TabNav
         tabs={[
-          { label: "General", href: `/dashboard/${ws}/settings` },
-          { label: "API Keys", href: `/dashboard/${ws}/settings/api-keys` },
-          { label: "Webhooks", href: `/dashboard/${ws}/settings/webhooks` },
+          { label: dict.settings.tabGeneral, href: `/dashboard/${ws}/settings` },
+          { label: dict.settings.tabApiKeys, href: `/dashboard/${ws}/settings/api-keys` },
+          { label: dict.settings.tabWebhooks, href: `/dashboard/${ws}/settings/webhooks` },
         ]}
         activeHref={`/dashboard/${ws}/settings/webhooks`}
         className="mb-8"

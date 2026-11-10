@@ -22,6 +22,7 @@ import {
 import { WorkspaceRequestsView } from "../../../components/workspace-dashboard/workspace-requests-view";
 import { ProductFollowToggle } from "../../../components/workspace-dashboard/product-follow-toggle";
 import { WorkspaceCommentsView } from "../../../components/workspace-dashboard/workspace-comments-view";
+import { getRequestLocale, getDictionary } from "../../../lib/i18n/server";
 
 interface DashboardPageProps {
   params: Promise<{ ws: string }>;
@@ -34,27 +35,29 @@ interface DashboardPageProps {
     createdTo?: string;
     search?: string;
     sort?: string;
-    attention?: string;
     cursor?: string;
+    attention?: string;
   }>;
 }
 
 export async function generateMetadata({
   params,
   searchParams,
-}: DashboardPageProps): Promise<Metadata> {
+}: DashboardPageProps) {
   const { ws } = await params;
   const search = await searchParams;
+  const locale = await getRequestLocale();
+  const dict = getDictionary(locale);
   const result = await getWorkspace(ws);
   if (!result.ok) {
-    return { title: "Dashboard · UserHQ" };
+    return { title: `Dashboard · UserHQ` };
   }
   const tabName =
     search.tab === "products"
-      ? "Products"
+      ? dict.workspace.tabProducts
       : search.tab === "comments"
-        ? "Comments"
-        : "Requests";
+        ? dict.workspace.tabComments
+        : dict.workspace.tabRequests;
   return {
     title: `${tabName} · ${result.data.name}`,
   };
@@ -66,6 +69,8 @@ export default async function DashboardPage({
 }: DashboardPageProps): Promise<React.JSX.Element | null> {
   const { ws } = await params;
   const search = await searchParams;
+  const locale = await getRequestLocale();
+  const dict = getDictionary(locale);
 
   const currentTab =
     search.tab === "products" || search.tab === "comments"
@@ -131,18 +136,18 @@ export default async function DashboardPage({
   const tabs: DashboardTab[] = [
     {
       id: "requests",
-      label: "Requests (All Boards)",
+      label: dict.workspace.tabRequests,
       href: `/dashboard/${encodeURIComponent(ws)}?tab=requests`,
     },
     {
       id: "comments",
-      label: "Comments",
+      label: dict.workspace.tabComments,
       badge: needsAttentionCount,
       href: `/dashboard/${encodeURIComponent(ws)}?tab=comments`,
     },
     {
       id: "products",
-      label: "Products",
+      label: dict.workspace.tabProducts,
       count: products.length,
       href: `/dashboard/${encodeURIComponent(ws)}?tab=products`,
     },
@@ -157,7 +162,7 @@ export default async function DashboardPage({
             {wsResult.data.name}
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Overview of products, feedback requests, and customer discussions.
+            {dict.workspace.dashboardDesc}
           </p>
         </div>
 
@@ -165,7 +170,7 @@ export default async function DashboardPage({
           <Button asChild className="gap-1.5 shrink-0 self-start sm:self-auto">
             <Link href={`/dashboard/${encodeURIComponent(ws)}/new`}>
               <Plus className="size-4" />
-              <span>Create product</span>
+              <span>{dict.workspace.createProduct}</span>
             </Link>
           </Button>
         )}
@@ -216,12 +221,12 @@ export default async function DashboardPage({
         <div className="space-y-4">
           {products.length === 0 ? (
             <EmptyState
-              title="No products yet"
-              body="Create a product to give your customers a public portal for feedback."
+              title={dict.workspace.noProductsTitle}
+              body={dict.workspace.noProductsBody}
               action={
                 <Button asChild>
                   <Link href={`/dashboard/${encodeURIComponent(ws)}/new`}>
-                    Create product
+                    {dict.workspace.createProduct}
                   </Link>
                 </Button>
               }
@@ -268,7 +273,7 @@ export default async function DashboardPage({
                       <Link
                         href={`/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(product.slug)}/board`}
                       >
-                        Manage
+                        {dict.workspace.manageProduct}
                       </Link>
                     </Button>
                     <Button variant="ghost" size="sm" asChild>
@@ -279,7 +284,7 @@ export default async function DashboardPage({
                         className="flex items-center gap-1.5"
                       >
                         <ExternalLink className="size-4" aria-hidden="true" />
-                        <span className="hidden sm:inline">View portal</span>
+                        <span className="hidden sm:inline">{dict.workspace.viewPortal}</span>
                       </a>
                     </Button>
                   </div>

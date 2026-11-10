@@ -5,10 +5,15 @@ import { AppShell } from "../../../components/app-shell";
 import { PageHeader } from "../../../components/page-header";
 import { StatePage } from "../../../components/state-page";
 import { CreateWorkspaceForm } from "./create-workspace-form";
+import { getRequestLocale, getDictionary } from "../../../lib/i18n/server";
 
-export const metadata = {
-  title: "Create workspace · UserHQ",
-};
+export async function generateMetadata() {
+  const locale = await getRequestLocale();
+  const dict = getDictionary(locale);
+  return {
+    title: `${dict.workspace.createWorkspace} · UserHQ`,
+  };
+}
 
 export default async function NewWorkspacePage(): Promise<React.JSX.Element> {
   const me = await getMe();
@@ -17,6 +22,8 @@ export default async function NewWorkspacePage(): Promise<React.JSX.Element> {
   }
 
   const host = await publicHost();
+  const locale = await getRequestLocale();
+  const dict = getDictionary(locale);
 
   return (
     <AppShell>
@@ -24,15 +31,15 @@ export default async function NewWorkspacePage(): Promise<React.JSX.Element> {
         {me.canCreateWorkspace ? (
           <>
             <PageHeader
-              title="Create your workspace"
-              description="You can change the name and logo later. The URL is permanent."
+              title={dict.workspace.createTitle}
+              description={dict.workspace.createDescription}
             />
             <CreateWorkspaceForm host={host} />
           </>
         ) : (
           <StatePage
-            title="Workspace creation is invite-only"
-            body="UserHQ is invite-only for now. If someone gave you an invite link, open it while signed in with the email it was created for."
+            title={dict.workspace.inviteOnlyTitle}
+            body={dict.workspace.inviteOnlyBody}
           />
         )}
       </div>

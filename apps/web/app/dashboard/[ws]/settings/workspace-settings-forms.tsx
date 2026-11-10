@@ -186,7 +186,7 @@ function WorkspaceGeneralForm({
         label={t("settings.websiteLabel")}
         id="ws-website"
         error={errors.websiteUrl?.message}
-        helper="Your portals link back here, and visitors land here when the product directory is off."
+        helper={t("settings.websiteHelper")}
       >
         <Input
           id="ws-website"
@@ -347,7 +347,7 @@ function WorkspaceDangerZone({
     await apiFetch(`/api/v1/workspaces/${ws}`, {
       method: "DELETE",
     });
-    flash(`${workspace.name} deleted`);
+    flash(t("settings.workspaceDeleted", { name: workspace.name }));
     window.location.assign("/dashboard");
   };
 
@@ -379,8 +379,8 @@ function WorkspaceDangerZone({
         <ConfirmDialog
           open={dialogOpen}
           onOpenChange={handleOpenChange}
-          title={`Delete ${workspace.name}?`}
-          description="All products in this workspace will be taken offline immediately, and the workspace URL cannot be used again. This cannot be undone."
+          title={t("settings.deleteWorkspaceTitle", { name: workspace.name })}
+          description={t("settings.deleteWorkspaceConfirmDesc")}
           dismissLabel={t("settings.keepWorkspace")}
           confirmLabel={t("settings.deleteWorkspace")}
           pendingLabel={t("settings.deleting")}
@@ -389,7 +389,7 @@ function WorkspaceDangerZone({
         >
           <Field
             id="confirm-delete-workspace"
-            label={`Type ${workspace.name} to confirm`}
+            label={t("settings.typeToConfirm", { name: workspace.name })}
           >
             <Input
               id="confirm-delete-workspace"

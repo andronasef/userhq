@@ -21,12 +21,14 @@ import { apiFetch, ApiClientError } from "../../../lib/api-client";
 import { errorCopy, FIELD_FOR_CODE } from "../../../lib/api-errors";
 import { flash } from "../../../components/ui/toaster";
 import { QueryProvider } from "../../../lib/query-client";
+import { useI18n } from "../../../lib/i18n/context";
 
 export interface CreateWorkspaceFormProps {
   host: string;
 }
 
 function CreateWorkspaceFormInner({ host }: CreateWorkspaceFormProps): React.JSX.Element {
+  const { t } = useI18n();
   const [slugTouched, setSlugTouched] = React.useState(false);
   const [alertError, setAlertError] = React.useState<string | null>(null);
   const [logoValue, setLogoValue] = React.useState<LogoValue | null>(null);
@@ -68,7 +70,7 @@ function CreateWorkspaceFormInner({ host }: CreateWorkspaceFormProps): React.JSX
       });
     },
     onSuccess: (res) => {
-      flash("Workspace created");
+      flash(t("workspace.createdToast"));
       window.location.assign(`/dashboard/${res.slug}`);
     },
     onError: (err: unknown) => {
@@ -101,23 +103,23 @@ function CreateWorkspaceFormInner({ host }: CreateWorkspaceFormProps): React.JSX
       <fieldset disabled={mutation.isPending} className="space-y-6">
         <Field
           id="workspace-name"
-          label="Workspace name"
+          label={t("workspace.nameLabel")}
           error={nameError}
         >
           <Input
-            placeholder="Acme Corp"
+            placeholder={t("workspace.namePlaceholder")}
             {...register("name")}
           />
         </Field>
 
         <Field
           id="workspace-slug"
-          label="URL"
+          label={t("workspace.urlLabel")}
           helper={
             <>
-              Lowercase letters, numbers, and hyphens, 2–32 characters.{" "}
+              {t("workspace.urlHelper")}{" "}
               <strong className="font-semibold text-foreground bg-yellow-300">
-                You can&apos;t change this later.
+                {t("workspace.urlPermanentNotice")}
               </strong>
             </>
           }
@@ -125,7 +127,7 @@ function CreateWorkspaceFormInner({ host }: CreateWorkspaceFormProps): React.JSX
         >
           <SlugInput
             prefix={`${host}/`}
-            placeholder="acme"
+            placeholder={t("workspace.slugPlaceholder")}
             {...register("slug", {
               onChange: () => setSlugTouched(true),
             })}
@@ -134,7 +136,7 @@ function CreateWorkspaceFormInner({ host }: CreateWorkspaceFormProps): React.JSX
 
         <div className="space-y-2">
           <label className="text-sm font-semibold leading-none text-foreground">
-            Logo
+            {t("workspace.logoLabel")}
           </label>
           <LogoField
             value={logoValue}
@@ -161,10 +163,10 @@ function CreateWorkspaceFormInner({ host }: CreateWorkspaceFormProps): React.JSX
             {mutation.isPending ? (
               <>
                 <LoaderCircle className="size-4 animate-spin" />
-                <span>Creating…</span>
+                <span>{t("workspace.creating")}</span>
               </>
             ) : (
-              "Create workspace"
+              t("workspace.createWorkspace")
             )}
           </Button>
         </div>

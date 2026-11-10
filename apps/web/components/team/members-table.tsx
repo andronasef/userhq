@@ -42,7 +42,7 @@ export function MembersTable({
         method: "DELETE",
       },
     );
-    toast.success(`${memberToRemove.name} removed`);
+    toast.success(t("team.memberRemoved", { name: memberToRemove.name }));
     router.refresh();
     const h1 = document.querySelector("h1");
     if (h1) {
@@ -148,10 +148,10 @@ export function MembersTable({
         }}
         title={
           memberToRemove
-            ? `${t("team.removeTeammate")} (${memberToRemove.name})?`
+            ? t("team.removeTeammateName", { name: memberToRemove.name })
             : ""
         }
-        description={`They'll lose access to ${workspaceName} right away. Anything they created stays.`}
+        description={t("team.removeWorkspaceDesc", { name: workspaceName })}
         dismissLabel={t("team.keepTeammate")}
         confirmLabel={t("team.removeTeammate")}
         pendingLabel={t("common.deleting")}

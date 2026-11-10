@@ -32,6 +32,7 @@ import {
 import { postHref, dashboardPostHref } from "@/lib/tenant";
 import { cn } from "@/lib/utils";
 import { applyReplyToFeed } from "@/lib/workspace-inbox";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface WorkspaceCommentsViewProps {
   ws: string;
@@ -43,17 +44,21 @@ export interface WorkspaceCommentsViewProps {
   currentAttention?: "needs_attention" | "handled" | "all";
 }
 
-function formatRelativeTime(dateString: string): string {
+function formatRelativeTime(
+  dateString: string,
+  t: (path: any, params?: any) => string,
+  locale: string
+): string {
   const diffMs = Date.now() - new Date(dateString).getTime();
   const diffSec = Math.floor(diffMs / 1000);
-  if (diffSec < 60) return "just now";
+  if (diffSec < 60) return t("common.justNow");
   const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 60) return t("common.minutesAgo", { count: diffMin });
   const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
+  if (diffHr < 24) return t("common.hoursAgo", { count: diffHr });
   const diffDays = Math.floor(diffHr / 24);
-  if (diffDays < 30) return `${diffDays}d ago`;
-  return new Date(dateString).toLocaleDateString();
+  if (diffDays < 30) return t("common.daysAgo", { count: diffDays });
+  return new Date(dateString).toLocaleDateString(locale);
 }
 
 export function WorkspaceCommentsView({
@@ -65,6 +70,7 @@ export function WorkspaceCommentsView({
   currentProduct = "",
   currentAttention = "needs_attention",
 }: WorkspaceCommentsViewProps): React.JSX.Element {
+  const { t, locale } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -114,7 +120,7 @@ export function WorkspaceCommentsView({
       setComments((prev) => [...prev, ...res.items]);
       setNextCursor(res.nextCursor);
     } catch {
-      toast.error("Failed to load more comments");
+      toast.error(t("workspace.failedLoadComments"));
     } finally {
       setLoadingMore(false);
     }
@@ -136,9 +142,9 @@ export function WorkspaceCommentsView({
         )
       );
       setNeedsAttentionCount((prev) => Math.max(0, prev - 1));
-      toast.success("Comment marked handled");
+      toast.success(t("workspace.commentMarkedHandled"));
     } catch {
-      toast.error("Failed to mark comment handled");
+      toast.error(t("workspace.failedMarkHandled"));
     } finally {
       setActionLoadingId(null);
     }
@@ -160,9 +166,9 @@ export function WorkspaceCommentsView({
         )
       );
       setNeedsAttentionCount((prev) => prev + 1);
-      toast.success("Comment reopened for attention");
+      toast.success(t("workspace.commentReopened"));
     } catch {
-      toast.error("Failed to reopen comment");
+      toast.error(t("workspace.failedReopenComment"));
     } finally {
       setActionLoadingId(null);
     }
@@ -184,10 +190,10 @@ export function WorkspaceCommentsView({
       setNeedsAttentionCount((prev) => Math.max(0, prev + applied.needsAttentionDelta));
       setReplyingCommentId(null);
       setReplyBody("");
-      toast.success("Reply posted and marked handled");
+      toast.success(t("workspace.replyPostedHandled"));
       router.refresh();
     } catch {
-      toast.error("Failed to post reply");
+      toast.error(t("workspace.failedPostReply"));
     } finally {
       setIsSubmittingReply(false);
     }
@@ -199,7 +205,7 @@ export function WorkspaceCommentsView({
       await markCommentRead(ws, commentId);
     } catch {
       setComments((prev) => prev.map((c) => (c.id === commentId ? { ...c, isUnread: true } : c)));
-      toast.error("Failed to mark comment as read");
+      toast.error(t("workspace.failedMarkRead"));
     }
   };
 
@@ -219,7 +225,7 @@ export function WorkspaceCommentsView({
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <span>Needs attention</span>
+            <span>{t("workspace.needsAttention")}</span>
             {needsAttentionCount > 0 && (
               <span className="px-1.5 py-0.2 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400">
                 {needsAttentionCount}
@@ -237,7 +243,7 @@ export function WorkspaceCommentsView({
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            Handled
+            {t("workspace.handled")}
           </button>
 
           <button
@@ -250,7 +256,7 @@ export function WorkspaceCommentsView({
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            All comments
+            {t("workspace.allComments")}
           </button>
         </div>
 
@@ -259,9 +265,9 @@ export function WorkspaceCommentsView({
           <NativeSelect
             value={currentProduct}
             onChange={(e) => updateFilters({ product: e.target.value || null })}
-            aria-label="Filter comments by product"
+            aria-label={t("workspace.filterCommentsProduct")}
           >
-            <option value="">All products</option>
+            <option value="">{t("workspace.allProducts")}</option>
             {products.map((p) => (
               <option key={p.slug} value={p.slug}>
                 {p.name}
@@ -276,17 +282,17 @@ export function WorkspaceCommentsView({
         <EmptyState
           title={
             currentAttention === "needs_attention"
-              ? "All caught up!"
+              ? t("workspace.allCaughtUpTitle")
               : currentAttention === "handled"
-                ? "No handled comments"
-                : "No comments found"
+                ? t("workspace.noHandledCommentsTitle")
+                : t("workspace.noCommentsFoundTitle")
           }
           body={
             currentAttention === "needs_attention"
-              ? "No customer comments across your workspace products currently require attention."
+              ? t("workspace.allCaughtUpBody")
               : currentAttention === "handled"
-                ? "Comments that have been resolved or replied to will appear here."
-                : "No comments have been posted yet."
+                ? t("workspace.noHandledCommentsBody")
+                : t("workspace.noCommentsFoundBody")
           }
           icon={
             currentAttention === "needs_attention" ? (
@@ -318,8 +324,8 @@ export function WorkspaceCommentsView({
                     {comment.isUnread && (
                       <span
                         className="size-2 rounded-full bg-primary shrink-0"
-                        title="Unread comment"
-                        aria-label="Unread comment"
+                        title={t("workspace.unreadComment")}
+                        aria-label={t("workspace.unreadComment")}
                       />
                     )}
 
@@ -340,7 +346,7 @@ export function WorkspaceCommentsView({
                     </Link>
 
                     {/* Post Title */}
-                    <span className="text-muted-foreground font-mono">on</span>
+                    <span className="text-muted-foreground font-mono">{t("workspace.onPost")}</span>
                     <Link
                       href={dashboardPostHref(ws, comment.product.slug, comment.post.number)}
                       className="font-semibold text-foreground hover:underline truncate max-w-xs sm:max-w-sm"
@@ -356,9 +362,9 @@ export function WorkspaceCommentsView({
                       <Link
                         href={dashboardPostHref(ws, comment.product.slug, comment.post.number)}
                         className="text-xs text-muted-foreground hover:text-foreground font-medium transition-colors"
-                        title="Open in platform dashboard"
+                        title={t("workspace.openDashboardHint")}
                       >
-                        Dashboard
+                        {t("workspace.dashboardLink")}
                       </Link>
                       {boardEnabled.has(comment.product.slug) && (
                         <>
@@ -368,9 +374,9 @@ export function WorkspaceCommentsView({
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground font-medium transition-colors"
-                        title="Open public portal post"
+                        title={t("workspace.openPortalPostHint")}
                       >
-                        <span>Public portal</span>
+                        <span>{t("workspace.publicPortalLink")}</span>
                         <ExternalLink className="size-3" aria-hidden="true" />
                       </a>
                         </>
@@ -382,13 +388,13 @@ export function WorkspaceCommentsView({
                   {isNeedsAttention && (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400">
                       <AlertCircle className="size-3" aria-hidden="true" />
-                      Needs attention
+                      {t("workspace.needsAttention")}
                     </span>
                   )}
                   {comment.handledAt && (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium text-muted-foreground bg-muted">
                       <CheckCircle2 className="size-3 text-emerald-500" aria-hidden="true" />
-                      Handled
+                      {t("workspace.handled")}
                     </span>
                   )}
                 </div>
@@ -403,25 +409,25 @@ export function WorkspaceCommentsView({
                   <div className="flex items-center gap-2">
                     <Avatar
                       src={comment.author.image}
-                      name={comment.author.name || "Customer"}
+                      name={comment.author.name || t("ui.anonymous")}
                       size="sm"
                       className="size-5"
                     />
                     <span className="font-medium text-foreground">
                       {comment.author.deleted
-                        ? "Deleted user"
-                        : comment.author.name || "Anonymous"}
+                        ? t("ui.deletedUser")
+                        : comment.author.name || t("ui.anonymous")}
                     </span>
                     {comment.author.isAdmin && (
                       <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-primary/10 text-[var(--primary-text)]">
-                        Admin
+                        {t("ui.adminBadge")}
                       </span>
                     )}
                     {comment.author.email && (
                       <a
                         href={`mailto:${comment.author.email}`}
                         className="inline-flex items-center gap-1 hover:underline text-muted-foreground hover:text-foreground font-mono text-[11px] transition-colors"
-                        title={`Email ${comment.author.email}`}
+                        title={t("workspace.emailAuthorHint", { email: comment.author.email })}
                       >
                         <Mail className="size-3 shrink-0" aria-hidden="true" />
                         <span>{comment.author.email}</span>
@@ -437,14 +443,14 @@ export function WorkspaceCommentsView({
                       </span>
                     )}
                     <span>·</span>
-                    <span>{formatRelativeTime(comment.createdAt)}</span>
+                    <span>{formatRelativeTime(comment.createdAt, t, locale)}</span>
                     {comment.handledAt && comment.handledBy && (comment.handledBy.deleted || comment.handledBy.name) && (
                       <>
                         <span>·</span>
                         <span className="text-muted-foreground/80">
                           {comment.handledBy.deleted
-                            ? "Handled by a former member"
-                            : `Handled by ${comment.handledBy.name}`}
+                            ? t("workspace.handledByFormerMember")
+                            : t("workspace.handledByName", { name: comment.handledBy.name })}
                         </span>
                       </>
                     )}
@@ -457,11 +463,11 @@ export function WorkspaceCommentsView({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        aria-label={`Mark as read: ${comment.author.name || "Customer"} on ${comment.post.title}`}
+                        aria-label={`${t("workspace.markAsRead")}: ${comment.author.name || "Customer"} on ${comment.post.title}`}
                         onClick={() => handleMarkRead(comment.id)}
                         className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
                       >
-                        Mark as read
+                        {t("workspace.markAsRead")}
                       </Button>
                     )}
                     {isNeedsAttention ? (
@@ -473,7 +479,7 @@ export function WorkspaceCommentsView({
                         className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1"
                       >
                         <CheckCircle2 className="size-3.5 text-emerald-500" />
-                        <span>Mark handled</span>
+                        <span>{t("workspace.markHandled")}</span>
                       </Button>
                     ) : (
                       !comment.isAdmin &&
@@ -486,7 +492,7 @@ export function WorkspaceCommentsView({
                           className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1"
                         >
                           <RotateCcw className="size-3.5" />
-                          <span>Reopen</span>
+                          <span>{t("workspace.reopen")}</span>
                         </Button>
                       )
                     )}
@@ -504,7 +510,7 @@ export function WorkspaceCommentsView({
                       className="h-7 px-2.5 text-xs gap-1"
                     >
                       <Reply className="size-3.5" />
-                      <span>{isReplying ? "Cancel" : "Reply"}</span>
+                      <span>{isReplying ? t("common.cancel") : t("ui.reply")}</span>
                     </Button>
                   </div>
                 </div>
@@ -517,7 +523,7 @@ export function WorkspaceCommentsView({
                     <Textarea
                       value={replyBody}
                       onChange={(e) => setReplyBody(e.target.value)}
-                      placeholder="Write an admin reply (this will also mark the comment handled)..."
+                      placeholder={t("workspace.replyPlaceholder")}
                       className="text-xs min-h-[72px]"
                       autoFocus
                     />
@@ -528,7 +534,7 @@ export function WorkspaceCommentsView({
                         onClick={() => setReplyingCommentId(null)}
                         className="h-7 text-xs"
                       >
-                        Cancel
+                        {t("common.cancel")}
                       </Button>
                       <Button
                         size="sm"
@@ -537,7 +543,7 @@ export function WorkspaceCommentsView({
                         className="h-7 text-xs gap-1"
                       >
                         <Send className="size-3" />
-                        <span>{isSubmittingReply ? "Posting..." : "Send Reply"}</span>
+                        <span>{isSubmittingReply ? t("workspace.postingReply") : t("workspace.sendReply")}</span>
                       </Button>
                     </div>
                   </div>
@@ -557,7 +563,7 @@ export function WorkspaceCommentsView({
             disabled={loadingMore}
             className="w-full max-w-xs"
           >
-            {loadingMore ? "Loading more..." : "Load more comments"}
+            {loadingMore ? t("workspace.loadingMoreComments") : t("workspace.loadMoreComments")}
           </Button>
         </div>
       )}

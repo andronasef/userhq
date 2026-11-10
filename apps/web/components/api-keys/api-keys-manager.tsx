@@ -22,7 +22,7 @@ export function WorkspaceApiKeysManager({
   initialKeys,
   products,
 }: WorkspaceApiKeysManagerProps): React.JSX.Element {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [keys, setKeys] = React.useState<ApiKeyMetadata[]>(initialKeys);
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
 
@@ -159,7 +159,7 @@ export function WorkspaceApiKeysManager({
                       <td className="px-4 py-3 font-medium text-foreground">
                         <div>{k.name}</div>
                         <div className="text-[11px] text-muted-foreground">
-                          {new Date(k.createdAt).toLocaleDateString()}
+                          {new Date(k.createdAt).toLocaleDateString(locale)}
                         </div>
                       </td>
 
@@ -208,8 +208,10 @@ export function WorkspaceApiKeysManager({
                           >
                             {k.productRestrictions.length === 1
                               ? productMap.get(k.productRestrictions[0]) ||
-                                "1 product"
-                              : `${k.productRestrictions.length} products`}
+                                t("apiKeys.oneProduct")
+                              : t("apiKeys.multipleProducts", {
+                                  count: k.productRestrictions.length,
+                                })}
                           </span>
                         ) : (
                           <span className="text-foreground">
@@ -220,7 +222,7 @@ export function WorkspaceApiKeysManager({
 
                       <td className="px-4 py-3 text-xs text-muted-foreground">
                         {k.lastUsedAt
-                          ? new Date(k.lastUsedAt).toLocaleDateString()
+                          ? new Date(k.lastUsedAt).toLocaleDateString(locale)
                           : t("apiKeys.neverUsed")}
                       </td>
 
@@ -289,7 +291,7 @@ export function WorkspaceApiKeysManager({
         onOpenChange={(open) => {
           if (!open) setRevokeTarget(null);
         }}
-        title={`${t("apiKeys.revokeAction")} "${revokeTarget?.name}"?`}
+        title={t("apiKeys.revokeTitle", { name: revokeTarget?.name ?? "" })}
         description={t("apiKeys.revokeDialogDesc")}
         dismissLabel={t("common.cancel")}
         confirmLabel={t("apiKeys.revokeAction")}

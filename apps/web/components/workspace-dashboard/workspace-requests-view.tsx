@@ -26,6 +26,7 @@ import { EntityLogo } from "@/components/entity-logo";
 import { EmptyState } from "@/components/empty-state";
 import { fetchWorkspaceRequests } from "@/lib/api-client";
 import { postHref, dashboardPostHref } from "@/lib/tenant";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface WorkspaceRequestsViewProps {
   ws: string;
@@ -83,6 +84,7 @@ export function LoadMoreFooter({
   onLoadMore: () => void;
   onRetry: () => void;
 }): React.JSX.Element | null {
+  const { t } = useI18n();
   if (!hasNext && !error) return null;
   return (
     <div className="flex flex-col items-center gap-2 pt-2">
@@ -93,7 +95,7 @@ export function LoadMoreFooter({
         >
           <span>{error}</span>
           <Button type="button" variant="outline" size="sm" onClick={onRetry} className="h-7 text-xs">
-            Try again
+            {t("common.tryAgain")}
           </Button>
         </div>
       )}
@@ -104,24 +106,28 @@ export function LoadMoreFooter({
           disabled={loading}
           className="w-full max-w-xs"
         >
-          {loading ? "Loading more..." : "Load more requests"}
+          {loading ? t("workspace.loadingMore") : t("workspace.loadMoreRequests")}
         </Button>
       )}
     </div>
   );
 }
 
-function formatRelativeTime(dateString: string): string {
+function formatRelativeTime(
+  dateString: string,
+  t: (path: any, params?: any) => string,
+  locale: string
+): string {
   const diffMs = Date.now() - new Date(dateString).getTime();
   const diffSec = Math.floor(diffMs / 1000);
-  if (diffSec < 60) return "just now";
+  if (diffSec < 60) return t("common.justNow");
   const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 60) return t("common.minutesAgo", { count: diffMin });
   const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
+  if (diffHr < 24) return t("common.hoursAgo", { count: diffHr });
   const diffDays = Math.floor(diffHr / 24);
-  if (diffDays < 30) return `${diffDays}d ago`;
-  return new Date(dateString).toLocaleDateString();
+  if (diffDays < 30) return t("common.daysAgo", { count: diffDays });
+  return new Date(dateString).toLocaleDateString(locale);
 }
 
 export function WorkspaceRequestsView({
@@ -139,6 +145,7 @@ export function WorkspaceRequestsView({
   currentCreatedFrom = "",
   currentCreatedTo = "",
 }: WorkspaceRequestsViewProps): React.JSX.Element {
+  const { t, locale } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -208,7 +215,7 @@ export function WorkspaceRequestsView({
       setItems((prev) => [...prev, ...res.items]);
       setNextCursor(res.nextCursor);
     } catch (err) {
-      setLoadError(err instanceof Error && err.message ? err.message : "Failed to load more requests.");
+      setLoadError(err instanceof Error && err.message ? err.message : t("ui.loadMoreFailed"));
     } finally {
       setLoadingMore(false);
     }
@@ -235,7 +242,7 @@ export function WorkspaceRequestsView({
             <Input
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search all feedback requests..."
+              placeholder={t("workspace.searchRequestsPlaceholder")}
               className="pl-9 pr-9"
             />
             {searchInput && (
@@ -246,7 +253,7 @@ export function WorkspaceRequestsView({
                   updateFilters({ search: null });
                 }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                aria-label="Clear search"
+                aria-label={t("workspace.clearSearch")}
               >
                 <X className="size-4" />
               </button>
@@ -259,11 +266,11 @@ export function WorkspaceRequestsView({
               <NativeSelect
                 value={currentSort}
                 onChange={(e) => updateFilters({ sort: e.target.value })}
-                aria-label="Sort requests"
+                aria-label={t("workspace.sortRequests")}
               >
-                <option value="top">Top (votes)</option>
-                <option value="new">Newest</option>
-                <option value="activity">Recent activity</option>
+                <option value="top">{t("workspace.sortTop")}</option>
+                <option value="new">{t("workspace.sortNew")}</option>
+                <option value="activity">{t("workspace.sortActivity")}</option>
               </NativeSelect>
             </div>
 
@@ -274,7 +281,7 @@ export function WorkspaceRequestsView({
                 onClick={handleClearFilters}
                 className="text-xs h-9 px-2 text-muted-foreground hover:text-foreground"
               >
-                Reset
+                {t("common.reset")}
               </Button>
             )}
           </div>
@@ -287,9 +294,9 @@ export function WorkspaceRequestsView({
             <NativeSelect
               value={currentProduct}
               onChange={(e) => updateFilters({ product: e.target.value || null, categoryId: null })}
-              aria-label="Filter by product"
+              aria-label={t("workspace.filterProduct")}
             >
-              <option value="">All products</option>
+              <option value="">{t("workspace.allProducts")}</option>
               {products.map((p) => (
                 <option key={p.slug} value={p.slug}>
                   {p.name}
@@ -303,14 +310,14 @@ export function WorkspaceRequestsView({
             <NativeSelect
               value={currentStatusType}
               onChange={(e) => updateFilters({ statusType: e.target.value || null })}
-              aria-label="Filter by status"
+              aria-label={t("workspace.filterStatus")}
             >
-              <option value="">All statuses</option>
-              <option value="review">Under Review</option>
-              <option value="planned">Planned</option>
-              <option value="active">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="closed">Closed</option>
+              <option value="">{t("workspace.allStatuses")}</option>
+              <option value="review">{t("workspace.statusReview")}</option>
+              <option value="planned">{t("workspace.statusPlanned")}</option>
+              <option value="active">{t("workspace.statusActive")}</option>
+              <option value="completed">{t("workspace.statusCompleted")}</option>
+              <option value="closed">{t("workspace.statusClosed")}</option>
             </NativeSelect>
           </div>
 
@@ -319,11 +326,11 @@ export function WorkspaceRequestsView({
             <NativeSelect
               value={currentCategoryId}
               onChange={(e) => updateFilters({ categoryId: e.target.value || null })}
-              aria-label="Filter by category"
+              aria-label={t("workspace.filterCategory")}
               disabled={!currentProduct}
-              title={currentProduct ? undefined : "Select a product to filter by category"}
+              title={currentProduct ? undefined : t("workspace.selectProductCategoryHint")}
             >
-              <option value="">All categories</option>
+              <option value="">{t("workspace.allCategories")}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -334,24 +341,24 @@ export function WorkspaceRequestsView({
 
           {/* Created date range (UTC) */}
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="font-medium shrink-0">From</span>
+            <span className="font-medium shrink-0">{t("workspace.dateFrom")}</span>
             <Input
               type="date"
               value={currentCreatedFrom}
               max={currentCreatedTo || undefined}
               onChange={(e) => updateFilters({ createdFrom: e.target.value || null })}
-              aria-label="Created from (UTC)"
+              aria-label={t("workspace.createdFromAria")}
               className="w-36"
             />
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="font-medium shrink-0">To</span>
+            <span className="font-medium shrink-0">{t("workspace.dateTo")}</span>
             <Input
               type="date"
               value={currentCreatedTo}
               min={currentCreatedFrom || undefined}
               onChange={(e) => updateFilters({ createdTo: e.target.value || null })}
-              aria-label="Created to (UTC)"
+              aria-label={t("workspace.createdToAria")}
               className="w-36"
             />
           </div>
@@ -361,23 +368,25 @@ export function WorkspaceRequestsView({
       {/* Results Header */}
       <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
         <span>
-          Showing {items.length} of {totalCount} request{totalCount === 1 ? "" : "s"}
+          {totalCount === 1
+            ? t("workspace.showingOneRequest")
+            : t("workspace.showingRequests", { count: items.length, total: totalCount })}
         </span>
       </div>
 
       {/* Request Items List */}
       {items.length === 0 ? (
         <EmptyState
-          title="No requests match your filter"
+          title={t("workspace.noFilteredRequestsTitle")}
           body={
             isFiltered
-              ? "Try adjusting your search query, status, product, category, or date filter to find what you're looking for."
-              : "No feedback requests have been submitted across your workspace products yet."
+              ? t("workspace.noFilteredRequestsBody")
+              : t("workspace.noRequestsBody")
           }
           action={
             isFiltered ? (
               <Button variant="outline" onClick={handleClearFilters}>
-                Clear filters
+                {t("workspace.clearFilters")}
               </Button>
             ) : undefined
           }
@@ -415,9 +424,9 @@ export function WorkspaceRequestsView({
                     <Link
                       href={dashboardPostHref(ws, req.product.slug, req.number)}
                       className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground font-medium transition-colors"
-                      title="Open in platform dashboard"
+                      title={t("workspace.openDashboardHint")}
                     >
-                      <span>Dashboard</span>
+                      <span>{t("workspace.dashboardLink")}</span>
                     </Link>
                     {boardEnabled.has(req.product.slug) && (
                       <>
@@ -427,9 +436,9 @@ export function WorkspaceRequestsView({
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground font-medium transition-colors"
-                      title="Open public portal post"
+                      title={t("workspace.openPortalPostHint")}
                     >
-                      <span>Public portal</span>
+                      <span>{t("workspace.publicPortalLink")}</span>
                       <ExternalLink className="size-3" aria-hidden="true" />
                     </a>
                       </>
@@ -480,15 +489,15 @@ export function WorkspaceRequestsView({
                   {/* Author, Contact & Location */}
                   <span className="font-medium text-foreground">
                     {req.author.deleted
-                      ? "Deleted user"
-                      : req.author.name || "Anonymous"}
+                      ? t("ui.deletedUser")
+                      : req.author.name || t("ui.anonymous")}
                   </span>
 
                   {req.author.email && (
                     <a
                       href={`mailto:${req.author.email}`}
                       className="inline-flex items-center gap-1 hover:underline text-muted-foreground hover:text-foreground font-mono text-[11px] transition-colors"
-                      title={`Email ${req.author.email}`}
+                      title={t("workspace.emailAuthorHint", { email: req.author.email })}
                     >
                       <Mail className="size-3 shrink-0" aria-hidden="true" />
                       <span>{req.author.email}</span>
@@ -505,7 +514,7 @@ export function WorkspaceRequestsView({
                     </span>
                   )}
 
-                  <span>{formatRelativeTime(req.createdAt)}</span>
+                  <span>{formatRelativeTime(req.createdAt, t, locale)}</span>
 
                   {/* Comment Count */}
                   {req.commentCount > 0 && (

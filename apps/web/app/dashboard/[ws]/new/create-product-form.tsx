@@ -21,6 +21,7 @@ import { apiFetch, ApiClientError } from "../../../../lib/api-client";
 import { errorCopy, FIELD_FOR_CODE } from "../../../../lib/api-errors";
 import { flash } from "../../../../components/ui/toaster";
 import { QueryProvider } from "../../../../lib/query-client";
+import { useI18n } from "../../../../lib/i18n/context";
 
 export interface CreateProductFormProps {
   ws: string;
@@ -28,6 +29,7 @@ export interface CreateProductFormProps {
 }
 
 function CreateProductFormInner({ ws, host }: CreateProductFormProps): React.JSX.Element {
+  const { t } = useI18n();
   const [slugTouched, setSlugTouched] = React.useState(false);
   const [alertError, setAlertError] = React.useState<string | null>(null);
   const [logoValue, setLogoValue] = React.useState<LogoValue | null>(null);
@@ -69,7 +71,7 @@ function CreateProductFormInner({ ws, host }: CreateProductFormProps): React.JSX
       });
     },
     onSuccess: (res) => {
-      flash("Product created");
+      flash(t("product.createdToast"));
       window.location.assign(`/dashboard/${ws}/${res.slug}/settings`);
     },
     onError: (err: unknown) => {
@@ -102,23 +104,23 @@ function CreateProductFormInner({ ws, host }: CreateProductFormProps): React.JSX
       <fieldset disabled={mutation.isPending} className="space-y-6">
         <Field
           id="product-name"
-          label="Product name"
+          label={t("product.nameLabel")}
           error={nameError}
         >
           <Input
-            placeholder="e.g. Web App"
+            placeholder={t("product.namePlaceholder")}
             {...register("name")}
           />
         </Field>
 
         <Field
           id="product-slug"
-          label="URL"
+          label={t("product.urlLabel")}
           helper={
             <>
-              Lowercase letters, numbers, and hyphens, 2–32 characters.{" "}
+              {t("product.urlHelper")}{" "}
               <strong className="font-semibold text-foreground">
-                You can&apos;t change this later.
+                {t("product.urlPermanentNotice")}
               </strong>
             </>
           }
@@ -126,7 +128,7 @@ function CreateProductFormInner({ ws, host }: CreateProductFormProps): React.JSX
         >
           <SlugInput
             prefix={`${host}/${ws}/`}
-            placeholder="app"
+            placeholder={t("product.slugPlaceholder")}
             {...register("slug", {
               onChange: () => setSlugTouched(true),
             })}
@@ -135,7 +137,7 @@ function CreateProductFormInner({ ws, host }: CreateProductFormProps): React.JSX
 
         <div className="space-y-2">
           <label className="text-sm font-semibold leading-none text-foreground">
-            Logo
+            {t("product.logoLabel")}
           </label>
           <LogoField
             value={logoValue}
@@ -162,10 +164,10 @@ function CreateProductFormInner({ ws, host }: CreateProductFormProps): React.JSX
             {mutation.isPending ? (
               <>
                 <LoaderCircle className="size-4 animate-spin" />
-                <span>Creating…</span>
+                <span>{t("product.creating")}</span>
               </>
             ) : (
-              "Create product"
+              t("product.createButton")
             )}
           </Button>
         </div>

@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface DashboardTab {
   id: "products" | "requests" | "comments";
@@ -23,13 +24,14 @@ export function WorkspaceDashboardTabs({
   activeTab,
   className,
 }: WorkspaceDashboardTabsProps): React.JSX.Element {
+  const { t } = useI18n();
   return (
     <nav
       className={cn(
         "flex gap-6 border-b border-border overflow-x-auto overflow-y-hidden no-scrollbar",
         className
       )}
-      aria-label="Workspace Dashboard Tabs"
+      aria-label={t("workspace.dashboardTabsAria")}
     >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;

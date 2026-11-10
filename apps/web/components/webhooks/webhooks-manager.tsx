@@ -249,7 +249,7 @@ export function WorkspaceWebhooksManager({
                             className="text-[11px] px-2 py-0.5 gap-1"
                           >
                             <Layers className="size-3" />
-                            <span>{productMap.get(prodId) || "Product"}</span>
+                            <span>{productMap.get(prodId) || prodId}</span>
                           </Badge>
                         ))
                       ) : (

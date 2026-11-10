@@ -154,7 +154,7 @@ function ProductFeaturesFormInner({
           disabled={!ready || mutation.isPending}
           className="space-y-4"
         >
-          <legend className="sr-only">Features visible to customers</legend>
+          <legend className="sr-only">{t("settings.featuresHeading")}</legend>
           <div className="flex flex-col gap-2">
             {PRODUCT_FEATURE_KEYS.map((key) => (
               <label

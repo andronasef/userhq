@@ -160,7 +160,7 @@ export function ChangelogStudio({
               <TH>{t("changelog.colTags")}</TH>
               <TH>{t("changelog.colReleaseDate")}</TH>
               <TH className="w-12 text-right">
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">{t("common.actions")}</span>
               </TH>
             </TR>
           </THead>

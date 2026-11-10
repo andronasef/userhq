@@ -167,7 +167,7 @@ export function DeletedItems({
               <TR>
                 <TH>{t("board.colPost")}</TH>
                 <TH>{t("board.colCreated")}</TH>
-                <TH>Author</TH>
+                <TH>{t("deletedItems.colAuthor")}</TH>
                 <TH className="w-24 text-right">
                   <span className="sr-only">{t("board.colActions")}</span>
                 </TH>
@@ -176,7 +176,7 @@ export function DeletedItems({
             <TBody>
               {deletedPosts.map((post) => {
                 const deletedByLabel = post.deletedByAuthor
-                  ? "Author"
+                  ? t("deletedItems.colAuthor")
                   : (post.deletedBy ?? "—");
 
                 return (
@@ -200,7 +200,7 @@ export function DeletedItems({
                       <Button
                         variant="ghost"
                         size="sm"
-                        aria-label={`Restore ${post.title}`}
+                        aria-label={t("deletedItems.restorePostAria", { title: post.title })}
                         disabled={restoringPostId === post.number}
                         onClick={() => handleRestorePost(post)}
                       >
@@ -235,7 +235,7 @@ export function DeletedItems({
               <TR>
                 <TH>{t("board.colComments")}</TH>
                 <TH>{t("board.colPost")}</TH>
-                <TH>Author</TH>
+                <TH>{t("deletedItems.colAuthor")}</TH>
                 <TH>{t("board.colCreated")}</TH>
                 <TH className="w-28 text-right">
                   <span className="sr-only">{t("board.colActions")}</span>
@@ -261,7 +261,7 @@ export function DeletedItems({
                       </Link>
                     </TD>
                     <TD className="text-sm text-muted-foreground">
-                      {comment.authorName ?? "Deleted user"}
+                      {comment.authorName ?? t("deletedItems.deletedUser")}
                     </TD>
                     <TD className="text-sm text-muted-foreground whitespace-nowrap">
                       {formatDate(comment.deletedAt)}
@@ -273,19 +273,19 @@ export function DeletedItems({
                             variant="ghost"
                             size="sm"
                             disabled
-                            aria-label="Restore comment"
+                            aria-label={t("deletedItems.restoreCommentAria")}
                           >
                             {t("deletedItems.restore")}
                           </Button>
                           <span className="text-[12px] text-muted-foreground">
-                            Restore the post first
+                            {t("deletedItems.restorePostFirst")}
                           </span>
                         </div>
                       ) : (
                         <Button
                           variant="ghost"
                           size="sm"
-                          aria-label="Restore comment"
+                          aria-label={t("deletedItems.restoreCommentAria")}
                           disabled={restoringCommentId === comment.id}
                           onClick={() => handleRestoreComment(comment)}
                         >

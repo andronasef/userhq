@@ -52,7 +52,7 @@ export function EntryLocaleTabs({
 
       <div
         role="tablist"
-        aria-label="Entry translation locales"
+        aria-label={t("ui.entryLocalesAria")}
         className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none"
       >
         {locales.map((code) => {

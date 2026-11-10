@@ -80,7 +80,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
         </section>
 
         {/* INTERACTIVE PRODUCT SHOWCASE */}
-        <section aria-label="Interactive Product Preview" className="flex flex-col gap-4">
+        <section aria-label={dict.showcase.interactivePreview} className="flex flex-col gap-4">
           <ProductShowcase />
         </section>
 

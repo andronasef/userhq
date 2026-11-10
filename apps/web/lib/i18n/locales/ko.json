@@ -59,7 +59,8 @@
     "daysAgo": "{count}일 전",
     "goToHome": "홈으로 이동",
     "tryAgain": "다시 시도",
-    "reset": "초기화"
+    "reset": "초기화",
+    "actions": "동작"
   },
   "portal": {
     "submitFeedback": "새로운 아이디어 제안",
@@ -261,7 +262,8 @@
     "showLess": "간략히 보기",
     "readMore": "더 읽기",
     "uploadTest": "업로드 테스트",
-    "signOutError": "로그아웃할 수 없습니다. 연결 상태를 확인하고 다시 시도하세요."
+    "signOutError": "로그아웃할 수 없습니다. 연결 상태를 확인하고 다시 시도하세요.",
+    "entryLocalesAria": "항목 번역 언어"
   },
   "roadmap": {
     "title": "로드맵",
@@ -314,7 +316,21 @@
     "checkBackFeedback": "나중에 다시 확인하거나 피드백을 공유하여 다음 개발 방향을 결정하는 데 도움을 주세요.",
     "checkBackSoon": "현재 어떤 작업을 진행하고 있는지 나중에 다시 확인해 보세요.",
     "itemDetails": "로드맵 항목 {title} 세부정보",
-    "linkedFeedbackCount": "연결된 피드백 게시물 {count}개."
+    "linkedFeedbackCount": "연결된 피드백 게시물 {count}개.",
+    "searchPostsPlaceholder": "제목 또는 번호로 피드백 게시물 검색…",
+    "noMatchingPosts": "일치하는 게시물이 없습니다.",
+    "publicTitlePlaceholder": "예: 다크 모드 지원",
+    "publicDescPlaceholder": "사용자를 위한 기능 가치를 설명하세요…",
+    "publicDescHelper": "무엇이 왜 제공되는지 설명하는 선택적 설명입니다.",
+    "internalTitleHelper": "팀 계획용 내부 작업 제목 (공개적으로 표시되지 않음).",
+    "internalTitlePlaceholder": "예: next-themes로 테마 토글 구현",
+    "internalDescHelper": "팀을 위한 선택적 기술 노트 또는 범위 사양입니다.",
+    "internalDescPlaceholder": "기술적 범위, 아키텍처 선택 또는 전제 조건…",
+    "internalNotesHelper": "메모와 링크를 위한 비공개 메모장입니다.",
+    "internalNotesPlaceholder": "비공개 링크, 고객 인용구 또는 구현 노트 추가…",
+    "translationForTitle": "공개 제목 번역 ({locale})...",
+    "translationForDesc": "공개 설명 번역 ({locale})...",
+    "publicTitleHelper": "공개 로드맵에 표시되는 고객용 제목입니다."
   },
   "changelog": {
     "title": "변경 로그",
@@ -424,7 +440,12 @@
     "didntFind": "원하는 내용을 찾지 못하셨나요?",
     "submitIdeaPrompt": "커뮤니티 피드백 보드에 질문이나 아이디어를 남겨주세요.",
     "postToBoard": "피드백 보드에 게시",
-    "noMatchingQuestions": "일치하는 질문을 찾을 수 없습니다"
+    "noMatchingQuestions": "일치하는 질문을 찾을 수 없습니다",
+    "dragToReorderQuestion": "질문 순서를 변경하려면 드래그하세요",
+    "questionActions": "질문 동작",
+    "dragToReorderCategory": "카테고리 순서를 변경하려면 드래그하세요",
+    "categoryOptions": "카테고리 옵션",
+    "faqCategoriesNav": "자주 묻는 질문 카테고리"
   },
   "apiKeys": {
     "title": "API 키",
@@ -594,7 +615,8 @@
     "eventCommentRestored": "삭제된 댓글이 복원될 때 트리거됨",
     "eventCommentCreated": "고객 또는 팀원이 댓글을 작성할 때마다 트리거됨",
     "eventCommentDeleted": "댓글이 삭제되거나 검토될 때 트리거됨",
-    "eventChangelogPublished": "변경 로그 공지가 게시될 때마다 트리거됨"
+    "eventChangelogPublished": "변경 로그 공지가 게시될 때마다 트리거됨",
+    "descPlaceholder": "운영 Zapier 연동"
   },
   "team": {
     "title": "팀",
@@ -773,7 +795,9 @@
     "tabHelpCenter": "고객센터",
     "all": "전체",
     "searchPlaceholder": "피드백 검색...",
-    "comments": "개의 댓글"
+    "comments": "개의 댓글",
+    "showcaseViews": "제품 쇼케이스 보기",
+    "interactivePreview": "인터랙티브 제품 미리보기"
   },
   "board": {
     "category": "카테고리",
@@ -1217,7 +1241,12 @@
     "noDeletedPostsTitle": "No deleted posts",
     "noDeletedPostsBody": "When posts are removed from your board, you can restore them here.",
     "noDeletedCommentsTitle": "No deleted comments",
-    "noDeletedCommentsBody": "When comments are removed, you can restore them here."
+    "noDeletedCommentsBody": "When comments are removed, you can restore them here.",
+    "restorePostAria": "{title} 복원",
+    "restoreCommentAria": "댓글 복원",
+    "restorePostFirst": "먼저 게시물을 복원하세요",
+    "colAuthor": "작성자",
+    "deletedUser": "삭제된 사용자"
   },
   "badges": {
     "title": "User Badges",
@@ -1235,7 +1264,24 @@
     "deleteBadgeDesc": "This badge will be removed from all users who currently have it.",
     "noBadgesTitle": "No custom badges yet",
     "noBadgesBody": "Create badges to highlight your top contributors and team members.",
-    "manageBadges": "Manage badges"
+    "manageBadges": "Manage badges",
+    "attributionRulesTitle": "기여 규칙: {name}",
+    "attributionRulesDesc": "일치하는 쿼리 매개변수가 있는 링크를 통해 사용자가 방문할 때 이 배지를 자동으로 부여합니다.",
+    "hmacEnabled": "HMAC 검증 활성화됨",
+    "noRulesYet": "아직 자동화된 기여 규칙이 없습니다.",
+    "addRuleSection": "규칙 추가",
+    "paramMatchingLabel": "매개변수 이름 일치",
+    "exactName": "정확한 이름",
+    "regularExpression": "정규식",
+    "queryParamLabel": "쿼리 매개변수 이름",
+    "queryParamPlaceholder": "예: tier, plan, source",
+    "matchTypeLabel": "일치 유형",
+    "exactString": "정확한 문자열",
+    "expectedValueLabel": "예상 값",
+    "antiSpoofingSecretLabel": "스푸핑 방지 HMAC 시크릿 (선택 사항)",
+    "antiSpoofingSecretPlaceholder": "HMAC-SHA256 확인을 위한 비밀 토큰 입력",
+    "antiSpoofingSecretHelp": "설정된 경우 서명 및 타임스탬프 매개변수를 모두 포함하세요. {sigParam}은 value + '.' + {tsParam}의 HMAC-SHA256 16진수입니다. {tsParam}은 링크에 서명된 Unix 초 단위이며 30일 동안 유효합니다.",
+    "deleteRuleAria": "규칙 삭제"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1345,5 +1391,36 @@
     "colMember": "멤버",
     "colRole": "역할",
     "platformInviteDesc": "회사가 워크스페이스를 설정할 수 있도록 초대 링크를 생성하세요."
+  },
+  "richText": {
+    "textFormatting": "텍스트 서식",
+    "heading2": "제목 2",
+    "heading3": "제목 3",
+    "bold": "굵게",
+    "italic": "기울임꼴",
+    "strikethrough": "취소선",
+    "codeBlock": "코드 블록",
+    "bulletList": "글머리 기호 목록",
+    "numberedList": "번호 매기기 목록",
+    "quote": "인용",
+    "divider": "구분선",
+    "insertLink": "링크 삽입",
+    "editLink": "링크 수정",
+    "removeLink": "링크 제거",
+    "saveLink": "링크 저장",
+    "insertRemoteImage": "원격 이미지 삽입",
+    "imageDialogDesc": "http:// 또는 https://에 호스팅된 이미지에 대한 직접 링크를 제공하세요. 로컬 파일 업로드는 지원되지 않습니다.",
+    "imageUrlLabel": "이미지 URL",
+    "altTextLabel": "대체 텍스트",
+    "altTextOptional": "(선택 사항, 최대 200자)",
+    "altTextPlaceholder": "설명 캡션 또는 대체 텍스트",
+    "enterImageUrl": "이미지 URL을 입력하세요.",
+    "invalidImageUrl": "유효한 http:// 또는 https:// 이미지 URL을 입력하세요.",
+    "altTextTooLong": "대체 텍스트는 200자 이하여야 합니다.",
+    "insertImage": "이미지 삽입",
+    "linkDialogDesc": "대상 URL을 입력하세요 (http://, https:// 또는 mailto: 로 시작).",
+    "destinationUrlLabel": "대상 URL",
+    "invalidLinkProtocol": "URL은 http://, https:// 또는 mailto: 로 시작해야 합니다",
+    "invalidLinkUrl": "유효한 URL을 입력하세요."
   }
 }

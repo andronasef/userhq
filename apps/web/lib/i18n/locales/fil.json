@@ -59,7 +59,8 @@
     "daysAgo": "{count}d ang nakalipas",
     "goToHome": "Pumunta sa home",
     "tryAgain": "Subukan muli",
-    "reset": "I-reset"
+    "reset": "I-reset",
+    "actions": "Mga Aksyon"
   },
   "portal": {
     "submitFeedback": "Magbigay ng mungkahi",
@@ -261,7 +262,8 @@
     "showLess": "Ipakita ang mas kaunti",
     "readMore": "Magbasa pa",
     "uploadTest": "Pagsusuri ng pag-upload",
-    "signOutError": "Hindi makapag-sign out. Suriin ang iyong koneksyon at subukan muli."
+    "signOutError": "Hindi makapag-sign out. Suriin ang iyong koneksyon at subukan muli.",
+    "entryLocalesAria": "Mga wika ng pagsasalin ng entry"
   },
   "roadmap": {
     "title": "Roadmap",
@@ -314,7 +316,21 @@
     "checkBackFeedback": "Bumalik mamaya o magbahagi ng feedback upang makatulong na hubugin ang aming bubuuin.",
     "checkBackSoon": "Bumalik mamaya para makita kung ano ang aming ginagawa.",
     "itemDetails": "Mga detalye para sa item ng roadmap {title}",
-    "linkedFeedbackCount": "{count} naka-link na mga post ng feedback."
+    "linkedFeedbackCount": "{count} naka-link na mga post ng feedback.",
+    "searchPostsPlaceholder": "Maghanap ng mga post ng feedback ayon sa pamagat o numero…",
+    "noMatchingPosts": "Walang nahanap na tugmang post.",
+    "publicTitlePlaceholder": "hal. Suporta sa Dark Mode",
+    "publicDescPlaceholder": "Ilarawan ang halaga ng feature para sa iyong mga user…",
+    "publicDescHelper": "Opsyonal na paglalarawan na nagpapaliwanag kung ano ang inihahatid at bakit.",
+    "internalTitleHelper": "Panloob na pamagat sa paggawa para sa pagpaplano ng koponan (hindi ipinapakita sa publiko kailanman).",
+    "internalTitlePlaceholder": "hal. Ipatupad ang pagpapalit ng tema gamit ang next-themes",
+    "internalDescHelper": "Opsyonal na teknikal na tala o mga detalye ng saklaw para sa koponan.",
+    "internalDescPlaceholder": "Teknikal na saklaw, mga pagpipilian sa arkitektura, o mga kinakailangan…",
+    "internalNotesHelper": "Pribadong scratchpad para sa mga tala at link.",
+    "internalNotesPlaceholder": "Magdagdag ng pribadong link, mga panipi ng customer, o mga tala ng pagpapatupad…",
+    "translationForTitle": "Pagsasalin para sa pampublikong pamagat ({locale})...",
+    "translationForDesc": "Pagsasalin para sa pampublikong paglalarawan ({locale})...",
+    "publicTitleHelper": "Pamagat para sa customer na ipinapakita sa pampublikong roadmap."
   },
   "changelog": {
     "title": "Changelog",
@@ -424,7 +440,12 @@
     "didntFind": "Hindi nahanap ang iyong hinahanap?",
     "submitIdeaPrompt": "Magsumite ng tanong o ideya sa aming board ng feedback ng komunidad.",
     "postToBoard": "Mag-post sa feedback board",
-    "noMatchingQuestions": "Walang nahanap na magkatugmang mga tanong"
+    "noMatchingQuestions": "Walang nahanap na magkatugmang mga tanong",
+    "dragToReorderQuestion": "I-drag para muling ayusin ang tanong",
+    "questionActions": "Mga aksyon sa tanong",
+    "dragToReorderCategory": "I-drag para muling ayusin ang kategorya",
+    "categoryOptions": "Mga opsyon sa kategorya",
+    "faqCategoriesNav": "Mga kategorya ng FAQ"
   },
   "apiKeys": {
     "title": "Mga API Key",
@@ -594,7 +615,8 @@
     "eventCommentRestored": "Nati-trigger kapag naibalik ang isang tinanggal na komento",
     "eventCommentCreated": "Nati-trigger kapag nag-post ng komento ang isang customer o kasama sa koponan",
     "eventCommentDeleted": "Nati-trigger kapag tinanggal o minoderate ang isang komento",
-    "eventChangelogPublished": "Nati-trigger tuwing may inilalathalang anunsyo sa changelog"
+    "eventChangelogPublished": "Nati-trigger tuwing may inilalathalang anunsyo sa changelog",
+    "descPlaceholder": "Integrasyon ng Zapier sa produksyon"
   },
   "team": {
     "title": "Koponan",
@@ -773,7 +795,9 @@
     "tabHelpCenter": "Help Center",
     "all": "Lahat",
     "searchPlaceholder": "Maghanap ng feedback...",
-    "comments": "mga komento"
+    "comments": "mga komento",
+    "showcaseViews": "Mga View ng Showcase ng Produkto",
+    "interactivePreview": "Interactive na Preview ng Produkto"
   },
   "board": {
     "category": "Kategorya",
@@ -1217,7 +1241,12 @@
     "noDeletedPostsTitle": "No deleted posts",
     "noDeletedPostsBody": "When posts are removed from your board, you can restore them here.",
     "noDeletedCommentsTitle": "No deleted comments",
-    "noDeletedCommentsBody": "When comments are removed, you can restore them here."
+    "noDeletedCommentsBody": "When comments are removed, you can restore them here.",
+    "restorePostAria": "Ibalik ang {title}",
+    "restoreCommentAria": "Ibalik ang komento",
+    "restorePostFirst": "Ibalik muna ang post",
+    "colAuthor": "May-akda",
+    "deletedUser": "Tinanggal na user"
   },
   "badges": {
     "title": "User Badges",
@@ -1235,7 +1264,24 @@
     "deleteBadgeDesc": "This badge will be removed from all users who currently have it.",
     "noBadgesTitle": "No custom badges yet",
     "noBadgesBody": "Create badges to highlight your top contributors and team members.",
-    "manageBadges": "Manage badges"
+    "manageBadges": "Manage badges",
+    "attributionRulesTitle": "Mga Panuntunan sa Attribution: {name}",
+    "attributionRulesDesc": "Awtomatikong igawad ang badge na ito kapag dumating ang mga user sa pamamagitan ng mga link na may tumutugmang parameter ng query.",
+    "hmacEnabled": "Naka-enable ang pag-verify ng HMAC",
+    "noRulesYet": "Wala pang mga automated na panuntunan sa attribution.",
+    "addRuleSection": "Magdagdag ng Panuntunan",
+    "paramMatchingLabel": "Pagtutugma ng pangalan ng parameter",
+    "exactName": "Eksaktong pangalan",
+    "regularExpression": "Regular expression",
+    "queryParamLabel": "Pangalan ng Query Param",
+    "queryParamPlaceholder": "hal. tier, plan, source",
+    "matchTypeLabel": "Uri ng Tugma",
+    "exactString": "Eksaktong string",
+    "expectedValueLabel": "Inaasahang Halaga",
+    "antiSpoofingSecretLabel": "Anti-Spoofing HMAC Secret (Opsyonal)",
+    "antiSpoofingSecretPlaceholder": "Ilagay ang secret token para sa pag-check ng HMAC-SHA256",
+    "antiSpoofingSecretHelp": "Kapag nakatakda, isama ang parehong parameter ng signature at timestamp. Ang {sigParam} ay ang HMAC-SHA256 hex ng value + '.' + {tsParam}. Ang {tsParam} ay ang mga segundong Unix kung kailan nilagdaan ang link, valid nang 30 araw.",
+    "deleteRuleAria": "Tanggalin ang panuntunan"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1345,5 +1391,36 @@
     "colMember": "Miyembro",
     "colRole": "Tungkulin",
     "platformInviteDesc": "Lumikha ng link ng imbitasyon sa itaas upang payagan ang isang kumpanya na mag-set up ng workspace."
+  },
+  "richText": {
+    "textFormatting": "Pag-format ng teksto",
+    "heading2": "Heading 2",
+    "heading3": "Heading 3",
+    "bold": "Bold",
+    "italic": "Italic",
+    "strikethrough": "Strikethrough",
+    "codeBlock": "Code block",
+    "bulletList": "Listahan ng bullet",
+    "numberedList": "Listahan na may numero",
+    "quote": "Quote",
+    "divider": "Divider",
+    "insertLink": "Maglagay ng link",
+    "editLink": "I-edit ang link",
+    "removeLink": "Alisin ang link",
+    "saveLink": "I-save ang link",
+    "insertRemoteImage": "Maglagay ng malayong larawan",
+    "imageDialogDesc": "Magbigay ng direktang link sa isang larawang naka-host sa http:// o https://. Hindi sinusuportahan ang mga lokal na pag-upload ng file.",
+    "imageUrlLabel": "URL ng Larawan",
+    "altTextLabel": "Alt text",
+    "altTextOptional": "(opsyonal, max 200 character)",
+    "altTextPlaceholder": "Naglalarawang caption o alt text",
+    "enterImageUrl": "Mangyaring maglagay ng URL ng larawan.",
+    "invalidImageUrl": "Mangyaring maglagay ng wastong http:// o https:// na URL ng larawan.",
+    "altTextTooLong": "Ang alt text ay dapat 200 character o mas kaunti.",
+    "insertImage": "Maglagay ng larawan",
+    "linkDialogDesc": "Maglagay ng patutunguhang URL (nagsisimula sa http://, https://, o mailto:).",
+    "destinationUrlLabel": "Patutunguhang URL",
+    "invalidLinkProtocol": "Dapat magsimula ang URL sa http://, https://, o mailto:",
+    "invalidLinkUrl": "Mangyaring maglagay ng wastong URL."
   }
 }

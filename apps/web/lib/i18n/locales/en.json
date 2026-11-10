@@ -59,7 +59,8 @@
     "daysAgo": "{count}d ago",
     "goToHome": "Go to home",
     "tryAgain": "Try again",
-    "reset": "Reset"
+    "reset": "Reset",
+    "actions": "Actions"
   },
   "portal": {
     "submitFeedback": "Submit idea",
@@ -261,7 +262,8 @@
     "showLess": "Show less",
     "readMore": "Read more",
     "uploadTest": "Upload test",
-    "signOutError": "Could not sign out. Check your connection and try again."
+    "signOutError": "Could not sign out. Check your connection and try again.",
+    "entryLocalesAria": "Entry translation locales"
   },
   "roadmap": {
     "title": "Roadmap",
@@ -314,7 +316,21 @@
     "checkBackFeedback": "Check back later or share feedback to help shape what we build next.",
     "checkBackSoon": "Check back later to see what we're working on.",
     "itemDetails": "Details for roadmap item {title}",
-    "linkedFeedbackCount": "{count} linked feedback posts."
+    "linkedFeedbackCount": "{count} linked feedback posts.",
+    "searchPostsPlaceholder": "Search feedback posts by title or number…",
+    "noMatchingPosts": "No matching posts found.",
+    "publicTitlePlaceholder": "e.g. Dark Mode Support",
+    "publicDescPlaceholder": "Describe the feature value for your users…",
+    "publicDescHelper": "Optional description explaining what is being delivered and why.",
+    "internalTitleHelper": "Internal working title for team planning (never shown publicly).",
+    "internalTitlePlaceholder": "e.g. Implement theme toggle with next-themes",
+    "internalDescHelper": "Optional technical notes or scope specifications for the team.",
+    "internalDescPlaceholder": "Technical scope, architectural choices, or prerequisites…",
+    "internalNotesHelper": "Private scratchpad for notes and links.",
+    "internalNotesPlaceholder": "Add private links, customer quotes, or implementation notes…",
+    "translationForTitle": "Translation for public title ({locale})...",
+    "translationForDesc": "Translation for public description ({locale})...",
+    "publicTitleHelper": "Customer-facing title shown on the public roadmap."
   },
   "changelog": {
     "title": "Changelog",
@@ -424,7 +440,12 @@
     "didntFind": "Didn't find what you were looking for?",
     "submitIdeaPrompt": "Submit a question or idea to our community feedback board.",
     "postToBoard": "Post to feedback board",
-    "noMatchingQuestions": "No matching questions found"
+    "noMatchingQuestions": "No matching questions found",
+    "dragToReorderQuestion": "Drag to reorder question",
+    "questionActions": "Question actions",
+    "dragToReorderCategory": "Drag to reorder category",
+    "categoryOptions": "Category options",
+    "faqCategoriesNav": "FAQ categories"
   },
   "apiKeys": {
     "title": "API Keys",
@@ -594,7 +615,8 @@
     "eventCommentRestored": "Triggered when a deleted comment is restored",
     "eventCommentCreated": "Triggered whenever a customer or teammate posts a comment",
     "eventCommentDeleted": "Triggered when a comment is deleted or moderated",
-    "eventChangelogPublished": "Triggered whenever a changelog announcement is published"
+    "eventChangelogPublished": "Triggered whenever a changelog announcement is published",
+    "descPlaceholder": "Production Zapier integration"
   },
   "team": {
     "title": "Team",
@@ -773,7 +795,9 @@
     "tabHelpCenter": "Help Center",
     "all": "All",
     "searchPlaceholder": "Search feedback...",
-    "comments": "comments"
+    "comments": "comments",
+    "showcaseViews": "Product Showcase Views",
+    "interactivePreview": "Interactive Product Preview"
   },
   "board": {
     "category": "Category",
@@ -1217,7 +1241,12 @@
     "noDeletedPostsTitle": "No deleted posts",
     "noDeletedPostsBody": "When posts are removed from your board, you can restore them here.",
     "noDeletedCommentsTitle": "No deleted comments",
-    "noDeletedCommentsBody": "When comments are removed, you can restore them here."
+    "noDeletedCommentsBody": "When comments are removed, you can restore them here.",
+    "restorePostAria": "Restore {title}",
+    "restoreCommentAria": "Restore comment",
+    "restorePostFirst": "Restore the post first",
+    "colAuthor": "Author",
+    "deletedUser": "Deleted user"
   },
   "badges": {
     "title": "User Badges",
@@ -1235,7 +1264,24 @@
     "deleteBadgeDesc": "This badge will be removed from all users who currently have it.",
     "noBadgesTitle": "No custom badges yet",
     "noBadgesBody": "Create badges to highlight your top contributors and team members.",
-    "manageBadges": "Manage badges"
+    "manageBadges": "Manage badges",
+    "attributionRulesTitle": "Attribution Rules: {name}",
+    "attributionRulesDesc": "Automatically grant this badge when users arrive via links with matching query parameters.",
+    "hmacEnabled": "HMAC verification enabled",
+    "noRulesYet": "No automated attribution rules yet.",
+    "addRuleSection": "Add Rule",
+    "paramMatchingLabel": "Parameter name matching",
+    "exactName": "Exact name",
+    "regularExpression": "Regular expression",
+    "queryParamLabel": "Query Param Name",
+    "queryParamPlaceholder": "e.g. tier, plan, source",
+    "matchTypeLabel": "Match Type",
+    "exactString": "Exact string",
+    "expectedValueLabel": "Expected Value",
+    "antiSpoofingSecretLabel": "Anti-Spoofing HMAC Secret (Optional)",
+    "antiSpoofingSecretPlaceholder": "Enter secret token for HMAC-SHA256 checking",
+    "antiSpoofingSecretHelp": "When set, include both signature and timestamp parameters. {sigParam} is the HMAC-SHA256 hex of value + '.' + {tsParam}. {tsParam} is the Unix seconds when the link was signed, valid for 30 days.",
+    "deleteRuleAria": "Delete rule"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1345,5 +1391,36 @@
     "colMember": "Member",
     "colRole": "Role",
     "platformInviteDesc": "Create an invite link above to let a company set up a workspace."
+  },
+  "richText": {
+    "textFormatting": "Text formatting",
+    "heading2": "Heading 2",
+    "heading3": "Heading 3",
+    "bold": "Bold",
+    "italic": "Italic",
+    "strikethrough": "Strikethrough",
+    "codeBlock": "Code block",
+    "bulletList": "Bullet list",
+    "numberedList": "Numbered list",
+    "quote": "Quote",
+    "divider": "Divider",
+    "insertLink": "Insert link",
+    "editLink": "Edit link",
+    "removeLink": "Remove link",
+    "saveLink": "Save link",
+    "insertRemoteImage": "Insert remote image",
+    "imageDialogDesc": "Provide a direct link to an image hosted on http:// or https://. Local file uploads are not supported.",
+    "imageUrlLabel": "Image URL",
+    "altTextLabel": "Alt text",
+    "altTextOptional": "(optional, max 200 chars)",
+    "altTextPlaceholder": "Descriptive caption or alt text",
+    "enterImageUrl": "Please enter an image URL.",
+    "invalidImageUrl": "Please enter a valid http:// or https:// image URL.",
+    "altTextTooLong": "Alt text must be 200 characters or less.",
+    "insertImage": "Insert image",
+    "linkDialogDesc": "Enter a destination URL (starting with http://, https://, or mailto:).",
+    "destinationUrlLabel": "Destination URL",
+    "invalidLinkProtocol": "URL must start with http://, https://, or mailto:",
+    "invalidLinkUrl": "Please enter a valid URL."
   }
 }

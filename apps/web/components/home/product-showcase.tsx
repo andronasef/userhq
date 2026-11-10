@@ -210,7 +210,7 @@ export function ProductShowcase(): React.JSX.Element {
           {/* Interactive Navigation Switcher */}
           <div
             role="tablist"
-            aria-label="Product Showcase Views"
+            aria-label={t("showcase.showcaseViews")}
             className="flex items-center gap-1 rounded-lg border border-border bg-background p-1"
           >
             <button

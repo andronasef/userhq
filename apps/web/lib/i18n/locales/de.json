@@ -59,7 +59,8 @@
     "daysAgo": "vor {count} Tagen",
     "goToHome": "Zur Startseite",
     "tryAgain": "Erneut versuchen",
-    "reset": "Zurücksetzen"
+    "reset": "Zurücksetzen",
+    "actions": "Aktionen"
   },
   "portal": {
     "submitFeedback": "Idee einreichen",
@@ -261,7 +262,8 @@
     "showLess": "Weniger anzeigen",
     "readMore": "Mehr lesen",
     "uploadTest": "Upload-Test",
-    "signOutError": "Abmeldung fehlgeschlagen. Bitte Verbindung prüfen und erneut versuchen."
+    "signOutError": "Abmeldung fehlgeschlagen. Bitte Verbindung prüfen und erneut versuchen.",
+    "entryLocalesAria": "Eintragsübersetzungssprachen"
   },
   "roadmap": {
     "title": "Roadmap",
@@ -314,7 +316,21 @@
     "checkBackFeedback": "Schauen Sie später wieder vorbei oder geben Sie Feedback ab, um zukünftige Funktionen mitzugestalten.",
     "checkBackSoon": "Schauen Sie später wieder vorbei, um zu sehen, woran wir arbeiten.",
     "itemDetails": "Details für Roadmap-Eintrag {title}",
-    "linkedFeedbackCount": "{count} verknüpfte Feedback-Beiträge."
+    "linkedFeedbackCount": "{count} verknüpfte Feedback-Beiträge.",
+    "searchPostsPlaceholder": "Feedback-Beiträge nach Titel oder Nummer durchsuchen…",
+    "noMatchingPosts": "Keine passenden Beiträge gefunden.",
+    "publicTitlePlaceholder": "z.B. Dark-Mode-Unterstützung",
+    "publicDescPlaceholder": "Beschreiben Sie den Mehrwert der Funktion für Ihre Nutzer…",
+    "publicDescHelper": "Optionale Beschreibung, die erklärt, was geliefert wird und warum.",
+    "internalTitleHelper": "Interner Arbeitstitel für die Teamplanung (wird öffentlich nicht angezeigt).",
+    "internalTitlePlaceholder": "z.B. Design-Umschalter mit next-themes implementieren",
+    "internalDescHelper": "Optionale technische Notizen oder Spezifikationen für das Team.",
+    "internalDescPlaceholder": "Technischer Umfang, Architektur-Entscheidungen oder Voraussetzungen…",
+    "internalNotesHelper": "Privates Notizfeld für Notizen und Links.",
+    "internalNotesPlaceholder": "Private Links, Kunden-Zitate oder Implementierungsnotizen hinzufügen…",
+    "translationForTitle": "Übersetzung für öffentlichen Titel ({locale})…",
+    "translationForDesc": "Übersetzung für öffentliche Beschreibung ({locale})…",
+    "publicTitleHelper": "Kundenorientierter Titel, der auf der öffentlichen Roadmap angezeigt wird."
   },
   "changelog": {
     "title": "Changelog",
@@ -424,7 +440,12 @@
     "didntFind": "Nicht gefunden, wonach Sie gesucht haben?",
     "submitIdeaPrompt": "Reichen Sie eine Frage oder Idee in unserem Feedback-Board ein.",
     "postToBoard": "Auf dem Feedback-Board posten",
-    "noMatchingQuestions": "Keine passenden Fragen gefunden"
+    "noMatchingQuestions": "Keine passenden Fragen gefunden",
+    "dragToReorderQuestion": "Ziehen, um Frage neu anzuordnen",
+    "questionActions": "Frage-Aktionen",
+    "dragToReorderCategory": "Ziehen, um Kategorie neu anzuordnen",
+    "categoryOptions": "Kategorieoptionen",
+    "faqCategoriesNav": "FAQ-Kategorien"
   },
   "apiKeys": {
     "title": "API-Schlüssel",
@@ -594,7 +615,8 @@
     "eventCommentRestored": "Wird ausgelöst, wenn ein gelöschter Kommentar wiederhergestellt wird",
     "eventCommentCreated": "Wird ausgelöst, wenn ein Kunde oder Kollege einen Kommentar abgibt",
     "eventCommentDeleted": "Wird ausgelöst, wenn ein Kommentar gelöscht oder moderiert wird",
-    "eventChangelogPublished": "Wird ausgelöst, wenn ein Changelog-Eintrag veröffentlicht wird"
+    "eventChangelogPublished": "Wird ausgelöst, wenn ein Changelog-Eintrag veröffentlicht wird",
+    "descPlaceholder": "Produktions-Zapier-Integration"
   },
   "team": {
     "title": "Team",
@@ -773,7 +795,9 @@
     "tabHelpCenter": "Hilfezentrum",
     "all": "Alle",
     "searchPlaceholder": "Feedback suchen...",
-    "comments": "Kommentare"
+    "comments": "Kommentare",
+    "showcaseViews": "Produkt-Showcase-Ansichten",
+    "interactivePreview": "Interaktive Produktvorschau"
   },
   "board": {
     "category": "Kategorie",
@@ -1217,7 +1241,12 @@
     "noDeletedPostsTitle": "No deleted posts",
     "noDeletedPostsBody": "When posts are removed from your board, you can restore them here.",
     "noDeletedCommentsTitle": "No deleted comments",
-    "noDeletedCommentsBody": "When comments are removed, you can restore them here."
+    "noDeletedCommentsBody": "When comments are removed, you can restore them here.",
+    "restorePostAria": "{title} wiederherstellen",
+    "restoreCommentAria": "Kommentar wiederherstellen",
+    "restorePostFirst": "Zuerst den Beitrag wiederherstellen",
+    "colAuthor": "Autor",
+    "deletedUser": "Gelöschter Benutzer"
   },
   "badges": {
     "title": "User Badges",
@@ -1235,7 +1264,24 @@
     "deleteBadgeDesc": "This badge will be removed from all users who currently have it.",
     "noBadgesTitle": "No custom badges yet",
     "noBadgesBody": "Create badges to highlight your top contributors and team members.",
-    "manageBadges": "Manage badges"
+    "manageBadges": "Manage badges",
+    "attributionRulesTitle": "Zuordnungsregeln: {name}",
+    "attributionRulesDesc": "Dieses Badge automatisch vergeben, wenn Benutzer über Links mit passenden Abfrageparametern eintreffen.",
+    "hmacEnabled": "HMAC-Verifizierung aktiviert",
+    "noRulesYet": "Noch keine automatisierten Zuordnungsregeln vorhanden.",
+    "addRuleSection": "Regel hinzufügen",
+    "paramMatchingLabel": "Parametername-Abgleich",
+    "exactName": "Exakter Name",
+    "regularExpression": "Regulärer Ausdruck",
+    "queryParamLabel": "Abfrageparameter-Name",
+    "queryParamPlaceholder": "z.B. tier, plan, source",
+    "matchTypeLabel": "Abgleichstyp",
+    "exactString": "Exakte Zeichenkette",
+    "expectedValueLabel": "Erwarteter Wert",
+    "antiSpoofingSecretLabel": "Anti-Spoofing-HMAC-Geheimnis (optional)",
+    "antiSpoofingSecretPlaceholder": "Geheimen Token für die HMAC-SHA256-Prüfung eingeben",
+    "antiSpoofingSecretHelp": "Wenn festgelegt, sowohl Signatur- als auch Zeitstempel-Parameter einbeziehen. {sigParam} ist das HMAC-SHA256-Hexadezimal von value + '.' + {tsParam}. {tsParam} sind die Unix-Sekunden bei der Signierung, 30 Tage gültig.",
+    "deleteRuleAria": "Regel löschen"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1345,5 +1391,36 @@
     "colMember": "Mitglied",
     "colRole": "Rolle",
     "platformInviteDesc": "Erstellen Sie oben einen Einladungslink, damit ein Unternehmen einen Workspace einrichten kann."
+  },
+  "richText": {
+    "textFormatting": "Textformatierung",
+    "heading2": "Überschrift 2",
+    "heading3": "Überschrift 3",
+    "bold": "Fett",
+    "italic": "Kursiv",
+    "strikethrough": "Durchgestrichen",
+    "codeBlock": "Codeblock",
+    "bulletList": "Aufzählungsliste",
+    "numberedList": "Nummerierte Liste",
+    "quote": "Zitat",
+    "divider": "Trennlinie",
+    "insertLink": "Link einfügen",
+    "editLink": "Link bearbeiten",
+    "removeLink": "Link entfernen",
+    "saveLink": "Link speichern",
+    "insertRemoteImage": "Remote-Bild einfügen",
+    "imageDialogDesc": "Geben Sie einen direkten Link zu einem Bild an, das unter http:// oder https:// gehostet wird. Lokale Datei-Uploads werden nicht unterstützt.",
+    "imageUrlLabel": "Bild-URL",
+    "altTextLabel": "Alt-Text",
+    "altTextOptional": "(optional, max. 200 Zeichen)",
+    "altTextPlaceholder": "Beschreibende Bildunterschrift oder Alt-Text",
+    "enterImageUrl": "Bitte geben Sie eine Bild-URL ein.",
+    "invalidImageUrl": "Bitte geben Sie eine gültige http://- oder https://-Bild-URL ein.",
+    "altTextTooLong": "Der Alt-Text darf maximal 200 Zeichen lang sein.",
+    "insertImage": "Bild einfügen",
+    "linkDialogDesc": "Geben Sie eine Ziel-URL ein (beginnend mit http://, https:// oder mailto:).",
+    "destinationUrlLabel": "Ziel-URL",
+    "invalidLinkProtocol": "URL muss mit http://, https:// oder mailto: beginnen",
+    "invalidLinkUrl": "Bitte geben Sie eine gültige URL ein."
   }
 }

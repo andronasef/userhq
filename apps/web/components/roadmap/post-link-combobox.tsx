@@ -11,6 +11,7 @@ import {
 import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
 import { apiFetch } from "../../lib/api-client";
+import { useI18n } from "../../lib/i18n/context";
 
 export interface PostLinkComboboxProps {
   ws: string;
@@ -27,6 +28,7 @@ export function PostLinkCombobox({
   linkedPostIds,
   onSelectPost,
 }: PostLinkComboboxProps) {
+  const { t } = useI18n();
   const [query, setQuery] = React.useState("");
   const [results, setResults] = React.useState<RoadmapPostLinkSearchResult[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -88,7 +90,7 @@ export function PostLinkCombobox({
           onFocus={() => {
             if (results.length > 0) setIsOpen(true);
           }}
-          placeholder="Search feedback posts by title or number…"
+          placeholder={t("roadmap.searchPostsPlaceholder")}
           className="pl-9 pr-9"
         />
         {isLoading && (
@@ -103,7 +105,7 @@ export function PostLinkCombobox({
         <div className="absolute z-50 left-0 right-0 top-full mt-1.5 max-h-60 overflow-y-auto rounded-md border border-border bg-popover shadow-md p-1">
           {results.length === 0 && !isLoading ? (
             <div className="p-3 text-center text-xs text-muted-foreground">
-              No matching posts found.
+              {t("roadmap.noMatchingPosts")}
             </div>
           ) : (
             results.map((post) => {

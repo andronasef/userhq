@@ -59,7 +59,8 @@
     "daysAgo": "{count} дн. назад",
     "goToHome": "На главную",
     "tryAgain": "Повторить попытку",
-    "reset": "Сбросить"
+    "reset": "Сбросить",
+    "actions": "Действия"
   },
   "portal": {
     "submitFeedback": "Предложить идею",
@@ -261,7 +262,8 @@
     "showLess": "Показать меньше",
     "readMore": "Читать далее",
     "uploadTest": "Тест загрузки",
-    "signOutError": "Не удалось выйти. Проверьте соединение и повторите попытку."
+    "signOutError": "Не удалось выйти. Проверьте соединение и повторите попытку.",
+    "entryLocalesAria": "Языки перевода записи"
   },
   "roadmap": {
     "title": "План развития",
@@ -314,7 +316,21 @@
     "checkBackFeedback": "Загляните позже или поделитесь отзывом, чтобы повлиять на следующие обновления.",
     "checkBackSoon": "Загляните позже, чтобы узнать, над чем мы работаем.",
     "itemDetails": "Подробности элемента дорожной карты {title}",
-    "linkedFeedbackCount": "Связанных отзывов: {count}."
+    "linkedFeedbackCount": "Связанных отзывов: {count}.",
+    "searchPostsPlaceholder": "Поиск публикаций отзывов по названию или номеру…",
+    "noMatchingPosts": "Подходящих публикаций не найдено.",
+    "publicTitlePlaceholder": "напр., Поддержка темного режима",
+    "publicDescPlaceholder": "Опишите ценность функции для ваших пользователей…",
+    "publicDescHelper": "Необязательное описание, поясняющее, что создается и почему.",
+    "internalTitleHelper": "Внутреннее рабочее название для планирования команды (никогда не отображается публично).",
+    "internalTitlePlaceholder": "напр., Реализовать переключение тем с помощью next-themes",
+    "internalDescHelper": "Необязательные технические заметки или спецификации области видимости для команды.",
+    "internalDescPlaceholder": "Технический масштаб, архитектурные решения или предварительные условия…",
+    "internalNotesHelper": "Личный черновик для заметок и ссылок.",
+    "internalNotesPlaceholder": "Добавляйте личные ссылки, цитаты клиентов или заметки по реализации…",
+    "translationForTitle": "Перевод общедоступного заголовка ({locale})...",
+    "translationForDesc": "Перевод общедоступного описания ({locale})...",
+    "publicTitleHelper": "Заголовок для клиентов, отображаемый на публичной дорожной карте."
   },
   "changelog": {
     "title": "История изменений",
@@ -424,7 +440,12 @@
     "didntFind": "Не нашли то, что искали?",
     "submitIdeaPrompt": "Отправьте вопрос или идею на нашу доску отзывов сообщества.",
     "postToBoard": "Опубликовать на доске отзывов",
-    "noMatchingQuestions": "Совпадающих вопросов не найдено"
+    "noMatchingQuestions": "Совпадающих вопросов не найдено",
+    "dragToReorderQuestion": "Перетащите, чтобы изменить порядок вопросов",
+    "questionActions": "Действия с вопросом",
+    "dragToReorderCategory": "Перетащите, чтобы изменить порядок категорий",
+    "categoryOptions": "Параметры категории",
+    "faqCategoriesNav": "Категории FAQ"
   },
   "apiKeys": {
     "title": "API-ключи",
@@ -594,7 +615,8 @@
     "eventCommentRestored": "Срабатывает при восстановлении удаленного комментария",
     "eventCommentCreated": "Срабатывает, когда клиент или участник команды оставляет комментарий",
     "eventCommentDeleted": "Срабатывает при удалении или модерации комментария",
-    "eventChangelogPublished": "Срабатывает при публикации объявления в истории изменений"
+    "eventChangelogPublished": "Срабатывает при публикации объявления в истории изменений",
+    "descPlaceholder": "Интеграция с Zapier (продакшн)"
   },
   "team": {
     "title": "Команда",
@@ -773,7 +795,9 @@
     "tabHelpCenter": "Центр помощи",
     "all": "Все",
     "searchPlaceholder": "Поиск отзывов...",
-    "comments": "комментариев"
+    "comments": "комментариев",
+    "showcaseViews": "Виды витрины продукта",
+    "interactivePreview": "Интерактивный предварительный просмотр продукта"
   },
   "board": {
     "category": "Категория",
@@ -1217,7 +1241,12 @@
     "noDeletedPostsTitle": "No deleted posts",
     "noDeletedPostsBody": "When posts are removed from your board, you can restore them here.",
     "noDeletedCommentsTitle": "No deleted comments",
-    "noDeletedCommentsBody": "When comments are removed, you can restore them here."
+    "noDeletedCommentsBody": "When comments are removed, you can restore them here.",
+    "restorePostAria": "Восстановить {title}",
+    "restoreCommentAria": "Восстановить комментарий",
+    "restorePostFirst": "Сначала восстановите публикацию",
+    "colAuthor": "Автор",
+    "deletedUser": "Удаленный пользователь"
   },
   "badges": {
     "title": "User Badges",
@@ -1235,7 +1264,24 @@
     "deleteBadgeDesc": "This badge will be removed from all users who currently have it.",
     "noBadgesTitle": "No custom badges yet",
     "noBadgesBody": "Create badges to highlight your top contributors and team members.",
-    "manageBadges": "Manage badges"
+    "manageBadges": "Manage badges",
+    "attributionRulesTitle": "Правила атрибуции: {name}",
+    "attributionRulesDesc": "Автоматически выдавать этот значок, когда пользователи переходят по ссылкам с совпадающими параметрами запроса.",
+    "hmacEnabled": "Проверка HMAC включена",
+    "noRulesYet": "Автоматических правил атрибуции пока нет.",
+    "addRuleSection": "Добавить правило",
+    "paramMatchingLabel": "Соответствие имени параметра",
+    "exactName": "Точное имя",
+    "regularExpression": "Регулярное выражение",
+    "queryParamLabel": "Имя параметра запроса",
+    "queryParamPlaceholder": "напр., tier, plan, source",
+    "matchTypeLabel": "Тип соответствия",
+    "exactString": "Точная строка",
+    "expectedValueLabel": "Ожидаемое значение",
+    "antiSpoofingSecretLabel": "Секрет HMAC для защиты от подделки (необязательно)",
+    "antiSpoofingSecretPlaceholder": "Введите секретный токен для проверки HMAC-SHA256",
+    "antiSpoofingSecretHelp": "Если задано, включите параметры подписи и временной метки. {sigParam} — это шестнадцатеричный HMAC-SHA256 от value + '.' + {tsParam}. {tsParam} — секунды Unix на момент подписания ссылки, действительны 30 дней.",
+    "deleteRuleAria": "Удалить правило"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1345,5 +1391,36 @@
     "colMember": "Участник",
     "colRole": "Роль",
     "platformInviteDesc": "Создайте ссылку-приглашение выше, чтобы компания могла настроить рабочее пространство."
+  },
+  "richText": {
+    "textFormatting": "Форматирование текста",
+    "heading2": "Заголовок 2",
+    "heading3": "Заголовок 3",
+    "bold": "Полужирный",
+    "italic": "Курсив",
+    "strikethrough": "Зачеркнутый",
+    "codeBlock": "Блок кода",
+    "bulletList": "Маркированный список",
+    "numberedList": "Нумерованный список",
+    "quote": "Цитата",
+    "divider": "Разделитель",
+    "insertLink": "Вставить ссылку",
+    "editLink": "Редактировать ссылку",
+    "removeLink": "Удалить ссылку",
+    "saveLink": "Сохранить ссылку",
+    "insertRemoteImage": "Вставить удаленное изображение",
+    "imageDialogDesc": "Укажите прямую ссылку на изображение, размещенное по протоколу http:// или https://. Загрузка локальных файлов не поддерживается.",
+    "imageUrlLabel": "URL изображения",
+    "altTextLabel": "Альтернативный текст",
+    "altTextOptional": "(необязательно, макс. 200 знаков)",
+    "altTextPlaceholder": "Описательная подпись или альтернативный текст",
+    "enterImageUrl": "Пожалуйста, введите URL изображения.",
+    "invalidImageUrl": "Пожалуйста, введите действительный URL изображения (http:// или https://).",
+    "altTextTooLong": "Альтернативный текст должен содержать не более 200 символов.",
+    "insertImage": "Вставить изображение",
+    "linkDialogDesc": "Введите целевой URL (начинающийся с http://, https:// или mailto:).",
+    "destinationUrlLabel": "Целевой URL",
+    "invalidLinkProtocol": "URL должен начинаться с http://, https:// или mailto:",
+    "invalidLinkUrl": "Пожалуйста, введите действительный URL."
   }
 }

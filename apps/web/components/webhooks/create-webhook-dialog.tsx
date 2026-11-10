@@ -310,7 +310,7 @@ const isValid = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expec
             >
               <Input
                 type="text"
-                placeholder="Production Zapier integration"
+                placeholder={t("webhooks.descPlaceholder")}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 data-testid="webhook-description-input"

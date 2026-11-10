@@ -59,7 +59,8 @@
     "daysAgo": "hace {count} d",
     "goToHome": "Ir al inicio",
     "tryAgain": "Reintentar",
-    "reset": "Restablecer"
+    "reset": "Restablecer",
+    "actions": "Acciones"
   },
   "portal": {
     "submitFeedback": "Enviar sugerencia",
@@ -261,7 +262,8 @@
     "showLess": "Mostrar menos",
     "readMore": "Leer más",
     "uploadTest": "Prueba de subida",
-    "signOutError": "No se pudo cerrar sesión. Revisa tu conexión e inténtalo de nuevo."
+    "signOutError": "No se pudo cerrar sesión. Revisa tu conexión e inténtalo de nuevo.",
+    "entryLocalesAria": "Idiomas de traducción de la entrada"
   },
   "roadmap": {
     "title": "Hoja de ruta",
@@ -314,7 +316,21 @@
     "checkBackFeedback": "Vuelve más tarde o comparte tus comentarios para ayudar a definir qué crearemos a continuación.",
     "checkBackSoon": "Vuelve más tarde para ver en qué estamos trabajando.",
     "itemDetails": "Detalles del elemento de la hoja de ruta {title}",
-    "linkedFeedbackCount": "{count} publicaciones de comentarios vinculadas."
+    "linkedFeedbackCount": "{count} publicaciones de comentarios vinculadas.",
+    "searchPostsPlaceholder": "Buscar publicaciones de comentarios por título o número…",
+    "noMatchingPosts": "No se encontraron publicaciones coincidentes.",
+    "publicTitlePlaceholder": "ej. Compatibilidad con modo oscuro",
+    "publicDescPlaceholder": "Describe el valor de la función para tus usuarios…",
+    "publicDescHelper": "Descripción opcional que explica qué se está entregando y por qué.",
+    "internalTitleHelper": "Título de trabajo interno para la planificación del equipo (nunca se muestra públicamente).",
+    "internalTitlePlaceholder": "ej. Implementar alternancia de tema con next-themes",
+    "internalDescHelper": "Notas técnicas u especificaciones de alcance opcionales para el equipo.",
+    "internalDescPlaceholder": "Alcance técnico, decisiones de arquitectura o requisitos previos…",
+    "internalNotesHelper": "Bloc de notas privado para anotaciones y enlaces.",
+    "internalNotesPlaceholder": "Añade enlaces privados, citas de clientes o notas de implementación…",
+    "translationForTitle": "Traducción para el título público ({locale})...",
+    "translationForDesc": "Traducción para la descripción pública ({locale})...",
+    "publicTitleHelper": "Título para los clientes que se muestra en la hoja de ruta pública."
   },
   "changelog": {
     "title": "Registro de cambios",
@@ -424,7 +440,12 @@
     "didntFind": "¿No encontraste lo que buscabas?",
     "submitIdeaPrompt": "Envía una pregunta o idea a nuestro tablero de comentarios de la comunidad.",
     "postToBoard": "Publicar en el tablero de comentarios",
-    "noMatchingQuestions": "No se encontraron preguntas coincidentes"
+    "noMatchingQuestions": "No se encontraron preguntas coincidentes",
+    "dragToReorderQuestion": "Arrastrar para reordenar la pregunta",
+    "questionActions": "Acciones de pregunta",
+    "dragToReorderCategory": "Arrastrar para reordenar la categoría",
+    "categoryOptions": "Opciones de categoría",
+    "faqCategoriesNav": "Categorías de preguntas frecuentes"
   },
   "apiKeys": {
     "title": "Claves de API",
@@ -594,7 +615,8 @@
     "eventCommentRestored": "Se activa cuando se restaura un comentario eliminado",
     "eventCommentCreated": "Se activa cada vez que un cliente o compañero publica un comentario",
     "eventCommentDeleted": "Se activa cuando un comentario es eliminado o moderado",
-    "eventChangelogPublished": "Se activa cada vez que se publica un anuncio en el registro de cambios"
+    "eventChangelogPublished": "Se activa cada vez que se publica un anuncio en el registro de cambios",
+    "descPlaceholder": "Integración de Zapier en producción"
   },
   "team": {
     "title": "Equipo",
@@ -773,7 +795,9 @@
     "tabHelpCenter": "Centro de ayuda",
     "all": "Todos",
     "searchPlaceholder": "Buscar comentarios...",
-    "comments": "comentarios"
+    "comments": "comentarios",
+    "showcaseViews": "Vistas del escaparate de productos",
+    "interactivePreview": "Vista previa interactiva del producto"
   },
   "board": {
     "category": "Categoría",
@@ -1217,7 +1241,12 @@
     "noDeletedPostsTitle": "No deleted posts",
     "noDeletedPostsBody": "When posts are removed from your board, you can restore them here.",
     "noDeletedCommentsTitle": "No deleted comments",
-    "noDeletedCommentsBody": "When comments are removed, you can restore them here."
+    "noDeletedCommentsBody": "When comments are removed, you can restore them here.",
+    "restorePostAria": "Restaurar {title}",
+    "restoreCommentAria": "Restaurar comentario",
+    "restorePostFirst": "Restaura la publicación primero",
+    "colAuthor": "Autor",
+    "deletedUser": "Usuario eliminado"
   },
   "badges": {
     "title": "User Badges",
@@ -1235,7 +1264,24 @@
     "deleteBadgeDesc": "This badge will be removed from all users who currently have it.",
     "noBadgesTitle": "No custom badges yet",
     "noBadgesBody": "Create badges to highlight your top contributors and team members.",
-    "manageBadges": "Manage badges"
+    "manageBadges": "Manage badges",
+    "attributionRulesTitle": "Reglas de atribución: {name}",
+    "attributionRulesDesc": "Otorga automáticamente esta insignia cuando los usuarios lleguen mediante enlaces con parámetros de consulta coincidentes.",
+    "hmacEnabled": "Verificación HMAC activada",
+    "noRulesYet": "Aún no hay reglas de atribución automatizadas.",
+    "addRuleSection": "Añadir regla",
+    "paramMatchingLabel": "Coincidencia de nombre de parámetro",
+    "exactName": "Nombre exacto",
+    "regularExpression": "Expresión regular",
+    "queryParamLabel": "Nombre del parámetro de consulta",
+    "queryParamPlaceholder": "ej. tier, plan, source",
+    "matchTypeLabel": "Tipo de coincidencia",
+    "exactString": "Cadena exacta",
+    "expectedValueLabel": "Valor esperado",
+    "antiSpoofingSecretLabel": "Secreto HMAC antisupantación (opcional)",
+    "antiSpoofingSecretPlaceholder": "Introduce el token secreto para la verificación HMAC-SHA256",
+    "antiSpoofingSecretHelp": "Cuando esté establecido, incluye los parámetros de firma y marca de tiempo. {sigParam} es el hexadecimal HMAC-SHA256 de value + '.' + {tsParam}. {tsParam} son los segundos Unix cuando se firmó el enlace, válido por 30 días.",
+    "deleteRuleAria": "Eliminar regla"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1345,5 +1391,36 @@
     "colMember": "Miembro",
     "colRole": "Rol",
     "platformInviteDesc": "Crea un enlace de invitación arriba para que una empresa configure un espacio de trabajo."
+  },
+  "richText": {
+    "textFormatting": "Formato de texto",
+    "heading2": "Encabezado 2",
+    "heading3": "Encabezado 3",
+    "bold": "Negrita",
+    "italic": "Cursiva",
+    "strikethrough": "Tachado",
+    "codeBlock": "Bloque de código",
+    "bulletList": "Lista con viñetas",
+    "numberedList": "Lista numerada",
+    "quote": "Cita",
+    "divider": "Separador",
+    "insertLink": "Insertar enlace",
+    "editLink": "Editar enlace",
+    "removeLink": "Quitar enlace",
+    "saveLink": "Guardar enlace",
+    "insertRemoteImage": "Insertar imagen remota",
+    "imageDialogDesc": "Proporciona un enlace directo a una imagen alojada en http:// o https://. No se admiten cargas de archivos locales.",
+    "imageUrlLabel": "URL de la imagen",
+    "altTextLabel": "Texto alternativo",
+    "altTextOptional": "(opcional, máx. 200 caracteres)",
+    "altTextPlaceholder": "Subtítulo descriptivo o texto alternativo",
+    "enterImageUrl": "Introduce una URL de imagen.",
+    "invalidImageUrl": "Introduce una URL de imagen válida que comience por http:// o https://.",
+    "altTextTooLong": "El texto alternativo debe tener 200 caracteres o menos.",
+    "insertImage": "Insertar imagen",
+    "linkDialogDesc": "Introduce una URL de destino (que comience con http://, https:// o mailto:).",
+    "destinationUrlLabel": "URL de destino",
+    "invalidLinkProtocol": "La URL debe comenzar con http://, https:// o mailto:",
+    "invalidLinkUrl": "Introduce una URL válida."
   }
 }

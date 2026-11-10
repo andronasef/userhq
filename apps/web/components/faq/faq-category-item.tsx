@@ -98,7 +98,7 @@ export function FaqCategoryItem({
             <button
               type="button"
               ref={handleRef}
-              aria-label="Drag to reorder category"
+              aria-label={t("faq.dragToReorderCategory")}
               className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1 shrink-0 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <GripVertical className="size-4" aria-hidden="true" />
@@ -133,7 +133,7 @@ export function FaqCategoryItem({
                   variant="ghost"
                   size="icon"
                   className="size-8 text-muted-foreground hover:text-foreground"
-                  aria-label="Category options"
+                  aria-label={t("faq.categoryOptions")}
                 >
                   <MoreHorizontal className="size-4" aria-hidden="true" />
                 </Button>

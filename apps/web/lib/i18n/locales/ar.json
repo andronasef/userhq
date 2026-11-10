@@ -59,7 +59,8 @@
     "daysAgo": "منذ {count} ي",
     "goToHome": "الذهاب إلى الرئيسية",
     "tryAgain": "حاول مرة أخرى",
-    "reset": "إعادة ضبط"
+    "reset": "إعادة ضبط",
+    "actions": "إجراءات"
   },
   "portal": {
     "submitFeedback": "أرسل فكرة",
@@ -261,7 +262,8 @@
     "showLess": "عرض أقل",
     "readMore": "اقرأ المزيد",
     "uploadTest": "اختبار الرفع",
-    "signOutError": "تعذر تسجيل الخروج. تحقق من اتصالك وحاول مرة أخرى."
+    "signOutError": "تعذر تسجيل الخروج. تحقق من اتصالك وحاول مرة أخرى.",
+    "entryLocalesAria": "لغات ترجمة الإدخال"
   },
   "roadmap": {
     "title": "خارطة الطريق",
@@ -314,7 +316,21 @@
     "checkBackFeedback": "تحقق مرة أخرى لاحقاً أو شارك ملاحظاتك للمساعدة في تشكيل ما نبنيه لاحقاً.",
     "checkBackSoon": "تحقق مرة أخرى لاحقاً لمعرفة ما نعمل عليه.",
     "itemDetails": "تفاصيل عنصر خارطة الطريق {title}",
-    "linkedFeedbackCount": "{count} منشورات ملاحظات مرتبطة."
+    "linkedFeedbackCount": "{count} منشورات ملاحظات مرتبطة.",
+    "searchPostsPlaceholder": "ابحث في منشورات الملاحظات حسب العنوان أو الرقم...",
+    "noMatchingPosts": "لم يتم العثور على منشورات مطابقة.",
+    "publicTitlePlaceholder": "مثلاً: دعم الوضع الداكن",
+    "publicDescPlaceholder": "صف قيمة الميزة للمستخدمين...",
+    "publicDescHelper": "وصف اختياري يوضح ما يتم تسليمه والسبب.",
+    "internalTitleHelper": "عنوان العمل الداخلي لتخطيط الفريق (لا يُعرض للعامة مطلقاً).",
+    "internalTitlePlaceholder": "مثلاً: تنفيذ تبديل السمة باستخدام next-themes",
+    "internalDescHelper": "ملاحظات فنية اختيارية أو مواصفات نطاق العمل للفريق.",
+    "internalDescPlaceholder": "النطاق الفني أو الخيارات المعمارية أو المتطلبات المسبقة...",
+    "internalNotesHelper": "مسودة خاصة للملاحظات والروابط.",
+    "internalNotesPlaceholder": "أضف روابط خاصة أو اقتباسات من العملاء أو ملاحظات التنفيذ...",
+    "translationForTitle": "ترجمة العنوان العام ({locale})...",
+    "translationForDesc": "ترجمة الوصف العام ({locale})...",
+    "publicTitleHelper": "العنوان الموجه للعملاء والمعروض في خريطة الطريق العامة."
   },
   "changelog": {
     "title": "سجل التغييرات",
@@ -424,7 +440,12 @@
     "didntFind": "ألم تجد ما كنت تبحث عنه؟",
     "submitIdeaPrompt": "أرسل سؤالاً أو فكرة إلى لوحة ملاحظات المجتمع لدينا.",
     "postToBoard": "النشر في لوحة الملاحظات",
-    "noMatchingQuestions": "لم يتم العثور على أسئلة مطابقة"
+    "noMatchingQuestions": "لم يتم العثور على أسئلة مطابقة",
+    "dragToReorderQuestion": "اسحب لإعادة ترتيب السؤال",
+    "questionActions": "إجراءات السؤال",
+    "dragToReorderCategory": "اسحب لإعادة ترتيب الفئة",
+    "categoryOptions": "خيارات الفئة",
+    "faqCategoriesNav": "فئات الأسئلة الشائعة"
   },
   "apiKeys": {
     "title": "مفاتيح API",
@@ -594,7 +615,8 @@
     "eventCommentRestored": "يتم تشغيله عند استعادة تعليق محذوف",
     "eventCommentCreated": "يتم تشغيله عند نشر عميل أو زميل تعليقًا",
     "eventCommentDeleted": "يتم تشغيله عند حذف تعليق أو الإشراف عليه",
-    "eventChangelogPublished": "يتم تشغيله عند نشر إعلان سجل تغييرات"
+    "eventChangelogPublished": "يتم تشغيله عند نشر إعلان سجل تغييرات",
+    "descPlaceholder": "تكامل Zapier للإنتاج"
   },
   "team": {
     "title": "الفريق",
@@ -773,7 +795,9 @@
     "tabHelpCenter": "مركز المساعدة",
     "all": "الكل",
     "searchPlaceholder": "البحث في الآراء...",
-    "comments": "تعليقات"
+    "comments": "تعليقات",
+    "showcaseViews": "عروض عرض المنتج",
+    "interactivePreview": "معاينة المنتج التفاعلية"
   },
   "board": {
     "category": "الفئة",
@@ -1217,7 +1241,12 @@
     "noDeletedPostsTitle": "لا توجد منشورات محذوفة",
     "noDeletedPostsBody": "عند إزالة المنشورات من لوحتك، يمكنك استعادتها هنا.",
     "noDeletedCommentsTitle": "لا توجد تعليقات محذوفة",
-    "noDeletedCommentsBody": "عند إزالة التعليقات، يمكنك استعادتها هنا."
+    "noDeletedCommentsBody": "عند إزالة التعليقات، يمكنك استعادتها هنا.",
+    "restorePostAria": "استعادة {title}",
+    "restoreCommentAria": "استعادة التعليق",
+    "restorePostFirst": "استعد المنشور أولاً",
+    "colAuthor": "الكاتب",
+    "deletedUser": "مستخدم محذوف"
   },
   "badges": {
     "title": "شارات المستخدمين",
@@ -1235,7 +1264,24 @@
     "deleteBadgeDesc": "ستتم إزالة هذه الشارة من جميع المستخدمين الذين يحملونها حاليًا.",
     "noBadgesTitle": "لا توجد شارات مخصصة بعد",
     "noBadgesBody": "أنشئ شارات لتمييز أفضل المساهمين وأعضاء الفريق.",
-    "manageBadges": "إدارة الشارات"
+    "manageBadges": "إدارة الشارات",
+    "attributionRulesTitle": "قواعد الإحالة: {name}",
+    "attributionRulesDesc": "منح هذه الشارة تلقائياً عندما يصل المستخدمون عبر روابط تتضمن معلمات استعلام مطابقة.",
+    "hmacEnabled": "تم تفعيل التحقق بواسطة HMAC",
+    "noRulesYet": "لا توجد قواعد إحالة آلية حتى الآن.",
+    "addRuleSection": "إضافة قاعدة",
+    "paramMatchingLabel": "مطابقة اسم المعلمة",
+    "exactName": "الاسم بالضبط",
+    "regularExpression": "تعبير نمطي (Regex)",
+    "queryParamLabel": "اسم معلمة الاستعلام",
+    "queryParamPlaceholder": "مثلاً: tier, plan, source",
+    "matchTypeLabel": "نوع المطابقة",
+    "exactString": "النص بالضبط",
+    "expectedValueLabel": "القيمة المتوقعة",
+    "antiSpoofingSecretLabel": "مفتاح HMAC السري لمكافحة الانتحال (اختياري)",
+    "antiSpoofingSecretPlaceholder": "أدخل الرمز السري للتحقق من HMAC-SHA256",
+    "antiSpoofingSecretHelp": "عند التعيين، قم بتضمين كل من معلمات التوقيع والطابع الزمني. {sigParam} هو تمثيل HMAC-SHA256 الست عشري لـ value + '.' + {tsParam}. {tsParam} هو ثواني Unix عند توقيع الرابط، صالح لمدة 30 يوماً.",
+    "deleteRuleAria": "حذف القاعدة"
   },
   "users": {
     "title": "دليل مستخدمي المنتج",
@@ -1345,5 +1391,36 @@
     "colMember": "العضو",
     "colRole": "الدور",
     "platformInviteDesc": "أنشئ رابط دعوة أعلاه للسماح لشركة بإعداد مساحة عمل."
+  },
+  "richText": {
+    "textFormatting": "تنسيق النص",
+    "heading2": "عنوان 2",
+    "heading3": "عنوان 3",
+    "bold": "عريض",
+    "italic": "مائل",
+    "strikethrough": "يتوسطه خط",
+    "codeBlock": "كتلة برمجية",
+    "bulletList": "قائمة نقطية",
+    "numberedList": "قائمة مرقمة",
+    "quote": "اقتباس",
+    "divider": "فاصل",
+    "insertLink": "إدراج رابط",
+    "editLink": "تعديل الرابط",
+    "removeLink": "إزالة الرابط",
+    "saveLink": "حفظ الرابط",
+    "insertRemoteImage": "إدراج صورة عن بعد",
+    "imageDialogDesc": "قدّم رابطاً مباشراً لصورة مستضافة على http:// أو https://. تحميل الملفات المحلية غير مدعوم.",
+    "imageUrlLabel": "عنوان URL للصورة",
+    "altTextLabel": "النص البديل",
+    "altTextOptional": "(اختياري، بحد أقصى 200 حرف)",
+    "altTextPlaceholder": "تسمية توضيحية أو نص بديل",
+    "enterImageUrl": "يرجى إدخال عنوان URL للصورة.",
+    "invalidImageUrl": "يرجى إدخال عنوان URL صالح للصورة يبدأ بـ http:// أو https://.",
+    "altTextTooLong": "يجب ألا يتجاوز النص البديل 200 حرف.",
+    "insertImage": "إدراج صورة",
+    "linkDialogDesc": "أدخل عنوان URL الوجهة (يبدأ بـ http:// أو https:// أو mailto:).",
+    "destinationUrlLabel": "عنوان URL الوجهة",
+    "invalidLinkProtocol": "يجب أن يبدأ عنوان URL بـ http:// أو https:// أو mailto:",
+    "invalidLinkUrl": "يرجى إدخال عنوان URL صالح."
   }
 }

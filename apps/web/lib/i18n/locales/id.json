@@ -59,7 +59,8 @@
     "daysAgo": "{count}h yang lalu",
     "goToHome": "Buka beranda",
     "tryAgain": "Coba lagi",
-    "reset": "Atur ulang"
+    "reset": "Atur ulang",
+    "actions": "Tindakan"
   },
   "portal": {
     "submitFeedback": "Kirim ide",
@@ -261,7 +262,8 @@
     "showLess": "Tampilkan lebih sedikit",
     "readMore": "Baca selengkapnya",
     "uploadTest": "Uji unggah",
-    "signOutError": "Tidak dapat keluar. Periksa koneksi Anda dan coba lagi."
+    "signOutError": "Tidak dapat keluar. Periksa koneksi Anda dan coba lagi.",
+    "entryLocalesAria": "Bahasa terjemahan entri"
   },
   "roadmap": {
     "title": "Peta Jalan",
@@ -314,7 +316,21 @@
     "checkBackFeedback": "Periksa kembali nanti atau sampaikan masukan untuk membantu menentukan apa yang kami buat selanjutnya.",
     "checkBackSoon": "Periksa kembali nanti untuk melihat apa yang sedang kami kerjakan.",
     "itemDetails": "Detail untuk item roadmap {title}",
-    "linkedFeedbackCount": "{count} postingan masukan yang ditautkan."
+    "linkedFeedbackCount": "{count} postingan masukan yang ditautkan.",
+    "searchPostsPlaceholder": "Cari postingan masukan berdasarkan judul atau nomor…",
+    "noMatchingPosts": "Tidak ada postingan yang cocok.",
+    "publicTitlePlaceholder": "mis. Dukungan Mode Gelap",
+    "publicDescPlaceholder": "Jelaskan manfaat fitur bagi pengguna Anda…",
+    "publicDescHelper": "Deskripsi opsional yang menjelaskan apa yang disampaikan dan alasannya.",
+    "internalTitleHelper": "Judul kerja internal untuk perencanaan tim (tidak pernah ditampilkan ke publik).",
+    "internalTitlePlaceholder": "mis. Terapkan pengalih tema dengan next-themes",
+    "internalDescHelper": "Catatan teknis atau spesifikasi cakupan opsional untuk tim.",
+    "internalDescPlaceholder": "Cakupan teknis, pilihan arsitektur, atau prasyarat…",
+    "internalNotesHelper": "Buku catatan pribadi untuk catatan dan tautan.",
+    "internalNotesPlaceholder": "Tambahkan tautan pribadi, kutipan pelanggan, atau catatan implementasi…",
+    "translationForTitle": "Terjemahan untuk judul publik ({locale})...",
+    "translationForDesc": "Terjemahan untuk deskripsi publik ({locale})...",
+    "publicTitleHelper": "Judul untuk pelanggan yang ditampilkan di roadmap publik."
   },
   "changelog": {
     "title": "Catatan Perubahan",
@@ -424,7 +440,12 @@
     "didntFind": "Tidak menemukan apa yang Anda cari?",
     "submitIdeaPrompt": "Kirimkan pertanyaan atau ide ke papan masukan komunitas kami.",
     "postToBoard": "Kirim ke papan masukan",
-    "noMatchingQuestions": "Tidak ada pertanyaan yang cocok ditemukan"
+    "noMatchingQuestions": "Tidak ada pertanyaan yang cocok ditemukan",
+    "dragToReorderQuestion": "Tarik untuk mengatur ulang pertanyaan",
+    "questionActions": "Tindakan pertanyaan",
+    "dragToReorderCategory": "Tarik untuk mengatur ulang kategori",
+    "categoryOptions": "Opsi kategori",
+    "faqCategoriesNav": "Kategori FAQ"
   },
   "apiKeys": {
     "title": "Kunci API",
@@ -594,7 +615,8 @@
     "eventCommentRestored": "Dicuat saat komentar yang dihapus dipulihkan",
     "eventCommentCreated": "Dicuat setiap kali pelanggan atau rekan tim memposting komentar",
     "eventCommentDeleted": "Dicuat saat komentar dihapus atau dimoderasi",
-    "eventChangelogPublished": "Dicuat setiap kali pengumuman changelog diterbitkan"
+    "eventChangelogPublished": "Dicuat setiap kali pengumuman changelog diterbitkan",
+    "descPlaceholder": "Integrasi Zapier produksi"
   },
   "team": {
     "title": "Tim",
@@ -773,7 +795,9 @@
     "tabHelpCenter": "Pusat Bantuan",
     "all": "Semua",
     "searchPlaceholder": "Cari umpan balik...",
-    "comments": "komentar"
+    "comments": "komentar",
+    "showcaseViews": "Tampilan Showcase Produk",
+    "interactivePreview": "Pratinjau Produk Interaktif"
   },
   "board": {
     "category": "Kategori",
@@ -1217,7 +1241,12 @@
     "noDeletedPostsTitle": "No deleted posts",
     "noDeletedPostsBody": "When posts are removed from your board, you can restore them here.",
     "noDeletedCommentsTitle": "No deleted comments",
-    "noDeletedCommentsBody": "When comments are removed, you can restore them here."
+    "noDeletedCommentsBody": "When comments are removed, you can restore them here.",
+    "restorePostAria": "Pulihkan {title}",
+    "restoreCommentAria": "Pulihkan komentar",
+    "restorePostFirst": "Pulihkan postingan terlebih dahulu",
+    "colAuthor": "Penulis",
+    "deletedUser": "Pengguna yang dihapus"
   },
   "badges": {
     "title": "User Badges",
@@ -1235,7 +1264,24 @@
     "deleteBadgeDesc": "This badge will be removed from all users who currently have it.",
     "noBadgesTitle": "No custom badges yet",
     "noBadgesBody": "Create badges to highlight your top contributors and team members.",
-    "manageBadges": "Manage badges"
+    "manageBadges": "Manage badges",
+    "attributionRulesTitle": "Aturan Atribusi: {name}",
+    "attributionRulesDesc": "Berikan lencana ini secara otomatis saat pengguna tiba melalui tautan dengan parameter kueri yang cocok.",
+    "hmacEnabled": "Verifikasi HMAC diaktifkan",
+    "noRulesYet": "Belum ada aturan atribusi otomatis.",
+    "addRuleSection": "Tambah Aturan",
+    "paramMatchingLabel": "Pencocokan nama parameter",
+    "exactName": "Nama persis",
+    "regularExpression": "Ekspresi reguler",
+    "queryParamLabel": "Nama Parameter Kueri",
+    "queryParamPlaceholder": "mis. tier, plan, source",
+    "matchTypeLabel": "Tipe Pencocokan",
+    "exactString": "String persis",
+    "expectedValueLabel": "Nilai yang Diharapkan",
+    "antiSpoofingSecretLabel": "Rahasia HMAC Anti-Spoofing (Opsional)",
+    "antiSpoofingSecretPlaceholder": "Masukkan token rahasia untuk pemeriksaan HMAC-SHA256",
+    "antiSpoofingSecretHelp": "Saat disetel, sertakan parameter tanda tangan dan stempel waktu. {sigParam} adalah heksadesimal HMAC-SHA256 dari value + '.' + {tsParam}. {tsParam} adalah detik Unix saat tautan ditandatangani, berlaku selama 30 hari.",
+    "deleteRuleAria": "Hapus aturan"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1345,5 +1391,36 @@
     "colMember": "Anggota",
     "colRole": "Peran",
     "platformInviteDesc": "Buat tautan undangan di atas agar perusahaan dapat menyiapkan ruang kerja."
+  },
+  "richText": {
+    "textFormatting": "Format teks",
+    "heading2": "Tajuk 2",
+    "heading3": "Tajuk 3",
+    "bold": "Tebal",
+    "italic": "Miring",
+    "strikethrough": "Coretan",
+    "codeBlock": "Blok kode",
+    "bulletList": "Daftar poin",
+    "numberedList": "Daftar bernomor",
+    "quote": "Kutipan",
+    "divider": "Pemisah",
+    "insertLink": "Sisipkan tautan",
+    "editLink": "Edit tautan",
+    "removeLink": "Hapus tautan",
+    "saveLink": "Simpan tautan",
+    "insertRemoteImage": "Sisipkan gambar jarak jauh",
+    "imageDialogDesc": "Berikan tautan langsung ke gambar yang di-hosting di http:// atau https://. Unggahan file lokal tidak didukung.",
+    "imageUrlLabel": "URL Gambar",
+    "altTextLabel": "Teks alternatif",
+    "altTextOptional": "(opsional, maks 200 karakter)",
+    "altTextPlaceholder": "Keterangan deskriptif atau teks alternatif",
+    "enterImageUrl": "Harap masukkan URL gambar.",
+    "invalidImageUrl": "Harap masukkan URL gambar http:// atau https:// yang valid.",
+    "altTextTooLong": "Teks alternatif harus 200 karakter atau kurang.",
+    "insertImage": "Sisipkan gambar",
+    "linkDialogDesc": "Masukkan URL tujuan (dimulai dengan http://, https://, atau mailto:).",
+    "destinationUrlLabel": "URL Tujuan",
+    "invalidLinkProtocol": "URL harus dimulai dengan http://, https://, atau mailto:",
+    "invalidLinkUrl": "Harap masukkan URL yang valid."
   }
 }

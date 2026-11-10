@@ -459,7 +459,7 @@ export function RoadmapItemModal({
                     id="modal-public-title"
                     label={`${t("roadmap.publicTitleLabel")} ${activeLocale !== defaultLocale ? `(${activeLocale})` : ""}`}
                     error={errors.publicTitle}
-                    helper="Customer-facing title shown on the public roadmap."
+                    helper={t("roadmap.publicTitleHelper")}
                   >
                     <Input
                       id="modal-public-title"
@@ -470,8 +470,8 @@ export function RoadmapItemModal({
                       dir={isRtl(activeLocale) ? "rtl" : "ltr"}
                       placeholder={
                         activeLocale === defaultLocale
-                          ? "e.g. Dark Mode Support"
-                          : `Translation for public title (${activeLocale})...`
+                          ? t("roadmap.publicTitlePlaceholder")
+                          : t("roadmap.translationForTitle", { locale: activeLocale })
                       }
                     />
                   </Field>
@@ -480,7 +480,7 @@ export function RoadmapItemModal({
                     id="modal-public-description"
                     label={`${t("roadmap.publicSummaryLabel")} ${activeLocale !== defaultLocale ? `(${activeLocale})` : ""}`}
                     error={errors.publicDescription}
-                    helper="Optional description explaining what is being delivered and why."
+                    helper={t("roadmap.publicDescHelper")}
                   >
                     <Textarea
                       id="modal-public-description"
@@ -491,8 +491,8 @@ export function RoadmapItemModal({
                       dir={isRtl(activeLocale) ? "rtl" : "ltr"}
                       placeholder={
                         activeLocale === defaultLocale
-                          ? "Describe the feature value for your users…"
-                          : `Translation for public description (${activeLocale})...`
+                          ? t("roadmap.publicDescPlaceholder")
+                          : t("roadmap.translationForDesc", { locale: activeLocale })
                       }
                       rows={3}
                     />
@@ -506,13 +506,13 @@ export function RoadmapItemModal({
                   id="modal-internal-title"
                   label={t("roadmap.internalTitleLabel")}
                   error={errors.internalTitle}
-                  helper="Internal working title for team planning (never shown publicly)."
+                  helper={t("roadmap.internalTitleHelper")}
                 >
                   <Input
                     id="modal-internal-title"
                     value={internalTitle}
                     onChange={(e) => setInternalTitle(e.target.value)}
-                    placeholder="e.g. Implement theme toggle with next-themes"
+                    placeholder={t("roadmap.internalTitlePlaceholder")}
                   />
                 </Field>
 
@@ -520,13 +520,13 @@ export function RoadmapItemModal({
                   id="modal-internal-description"
                   label={t("roadmap.internalDescriptionLabel")}
                   error={errors.internalDescription}
-                  helper="Optional technical notes or scope specifications for the team."
+                  helper={t("roadmap.internalDescHelper")}
                 >
                   <Textarea
                     id="modal-internal-description"
                     value={internalDescription}
                     onChange={(e) => setInternalDescription(e.target.value)}
-                    placeholder="Technical scope, architectural choices, or prerequisites…"
+                    placeholder={t("roadmap.internalDescPlaceholder")}
                     rows={3}
                   />
                 </Field>
@@ -535,13 +535,13 @@ export function RoadmapItemModal({
                   id="modal-internal-notes"
                   label={t("roadmap.internalNotesLabel")}
                   error={errors.internalNotes}
-                  helper="Private scratchpad for notes and links."
+                  helper={t("roadmap.internalNotesHelper")}
                 >
                   <Textarea
                     id="modal-internal-notes"
                     value={internalNotes}
                     onChange={(e) => setInternalNotes(e.target.value)}
-                    placeholder="Add private links, customer quotes, or implementation notes…"
+                    placeholder={t("roadmap.internalNotesPlaceholder")}
                     rows={2}
                   />
                 </Field>

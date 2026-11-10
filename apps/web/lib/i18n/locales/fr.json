@@ -59,7 +59,8 @@
     "daysAgo": "il y a {count} j",
     "goToHome": "Aller à l accueil",
     "tryAgain": "Réessayer",
-    "reset": "Réinitialiser"
+    "reset": "Réinitialiser",
+    "actions": "Actions"
   },
   "portal": {
     "submitFeedback": "Proposer une idée",
@@ -261,7 +262,8 @@
     "showLess": "Afficher moins",
     "readMore": "Lire la suite",
     "uploadTest": "Test de téléversement",
-    "signOutError": "Impossible de se déconnecter. Vérifiez votre connexion et réessayez."
+    "signOutError": "Impossible de se déconnecter. Vérifiez votre connexion et réessayez.",
+    "entryLocalesAria": "Langues de traduction de l'entrée"
   },
   "roadmap": {
     "title": "Feuille de route",
@@ -314,7 +316,21 @@
     "checkBackFeedback": "Revenez plus tard ou partagez vos retours pour nous aider à orienter nos prochains développements.",
     "checkBackSoon": "Revenez plus tard pour découvrir nos chantiers en cours.",
     "itemDetails": "Détails de l'élément de feuille de route {title}",
-    "linkedFeedbackCount": "{count} retours associés."
+    "linkedFeedbackCount": "{count} retours associés.",
+    "searchPostsPlaceholder": "Rechercher des retours par titre ou numéro…",
+    "noMatchingPosts": "Aucune publication correspondante trouvée.",
+    "publicTitlePlaceholder": "ex. Prise en charge du mode sombre",
+    "publicDescPlaceholder": "Décrivez la valeur de la fonctionnalité pour vos utilisateurs…",
+    "publicDescHelper": "Description facultative expliquant ce qui est livré et pourquoi.",
+    "internalTitleHelper": "Titre de travail interne pour la planification d'équipe (jamais affiché publiquement).",
+    "internalTitlePlaceholder": "ex. Implémenter le basculement de thème avec next-themes",
+    "internalDescHelper": "Notes techniques ou spécifications de portée facultatives pour l'équipe.",
+    "internalDescPlaceholder": "Portée technique, choix d'architecture ou prérequis…",
+    "internalNotesHelper": "Brouillon privé pour les notes et les liens.",
+    "internalNotesPlaceholder": "Ajoutez des liens privés, des citations de clients ou des notes de mise en œuvre…",
+    "translationForTitle": "Traduction du titre public ({locale})...",
+    "translationForDesc": "Traduction de la description publique ({locale})...",
+    "publicTitleHelper": "Titre destiné aux clients affiché sur la feuille de route publique."
   },
   "changelog": {
     "title": "Journal des modifications",
@@ -424,7 +440,12 @@
     "didntFind": "Vous n'avez pas trouvé ce que vous cherchiez ?",
     "submitIdeaPrompt": "Soumettez une question ou une idée sur notre tableau de retours communautaire.",
     "postToBoard": "Publier sur le tableau de retours",
-    "noMatchingQuestions": "Aucune question correspondante trouvée"
+    "noMatchingQuestions": "Aucune question correspondante trouvée",
+    "dragToReorderQuestion": "Faire glisser pour réorganiser la question",
+    "questionActions": "Actions de la question",
+    "dragToReorderCategory": "Faire glisser pour réorganiser la catégorie",
+    "categoryOptions": "Options de catégorie",
+    "faqCategoriesNav": "Catégories de FAQ"
   },
   "apiKeys": {
     "title": "Clés d'API",
@@ -594,7 +615,8 @@
     "eventCommentRestored": "Déclenché lorsqu'un commentaire supprimé est restauré",
     "eventCommentCreated": "Déclenché dès qu'un client ou collaborateur publie un commentaire",
     "eventCommentDeleted": "Déclenché lorsqu'un commentaire est supprimé ou modéré",
-    "eventChangelogPublished": "Déclenché dès qu'une annonce est publiée dans le journal des modifications"
+    "eventChangelogPublished": "Déclenché dès qu'une annonce est publiée dans le journal des modifications",
+    "descPlaceholder": "Intégration Zapier en production"
   },
   "team": {
     "title": "Équipe",
@@ -773,7 +795,9 @@
     "tabHelpCenter": "Centre d'aide",
     "all": "Tous",
     "searchPlaceholder": "Rechercher des retours...",
-    "comments": "commentaires"
+    "comments": "commentaires",
+    "showcaseViews": "Vues de présentation du produit",
+    "interactivePreview": "Aperçu interactif du produit"
   },
   "board": {
     "category": "Catégorie",
@@ -1217,7 +1241,12 @@
     "noDeletedPostsTitle": "No deleted posts",
     "noDeletedPostsBody": "When posts are removed from your board, you can restore them here.",
     "noDeletedCommentsTitle": "No deleted comments",
-    "noDeletedCommentsBody": "When comments are removed, you can restore them here."
+    "noDeletedCommentsBody": "When comments are removed, you can restore them here.",
+    "restorePostAria": "Restaurer {title}",
+    "restoreCommentAria": "Restaurer le commentaire",
+    "restorePostFirst": "Restaurer d'abord la publication",
+    "colAuthor": "Auteur",
+    "deletedUser": "Utilisateur supprimé"
   },
   "badges": {
     "title": "User Badges",
@@ -1235,7 +1264,24 @@
     "deleteBadgeDesc": "This badge will be removed from all users who currently have it.",
     "noBadgesTitle": "No custom badges yet",
     "noBadgesBody": "Create badges to highlight your top contributors and team members.",
-    "manageBadges": "Manage badges"
+    "manageBadges": "Manage badges",
+    "attributionRulesTitle": "Règles d'attribution : {name}",
+    "attributionRulesDesc": "Attribuez automatiquement ce badge lorsque les utilisateurs arrivent via des liens avec des paramètres de requête correspondants.",
+    "hmacEnabled": "Vérification HMAC activée",
+    "noRulesYet": "Aucune règle d'attribution automatisée pour le moment.",
+    "addRuleSection": "Ajouter une règle",
+    "paramMatchingLabel": "Correspondance du nom de paramètre",
+    "exactName": "Nom exact",
+    "regularExpression": "Expression régulière",
+    "queryParamLabel": "Nom du paramètre de requête",
+    "queryParamPlaceholder": "ex. tier, plan, source",
+    "matchTypeLabel": "Type de correspondance",
+    "exactString": "Chaîne exacte",
+    "expectedValueLabel": "Valeur attendue",
+    "antiSpoofingSecretLabel": "Secret HMAC anti-usurpation (facultatif)",
+    "antiSpoofingSecretPlaceholder": "Entrez le jeton secret pour la vérification HMAC-SHA256",
+    "antiSpoofingSecretHelp": "Lorsqu'il est défini, incluez les paramètres de signature et d'horodatage. {sigParam} est l'hexadécimal HMAC-SHA256 de value + '.' + {tsParam}. {tsParam} correspond aux secondes Unix lors de la signature, valable 30 jours.",
+    "deleteRuleAria": "Supprimer la règle"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1345,5 +1391,36 @@
     "colMember": "Membre",
     "colRole": "Rôle",
     "platformInviteDesc": "Créez un lien d'invitation ci-dessus pour permettre à une entreprise de configurer un espace de travail."
+  },
+  "richText": {
+    "textFormatting": "Mise en forme du texte",
+    "heading2": "Titre 2",
+    "heading3": "Titre 3",
+    "bold": "Gras",
+    "italic": "Italique",
+    "strikethrough": "Barré",
+    "codeBlock": "Bloc de code",
+    "bulletList": "Liste à puces",
+    "numberedList": "Liste numérotée",
+    "quote": "Citation",
+    "divider": "Séparateur",
+    "insertLink": "Insérer un lien",
+    "editLink": "Modifier le lien",
+    "removeLink": "Supprimer le lien",
+    "saveLink": "Enregistrer le lien",
+    "insertRemoteImage": "Insérer une image distante",
+    "imageDialogDesc": "Fournissez un lien direct vers une image hébergée sur http:// ou https://. Les téléversements de fichiers locaux ne sont pas pris en charge.",
+    "imageUrlLabel": "URL de l'image",
+    "altTextLabel": "Texte alternatif",
+    "altTextOptional": "(facultatif, 200 car. max)",
+    "altTextPlaceholder": "Légende descriptive ou texte alternatif",
+    "enterImageUrl": "Veuillez entrer une URL d'image.",
+    "invalidImageUrl": "Veuillez entrer une URL d'image valide commençant par http:// ou https://.",
+    "altTextTooLong": "Le texte alternatif doit comporter 200 caractères ou moins.",
+    "insertImage": "Insérer l'image",
+    "linkDialogDesc": "Entrez une URL de destination (commençant par http://, https:// ou mailto:).",
+    "destinationUrlLabel": "URL de destination",
+    "invalidLinkProtocol": "L'URL doit commencer par http://, https:// ou mailto:",
+    "invalidLinkUrl": "Veuillez entrer une URL valide."
   }
 }

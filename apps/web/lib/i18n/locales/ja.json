@@ -59,7 +59,8 @@
     "daysAgo": "{count}日前",
     "goToHome": "ホームへ移動",
     "tryAgain": "もう一度試す",
-    "reset": "リセット"
+    "reset": "リセット",
+    "actions": "アクション"
   },
   "portal": {
     "submitFeedback": "フィードバックを投稿",
@@ -261,7 +262,8 @@
     "showLess": "折りたたむ",
     "readMore": "続きを読む",
     "uploadTest": "アップロードテスト",
-    "signOutError": "サインアウトできませんでした。接続を確認して再試行してください。"
+    "signOutError": "サインアウトできませんでした。接続を確認して再試行してください。",
+    "entryLocalesAria": "エントリ翻訳ロケール"
   },
   "roadmap": {
     "title": "ロードマップ",
@@ -314,7 +316,21 @@
     "checkBackFeedback": "後でもう一度確認するか、フィードバックを投稿して次の開発方針にご協力ください。",
     "checkBackSoon": "現在取り組んでいる内容については後でもう一度ご確認ください。",
     "itemDetails": "ロードマップ項目 {title} の詳細",
-    "linkedFeedbackCount": "{count} 件のリンクされたフィードバック投稿。"
+    "linkedFeedbackCount": "{count} 件のリンクされたフィードバック投稿。",
+    "searchPostsPlaceholder": "フィードバックの投稿をタイトルまたは番号で検索…",
+    "noMatchingPosts": "一致する投稿が見つかりませんでした。",
+    "publicTitlePlaceholder": "例: ダークモードのサポート",
+    "publicDescPlaceholder": "ユーザーにとっての機能の価値を説明してください…",
+    "publicDescHelper": "提供内容とその理由を説明する任意の説明。",
+    "internalTitleHelper": "チーム計画用の内部作業タイトル（一般公開されることはありません）。",
+    "internalTitlePlaceholder": "例: next-themes でテーマ切り替えを実装",
+    "internalDescHelper": "チーム向けの任意の技術ノートまたはスコープ仕様。",
+    "internalDescPlaceholder": "技術的スコープ、アーキテクチャの選択、または前提条件…",
+    "internalNotesHelper": "ノートやリンク用のプライベートメモ帳。",
+    "internalNotesPlaceholder": "非公開リンク、顧客の引用、または実装ノートを追加…",
+    "translationForTitle": "公開タイトルの翻訳 ({locale})...",
+    "translationForDesc": "公開説明の翻訳 ({locale})...",
+    "publicTitleHelper": "公開ロードマップに表示される顧客向けタイトル。"
   },
   "changelog": {
     "title": "チェンジログ",
@@ -424,7 +440,12 @@
     "didntFind": "お探しの情報は見つかりませんでしたか？",
     "submitIdeaPrompt": "コミュニティのフィードバック掲示板に質問やアイデアを投稿してください。",
     "postToBoard": "フィードバック掲示板に投稿",
-    "noMatchingQuestions": "一致する質問は見つかりませんでした"
+    "noMatchingQuestions": "一致する質問は見つかりませんでした",
+    "dragToReorderQuestion": "ドラッグして質問を並べ替え",
+    "questionActions": "質問のアクション",
+    "dragToReorderCategory": "ドラッグしてカテゴリを並べ替え",
+    "categoryOptions": "カテゴリオプション",
+    "faqCategoriesNav": "FAQカテゴリ"
   },
   "apiKeys": {
     "title": "APIキー",
@@ -594,7 +615,8 @@
     "eventCommentRestored": "削除されたコメントが復元された時にトリガー",
     "eventCommentCreated": "ユーザーまたはチームメンバーがコメントを投稿した時にトリガー",
     "eventCommentDeleted": "コメントが削除またはモデレーションされた時にトリガー",
-    "eventChangelogPublished": "更新履歴のアナウンスが公開された時にトリガー"
+    "eventChangelogPublished": "更新履歴のアナウンスが公開された時にトリガー",
+    "descPlaceholder": "本番用 Zapier 連携"
   },
   "team": {
     "title": "チーム",
@@ -773,7 +795,9 @@
     "tabHelpCenter": "ヘルプセンター",
     "all": "すべて",
     "searchPlaceholder": "フィードバックを検索...",
-    "comments": "件のコメント"
+    "comments": "件のコメント",
+    "showcaseViews": "製品ショーケース ビュー",
+    "interactivePreview": "インタラクティブな製品プレビュー"
   },
   "board": {
     "category": "カテゴリー",
@@ -1217,7 +1241,12 @@
     "noDeletedPostsTitle": "No deleted posts",
     "noDeletedPostsBody": "When posts are removed from your board, you can restore them here.",
     "noDeletedCommentsTitle": "No deleted comments",
-    "noDeletedCommentsBody": "When comments are removed, you can restore them here."
+    "noDeletedCommentsBody": "When comments are removed, you can restore them here.",
+    "restorePostAria": "{title} を復元",
+    "restoreCommentAria": "コメントを復元",
+    "restorePostFirst": "最初に投稿を復元してください",
+    "colAuthor": "投稿者",
+    "deletedUser": "削除されたユーザー"
   },
   "badges": {
     "title": "User Badges",
@@ -1235,7 +1264,24 @@
     "deleteBadgeDesc": "This badge will be removed from all users who currently have it.",
     "noBadgesTitle": "No custom badges yet",
     "noBadgesBody": "Create badges to highlight your top contributors and team members.",
-    "manageBadges": "Manage badges"
+    "manageBadges": "Manage badges",
+    "attributionRulesTitle": "属性ルール: {name}",
+    "attributionRulesDesc": "一致するクエリパラメータを持つリンク経由でユーザーがアクセスしたときに、このバッジを自動的に付与します。",
+    "hmacEnabled": "HMAC 検証が有効",
+    "noRulesYet": "自動属性ルールはまだありません。",
+    "addRuleSection": "ルールを追加",
+    "paramMatchingLabel": "パラメータ名の一致",
+    "exactName": "完全一致する名前",
+    "regularExpression": "正規表現",
+    "queryParamLabel": "クエリパラメータ名",
+    "queryParamPlaceholder": "例: tier, plan, source",
+    "matchTypeLabel": "一致の種類",
+    "exactString": "完全一致する文字列",
+    "expectedValueLabel": "期待される値",
+    "antiSpoofingSecretLabel": "なりすまし防止 HMAC シークレット（任意）",
+    "antiSpoofingSecretPlaceholder": "HMAC-SHA256 チェック用のシークレットトークンを入力",
+    "antiSpoofingSecretHelp": "設定すると、署名とタイムスタンプの両方のパラメータが含まれます。{sigParam} は value + '.' + {tsParam} の HMAC-SHA256 16進数です。{tsParam} はリンクが署名されたUnix秒数で、30日間有効です。",
+    "deleteRuleAria": "ルールを削除"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1345,5 +1391,36 @@
     "colMember": "メンバー",
     "colRole": "役割",
     "platformInviteDesc": "企業がワークスペースを開設できるように招待リンクを作成してください。"
+  },
+  "richText": {
+    "textFormatting": "テキストの書式設定",
+    "heading2": "見出し 2",
+    "heading3": "見出し 3",
+    "bold": "太字",
+    "italic": "斜体",
+    "strikethrough": "取り消し線",
+    "codeBlock": "コードブロック",
+    "bulletList": "箇条書きリスト",
+    "numberedList": "番号付きリスト",
+    "quote": "引用",
+    "divider": "区切り線",
+    "insertLink": "リンクを挿入",
+    "editLink": "リンクを編集",
+    "removeLink": "リンクを削除",
+    "saveLink": "リンクを保存",
+    "insertRemoteImage": "リモート画像を挿入",
+    "imageDialogDesc": "http:// または https:// でホストされている画像への直接リンクを指定してください。ローカルファイルのアップロードはサポートされていません。",
+    "imageUrlLabel": "画像URL",
+    "altTextLabel": "代替テキスト",
+    "altTextOptional": "（任意、最大200文字）",
+    "altTextPlaceholder": "説明的なキャプションまたは代替テキスト",
+    "enterImageUrl": "画像URLを入力してください。",
+    "invalidImageUrl": "有効な http:// または https:// の画像URLを入力してください。",
+    "altTextTooLong": "代替テキストは200文字以下にする必要があります。",
+    "insertImage": "画像を挿入",
+    "linkDialogDesc": "リンク先のURLを入力してください（http://、https://、または mailto: で始まるもの）。",
+    "destinationUrlLabel": "リンク先URL",
+    "invalidLinkProtocol": "URLは http://、https://、または mailto: で始まる必要があります",
+    "invalidLinkUrl": "有効なURLを入力してください。"
   }
 }

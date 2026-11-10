@@ -59,7 +59,8 @@
     "daysAgo": "{count} दिन पहले",
     "goToHome": "होम पर जाएं",
     "tryAgain": "पुनः प्रयास करें",
-    "reset": "रीसेट"
+    "reset": "रीसेट",
+    "actions": "क्रियाएं"
   },
   "portal": {
     "submitFeedback": "सुझाव दें",
@@ -261,7 +262,8 @@
     "showLess": "कम दिखाएं",
     "readMore": "और पढ़ें",
     "uploadTest": "अपलोड परीक्षण",
-    "signOutError": "साइन आउट नहीं हो सका। अपना कनेक्शन जांचें और पुन: प्रयास करें।"
+    "signOutError": "साइन आउट नहीं हो सका। अपना कनेक्शन जांचें और पुन: प्रयास करें।",
+    "entryLocalesAria": "प्रविष्टि अनुवाद भाषाएं"
   },
   "roadmap": {
     "title": "रोडमैप",
@@ -314,7 +316,21 @@
     "checkBackFeedback": "बाद में देखें या आगे क्या बनाना है यह तय करने में मदद के लिए अपनी प्रतिक्रिया साझा करें।",
     "checkBackSoon": "हम किस पर काम कर रहे हैं यह देखने के लिए बाद में पुनः देखें।",
     "itemDetails": "रोडमैप आइटम {title} का विवरण",
-    "linkedFeedbackCount": "{count} लिंक की गई प्रतिक्रिया पोस्ट।"
+    "linkedFeedbackCount": "{count} लिंक की गई प्रतिक्रिया पोस्ट।",
+    "searchPostsPlaceholder": "शीर्षक या संख्या द्वारा प्रतिक्रिया पोस्ट खोजें…",
+    "noMatchingPosts": "कोई मेल खाने वाली पोस्ट नहीं मिली।",
+    "publicTitlePlaceholder": "उदा. डार्क मोड समर्थन",
+    "publicDescPlaceholder": "अपने उपयोगकर्ताओं के लिए सुविधा के महत्व का वर्णन करें…",
+    "publicDescHelper": "वैकल्पिक विवरण जो बताता है कि क्या डिलीवर किया जा रहा है और क्यों।",
+    "internalTitleHelper": "टीम योजना के लिए आंतरिक कार्य शीर्षक (कभी सार्वजनिक रूप से नहीं दिखाया जाता)।",
+    "internalTitlePlaceholder": "उदा. next-themes के साथ थीम टॉगल लागू करें",
+    "internalDescHelper": "टीम के लिए वैकल्पिक तकनीकी नोट्स या स्कोप विनिर्देश।",
+    "internalDescPlaceholder": "तकनीकी दायरा, वास्तुशिल्प विकल्प, या पूर्वापेक्षाएँ…",
+    "internalNotesHelper": "नोट्स और लिंक के लिए निजी स्क्रैचपैड।",
+    "internalNotesPlaceholder": "निजी लिंक, ग्राहक उद्धरण, या कार्यान्वयन नोट्स जोड़ें…",
+    "translationForTitle": "सार्वजनिक शीर्षक के लिए अनुवाद ({locale})...",
+    "translationForDesc": "सार्वजनिक विवरण के लिए अनुवाद ({locale})...",
+    "publicTitleHelper": "सार्वजनिक रोडमैप पर दिखाया जाने वाला ग्राहक-उन्मुख शीर्षक।"
   },
   "changelog": {
     "title": "परिवर्तन सूची (Changelog)",
@@ -424,7 +440,12 @@
     "didntFind": "जो आप ढूंढ रहे थे वह नहीं मिला?",
     "submitIdeaPrompt": "हमारे सामुदायिक प्रतिक्रिया बोर्ड पर कोई प्रश्न या विचार सबमिट करें।",
     "postToBoard": "प्रतिक्रिया बोर्ड पर पोस्ट करें",
-    "noMatchingQuestions": "कोई मेल खाने वाला प्रश्न नहीं मिला"
+    "noMatchingQuestions": "कोई मेल खाने वाला प्रश्न नहीं मिला",
+    "dragToReorderQuestion": "प्रश्न को पुनर्व्यवस्थित करने के लिए खींचें",
+    "questionActions": "प्रश्न क्रियाएं",
+    "dragToReorderCategory": "श्रेणी को पुनर्व्यवस्थित करने के लिए खींचें",
+    "categoryOptions": "श्रेणी विकल्प",
+    "faqCategoriesNav": "अक्सर पूछे जाने वाले प्रश्नों की श्रेणियां"
   },
   "apiKeys": {
     "title": "API कुंजियाँ",
@@ -594,7 +615,8 @@
     "eventCommentRestored": "जब हटाई गई टिप्पणी पुनर्स्थापित की जाती है तो सक्रिय होता है",
     "eventCommentCreated": "जब भी कोई ग्राहक या टीम का साथी टिप्पणी करता है तो सक्रिय होता है",
     "eventCommentDeleted": "जब कोई टिप्पणी हटाई या मॉडरेट की जाती है तो सक्रिय होता है",
-    "eventChangelogPublished": "जब भी परिवर्तन लॉग घोषणा प्रकाशित होती है तो सक्रिय होता है"
+    "eventChangelogPublished": "जब भी परिवर्तन लॉग घोषणा प्रकाशित होती है तो सक्रिय होता है",
+    "descPlaceholder": "उत्पादन Zapier एकीकरण"
   },
   "team": {
     "title": "टीम",
@@ -773,7 +795,9 @@
     "tabHelpCenter": "सहायता केंद्र",
     "all": "सभी",
     "searchPlaceholder": "प्रतिक्रिया खोजें...",
-    "comments": "टिप्पणियाँ"
+    "comments": "टिप्पणियाँ",
+    "showcaseViews": "उत्पाद शोकेस दृश्य",
+    "interactivePreview": "इंटरैक्टिव उत्पाद पूर्वावलोकन"
   },
   "board": {
     "category": "श्रेणी",
@@ -1217,7 +1241,12 @@
     "noDeletedPostsTitle": "No deleted posts",
     "noDeletedPostsBody": "When posts are removed from your board, you can restore them here.",
     "noDeletedCommentsTitle": "No deleted comments",
-    "noDeletedCommentsBody": "When comments are removed, you can restore them here."
+    "noDeletedCommentsBody": "When comments are removed, you can restore them here.",
+    "restorePostAria": "{title} पुनर्स्थापित करें",
+    "restoreCommentAria": "टिप्पणी पुनर्स्थापित करें",
+    "restorePostFirst": "पहले पोस्ट पुनर्स्थापित करें",
+    "colAuthor": "लेखक",
+    "deletedUser": "हटाया गया उपयोगकर्ता"
   },
   "badges": {
     "title": "User Badges",
@@ -1235,7 +1264,24 @@
     "deleteBadgeDesc": "This badge will be removed from all users who currently have it.",
     "noBadgesTitle": "No custom badges yet",
     "noBadgesBody": "Create badges to highlight your top contributors and team members.",
-    "manageBadges": "Manage badges"
+    "manageBadges": "Manage badges",
+    "attributionRulesTitle": "एट्रिब्यूशन नियम: {name}",
+    "attributionRulesDesc": "उपयोगकर्ताओं के मेल खाने वाले क्वेरी पैरामीटर वाले लिंक के माध्यम से आने पर स्वचालित रूप से यह बैज प्रदान करें।",
+    "hmacEnabled": "HMAC सत्यापन सक्षम",
+    "noRulesYet": "अभी तक कोई स्वचालित एट्रिब्यूशन नियम नहीं हैं।",
+    "addRuleSection": "नियम जोड़ें",
+    "paramMatchingLabel": "पैरामीटर नाम मिलान",
+    "exactName": "सटीक नाम",
+    "regularExpression": "रेगुलर एक्सप्रेशन",
+    "queryParamLabel": "क्वेरी पैरामीटर का नाम",
+    "queryParamPlaceholder": "उदा. tier, plan, source",
+    "matchTypeLabel": "मिलान प्रकार",
+    "exactString": "सटीक स्ट्रिंग",
+    "expectedValueLabel": "अपेक्षित मान",
+    "antiSpoofingSecretLabel": "एंटी-स्पूफिंग HMAC गुप्त (वैकल्पिक)",
+    "antiSpoofingSecretPlaceholder": "HMAC-SHA256 जाँच के लिए गुप्त टोकन दर्ज करें",
+    "antiSpoofingSecretHelp": "सेट होने पर, हस्ताक्षर और टाइमस्टैम्प दोनों पैरामीटर शामिल करें। {sigParam} value + '.' + {tsParam} का HMAC-SHA256 हेक्स है। {tsParam} लिंक पर हस्ताक्षर किए जाने के यूनिक्स सेकंड हैं, जो 30 दिनों के लिए मान्य हैं।",
+    "deleteRuleAria": "नियम हटाएं"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1345,5 +1391,36 @@
     "colMember": "सदस्य",
     "colRole": "भूमिका",
     "platformInviteDesc": "किसी कंपनी को कार्यक्षेत्र सेट करने की अनुमति देने के लिए ऊपर एक निमंत्रण लिंक बनाएं।"
+  },
+  "richText": {
+    "textFormatting": "पाठ स्वरूपण",
+    "heading2": "शीर्षक 2",
+    "heading3": "शीर्षक 3",
+    "bold": "बोल्ड",
+    "italic": "इटैलिक",
+    "strikethrough": "स्ट्राइकथ्रू",
+    "codeBlock": "कोड ब्लॉक",
+    "bulletList": "बुलेट सूची",
+    "numberedList": "क्रमांकित सूची",
+    "quote": "उद्धरण",
+    "divider": "विभाजक",
+    "insertLink": "लिंक डालें",
+    "editLink": "लिंक संपादित करें",
+    "removeLink": "लिंक हटाएं",
+    "saveLink": "लिंक सहेजें",
+    "insertRemoteImage": "रिमोट छवि डालें",
+    "imageDialogDesc": "http:// या https:// पर होस्ट की गई छवि का सीधा लिंक प्रदान करें। स्थानीय फ़ाइल अपलोड समर्थित नहीं हैं।",
+    "imageUrlLabel": "छवि URL",
+    "altTextLabel": "ऑल्ट टेक्स्ट",
+    "altTextOptional": "(वैकल्पिक, अधिकतम 200 वर्ण)",
+    "altTextPlaceholder": "वर्णनात्मक कैप्शन या ऑल्ट टेक्स्ट",
+    "enterImageUrl": "कृपया एक छवि URL दर्ज करें।",
+    "invalidImageUrl": "कृपया एक मान्य http:// या https:// छवि URL दर्ज करें।",
+    "altTextTooLong": "ऑल्ट टेक्स्ट 200 वर्ण या उससे कम होना चाहिए।",
+    "insertImage": "छवि डालें",
+    "linkDialogDesc": "एक गंतव्य URL दर्ज करें (http://, https://, या mailto: से शुरू)।",
+    "destinationUrlLabel": "गंतव्य URL",
+    "invalidLinkProtocol": "URL http://, https://, या mailto: से शुरू होना चाहिए",
+    "invalidLinkUrl": "कृपया एक मान्य URL दर्ज करें।"
   }
 }

@@ -4,6 +4,7 @@ import * as React from "react";
 import type { PublicFaqCategory } from "@userhq/types";
 import { Badge } from "../ui/badge";
 import { cn } from "../../lib/utils";
+import { useI18n } from "../../lib/i18n/context";
 
 export interface FaqSidebarNavProps {
   categories: PublicFaqCategory[];
@@ -18,6 +19,8 @@ export function FaqSidebarNav({
   onSelectCategory,
   className,
 }: FaqSidebarNavProps): React.JSX.Element {
+  const { t } = useI18n();
+
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     onSelectCategory?.(id);
@@ -30,14 +33,14 @@ export function FaqSidebarNav({
 
   return (
     <nav
-      aria-label="FAQ categories"
+      aria-label={t("faq.faqCategoriesNav")}
       className={cn(
         "hidden lg:block lg:col-span-4 sticky top-24 space-y-1 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2",
         className
       )}
     >
       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
-        Categories
+        {t("categories.title")}
       </p>
       {categories.map((cat) => {
         const isActive = activeCategoryId === cat.id;

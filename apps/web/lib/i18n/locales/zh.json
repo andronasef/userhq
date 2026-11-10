@@ -59,7 +59,8 @@
     "daysAgo": "{count}天前",
     "goToHome": "返回首页",
     "tryAgain": "重试",
-    "reset": "重置"
+    "reset": "重置",
+    "actions": "操作"
   },
   "portal": {
     "submitFeedback": "提交反馈",
@@ -261,7 +262,8 @@
     "showLess": "收起",
     "readMore": "阅读更多",
     "uploadTest": "上传测试",
-    "signOutError": "无法退出登录。请检查网络连接后重试。"
+    "signOutError": "无法退出登录。请检查网络连接后重试。",
+    "entryLocalesAria": "词条翻译语言"
   },
   "roadmap": {
     "title": "路线图",
@@ -314,7 +316,21 @@
     "checkBackFeedback": "请稍后查看，或提交反馈协助我们规划后续开发。",
     "checkBackSoon": "请稍后查看我们正在进行的工作。",
     "itemDetails": "路线图项目 {title} 的详细信息",
-    "linkedFeedbackCount": "{count} 条关联的反馈帖子。"
+    "linkedFeedbackCount": "{count} 条关联的反馈帖子。",
+    "searchPostsPlaceholder": "按标题或编号搜索反馈帖子…",
+    "noMatchingPosts": "未找到匹配的帖子。",
+    "publicTitlePlaceholder": "例如：暗黑模式支持",
+    "publicDescPlaceholder": "描述此功能对用户的价值…",
+    "publicDescHelper": "可选描述，说明要交付的内容和原因。",
+    "internalTitleHelper": "团队规划的内部工作标题（绝不对外公开显示）。",
+    "internalTitlePlaceholder": "例如：使用 next-themes 实现主题切换",
+    "internalDescHelper": "供团队参考的可选技术说明或范围规范。",
+    "internalDescPlaceholder": "技术范围、架构选择或前置条件…",
+    "internalNotesHelper": "用于备注和链接的私密便签。",
+    "internalNotesPlaceholder": "添加内部链接、客户原话或实现说明…",
+    "translationForTitle": "公开标题的翻译 ({locale})...",
+    "translationForDesc": "公开描述的翻译 ({locale})...",
+    "publicTitleHelper": "在公开路线图上展示的面向客户的标题。"
   },
   "changelog": {
     "title": "更新日志",
@@ -424,7 +440,12 @@
     "didntFind": "没有找到您想要的内容？",
     "submitIdeaPrompt": "向我们的社区反馈板提交问题或想法。",
     "postToBoard": "发布到反馈板",
-    "noMatchingQuestions": "未找到匹配的问题"
+    "noMatchingQuestions": "未找到匹配的问题",
+    "dragToReorderQuestion": "拖动以重新排序问题",
+    "questionActions": "问题操作",
+    "dragToReorderCategory": "拖动以重新排序分类",
+    "categoryOptions": "分类选项",
+    "faqCategoriesNav": "常见问题分类"
   },
   "apiKeys": {
     "title": "API 密钥",
@@ -594,7 +615,8 @@
     "eventCommentRestored": "恢复已删除的评论时触发",
     "eventCommentCreated": "每当客户或团队成员发表评论时触发",
     "eventCommentDeleted": "删除或审核评论时触发",
-    "eventChangelogPublished": "每当发布更新日志公告时触发"
+    "eventChangelogPublished": "每当发布更新日志公告时触发",
+    "descPlaceholder": "生产环境 Zapier 集成"
   },
   "team": {
     "title": "团队",
@@ -773,7 +795,9 @@
     "tabHelpCenter": "帮助中心",
     "all": "全部",
     "searchPlaceholder": "搜索反馈...",
-    "comments": "条评论"
+    "comments": "条评论",
+    "showcaseViews": "产品展示视图",
+    "interactivePreview": "交互式产品预览"
   },
   "board": {
     "category": "类别",
@@ -1217,7 +1241,12 @@
     "noDeletedPostsTitle": "No deleted posts",
     "noDeletedPostsBody": "When posts are removed from your board, you can restore them here.",
     "noDeletedCommentsTitle": "No deleted comments",
-    "noDeletedCommentsBody": "When comments are removed, you can restore them here."
+    "noDeletedCommentsBody": "When comments are removed, you can restore them here.",
+    "restorePostAria": "恢复 {title}",
+    "restoreCommentAria": "恢复评论",
+    "restorePostFirst": "请先恢复帖子",
+    "colAuthor": "作者",
+    "deletedUser": "已注销用户"
   },
   "badges": {
     "title": "User Badges",
@@ -1235,7 +1264,24 @@
     "deleteBadgeDesc": "This badge will be removed from all users who currently have it.",
     "noBadgesTitle": "No custom badges yet",
     "noBadgesBody": "Create badges to highlight your top contributors and team members.",
-    "manageBadges": "Manage badges"
+    "manageBadges": "Manage badges",
+    "attributionRulesTitle": "归因规则：{name}",
+    "attributionRulesDesc": "当用户通过包含匹配查询参数的链接访问时，自动授予此徽章。",
+    "hmacEnabled": "已启用 HMAC 验证",
+    "noRulesYet": "暂无自动化归因规则。",
+    "addRuleSection": "添加规则",
+    "paramMatchingLabel": "参数名称匹配",
+    "exactName": "精确名称",
+    "regularExpression": "正则表达式",
+    "queryParamLabel": "查询参数名称",
+    "queryParamPlaceholder": "例如：tier, plan, source",
+    "matchTypeLabel": "匹配类型",
+    "exactString": "精确字符串",
+    "expectedValueLabel": "预期值",
+    "antiSpoofingSecretLabel": "防伪造 HMAC 密钥（可选）",
+    "antiSpoofingSecretPlaceholder": "输入用于 HMAC-SHA256 校验的密钥令牌",
+    "antiSpoofingSecretHelp": "设置后，请同时包含签名和时间戳参数。{sigParam} 是 value + '.' + {tsParam} 的 HMAC-SHA256 十六进制值。{tsParam} 是签署链接时的 Unix 秒数，有效期 30 天。",
+    "deleteRuleAria": "删除规则"
   },
   "users": {
     "title": "Product Users Directory",
@@ -1345,5 +1391,36 @@
     "colMember": "成员",
     "colRole": "角色",
     "platformInviteDesc": "在上方创建邀请链接，以允许公司设置工作区。"
+  },
+  "richText": {
+    "textFormatting": "文本格式",
+    "heading2": "标题 2",
+    "heading3": "标题 3",
+    "bold": "加粗",
+    "italic": "斜体",
+    "strikethrough": "删除线",
+    "codeBlock": "代码块",
+    "bulletList": "无序列表",
+    "numberedList": "有序列表",
+    "quote": "引用",
+    "divider": "分割线",
+    "insertLink": "插入链接",
+    "editLink": "编辑链接",
+    "removeLink": "移除链接",
+    "saveLink": "保存链接",
+    "insertRemoteImage": "插入远程图片",
+    "imageDialogDesc": "提供托管在 http:// 或 https:// 上的图片直接链接。不支持本地文件上传。",
+    "imageUrlLabel": "图片 URL",
+    "altTextLabel": "替代文本",
+    "altTextOptional": "（可选，最多 200 字符）",
+    "altTextPlaceholder": "描述性说明或替代文本",
+    "enterImageUrl": "请输入图片 URL。",
+    "invalidImageUrl": "请输入有效的 http:// 或 https:// 图片 URL。",
+    "altTextTooLong": "替代文本长度不能超过 200 个字符。",
+    "insertImage": "插入图片",
+    "linkDialogDesc": "输入目标 URL（以 http://、https:// 或 mailto: 开头）。",
+    "destinationUrlLabel": "目标 URL",
+    "invalidLinkProtocol": "URL 必须以 http://、https:// 或 mailto: 开头",
+    "invalidLinkUrl": "请输入有效的 URL。"
   }
 }

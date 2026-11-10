@@ -79,7 +79,7 @@ export function FaqQuestionItem({
           <button
             type="button"
             ref={handleRef}
-            aria-label="Drag to reorder question"
+            aria-label={t("faq.dragToReorderQuestion")}
             className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1 shrink-0 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <GripVertical className="size-4" aria-hidden="true" />
@@ -108,7 +108,7 @@ export function FaqQuestionItem({
                 variant="ghost"
                 size="icon"
                 className="size-7 text-muted-foreground hover:text-foreground"
-                aria-label="Question actions"
+                aria-label={t("faq.questionActions")}
               >
                 <MoreHorizontal className="size-4" aria-hidden="true" />
               </Button>

@@ -524,10 +524,9 @@ function ProductBadgesFormInner({
       >
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Attribution Rules: {ruleBadge?.name}</DialogTitle>
+            <DialogTitle>{t("badges.attributionRulesTitle", { name: ruleBadge?.name ?? "" })}</DialogTitle>
             <DialogDescription>
-              Automatically grant this badge when users arrive via links with
-              matching query parameters.
+              {t("badges.attributionRulesDesc")}
             </DialogDescription>
           </DialogHeader>
 
@@ -562,13 +561,14 @@ function ProductBadgesFormInner({
                           {r.hasSecretToken && (
                             <div className="text-[10px] text-muted-foreground flex items-center gap-1">
                               <Key className="size-3" />
-                              <span>HMAC verification enabled</span>
+                              <span>{t("badges.hmacEnabled")}</span>
                             </div>
                           )}
                         </div>
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label={t("badges.deleteRuleAria")}
                           className="size-7 text-destructive hover:text-destructive"
                           onClick={() =>
                             deleteRuleMutation.mutate({
@@ -584,14 +584,14 @@ function ProductBadgesFormInner({
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground italic">
-                  No automated attribution rules yet.
+                  {t("badges.noRulesYet")}
                 </p>
               )}
             </div>
 
             <div className="border-t border-border pt-4 space-y-3">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
-                Add Rule
+                {t("badges.addRuleSection")}
               </h4>
 
               <div className="grid grid-cols-2 gap-2">
@@ -600,7 +600,7 @@ function ProductBadgesFormInner({
                     htmlFor="rule-key-match-type"
                     className="text-sm font-medium"
                   >
-                    Parameter name matching
+                    {t("badges.paramMatchingLabel")}
                   </label>
                   <NativeSelect
                     id="rule-key-match-type"
@@ -609,8 +609,8 @@ function ProductBadgesFormInner({
                       setKeyMatchType(event.target.value as "exact" | "regex")
                     }
                   >
-                    <option value="exact">Exact name</option>
-                    <option value="regex">Regular expression</option>
+                    <option value="exact">{t("badges.exactName")}</option>
+                    <option value="regex">{t("badges.regularExpression")}</option>
                   </NativeSelect>
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -618,13 +618,13 @@ function ProductBadgesFormInner({
                     htmlFor="rule-param-key"
                     className="text-sm font-semibold text-foreground"
                   >
-                    Query Param Name
+                    {t("badges.queryParamLabel")}
                   </label>
                   <Input
                     id="rule-param-key"
                     value={paramKey}
                     onChange={(e) => setParamKey(e.target.value)}
-                    placeholder="e.g. tier, plan, source"
+                    placeholder={t("badges.queryParamPlaceholder")}
                     required
                   />
                 </div>
@@ -634,7 +634,7 @@ function ProductBadgesFormInner({
                     htmlFor="rule-match-type"
                     className="text-sm font-semibold text-foreground"
                   >
-                    Match Type
+                    {t("badges.matchTypeLabel")}
                   </label>
                   <NativeSelect
                     id="rule-match-type"
@@ -643,8 +643,8 @@ function ProductBadgesFormInner({
                       setMatchType(e.target.value as "exact" | "regex")
                     }
                   >
-                    <option value="exact">Exact string</option>
-                    <option value="regex">Regular expression</option>
+                    <option value="exact">{t("badges.exactString")}</option>
+                    <option value="regex">{t("badges.regularExpression")}</option>
                   </NativeSelect>
                 </div>
               </div>
@@ -654,7 +654,7 @@ function ProductBadgesFormInner({
                   htmlFor="rule-match-value"
                   className="text-sm font-semibold text-foreground"
                 >
-                  Expected Value
+                  {t("badges.expectedValueLabel")}
                 </label>
                 <Input
                   id="rule-match-value"
@@ -672,22 +672,17 @@ function ProductBadgesFormInner({
                   htmlFor="rule-secret-token"
                   className="text-sm font-semibold text-foreground"
                 >
-                  Anti-Spoofing HMAC Secret (Optional)
+                  {t("badges.antiSpoofingSecretLabel")}
                 </label>
                 <Input
                   id="rule-secret-token"
                   type="password"
                   value={secretToken}
                   onChange={(e) => setSecretToken(e.target.value)}
-                  placeholder="Enter secret token for HMAC-SHA256 checking"
+                  placeholder={t("badges.antiSpoofingSecretPlaceholder")}
                 />
                 <p className="text-[11px] text-muted-foreground">
-                  When set, include both signature and timestamp parameters.
-                  <code>{paramKey || "param"}_sig</code> is the HMAC-SHA256 hex
-                  of
-                  <code>value + "." + {paramKey || "param"}_ts</code>.
-                  <code>{paramKey || "param"}_ts</code> is the Unix seconds when
-                  the link was signed, valid for 30 days.
+                  {t("badges.antiSpoofingSecretHelp")}
                 </p>
               </div>
 

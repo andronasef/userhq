@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface TabItem {
   label: string;
@@ -10,9 +13,11 @@ export interface TabNavProps {
   tabs: TabItem[];
   activeHref: string;
   className?: string;
+  ariaLabel?: string;
 }
 
-export function TabNav({ tabs, activeHref, className }: TabNavProps) {
+export function TabNav({ tabs, activeHref, className, ariaLabel }: TabNavProps) {
+  const { t } = useI18n();
   if (!tabs || tabs.length === 0) {
     return null;
   }
@@ -23,7 +28,7 @@ export function TabNav({ tabs, activeHref, className }: TabNavProps) {
         "flex gap-6 border-b border-border overflow-x-auto overflow-y-hidden no-scrollbar",
         className
       )}
-      aria-label="Tabs"
+      aria-label={ariaLabel ?? t("nav.tabs")}
     >
       {tabs.map((tab) => {
         const isActive = activeHref === tab.href;

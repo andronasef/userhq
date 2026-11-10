@@ -14,11 +14,15 @@ export async function generateMetadata({
   params,
 }: PublicFaqPageProps): Promise<Metadata> {
   const { ws, product } = await params;
-  const result = await getPortalProduct(ws, product);
+  const [result, locale] = await Promise.all([
+    getPortalProduct(ws, product),
+    getRequestLocale(),
+  ]);
   if (!result.ok || !result.data.product.features.faq) return {};
+  const dict = getDictionary(locale);
   return {
-    title: `Frequently Asked Questions · ${result.data.product.name}`,
-    description: `Find quick answers to common questions about ${result.data.product.name}.`,
+    title: `${dict.faq.title} · ${result.data.product.name}`,
+    description: dict.faq.subtitle.replace("{name}", result.data.product.name),
   };
 }
 

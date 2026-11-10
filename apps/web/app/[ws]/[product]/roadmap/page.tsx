@@ -2,6 +2,7 @@ import * as React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPortalProduct, getPublicRoadmap } from "../../../../lib/api-server";
+import { getRequestLocale, getDictionary } from "../../../../lib/i18n/server";
 import { PublicRoadmapView } from "./public-roadmap-view";
 
 interface PublicRoadmapPageProps {
@@ -12,11 +13,15 @@ export async function generateMetadata({
   params,
 }: PublicRoadmapPageProps): Promise<Metadata> {
   const { ws, product } = await params;
-  const result = await getPortalProduct(ws, product);
+  const [result, locale] = await Promise.all([
+    getPortalProduct(ws, product),
+    getRequestLocale(),
+  ]);
   if (!result.ok || !result.data.product.features.roadmap) return {};
+  const dict = getDictionary(locale);
   return {
-    title: `Roadmap · ${result.data.product.name}`,
-    description: `Follow public roadmap progress and upcoming features for ${result.data.product.name}.`,
+    title: `${dict.nav.roadmap} · ${result.data.product.name}`,
+    description: dict.roadmap.subtitle,
   };
 }
 

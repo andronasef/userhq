@@ -14,11 +14,15 @@ export async function generateMetadata({
   params,
 }: PublicChangelogPageProps): Promise<Metadata> {
   const { ws, product } = await params;
-  const result = await getPortalProduct(ws, product);
+  const [result, locale] = await Promise.all([
+    getPortalProduct(ws, product),
+    getRequestLocale(),
+  ]);
   if (!result.ok || !result.data.product.features.changelog) return {};
+  const dict = getDictionary(locale);
   return {
-    title: `Changelog · ${result.data.product.name}`,
-    description: `New features, improvements, and bug fixes for ${result.data.product.name}.`,
+    title: `${dict.nav.changelog} · ${result.data.product.name}`,
+    description: dict.changelog.subtitle.replace("{name}", result.data.product.name),
   };
 }
 

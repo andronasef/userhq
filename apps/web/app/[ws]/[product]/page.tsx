@@ -6,7 +6,8 @@ import { NewPostButton } from "@/components/board/post-form-dialog";
 import { BoardToolbar } from "@/components/board/board-toolbar";
 import { PostList } from "@/components/board/post-list";
 import { EmptyState } from "@/components/empty-state";
-import { getDictionary } from "@/lib/i18n";
+import { getDictionary, isSupportedLocale } from "@/lib/i18n";
+import { getRequestLocale } from "@/lib/i18n/server";
 
 import Link from "next/link";
 import { landingHref } from "@/lib/portal-features";
@@ -22,13 +23,17 @@ export async function generateMetadata({
   params,
 }: PortalBoardPageProps): Promise<Metadata> {
   const { ws, product } = await params;
-  const result = await getPortalProduct(ws, product);
+  const [result, locale] = await Promise.all([
+    getPortalProduct(ws, product),
+    getRequestLocale(),
+  ]);
   if (!result.ok) return {};
   const features = result.data.product.features;
   if (!landingHref(ws, product, features)) return { robots: { index: false, follow: false } };
   if (!features.board) return {};
+  const dict = getDictionary(locale);
   return {
-    title: `Feedback · ${result.data.product.name}`,
+    title: `${dict.ui.feedback} · ${result.data.product.name}`,
   };
 }
 
@@ -48,14 +53,18 @@ export default async function PortalBoardPage({
   }
   const search = searchParamsObj.toString();
 
-  const productResult = await getPortalProduct(ws, product);
+  const [productResult, locale] = await Promise.all([
+    getPortalProduct(ws, product),
+    getRequestLocale(),
+  ]);
   if (!productResult.ok) notFound();
   const p = productResult.data.product;
 
-  const dict = getDictionary(
-    (productResult.data.product as { resolvedLocale?: string }).resolvedLocale ??
-      (typeof sp?.lang === "string" ? sp.lang : undefined)
-  );
+  const resolvedLocale =
+    typeof sp?.lang === "string" && isSupportedLocale(sp.lang)
+      ? sp.lang
+      : locale;
+  const dict = getDictionary(resolvedLocale);
 
   if (!p.features.board) {
     const href = landingHref(ws, product, p.features);
@@ -99,7 +108,7 @@ export default async function PortalBoardPage({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">{dict.ui.feedback}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground" dir="auto">
             {dict.board.feedbackSubtitle.replace("{name}", productName)}
           </p>
         </div>

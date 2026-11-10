@@ -40,7 +40,10 @@ export async function generateMetadata({
   const postNumber = parsePostRef(ref);
   if (!postNumber) return {};
 
-  const productResult = await getPortalProduct(ws, product);
+  const [productResult, locale] = await Promise.all([
+    getPortalProduct(ws, product),
+    getRequestLocale(),
+  ]);
   if (!productResult.ok || !productResult.data.product.features.board) return {};
   const postResult = await getPost(ws, product, postNumber);
   if (!postResult.ok) return {};
@@ -50,8 +53,9 @@ export async function generateMetadata({
   const post = postResult.data.post;
   const origin = await publicOrigin();
   const canonicalPath = postHref(ws, product, post.number, post.slug);
+  const dict = getDictionary(locale);
   const fallbackDesc =
-    p.tagline ?? `Share ideas for ${p.name} and vote on the ones you want most.`;
+    p.tagline ?? dict.board.feedbackSubtitle.replace("{name}", p.name);
 
   const metaDesc = excerpt(post.description, fallbackDesc);
 

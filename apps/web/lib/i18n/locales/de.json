@@ -12,7 +12,19 @@
     "webhooks": "Webhooks",
     "backToPortal": "Zurück zum Portal",
     "goToDashboard": "Dashboard",
-    "hiddenFromCustomers": "Für Kunden ausgeblendet"
+    "hiddenFromCustomers": "Für Kunden ausgeblendet",
+    "users": "Benutzer",
+    "viewPortal": "Portal anzeigen",
+    "userGuide": "Benutzerhandbuch",
+    "guide": "Handbuch",
+    "sidebarNav": "Seitenleistennavigation",
+    "workspaceNav": "Arbeitsbereichsnavigation",
+    "productsNav": "Produktnavigation",
+    "addNewProduct": "Neues Produkt hinzufügen",
+    "openNav": "Navigation öffnen",
+    "closeNav": "Navigation schließen",
+    "helpAndResources": "Hilfe und Ressourcen",
+    "tabs": "Reiter"
   },
   "common": {
     "save": "Speichern",
@@ -36,7 +48,12 @@
     "copy": "Kopieren",
     "saveFailed": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
     "reload": "Neu laden",
-    "errorGeneric": "Auf unserer Seite ist ein Fehler aufgetreten. Bitte versuchen Sie es gleich noch einmal."
+    "errorGeneric": "Auf unserer Seite ist ein Fehler aufgetreten. Bitte versuchen Sie es gleich noch einmal.",
+    "justNow": "gerade eben",
+    "minutesAgo": "vor {count} Min.",
+    "hoursAgo": "vor {count} Std.",
+    "daysAgo": "vor {count} T.",
+    "goToHome": "Zur Startseite"
   },
   "portal": {
     "submitFeedback": "Idee einreichen",
@@ -90,7 +107,8 @@
     "confirmLanguageChange": "Hauptsprache ändern",
     "atLeastOneLanguage": "Mindestens eine Sprache muss aktiviert bleiben.",
     "swapPreviewError": "Die Vorschau konnte nicht geladen werden. Bitte vor der Bestätigung erneut versuchen.",
-    "retryPreview": "Vorschau erneut laden"
+    "retryPreview": "Vorschau erneut laden",
+    "noProductsYet": "Noch keine Produkte vorhanden"
   },
   "entries": {
     "translationTab": "Übersetzungen",
@@ -235,7 +253,9 @@
     "account": "Konto",
     "general": "Allgemein",
     "showLess": "Weniger anzeigen",
-    "readMore": "Mehr lesen"
+    "readMore": "Mehr lesen",
+    "uploadTest": "Upload-Test",
+    "signOutError": "Abmeldung fehlgeschlagen. Bitte Verbindung prüfen und erneut versuchen."
   },
   "roadmap": {
     "title": "Roadmap",
@@ -838,5 +858,27 @@
     "pageCouldNotLoad": "Diese Seite konnte nicht geladen werden. Bitte versuchen Sie es in Kürze erneut.",
     "tryAgain": "Erneut versuchen",
     "goToHome": "Zur Startseite"
+  },
+  "workspace": {
+    "workspaces": "Arbeitsbereiche",
+    "chooseWorkspace": "Arbeitsbereich wählen",
+    "createWorkspace": "Arbeitsbereich erstellen",
+    "switchWorkspace": "Arbeitsbereich wechseln",
+    "switchWorkspaceCurrent": "Arbeitsbereich wechseln, aktuell: {current}",
+    "workspaceUnavailable": "{name} ist nicht verfügbar",
+    "suspendedDesc": "Dieser Arbeitsbereich wurde vom UserHQ-Team gesperrt. Ihre Daten bleiben erhalten. Wenden Sie sich an das UserHQ-Team, um den Zugriff wiederherzustellen.",
+    "roleAdmin": "Administrator",
+    "roleOwner": "Inhaber"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "unreadNotifications": "{count} ungelesene Benachrichtigungen",
+    "newCount": "{count} neu",
+    "markAllAsRead": "Alle als gelesen markieren",
+    "noNotificationsYet": "Noch keine Benachrichtigungen",
+    "noNotificationsDesc": "Sie werden benachrichtigt, wenn Feedback aktualisiert wird, dem Sie folgen.",
+    "loadMore": "Mehr laden",
+    "loading": "Wird geladen…",
+    "statusChangedTo": "Status geändert zu"
   }
 }

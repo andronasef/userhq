@@ -2,6 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { getMe } from "../lib/api-server";
 import { isDevUploadEnabled } from "../lib/dev-flags";
+import { getDictionary, getRequestLocale } from "../lib/i18n/server";
 import { UserMenu, SignInButton } from "./user-menu";
 import { SessionKeepAlive } from "./session-keepalive";
 import { NotificationBell } from "./notifications/notification-bell";
@@ -10,7 +11,8 @@ import { ThemeToggle } from "./theme-toggle";
 import { LanguageSwitcher } from "./language-switcher";
 
 export async function Header(): Promise<React.JSX.Element> {
-  const me = await getMe();
+  const [me, locale] = await Promise.all([getMe(), getRequestLocale()]);
+  const dict = getDictionary(locale);
   const devUploadEnabled = isDevUploadEnabled();
   const isWorkspaceOwner =
     me.isPlatformOwner || me.workspaces.some((w) => w.role === "owner");
@@ -26,7 +28,7 @@ export async function Header(): Promise<React.JSX.Element> {
                 href="/guide"
                 className="hover:text-foreground transition-colors"
               >
-                Guide
+                {dict.nav?.guide ?? "Guide"}
               </Link>
             </nav>
           )}

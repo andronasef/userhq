@@ -12,7 +12,19 @@
     "webhooks": "Webhooks",
     "backToPortal": "返回门户",
     "goToDashboard": "控制台",
-    "hiddenFromCustomers": "对客户隐藏"
+    "hiddenFromCustomers": "对客户隐藏",
+    "users": "用户",
+    "viewPortal": "查看门户",
+    "userGuide": "用户指南",
+    "guide": "指南",
+    "sidebarNav": "侧边栏导航",
+    "workspaceNav": "工作区导航",
+    "productsNav": "产品导航",
+    "addNewProduct": "添加新产品",
+    "openNav": "打开导航",
+    "closeNav": "关闭导航",
+    "helpAndResources": "帮助与资源",
+    "tabs": "标签页"
   },
   "common": {
     "save": "保存",
@@ -36,7 +48,12 @@
     "copy": "复制",
     "saveFailed": "无法保存，请重试。",
     "reload": "重新加载",
-    "errorGeneric": "出现了一些问题，请稍后重试。"
+    "errorGeneric": "出现了一些问题，请稍后重试。",
+    "justNow": "刚刚",
+    "minutesAgo": "{count}分钟前",
+    "hoursAgo": "{count}小时前",
+    "daysAgo": "{count}天前",
+    "goToHome": "返回首页"
   },
   "portal": {
     "submitFeedback": "提交反馈",
@@ -90,7 +107,8 @@
     "confirmLanguageChange": "更改主要语言",
     "atLeastOneLanguage": "必须至少启用一种语言。",
     "swapPreviewError": "无法加载影响预览。请重试后再确认。",
-    "retryPreview": "重试预览"
+    "retryPreview": "重试预览",
+    "noProductsYet": "尚无产品"
   },
   "entries": {
     "translationTab": "多语言翻译",
@@ -235,7 +253,9 @@
     "account": "账户",
     "general": "通用",
     "showLess": "收起",
-    "readMore": "阅读更多"
+    "readMore": "阅读更多",
+    "uploadTest": "上传测试",
+    "signOutError": "无法退出登录。请检查网络连接后重试。"
   },
   "roadmap": {
     "title": "路线图",
@@ -838,5 +858,27 @@
     "pageCouldNotLoad": "无法加载此页面，请稍后重试。",
     "tryAgain": "重试",
     "goToHome": "前往主页"
+  },
+  "workspace": {
+    "workspaces": "工作区",
+    "chooseWorkspace": "选择工作区",
+    "createWorkspace": "创建工作区",
+    "switchWorkspace": "切换工作区",
+    "switchWorkspaceCurrent": "切换工作区，当前：{current}",
+    "workspaceUnavailable": "{name} 不可用",
+    "suspendedDesc": "此工作区已被 UserHQ 团队暂停。您的数据已被保留。请联系 UserHQ 团队以恢复访问。",
+    "roleAdmin": "管理员",
+    "roleOwner": "所有者"
+  },
+  "notifications": {
+    "title": "通知",
+    "unreadNotifications": "{count} 条未读通知",
+    "newCount": "{count} 条新",
+    "markAllAsRead": "全部标记为已读",
+    "noNotificationsYet": "尚无通知",
+    "noNotificationsDesc": "当您关注的反馈更新时，您将收到通知。",
+    "loadMore": "加载更多",
+    "loading": "加载中…",
+    "statusChangedTo": "状态变更为"
   }
 }

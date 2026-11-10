@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PanelLeft, X } from "lucide-react";
+import { useI18n } from "../../lib/i18n/context";
 import { Button } from "../ui/button";
 import { UserHQBrand } from "../userhq-brand";
 import {
@@ -20,6 +21,7 @@ interface MobileNavProps {
 export function MobileNav({ children }: MobileNavProps) {
   const [open, setOpen] = React.useState(false);
   const pathname = usePathname();
+  const { t } = useI18n();
 
   React.useEffect(() => {
     setOpen(false);
@@ -32,7 +34,7 @@ export function MobileNav({ children }: MobileNavProps) {
           variant="ghost"
           size="icon"
           className="lg:hidden shrink-0"
-          aria-label="Open navigation"
+          aria-label={t("nav.openNav")}
         >
           <PanelLeft className="size-5 shrink-0" aria-hidden="true" />
         </Button>
@@ -51,7 +53,7 @@ export function MobileNav({ children }: MobileNavProps) {
               variant="ghost"
               size="icon"
               className="size-8 rounded-md text-muted-foreground hover:text-foreground"
-              aria-label="Close navigation"
+              aria-label={t("nav.closeNav")}
             >
               <X className="size-4" aria-hidden="true" />
             </Button>

@@ -14,9 +14,11 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { apiFetch } from "../../lib/api-client";
+import { useI18n } from "../../lib/i18n/context";
 import { NotificationItem } from "./notification-item";
 
 export function NotificationBell(): React.JSX.Element {
+  const { t } = useI18n();
   const [open, setOpen] = React.useState(false);
   const [unreadCount, setUnreadCount] = React.useState<number>(0);
   const [notifications, setNotifications] = React.useState<NotificationItemType[]>([]);
@@ -136,8 +138,8 @@ export function NotificationBell(): React.JSX.Element {
           className="rounded-full relative size-9 text-muted-foreground hover:text-foreground"
           aria-label={
             unreadCount > 0
-              ? `${unreadCount} unread notifications`
-              : "Notifications"
+              ? t("notifications.unreadNotifications", { count: unreadCount })
+              : t("notifications.title")
           }
         >
           <Bell className="size-4" aria-hidden="true" />
@@ -158,10 +160,10 @@ export function NotificationBell(): React.JSX.Element {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
+            <h3 className="text-sm font-semibold text-foreground">{t("notifications.title")}</h3>
             {unreadCount > 0 && (
               <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive">
-                {unreadCount} new
+                {t("notifications.newCount", { count: unreadCount })}
               </span>
             )}
           </div>
@@ -172,7 +174,7 @@ export function NotificationBell(): React.JSX.Element {
               className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             >
               <CheckCheck className="size-3.5" aria-hidden="true" />
-              <span>Mark all as read</span>
+              <span>{t("notifications.markAllAsRead")}</span>
             </button>
           )}
         </div>
@@ -186,9 +188,9 @@ export function NotificationBell(): React.JSX.Element {
           ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-center">
               <BellOff className="size-8 text-muted-foreground/50 mb-2" aria-hidden="true" />
-              <p className="text-sm font-medium text-foreground">No notifications yet</p>
+              <p className="text-sm font-medium text-foreground">{t("notifications.noNotificationsYet")}</p>
               <p className="text-xs text-muted-foreground max-w-xs mt-1">
-                You'll be notified when feedback you're following gets updated.
+                {t("notifications.noNotificationsDesc")}
               </p>
             </div>
           ) : (
@@ -208,7 +210,7 @@ export function NotificationBell(): React.JSX.Element {
                     onClick={handleLoadMore}
                     disabled={loadingMore}
                   >
-                    {loadingMore ? "Loading…" : "Load more"}
+                    {loadingMore ? t("notifications.loading") : t("notifications.loadMore")}
                   </Button>
                 </div>
               )}

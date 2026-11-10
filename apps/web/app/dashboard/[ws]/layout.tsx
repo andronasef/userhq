@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getWorkspace, getMe, getProducts } from "../../../lib/api-server";
 import { isDevUploadEnabled } from "../../../lib/dev-flags";
+import { getDictionary, getRequestLocale, formatMessage } from "../../../lib/i18n/server";
 import { UserMenu } from "../../../components/user-menu";
 import { NotificationBell } from "../../../components/notifications/notification-bell";
 import { ThemeToggle } from "../../../components/theme-toggle";
@@ -25,7 +26,11 @@ export default async function DashboardLayout({
   params,
 }: DashboardLayoutProps) {
   const { ws } = await params;
-  const result = await getWorkspace(ws);
+  const [result, locale] = await Promise.all([
+    getWorkspace(ws),
+    getRequestLocale(),
+  ]);
+  const dict = getDictionary(locale);
 
   if (!result.ok) {
     if (result.status === 403 && result.code === "workspace_suspended") {
@@ -35,16 +40,16 @@ export default async function DashboardLayout({
       return (
         <AppShell>
           <StatePage
-            title={`${name} is unavailable`}
-            body="This workspace has been suspended by the UserHQ team. Your data is kept. Contact the UserHQ team to restore access."
+            title={formatMessage(dict.workspace?.workspaceUnavailable ?? "{name} is unavailable", { name })}
+            body={dict.workspace?.suspendedDesc ?? "This workspace has been suspended by the UserHQ team. Your data is kept. Contact the UserHQ team to restore access."}
             actions={
               <>
                 <Button variant="outline" asChild>
-                  <Link href="/">Go to home</Link>
+                  <Link href="/">{dict.common?.goToHome ?? "Go to home"}</Link>
                 </Button>
                 {me.workspaces.length > 1 && (
                   <Button variant="outline" asChild>
-                    <Link href="/dashboard">Switch workspace</Link>
+                    <Link href="/dashboard">{dict.workspace?.switchWorkspace ?? "Switch workspace"}</Link>
                   </Button>
                 )}
               </>

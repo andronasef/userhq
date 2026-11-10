@@ -12,7 +12,19 @@
     "webhooks": "Mga Webhook",
     "backToPortal": "Bumalik sa portal",
     "goToDashboard": "Dashboard",
-    "hiddenFromCustomers": "Nakatago sa mga customer"
+    "hiddenFromCustomers": "Nakatago sa mga customer",
+    "users": "Mga Gumagamit",
+    "viewPortal": "Tingnan ang portal",
+    "userGuide": "Gabay ng Gumagamit",
+    "guide": "Gabay",
+    "sidebarNav": "Nabigasyon ng sidebar",
+    "workspaceNav": "Nabigasyon ng workspace",
+    "productsNav": "Nabigasyon ng mga produkto",
+    "addNewProduct": "Magdagdag ng bagong produkto",
+    "openNav": "Buksan ang nabigasyon",
+    "closeNav": "Isara ang nabigasyon",
+    "helpAndResources": "Tulong at mga mapagkukunan",
+    "tabs": "Mga Tab"
   },
   "common": {
     "save": "I-save",
@@ -36,7 +48,12 @@
     "copy": "Kopyahin",
     "saveFailed": "Hindi ma-save. Subukan muli.",
     "reload": "I-reload",
-    "errorGeneric": "May nagkaproblema sa aming panig. Pakisubukan muli maya-maya."
+    "errorGeneric": "May nagkaproblema sa aming panig. Pakisubukan muli maya-maya.",
+    "justNow": "ngayon lang",
+    "minutesAgo": "{count}m ang nakalipas",
+    "hoursAgo": "{count}h ang nakalipas",
+    "daysAgo": "{count}d ang nakalipas",
+    "goToHome": "Pumunta sa home"
   },
   "portal": {
     "submitFeedback": "Magbigay ng mungkahi",
@@ -90,7 +107,8 @@
     "confirmLanguageChange": "Baguhin ang pangunahing wika",
     "atLeastOneLanguage": "Dapat manatiling naka-enable ang kahit isang wika.",
     "swapPreviewError": "Hindi ma-load ang preview ng epekto. Subukan muli bago kumpirmahin.",
-    "retryPreview": "Subukan muli ang preview"
+    "retryPreview": "Subukan muli ang preview",
+    "noProductsYet": "Wala pang mga produkto"
   },
   "entries": {
     "translationTab": "Mga Pagsasalin",
@@ -235,7 +253,9 @@
     "account": "Account",
     "general": "Pangkalahatan",
     "showLess": "Ipakita ang mas kaunti",
-    "readMore": "Magbasa pa"
+    "readMore": "Magbasa pa",
+    "uploadTest": "Pagsusuri ng pag-upload",
+    "signOutError": "Hindi makapag-sign out. Suriin ang iyong koneksyon at subukan muli."
   },
   "roadmap": {
     "title": "Roadmap",
@@ -838,5 +858,27 @@
     "pageCouldNotLoad": "Hindi ma-load ang page na ito. Pakisubukan muli makalipas ang ilang minuto.",
     "tryAgain": "Subukan muli",
     "goToHome": "Pumunta sa home"
+  },
+  "workspace": {
+    "workspaces": "Mga Workspace",
+    "chooseWorkspace": "Pumili ng workspace",
+    "createWorkspace": "Gumawa ng workspace",
+    "switchWorkspace": "Magpalit ng workspace",
+    "switchWorkspaceCurrent": "Magpalit ng workspace, kasalukuyan: {current}",
+    "workspaceUnavailable": "Hindi available ang {name}",
+    "suspendedDesc": "Sinuspinde ang workspace na ito ng koponan ng UserHQ. Napanatili ang iyong data. Makipag-ugnayan sa UserHQ upang maibalik ang access.",
+    "roleAdmin": "Admin",
+    "roleOwner": "May-ari"
+  },
+  "notifications": {
+    "title": "Mga Abiso",
+    "unreadNotifications": "{count} hindi nabasang abiso",
+    "newCount": "{count} bago",
+    "markAllAsRead": "Markahan lahat bilang nabasa",
+    "noNotificationsYet": "Wala pang mga abiso",
+    "noNotificationsDesc": "Aabisuhan ka kapag na-update ang feedback na iyong sinusubaybayan.",
+    "loadMore": "Mag-load ng higit pa",
+    "loading": "Naglo-load…",
+    "statusChangedTo": "Binago ang status sa"
   }
 }

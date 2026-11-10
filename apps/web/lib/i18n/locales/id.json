@@ -12,7 +12,19 @@
     "webhooks": "Webhook",
     "backToPortal": "Kembali ke portal",
     "goToDashboard": "Dasbor",
-    "hiddenFromCustomers": "Disembunyikan dari pelanggan"
+    "hiddenFromCustomers": "Disembunyikan dari pelanggan",
+    "users": "Pengguna",
+    "viewPortal": "Lihat portal",
+    "userGuide": "Panduan Pengguna",
+    "guide": "Panduan",
+    "sidebarNav": "Navigasi bilah sisi",
+    "workspaceNav": "Navigasi ruang kerja",
+    "productsNav": "Navigasi produk",
+    "addNewProduct": "Tambah produk baru",
+    "openNav": "Buka navigasi",
+    "closeNav": "Tutup navigasi",
+    "helpAndResources": "Bantuan dan sumber daya",
+    "tabs": "Tab"
   },
   "common": {
     "save": "Simpan",
@@ -36,7 +48,12 @@
     "copy": "Salin",
     "saveFailed": "Tidak dapat menyimpan. Coba lagi.",
     "reload": "Muat ulang",
-    "errorGeneric": "Terjadi kesalahan di pihak kami. Silakan coba lagi sebentar lagi."
+    "errorGeneric": "Terjadi kesalahan di pihak kami. Silakan coba lagi sebentar lagi.",
+    "justNow": "baru saja",
+    "minutesAgo": "{count} mnt lalu",
+    "hoursAgo": "{count} jam lalu",
+    "daysAgo": "{count} hr lalu",
+    "goToHome": "Buka beranda"
   },
   "portal": {
     "submitFeedback": "Kirim ide",
@@ -90,7 +107,8 @@
     "confirmLanguageChange": "Ubah bahasa utama",
     "atLeastOneLanguage": "Setidaknya satu bahasa harus tetap diaktifkan.",
     "swapPreviewError": "Pratinjau dampak tidak dapat dimuat. Coba lagi sebelum mengonfirmasi.",
-    "retryPreview": "Coba lagi pratinjau"
+    "retryPreview": "Coba lagi pratinjau",
+    "noProductsYet": "Belum ada produk"
   },
   "entries": {
     "translationTab": "Terjemahan",
@@ -235,7 +253,9 @@
     "account": "Akun",
     "general": "Umum",
     "showLess": "Tampilkan lebih sedikit",
-    "readMore": "Baca selengkapnya"
+    "readMore": "Baca selengkapnya",
+    "uploadTest": "Uji unggah",
+    "signOutError": "Tidak dapat keluar. Periksa koneksi Anda dan coba lagi."
   },
   "roadmap": {
     "title": "Peta Jalan",
@@ -838,5 +858,27 @@
     "pageCouldNotLoad": "Halaman ini tidak dapat dimuat. Silakan coba lagi dalam beberapa saat.",
     "tryAgain": "Coba lagi",
     "goToHome": "Buka beranda"
+  },
+  "workspace": {
+    "workspaces": "Ruang kerja",
+    "chooseWorkspace": "Pilih ruang kerja",
+    "createWorkspace": "Buat ruang kerja",
+    "switchWorkspace": "Ganti ruang kerja",
+    "switchWorkspaceCurrent": "Ganti ruang kerja, saat ini: {current}",
+    "workspaceUnavailable": "{name} tidak tersedia",
+    "suspendedDesc": "Ruang kerja ini telah ditangguhkan oleh tim UserHQ. Data Anda tetap disimpan. Hubungi tim UserHQ untuk memulihkan akses.",
+    "roleAdmin": "Admin",
+    "roleOwner": "Pemilik"
+  },
+  "notifications": {
+    "title": "Notifikasi",
+    "unreadNotifications": "{count} notifikasi belum dibaca",
+    "newCount": "{count} baru",
+    "markAllAsRead": "Tandai semua telah dibaca",
+    "noNotificationsYet": "Belum ada notifikasi",
+    "noNotificationsDesc": "Anda akan diberi tahu saat masukan yang Anda ikuti diperbarui.",
+    "loadMore": "Muat lebih banyak",
+    "loading": "Memuat…",
+    "statusChangedTo": "Status diubah menjadi"
   }
 }

@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { ChevronsUpDown, Check, Plus } from "lucide-react";
+import { useI18n } from "../../lib/i18n/context";
 import { Button } from "../ui/button";
 import { EntityLogo } from "../entity-logo";
 import {
@@ -36,13 +37,15 @@ export function WorkspaceSwitcher({
   workspaces,
   canCreate,
 }: WorkspaceSwitcherProps) {
+  const { t } = useI18n();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
           className="h-9 px-2 gap-2 max-w-60 min-w-0 shrink justify-start"
-          aria-label={`Switch workspace, current: ${current.name}`}
+          aria-label={t("workspace.switchWorkspaceCurrent", { current: current.name })}
         >
           <EntityLogo src={current.logoUrl} name={current.name} size={24} />
           <span className="text-sm font-semibold truncate text-foreground min-w-0">
@@ -57,7 +60,7 @@ export function WorkspaceSwitcher({
 
       <DropdownMenuContent align="start" sideOffset={8}>
         <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground px-2 py-1.5">
-          Workspaces
+          {t("workspace.workspaces")}
         </DropdownMenuLabel>
         <div className="max-h-96 overflow-y-auto flex flex-col gap-0.5">
           {workspaces.map((ws) => {
@@ -91,7 +94,7 @@ export function WorkspaceSwitcher({
                 className="flex items-center gap-2 w-full"
               >
                 <Plus className="size-4 shrink-0" aria-hidden="true" />
-                <span>Create workspace</span>
+                <span>{t("workspace.createWorkspace")}</span>
               </Link>
             </DropdownMenuItem>
           </>

@@ -12,7 +12,19 @@
     "webhooks": "Webhooks",
     "backToPortal": "Volver al portal",
     "goToDashboard": "Panel",
-    "hiddenFromCustomers": "Oculto para clientes"
+    "hiddenFromCustomers": "Oculto para clientes",
+    "users": "Usuarios",
+    "viewPortal": "Ver portal",
+    "userGuide": "Guía de usuario",
+    "guide": "Guía",
+    "sidebarNav": "Navegación de barra lateral",
+    "workspaceNav": "Navegación del espacio de trabajo",
+    "productsNav": "Navegación de productos",
+    "addNewProduct": "Añadir nuevo producto",
+    "openNav": "Abrir navegación",
+    "closeNav": "Cerrar navegación",
+    "helpAndResources": "Ayuda y recursos",
+    "tabs": "Pestañas"
   },
   "common": {
     "save": "Guardar",
@@ -36,7 +48,12 @@
     "copy": "Copiar",
     "saveFailed": "No se pudo guardar. Inténtalo de nuevo.",
     "reload": "Recargar",
-    "errorGeneric": "Algo salió mal por nuestra parte. Inténtalo de nuevo en un momento."
+    "errorGeneric": "Algo salió mal por nuestra parte. Inténtalo de nuevo en un momento.",
+    "justNow": "ahora mismo",
+    "minutesAgo": "hace {count} min",
+    "hoursAgo": "hace {count} h",
+    "daysAgo": "hace {count} d",
+    "goToHome": "Ir al inicio"
   },
   "portal": {
     "submitFeedback": "Enviar sugerencia",
@@ -90,7 +107,8 @@
     "confirmLanguageChange": "Cambiar idioma principal",
     "atLeastOneLanguage": "Debe permanecer habilitado al menos un idioma.",
     "swapPreviewError": "No se pudo cargar la vista previa del impacto. Reintenta antes de confirmar.",
-    "retryPreview": "Reintentar vista previa"
+    "retryPreview": "Reintentar vista previa",
+    "noProductsYet": "Aún no hay productos"
   },
   "entries": {
     "translationTab": "Traducciones",
@@ -235,7 +253,9 @@
     "account": "Cuenta",
     "general": "General",
     "showLess": "Mostrar menos",
-    "readMore": "Leer más"
+    "readMore": "Leer más",
+    "uploadTest": "Prueba de subida",
+    "signOutError": "No se pudo cerrar sesión. Revisa tu conexión e inténtalo de nuevo."
   },
   "roadmap": {
     "title": "Hoja de ruta",
@@ -838,5 +858,27 @@
     "pageCouldNotLoad": "No se pudo cargar esta página. Inténtalo de nuevo en unos minutos.",
     "tryAgain": "Reintentar",
     "goToHome": "Ir al inicio"
+  },
+  "workspace": {
+    "workspaces": "Espacios de trabajo",
+    "chooseWorkspace": "Elige un espacio de trabajo",
+    "createWorkspace": "Crear espacio de trabajo",
+    "switchWorkspace": "Cambiar de espacio de trabajo",
+    "switchWorkspaceCurrent": "Cambiar de espacio de trabajo, actual: {current}",
+    "workspaceUnavailable": "{name} no está disponible",
+    "suspendedDesc": "Este espacio de trabajo ha sido suspendido por el equipo de UserHQ. Tus datos se conservan. Contacta con UserHQ para restablecer el acceso.",
+    "roleAdmin": "Administrador",
+    "roleOwner": "Propietario"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "unreadNotifications": "{count} notificaciones no leídas",
+    "newCount": "{count} nuevas",
+    "markAllAsRead": "Marcar todo como leído",
+    "noNotificationsYet": "Aún no hay notificaciones",
+    "noNotificationsDesc": "Recibirás una notificación cuando los comentarios que sigues se actualicen.",
+    "loadMore": "Cargar más",
+    "loading": "Cargando…",
+    "statusChangedTo": "Estado cambiado a"
   }
 }

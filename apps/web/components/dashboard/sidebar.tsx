@@ -48,10 +48,10 @@ export function DashboardSidebar({
 
   return (
     <aside
-      aria-label="Sidebar navigation"
+      aria-label={t("nav.sidebarNav")}
       className={cn("flex flex-col gap-6 w-full", className)}
     >
-      <nav aria-label="Workspace navigation" className="flex flex-col gap-1">
+      <nav aria-label={t("nav.workspaceNav")} className="flex flex-col gap-1">
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1">
           {t("ui.workspace")}
         </div>
@@ -96,7 +96,7 @@ export function DashboardSidebar({
         </Link>
       </nav>
 
-      <nav aria-label="Products navigation" className="flex flex-col gap-1">
+      <nav aria-label={t("nav.productsNav")} className="flex flex-col gap-1">
         <div className="flex items-center justify-between px-3 mb-1">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             {t("dashboard.products")}
@@ -104,8 +104,8 @@ export function DashboardSidebar({
           <Button variant="ghost" size="icon" className="size-5" asChild>
             <Link
               href={`/dashboard/${ws}/new`}
-              aria-label="Add new product"
-              title="Add new product"
+              aria-label={t("nav.addNewProduct")}
+              title={t("nav.addNewProduct")}
             >
               <Plus className="size-4" aria-hidden="true" />
             </Link>
@@ -114,7 +114,7 @@ export function DashboardSidebar({
 
         {products.length === 0 ? (
           <div className="text-sm text-muted-foreground px-3">
-            No products yet
+            {t("dashboard.noProductsYet")}
           </div>
         ) : (
           <div className="flex flex-col gap-1">
@@ -178,7 +178,7 @@ export function DashboardSidebar({
                     <div className="flex flex-col gap-0.5 pl-7">
                       <Link
                         href={boardHref}
-                        title={!product.features.board ? "Hidden from customers" : undefined}
+                        title={!product.features.board ? t("nav.hiddenFromCustomers") : undefined}
                         className={cn(
                           "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
                           isBoardActive &&
@@ -193,13 +193,13 @@ export function DashboardSidebar({
                         <span className="truncate">{t("nav.board")}</span>
                         {!product.features.board && (<>
                           <EyeOff className="size-3.5 ml-auto shrink-0 text-muted-foreground" aria-hidden />
-                          <span className="sr-only">Hidden from customers</span>
+                          <span className="sr-only">{t("nav.hiddenFromCustomers")}</span>
                         </>)}
                       </Link>
 
                       <Link
                         href={roadmapHref}
-                        title={!product.features.roadmap ? "Hidden from customers" : undefined}
+                        title={!product.features.roadmap ? t("nav.hiddenFromCustomers") : undefined}
                         className={cn(
                           "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
                           isRoadmapActive &&
@@ -214,13 +214,13 @@ export function DashboardSidebar({
                         <span className="truncate">{t("nav.roadmap")}</span>
                         {!product.features.roadmap && (<>
                           <EyeOff className="size-3.5 ml-auto shrink-0 text-muted-foreground" aria-hidden />
-                          <span className="sr-only">Hidden from customers</span>
+                          <span className="sr-only">{t("nav.hiddenFromCustomers")}</span>
                         </>)}
                       </Link>
 
                       <Link
                         href={changelogHref}
-                        title={!product.features.changelog ? "Hidden from customers" : undefined}
+                        title={!product.features.changelog ? t("nav.hiddenFromCustomers") : undefined}
                         className={cn(
                           "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
                           isChangelogActive &&
@@ -235,13 +235,13 @@ export function DashboardSidebar({
                         <span className="truncate">{t("nav.changelog")}</span>
                         {!product.features.changelog && (<>
                           <EyeOff className="size-3.5 ml-auto shrink-0 text-muted-foreground" aria-hidden />
-                          <span className="sr-only">Hidden from customers</span>
+                          <span className="sr-only">{t("nav.hiddenFromCustomers")}</span>
                         </>)}
                       </Link>
 
                       <Link
                         href={faqHref}
-                        title={!product.features.faq ? "Hidden from customers" : undefined}
+                        title={!product.features.faq ? t("nav.hiddenFromCustomers") : undefined}
                         className={cn(
                           "flex items-center gap-2 h-8 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60",
                           isFaqActive &&
@@ -256,7 +256,7 @@ export function DashboardSidebar({
                         <span className="truncate">{t("nav.faq")}</span>
                         {!product.features.faq && (<>
                           <EyeOff className="size-3.5 ml-auto shrink-0 text-muted-foreground" aria-hidden />
-                          <span className="sr-only">Hidden from customers</span>
+                          <span className="sr-only">{t("nav.hiddenFromCustomers")}</span>
                         </>)}
                       </Link>
 
@@ -273,7 +273,7 @@ export function DashboardSidebar({
                           className="size-3.5 shrink-0"
                           aria-hidden="true"
                         />
-                        <span className="truncate">Users</span>
+                        <span className="truncate">{t("nav.users")}</span>
                       </Link>
 
                       <Link
@@ -302,7 +302,7 @@ export function DashboardSidebar({
                           className="size-3.5 shrink-0"
                           aria-hidden="true"
                         />
-                        <span className="truncate">View portal</span>
+                        <span className="truncate">{t("nav.viewPortal")}</span>
                       </a>
                     </div>
                   )}
@@ -314,13 +314,13 @@ export function DashboardSidebar({
       </nav>
 
       {isWorkspaceOwner && (
-        <nav aria-label="Help and resources" className="mt-auto pt-4 border-t border-border flex flex-col gap-1">
+        <nav aria-label={t("nav.helpAndResources")} className="mt-auto pt-4 border-t border-border flex flex-col gap-1">
           <Link
             href="/guide"
             className="flex items-center gap-2 h-9 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
           >
             <BookOpen className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-            <span className="truncate">User Guide</span>
+            <span className="truncate">{t("nav.userGuide")}</span>
           </Link>
         </nav>
       )}

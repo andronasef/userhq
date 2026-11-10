@@ -12,7 +12,19 @@
     "webhooks": "Webhooks",
     "backToPortal": "Back to portal",
     "goToDashboard": "Dashboard",
-    "hiddenFromCustomers": "Hidden from customers"
+    "hiddenFromCustomers": "Hidden from customers",
+    "users": "Users",
+    "viewPortal": "View portal",
+    "userGuide": "User Guide",
+    "guide": "Guide",
+    "sidebarNav": "Sidebar navigation",
+    "workspaceNav": "Workspace navigation",
+    "productsNav": "Products navigation",
+    "addNewProduct": "Add new product",
+    "openNav": "Open navigation",
+    "closeNav": "Close navigation",
+    "helpAndResources": "Help and resources",
+    "tabs": "Tabs"
   },
   "common": {
     "save": "Save",
@@ -36,7 +48,12 @@
     "copy": "Copy",
     "saveFailed": "Could not save. Try again.",
     "reload": "Reload",
-    "errorGeneric": "Something went wrong on our end. Try again in a moment."
+    "errorGeneric": "Something went wrong on our end. Try again in a moment.",
+    "justNow": "just now",
+    "minutesAgo": "{count}m ago",
+    "hoursAgo": "{count}h ago",
+    "daysAgo": "{count}d ago",
+    "goToHome": "Go to home"
   },
   "portal": {
     "submitFeedback": "Submit idea",
@@ -90,7 +107,8 @@
     "confirmLanguageChange": "Change primary language",
     "atLeastOneLanguage": "At least one language must remain enabled.",
     "swapPreviewError": "Could not load the impact preview. Retry before confirming.",
-    "retryPreview": "Retry preview"
+    "retryPreview": "Retry preview",
+    "noProductsYet": "No products yet"
   },
   "entries": {
     "translationTab": "Translations",
@@ -235,7 +253,9 @@
     "account": "Account",
     "general": "General",
     "showLess": "Show less",
-    "readMore": "Read more"
+    "readMore": "Read more",
+    "uploadTest": "Upload test",
+    "signOutError": "Could not sign out. Check your connection and try again."
   },
   "roadmap": {
     "title": "Roadmap",
@@ -838,5 +858,27 @@
     "pageCouldNotLoad": "This page couldn't load. Try again, or come back in a few minutes.",
     "tryAgain": "Try again",
     "goToHome": "Go to home"
+  },
+  "workspace": {
+    "workspaces": "Workspaces",
+    "chooseWorkspace": "Choose a workspace",
+    "createWorkspace": "Create workspace",
+    "switchWorkspace": "Switch workspace",
+    "switchWorkspaceCurrent": "Switch workspace, current: {current}",
+    "workspaceUnavailable": "{name} is unavailable",
+    "suspendedDesc": "This workspace has been suspended by the UserHQ team. Your data is kept. Contact the UserHQ team to restore access.",
+    "roleAdmin": "Admin",
+    "roleOwner": "Owner"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "unreadNotifications": "{count} unread notifications",
+    "newCount": "{count} new",
+    "markAllAsRead": "Mark all as read",
+    "noNotificationsYet": "No notifications yet",
+    "noNotificationsDesc": "You will be notified when feedback you are following gets updated.",
+    "loadMore": "Load more",
+    "loading": "Loading…",
+    "statusChangedTo": "Status changed to"
   }
 }

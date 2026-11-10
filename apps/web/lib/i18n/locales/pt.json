@@ -12,7 +12,19 @@
     "webhooks": "Webhooks",
     "backToPortal": "Voltar ao portal",
     "goToDashboard": "Painel",
-    "hiddenFromCustomers": "Oculto para clientes"
+    "hiddenFromCustomers": "Oculto para clientes",
+    "users": "Usuários",
+    "viewPortal": "Ver portal",
+    "userGuide": "Guia do usuário",
+    "guide": "Guia",
+    "sidebarNav": "Navegação da barra lateral",
+    "workspaceNav": "Navegação do espaço de trabalho",
+    "productsNav": "Navegação de produtos",
+    "addNewProduct": "Adicionar novo produto",
+    "openNav": "Abrir navegação",
+    "closeNav": "Fechar navegação",
+    "helpAndResources": "Ajuda e recursos",
+    "tabs": "Abas"
   },
   "common": {
     "save": "Salvar",
@@ -36,7 +48,12 @@
     "copy": "Copiar",
     "saveFailed": "Não foi possível salvar. Tente novamente.",
     "reload": "Recarregar",
-    "errorGeneric": "Algo deu errado do nosso lado. Tente novamente em alguns instantes."
+    "errorGeneric": "Algo deu errado do nosso lado. Tente novamente em alguns instantes.",
+    "justNow": "agora mesmo",
+    "minutesAgo": "há {count} min",
+    "hoursAgo": "há {count} h",
+    "daysAgo": "há {count} d",
+    "goToHome": "Ir para o início"
   },
   "portal": {
     "submitFeedback": "Enviar ideia",
@@ -90,7 +107,8 @@
     "confirmLanguageChange": "Alterar idioma principal",
     "atLeastOneLanguage": "Pelo menos um idioma deve permanecer ativado.",
     "swapPreviewError": "Não foi possível carregar a prévia do impacto. Tente novamente antes de confirmar.",
-    "retryPreview": "Tentar prévia novamente"
+    "retryPreview": "Tentar prévia novamente",
+    "noProductsYet": "Nenhum produto ainda"
   },
   "entries": {
     "translationTab": "Traduções",
@@ -235,7 +253,9 @@
     "account": "Conta",
     "general": "Geral",
     "showLess": "Mostrar menos",
-    "readMore": "Ler mais"
+    "readMore": "Ler mais",
+    "uploadTest": "Teste de upload",
+    "signOutError": "Não foi possível sair. Verifique sua conexão e tente novamente."
   },
   "roadmap": {
     "title": "Roteiro (Roadmap)",
@@ -838,5 +858,27 @@
     "pageCouldNotLoad": "Não foi possível carregar esta página. Tente novamente em instantes.",
     "tryAgain": "Tentar novamente",
     "goToHome": "Ir para a página inicial"
+  },
+  "workspace": {
+    "workspaces": "Espaços de trabalho",
+    "chooseWorkspace": "Escolha um espaço de trabalho",
+    "createWorkspace": "Criar espaço de trabalho",
+    "switchWorkspace": "Alternar espaço de trabalho",
+    "switchWorkspaceCurrent": "Alternar espaço de trabalho, atual: {current}",
+    "workspaceUnavailable": "{name} está indisponível",
+    "suspendedDesc": "Este espaço de trabalho foi suspenso pela equipe do UserHQ. Seus dados estão mantidos. Entre em contato com a equipe para restaurar o acesso.",
+    "roleAdmin": "Administrador",
+    "roleOwner": "Proprietário"
+  },
+  "notifications": {
+    "title": "Notificações",
+    "unreadNotifications": "{count} notificações não lidas",
+    "newCount": "{count} novas",
+    "markAllAsRead": "Marcar tudo como lido",
+    "noNotificationsYet": "Nenhuma notificação ainda",
+    "noNotificationsDesc": "Você será notificado quando o feedback que você segue for atualizado.",
+    "loadMore": "Carregar mais",
+    "loading": "Carregando…",
+    "statusChangedTo": "Status alterado para"
   }
 }

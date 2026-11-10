@@ -88,3 +88,16 @@ export function resolveLocale({
 
   return DEFAULT_LOCALE;
 }
+
+export function formatMessage(
+  template: string,
+  params?: Record<string, string | number | boolean | null | undefined>,
+): string {
+  if (!params) return template;
+  let res = template;
+  for (const [key, val] of Object.entries(params)) {
+    res = res.replaceAll(`{${key}}`, String(val ?? ""));
+  }
+  return res;
+}
+

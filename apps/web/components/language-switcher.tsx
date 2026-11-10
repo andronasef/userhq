@@ -37,7 +37,7 @@ export function LanguageSwitcher({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          aria-label={t("common.switchLanguage", "Switch language")}
+          aria-label={t("common.switchLanguage")}
           className={cn(
             "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer",
             variant === "outline" &&

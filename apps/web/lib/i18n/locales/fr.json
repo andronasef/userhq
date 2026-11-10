@@ -12,7 +12,19 @@
     "webhooks": "Webhooks",
     "backToPortal": "Retour au portail",
     "goToDashboard": "Tableau de bord",
-    "hiddenFromCustomers": "Masqué pour les clients"
+    "hiddenFromCustomers": "Masqué pour les clients",
+    "users": "Utilisateurs",
+    "viewPortal": "Voir le portail",
+    "userGuide": "Guide d utilisation",
+    "guide": "Guide",
+    "sidebarNav": "Navigation latérale",
+    "workspaceNav": "Navigation de l espace de travail",
+    "productsNav": "Navigation des produits",
+    "addNewProduct": "Ajouter un nouveau produit",
+    "openNav": "Ouvrir la navigation",
+    "closeNav": "Fermer la navigation",
+    "helpAndResources": "Aide et ressources",
+    "tabs": "Onglets"
   },
   "common": {
     "save": "Enregistrer",
@@ -36,7 +48,12 @@
     "copy": "Copier",
     "saveFailed": "Impossible d’enregistrer. Réessayez.",
     "reload": "Recharger",
-    "errorGeneric": "Une erreur s'est produite de notre côté. Veuillez réessayer dans un instant."
+    "errorGeneric": "Une erreur s'est produite de notre côté. Veuillez réessayer dans un instant.",
+    "justNow": "à l instant",
+    "minutesAgo": "il y a {count} min",
+    "hoursAgo": "il y a {count} h",
+    "daysAgo": "il y a {count} j",
+    "goToHome": "Aller à l accueil"
   },
   "portal": {
     "submitFeedback": "Proposer une idée",
@@ -90,7 +107,8 @@
     "confirmLanguageChange": "Changer la langue principale",
     "atLeastOneLanguage": "Au moins une langue doit rester activée.",
     "swapPreviewError": "Impossible de charger l’aperçu de l’impact. Réessayez avant de confirmer.",
-    "retryPreview": "Réessayer l’aperçu"
+    "retryPreview": "Réessayer l’aperçu",
+    "noProductsYet": "Aucun produit pour l instant"
   },
   "entries": {
     "translationTab": "Traductions",
@@ -235,7 +253,9 @@
     "account": "Compte",
     "general": "Général",
     "showLess": "Afficher moins",
-    "readMore": "Lire la suite"
+    "readMore": "Lire la suite",
+    "uploadTest": "Test de téléversement",
+    "signOutError": "Impossible de se déconnecter. Vérifiez votre connexion et réessayez."
   },
   "roadmap": {
     "title": "Feuille de route",
@@ -838,5 +858,27 @@
     "pageCouldNotLoad": "Cette page n'a pas pu être chargée. Veuillez réessayer dans quelques instants.",
     "tryAgain": "Réessayer",
     "goToHome": "Aller à l'accueil"
+  },
+  "workspace": {
+    "workspaces": "Espaces de travail",
+    "chooseWorkspace": "Choisir un espace de travail",
+    "createWorkspace": "Créer un espace de travail",
+    "switchWorkspace": "Changer d espace de travail",
+    "switchWorkspaceCurrent": "Changer d espace de travail, actuel : {current}",
+    "workspaceUnavailable": "{name} est indisponible",
+    "suspendedDesc": "Cet espace de travail a été suspendu par l équipe UserHQ. Vos données sont conservées. Contactez l équipe UserHQ pour rétablir l accès.",
+    "roleAdmin": "Administrateur",
+    "roleOwner": "Propriétaire"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "unreadNotifications": "{count} notifications non lues",
+    "newCount": "{count} nouvelles",
+    "markAllAsRead": "Tout marquer comme lu",
+    "noNotificationsYet": "Aucune notification pour le moment",
+    "noNotificationsDesc": "Vous recevrez une notification lorsque les retours suivis seront mis à jour.",
+    "loadMore": "Charger plus",
+    "loading": "Chargement…",
+    "statusChangedTo": "Statut changé en"
   }
 }

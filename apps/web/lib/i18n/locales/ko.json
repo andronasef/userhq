@@ -12,7 +12,19 @@
     "webhooks": "웹훅",
     "backToPortal": "포털로 돌아가기",
     "goToDashboard": "대시보드",
-    "hiddenFromCustomers": "고객에게 숨김"
+    "hiddenFromCustomers": "고객에게 숨김",
+    "users": "사용자",
+    "viewPortal": "포털 보기",
+    "userGuide": "사용자 가이드",
+    "guide": "가이드",
+    "sidebarNav": "사이드바 탐색",
+    "workspaceNav": "워크스페이스 탐색",
+    "productsNav": "제품 탐색",
+    "addNewProduct": "새 제품 추가",
+    "openNav": "탐색 열기",
+    "closeNav": "탐색 닫기",
+    "helpAndResources": "도움말 및 리소스",
+    "tabs": "탭"
   },
   "common": {
     "save": "저장",
@@ -36,7 +48,12 @@
     "copy": "복사",
     "saveFailed": "저장하지 못했습니다. 다시 시도하세요.",
     "reload": "새로고침",
-    "errorGeneric": "문제가 발생했습니다. 잠시 후 다시 시도해 주세요."
+    "errorGeneric": "문제가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+    "justNow": "방금",
+    "minutesAgo": "{count}분 전",
+    "hoursAgo": "{count}시간 전",
+    "daysAgo": "{count}일 전",
+    "goToHome": "홈으로 이동"
   },
   "portal": {
     "submitFeedback": "새로운 아이디어 제안",
@@ -90,7 +107,8 @@
     "confirmLanguageChange": "기본 언어 변경",
     "atLeastOneLanguage": "하나 이상의 언어를 활성화해야 합니다.",
     "swapPreviewError": "영향 미리보기를 불러오지 못했습니다. 확인하기 전에 다시 시도하세요.",
-    "retryPreview": "미리보기 다시 시도"
+    "retryPreview": "미리보기 다시 시도",
+    "noProductsYet": "아직 제품이 없습니다"
   },
   "entries": {
     "translationTab": "번역",
@@ -235,7 +253,9 @@
     "account": "계정",
     "general": "일반",
     "showLess": "간략히 보기",
-    "readMore": "더 읽기"
+    "readMore": "더 읽기",
+    "uploadTest": "업로드 테스트",
+    "signOutError": "로그아웃할 수 없습니다. 연결 상태를 확인하고 다시 시도하세요."
   },
   "roadmap": {
     "title": "로드맵",
@@ -838,5 +858,27 @@
     "pageCouldNotLoad": "이 페이지를 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.",
     "tryAgain": "다시 시도",
     "goToHome": "홈으로 이동"
+  },
+  "workspace": {
+    "workspaces": "워크스페이스",
+    "chooseWorkspace": "워크스페이스 선택",
+    "createWorkspace": "워크스페이스 생성",
+    "switchWorkspace": "워크스페이스 전환",
+    "switchWorkspaceCurrent": "워크스페이스 전환, 현재: {current}",
+    "workspaceUnavailable": "{name}을(를) 사용할 수 없습니다",
+    "suspendedDesc": "이 워크스페이스는 UserHQ 팀에 의해 일시 정지되었습니다. 귀하의 데이터는 보존됩니다. 액세스를 복원하려면 UserHQ 팀에 문의하세요.",
+    "roleAdmin": "관리자",
+    "roleOwner": "소유자"
+  },
+  "notifications": {
+    "title": "알림",
+    "unreadNotifications": "{count}개의 읽지 않은 알림",
+    "newCount": "{count}개 신규",
+    "markAllAsRead": "모두 읽음으로 표시",
+    "noNotificationsYet": "아직 알림이 없습니다",
+    "noNotificationsDesc": "팔로우 중인 피드백이 업데이트되면 알림을 받게 됩니다.",
+    "loadMore": "더 보기",
+    "loading": "로드 중…",
+    "statusChangedTo": "상태가 다음으로 변경됨:"
   }
 }

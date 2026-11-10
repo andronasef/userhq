@@ -12,7 +12,19 @@
     "webhooks": "الخطافات البرمجية",
     "backToPortal": "العودة إلى البوابة",
     "goToDashboard": "لوحة التحكم",
-    "hiddenFromCustomers": "مخفي عن العملاء"
+    "hiddenFromCustomers": "مخفي عن العملاء",
+    "users": "المستخدمون",
+    "viewPortal": "عرض البوابة",
+    "userGuide": "دليل المستخدم",
+    "guide": "الدليل",
+    "sidebarNav": "شريط التنقل الجانبي",
+    "workspaceNav": "تنقل مساحة العمل",
+    "productsNav": "تنقل المنتجات",
+    "addNewProduct": "إضافة منتج جديد",
+    "openNav": "فتح التنقل",
+    "closeNav": "إغلاق التنقل",
+    "helpAndResources": "المساعدة والموارد",
+    "tabs": "علامات التبويب"
   },
   "common": {
     "save": "حفظ",
@@ -36,7 +48,12 @@
     "copy": "نسخ",
     "saveFailed": "تعذّر الحفظ. أعد المحاولة.",
     "reload": "إعادة تحميل",
-    "errorGeneric": "حدث خطأ ما من جانبنا. يُرجى المحاولة مرة أخرى بعد لحظات."
+    "errorGeneric": "حدث خطأ ما من جانبنا. يُرجى المحاولة مرة أخرى بعد لحظات.",
+    "justNow": "الآن",
+    "minutesAgo": "منذ {count} د",
+    "hoursAgo": "منذ {count} س",
+    "daysAgo": "منذ {count} ي",
+    "goToHome": "الذهاب إلى الرئيسية"
   },
   "portal": {
     "submitFeedback": "أرسل فكرة",
@@ -90,7 +107,8 @@
     "confirmLanguageChange": "تأكيد تغيير اللغة الأساسية",
     "atLeastOneLanguage": "يجب إبقاء لغة واحدة على الأقل مفعّلة.",
     "swapPreviewError": "تعذّر تحميل معاينة التأثير. أعد المحاولة قبل التأكيد.",
-    "retryPreview": "إعادة تحميل المعاينة"
+    "retryPreview": "إعادة تحميل المعاينة",
+    "noProductsYet": "لا توجد منتجات بعد"
   },
   "entries": {
     "translationTab": "الترجمات",
@@ -235,7 +253,9 @@
     "account": "الحساب",
     "general": "عام",
     "showLess": "عرض أقل",
-    "readMore": "اقرأ المزيد"
+    "readMore": "اقرأ المزيد",
+    "uploadTest": "اختبار الرفع",
+    "signOutError": "تعذر تسجيل الخروج. تحقق من اتصالك وحاول مرة أخرى."
   },
   "roadmap": {
     "title": "خارطة الطريق",
@@ -838,5 +858,27 @@
     "pageCouldNotLoad": "تعذر تحميل هذه الصفحة. حاول مرة أخرى أو عد بعد قليل.",
     "tryAgain": "إعادة المحاولة",
     "goToHome": "الانتقال إلى الرئيسية"
+  },
+  "workspace": {
+    "workspaces": "مساحات العمل",
+    "chooseWorkspace": "اختر مساحة عمل",
+    "createWorkspace": "إنشاء مساحة عمل",
+    "switchWorkspace": "تبديل مساحة العمل",
+    "switchWorkspaceCurrent": "تبديل مساحة العمل، الحالية: {current}",
+    "workspaceUnavailable": "{name} غير متوفر",
+    "suspendedDesc": "تم تعليق مساحة العمل هذه من قبل فريق UserHQ. تم الاحتفاظ ببياناتك. تواصل مع فريق UserHQ لاستعادة الوصول.",
+    "roleAdmin": "مسؤول",
+    "roleOwner": "المالك"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "unreadNotifications": "{count} إشعارات غير مقروءة",
+    "newCount": "{count} جديدة",
+    "markAllAsRead": "تحديد الكل كمقروء",
+    "noNotificationsYet": "لا توجد إشعارات بعد",
+    "noNotificationsDesc": "سيتم إعلامك عندما يتم تحديث الملاحظات التي تتابعها.",
+    "loadMore": "تحميل المزيد",
+    "loading": "جارٍ التحميل…",
+    "statusChangedTo": "تغيرت الحالة إلى"
   }
 }

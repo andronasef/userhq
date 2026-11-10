@@ -132,13 +132,13 @@ export function UserMenu({
       const res = await authClient.signOut();
       if (res?.error) {
         setIsPending(false);
-        setErrorMessage("Couldn't sign out. Check your connection and try again.");
+        setErrorMessage(t("ui.signOutError"));
         return;
       }
       window.location.assign("/");
     } catch {
       setIsPending(false);
-      setErrorMessage("Couldn't sign out. Check your connection and try again.");
+      setErrorMessage(t("ui.signOutError"));
     }
   };
 
@@ -188,7 +188,7 @@ export function UserMenu({
             <DropdownMenuItem asChild>
               <Link href="/dev/upload" className="flex items-center gap-2 w-full">
                 <ImageUp className="size-4 shrink-0" aria-hidden="true" />
-                <span>Upload test</span>
+                <span>{t("ui.uploadTest")}</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -270,7 +270,7 @@ export function UserMenu({
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="flex items-center gap-2 w-full cursor-pointer">
             <Globe className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-            <span>{t("common.language", "Language")}</span>
+            <span>{t("common.language")}</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-48 max-h-72 overflow-y-auto">
             {Object.values(LOCALE_CATALOG).map((item) => {

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMe } from "../../lib/api-server";
+import { getDictionary, getRequestLocale } from "../../lib/i18n/server";
 import { AppShell } from "../../components/app-shell";
 import { PageHeader } from "../../components/page-header";
 import { EntityLogo } from "../../components/entity-logo";
@@ -13,7 +14,8 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPickerPage(): Promise<React.JSX.Element> {
-  const me = await getMe();
+  const [me, locale] = await Promise.all([getMe(), getRequestLocale()]);
+  const dict = getDictionary(locale);
 
   if (!me.user) {
     redirect("/login?next=%2Fdashboard");
@@ -34,11 +36,11 @@ export default async function DashboardPickerPage(): Promise<React.JSX.Element> 
   return (
     <AppShell>
       <PageHeader
-        title="Choose a workspace"
+        title={dict.workspace?.chooseWorkspace ?? "Choose a workspace"}
         action={
           me.canCreateWorkspace ? (
             <Button variant="outline" asChild>
-              <Link href="/dashboard/new">Create workspace</Link>
+              <Link href="/dashboard/new">{dict.workspace?.createWorkspace ?? "Create workspace"}</Link>
             </Button>
           ) : undefined
         }
@@ -46,7 +48,10 @@ export default async function DashboardPickerPage(): Promise<React.JSX.Element> 
 
       <div className="rounded-lg border border-border divide-y divide-border">
         {sortedWorkspaces.map((ws) => {
-          const roleLabel = ws.role === "admin" ? "Admin" : "Owner";
+          const roleLabel =
+            ws.role === "admin"
+              ? (dict.workspace?.roleAdmin ?? "Admin")
+              : (dict.workspace?.roleOwner ?? "Owner");
 
           return (
             <Link

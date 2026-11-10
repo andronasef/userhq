@@ -6,6 +6,7 @@ import {
   getAdminChangelogEntry,
   getAdminChangelogTags,
 } from "../../../../../../lib/api-server";
+import { getServerI18n } from "@/lib/i18n/server";
 import { ChangelogEditor } from "../../../../../../components/changelog/changelog-editor";
 
 interface EditChangelogPageProps {
@@ -16,17 +17,18 @@ export async function generateMetadata({
   params,
 }: EditChangelogPageProps): Promise<Metadata> {
   const { ws, product, id } = await params;
+  const { t } = await getServerI18n();
   const [productRes, entryRes] = await Promise.all([
     getProduct(ws, product),
     getAdminChangelogEntry(ws, product, id),
   ]);
 
   if (!productRes.ok || !entryRes.ok) {
-    return { title: "Edit Release Note · UserHQ" };
+    return { title: `${t("changelog.actionEdit")} · UserHQ` };
   }
 
   return {
-    title: `Edit "${entryRes.data.title}" · ${productRes.data.name}`,
+    title: `${t("changelog.actionEdit")} "${entryRes.data.title}" · ${productRes.data.name}`,
   };
 }
 

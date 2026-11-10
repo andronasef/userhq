@@ -37,6 +37,7 @@ import { BadgeChip } from "@/components/badges/badge-chip";
 import { formatDate } from "@/lib/format";
 import { apiFetch } from "@/lib/api-client";
 import { QueryProvider } from "@/lib/query-client";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface ProductUsersManagerProps {
   ws: string;
@@ -54,6 +55,7 @@ function ProductUsersManagerInner({
   ws,
   product,
 }: ProductUsersManagerProps): React.JSX.Element {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
 
   const [query, setQuery] = React.useState("");
@@ -229,7 +231,7 @@ function ProductUsersManagerInner({
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search users by name or email..."
+            placeholder={t("users.searchPlaceholder")}
             className="pl-9"
           />
         </div>
@@ -244,10 +246,10 @@ function ProductUsersManagerInner({
             }}
             className="w-[180px]"
           >
-            <option value="">All Badges</option>
+            <option value="">{t("badges.title")}</option>
             {allBadges.map((badge) => (
               <option key={badge.id} value={badge.id}>
-                Badge: {badge.name}
+                {badge.name}
               </option>
             ))}
           </NativeSelect>
@@ -257,23 +259,23 @@ function ProductUsersManagerInner({
       {/* Users Table */}
       {isLoading ? (
         <div className="p-12 text-center text-sm text-muted-foreground border border-border rounded-lg bg-card">
-          Loading users directory...
+          {t("board.loading")}
         </div>
       ) : users.length === 0 ? (
         <div className="p-12 text-center text-sm text-muted-foreground border border-dashed border-border rounded-lg bg-card">
           {debouncedQuery || badgeFilter
-            ? "No users match the search filters."
-            : "No active users found for this product yet."}
+            ? t("users.noUsersTitle")
+            : t("users.noUsersBody")}
         </div>
       ) : (
         <Table>
           <THead>
             <TR>
-              <TH>User</TH>
-              <TH>Assigned Badges</TH>
+              <TH>{t("users.colUser")}</TH>
+              <TH>{t("users.colBadges")}</TH>
               <TH>Activity</TH>
-              <TH>First Seen</TH>
-              <TH className="text-right">Actions</TH>
+              <TH>{t("users.colJoined")}</TH>
+              <TH className="text-right">{t("users.colActions")}</TH>
             </TR>
           </THead>
           <TBody>
@@ -355,7 +357,7 @@ function ProductUsersManagerInner({
                     className="gap-1.5"
                   >
                     <Shield className="size-3.5" />
-                    <span>Manage Badges</span>
+                    <span>{t("badges.manageBadges")}</span>
                   </Button>
                 </TD>
               </TR>
@@ -379,7 +381,7 @@ function ProductUsersManagerInner({
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
               <ChevronLeft className="size-4" />
-              <span>Previous</span>
+              <span>{t("common.previous")}</span>
             </Button>
             <span className="text-xs text-muted-foreground px-2">
               Page {page} of {totalPages}
@@ -390,7 +392,7 @@ function ProductUsersManagerInner({
               disabled={page >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             >
-              <span>Next</span>
+              <span>{t("common.next")}</span>
               <ChevronRight className="size-4" />
             </Button>
           </div>
@@ -404,7 +406,7 @@ function ProductUsersManagerInner({
       >
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Manage User Badges</DialogTitle>
+            <DialogTitle>{t("badges.manageBadges")}</DialogTitle>
             <DialogDescription>
               {managingUser?.name || managingUser?.email}
             </DialogDescription>
@@ -414,7 +416,7 @@ function ProductUsersManagerInner({
             {/* Current Badges List */}
             <div className="space-y-2">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Assigned Badges
+                {t("users.colBadges")}
               </h4>
               {managingUser?.badges && managingUser.badges.length > 0 ? (
                 <div className="space-y-2">
@@ -433,7 +435,7 @@ function ProductUsersManagerInner({
                         variant="ghost"
                         size="icon"
                         className="size-7 text-destructive hover:text-destructive"
-                        title="Revoke badge"
+                        title={t("users.revokeBadge")}
                         disabled={revokeMutation.isPending}
                         onClick={() =>
                           managingUser &&
@@ -458,7 +460,7 @@ function ProductUsersManagerInner({
             {/* Grant Badge Form */}
             <div className="border-t border-border pt-4 space-y-3">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
-                Grant Badge
+                {t("users.grantBadge")}
               </h4>
 
               {availableToGrant.length === 0 ? (
@@ -505,7 +507,7 @@ function ProductUsersManagerInner({
                   >
                     <Plus className="size-4" />
                     <span>
-                      {assignMutation.isPending ? "Granting..." : "Grant Badge"}
+                      {assignMutation.isPending ? "Granting..." : t("users.grantBadge")}
                     </span>
                   </Button>
                 </div>
@@ -515,7 +517,7 @@ function ProductUsersManagerInner({
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setManagingUser(null)}>
-              Done
+              {t("common.done")}
             </Button>
           </DialogFooter>
         </DialogContent>

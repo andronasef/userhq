@@ -11,6 +11,7 @@ import { RoadmapView } from "./roadmap-view";
 import { StatusesView } from "../statuses/statuses-view";
 import { PageHeader } from "../../../../../components/page-header";
 import { TabNav } from "../../../../../components/tab-nav";
+import { getServerI18n } from "@/lib/i18n/server";
 
 interface RoadmapPageProps {
   params: Promise<{ ws: string; product: string }>;
@@ -25,12 +26,13 @@ export async function generateMetadata({
   params,
 }: RoadmapPageProps): Promise<Metadata> {
   const { ws, product } = await params;
+  const { t } = await getServerI18n();
   const result = await getProduct(ws, product);
   if (!result.ok) {
-    return { title: "Roadmap · UserHQ" };
+    return { title: `${t("roadmap.title")} · UserHQ` };
   }
   return {
-    title: `Roadmap · ${result.data.name}`,
+    title: `${t("roadmap.title")} · ${result.data.name}`,
   };
 }
 
@@ -39,6 +41,7 @@ export default async function RoadmapPage({
   searchParams,
 }: RoadmapPageProps): Promise<React.JSX.Element | null> {
   const { ws, product } = await params;
+  const { t } = await getServerI18n();
   const { view, item: initialItemId, linkPost: initialLinkPostNumber } =
     await searchParams;
   const [productRes, statusesRes, membersRes, roadmapRes] = await Promise.all([
@@ -66,9 +69,9 @@ export default async function RoadmapPage({
 
   const isStatusesView = view === "statuses";
   const tabs = [
-    { label: "Roadmap", href: `/dashboard/${ws}/${product}/roadmap` },
+    { label: t("roadmap.title"), href: `/dashboard/${ws}/${product}/roadmap` },
     {
-      label: "Statuses",
+      label: t("statuses.title"),
       href: `/dashboard/${ws}/${product}/roadmap?view=statuses`,
     },
   ];
@@ -80,8 +83,8 @@ export default async function RoadmapPage({
     return (
       <div className="w-full max-w-5xl space-y-6">
         <PageHeader
-          title="Roadmap"
-          description="Plan internal milestones and choose what appears on the public roadmap."
+          title={t("roadmap.title")}
+          description={t("roadmap.description")}
         />
         <TabNav tabs={tabs} activeHref={activeHref} className="mb-6" />
         <StatusesView

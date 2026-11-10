@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
 import { apiFetch } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface VoterListProps {
   ws: string;
@@ -21,6 +22,7 @@ export function VoterList({
   postNumber,
   initial,
 }: VoterListProps) {
+  const { t } = useI18n();
   const [voters, setVoters] = React.useState<Voter[]>(initial?.voters ?? []);
   const [nextCursor, setNextCursor] = React.useState<string | null>(
     initial ? (initial.nextCursor ?? null) : null
@@ -53,7 +55,7 @@ export function VoterList({
       })
       .catch((err) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load voters.");
+          setError(err instanceof Error ? err.message : t("common.errorGeneric"));
           setLoading(false);
         }
       });
@@ -61,7 +63,7 @@ export function VoterList({
     return () => {
       cancelled = true;
     };
-  }, [ws, product, postNumber, initial]);
+  }, [ws, product, postNumber, initial, t]);
 
   const handleLoadMore = async () => {
     if (!nextCursor || loadingMore) return;
@@ -82,7 +84,7 @@ export function VoterList({
   if (loading) {
     return (
       <div className="py-6 text-center text-sm text-muted-foreground">
-        Loading…
+        {t("board.loading")}
       </div>
     );
   }
@@ -98,7 +100,7 @@ export function VoterList({
   if (voters.length === 0) {
     return (
       <div className="py-6 text-center text-sm text-muted-foreground">
-        No votes yet.
+        {t("postDetail.noVoters")}
       </div>
     );
   }
@@ -151,7 +153,7 @@ export function VoterList({
             onClick={handleLoadMore}
             disabled={loadingMore}
           >
-            {loadingMore ? "Loading…" : "Load more"}
+            {loadingMore ? t("board.loading") : t("board.loadMore")}
           </Button>
         </div>
       )}

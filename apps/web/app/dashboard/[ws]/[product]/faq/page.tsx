@@ -5,6 +5,7 @@ import { getProduct, getAdminFaqCategories } from "../../../../../lib/api-server
 import { HiddenModuleNotice } from "@/components/dashboard/hidden-module-notice";
 import { PageHeader } from "../../../../../components/page-header";
 import { FaqManager } from "../../../../../components/faq/faq-manager";
+import { getServerI18n } from "@/lib/i18n/server";
 
 interface DashboardFaqPageProps {
   params: Promise<{ ws: string; product: string }>;
@@ -14,12 +15,13 @@ export async function generateMetadata({
   params,
 }: DashboardFaqPageProps): Promise<Metadata> {
   const { ws, product } = await params;
+  const { t } = await getServerI18n();
   const result = await getProduct(ws, product);
   if (!result.ok) {
-    return { title: "FAQ · Dashboard · UserHQ" };
+    return { title: `${t("faq.title")} · UserHQ` };
   }
   return {
-    title: `FAQ · ${result.data.name}`,
+    title: `${t("faq.title")} · ${result.data.name}`,
   };
 }
 
@@ -27,6 +29,7 @@ export default async function DashboardFaqPage({
   params,
 }: DashboardFaqPageProps): Promise<React.JSX.Element | null> {
   const { ws, product } = await params;
+  const { t } = await getServerI18n();
   const [productRes, faqRes] = await Promise.all([
     getProduct(ws, product),
     getAdminFaqCategories(ws, product),
@@ -47,8 +50,8 @@ export default async function DashboardFaqPage({
   return (
     <div className="flex flex-col gap-6 max-w-5xl">
       <PageHeader
-        title="Frequently Asked Questions"
-        description="Manage self-serve knowledge base articles, categories, and question ordering."
+        title={t("faq.title")}
+        description={t("faq.description")}
       />
       {!productRes.data.features.faq && <HiddenModuleNotice ws={ws} product={product} module="faq" />}
       <FaqManager

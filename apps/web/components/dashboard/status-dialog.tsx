@@ -30,6 +30,7 @@ import { Alert } from "../ui/alert";
 import { apiFetch, ApiClientError } from "../../lib/api-client";
 import { errorCopy, FIELD_FOR_CODE } from "../../lib/api-errors";
 import { QueryProvider } from "../../lib/query-client";
+import { useI18n } from "../../lib/i18n/context";
 
 export interface StatusDialogProps {
   mode: "add" | "edit";
@@ -41,14 +42,6 @@ export interface StatusDialogProps {
   product: string;
 }
 
-const TYPE_LABELS: Record<StatusType, string> = {
-  review: "Review",
-  planned: "Planned",
-  active: "In Progress",
-  completed: "Completed",
-  closed: "Closed",
-};
-
 function StatusDialogInner({
   mode,
   status,
@@ -58,7 +51,16 @@ function StatusDialogInner({
   ws,
   product,
 }: StatusDialogProps): React.JSX.Element {
+  const { t } = useI18n();
   const [alertError, setAlertError] = React.useState<string | null>(null);
+
+  const typeLabels: Record<StatusType, string> = {
+    review: t("statuses.typeReview"),
+    planned: t("statuses.typePlanned"),
+    active: t("statuses.typeActive"),
+    completed: t("statuses.typeCompleted"),
+    closed: t("statuses.typeClosed"),
+  };
 
   const defaultValues: CreateStatusInput = {
     name: status?.name ?? "",
@@ -118,7 +120,7 @@ function StatusDialogInner({
       }
     },
     onSuccess: (saved) => {
-      toast.success(mode === "add" ? "Status added" : "Status updated");
+      toast.success(mode === "add" ? t("statuses.statusAdded") : t("statuses.statusUpdated"));
       onSaved(saved);
       onOpenChange(false);
     },
@@ -150,7 +152,7 @@ function StatusDialogInner({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {mode === "add" ? "Add status" : "Edit status"}
+            {mode === "add" ? t("statuses.addStatus") : t("statuses.editStatus")}
           </DialogTitle>
         </DialogHeader>
 
@@ -158,32 +160,32 @@ function StatusDialogInner({
           <fieldset disabled={mutation.isPending} className="space-y-4">
             <Field
               id="status-name"
-              label="Name"
+              label={t("statuses.nameLabel")}
               error={errors.name?.message}
             >
               <Input
-                placeholder="e.g. Under Review"
+                placeholder={t("statuses.namePlaceholder")}
                 {...register("name")}
               />
             </Field>
 
             <Field
               id="status-type"
-              label="Type"
+              label={t("statuses.typeLabel")}
               helper="The type decides how the status behaves, for example which posts count as done."
               error={errors.type?.message}
             >
               <NativeSelect {...register("type")}>
-                {STATUS_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {TYPE_LABELS[t]}
+                {STATUS_TYPES.map((st) => (
+                  <option key={st} value={st}>
+                    {typeLabels[st]}
                   </option>
                 ))}
               </NativeSelect>
             </Field>
 
             <ColorField
-              label="Color"
+              label={t("statuses.colorLabel")}
               value={colorValue}
               onChange={(hex) =>
                 setValue("color", hex, { shouldValidate: true })
@@ -204,7 +206,7 @@ function StatusDialogInner({
                   htmlFor="status-is-public-roadmap"
                   className="text-sm font-medium text-foreground cursor-pointer"
                 >
-                  Show on public roadmap
+                  {t("statuses.showOnRoadmap")}
                 </label>
                 <p className="text-xs text-muted-foreground">
                   When checked, items in this stage appear as a column on your public product roadmap.
@@ -225,18 +227,18 @@ function StatusDialogInner({
                 onClick={() => onOpenChange(false)}
                 disabled={mutation.isPending}
               >
-                Discard changes
+                {t("categories.discardChanges")}
               </Button>
               <Button type="submit" disabled={mutation.isPending}>
                 {mutation.isPending ? (
                   <>
                     <LoaderCircle className="size-4 animate-spin" />
-                    <span>Saving…</span>
+                    <span>{t("common.saving")}</span>
                   </>
                 ) : mode === "add" ? (
-                  "Add status"
+                  t("statuses.addStatus")
                 ) : (
-                  "Save status"
+                  t("statuses.editStatus")
                 )}
               </Button>
             </DialogFooter>

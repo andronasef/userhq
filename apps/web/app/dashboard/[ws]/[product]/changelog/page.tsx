@@ -6,6 +6,7 @@ import {
   getAdminChangelogList,
   getAdminChangelogTags,
 } from "../../../../../lib/api-server";
+import { getServerI18n } from "@/lib/i18n/server";
 import { ChangelogStudio } from "../../../../../components/changelog/changelog-studio";
 
 interface DashboardChangelogPageProps {
@@ -16,12 +17,13 @@ export async function generateMetadata({
   params,
 }: DashboardChangelogPageProps): Promise<Metadata> {
   const { ws, product } = await params;
+  const { t } = await getServerI18n();
   const result = await getProduct(ws, product);
   if (!result.ok) {
-    return { title: "Changelog · UserHQ" };
+    return { title: `${t("changelog.title")} · UserHQ` };
   }
   return {
-    title: `Changelog · ${result.data.name}`,
+    title: `${t("changelog.title")} · ${result.data.name}`,
   };
 }
 

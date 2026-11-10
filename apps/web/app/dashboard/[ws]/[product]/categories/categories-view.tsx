@@ -7,6 +7,7 @@ import { PageHeader } from "../../../../../components/page-header";
 import { Button } from "../../../../../components/ui/button";
 import { CategoryList } from "../../../../../components/dashboard/category-list";
 import { CategoryDialog } from "../../../../../components/dashboard/category-dialog";
+import { useI18n } from "../../../../../lib/i18n/context";
 
 export interface CategoriesViewProps {
   ws: string;
@@ -21,6 +22,7 @@ export function CategoriesView({
   initial,
   showHeader = true,
 }: CategoriesViewProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const [addDialogOpen, setAddDialogOpen] = React.useState(false);
 
@@ -28,21 +30,21 @@ export function CategoriesView({
     <div className="space-y-6 max-w-5xl">
       {showHeader ? (
         <PageHeader
-          title="Categories"
-          description="Group feedback by topic so customers can find and file related ideas."
+          title={t("categories.title")}
+          description={t("categories.description")}
           action={
             <Button onClick={() => setAddDialogOpen(true)}>
-              Add category
+              {t("categories.addCategory")}
             </Button>
           }
         />
       ) : (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            Group feedback by topic so customers can find and file related ideas.
+            {t("categories.description")}
           </p>
           <Button onClick={() => setAddDialogOpen(true)} className="self-start sm:self-auto">
-            Add category
+            {t("categories.addCategory")}
           </Button>
         </div>
       )}

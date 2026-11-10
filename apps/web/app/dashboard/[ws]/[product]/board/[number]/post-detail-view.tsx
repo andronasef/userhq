@@ -27,6 +27,7 @@ import { LinkedRoadmapBanner } from "@/components/post/linked-roadmap-banner";
 import { DeviceBadge } from "@/components/post/device-badge";
 import { formatDate } from "@/lib/format";
 import { apiFetch } from "@/lib/api-client";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface PostDetailViewProps {
   ws: string;
@@ -51,6 +52,7 @@ export function PostDetailView({
   statuses,
   categories,
 }: PostDetailViewProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const [deleted, setDeleted] = React.useState(initialDeleted);
   const [restoring, setRestoring] = React.useState(false);
@@ -63,12 +65,12 @@ export function PostDetailView({
         `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/posts/${post.number}/restore`,
         { method: "POST" }
       );
-      toast.success("Post restored");
+      toast.success(t("deletedItems.postRestored"));
       setDeleted(false);
       router.refresh();
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to restore post."
+        err instanceof Error ? err.message : t("deletedItems.failedToRestorePost")
       );
     } finally {
       setRestoring(false);
@@ -94,7 +96,7 @@ export function PostDetailView({
             href={`/dashboard/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/board`}
           >
             <ArrowLeft className="size-4" aria-hidden="true" />
-            <span>Back to board</span>
+            <span>{t("postDetail.backToBoard")}</span>
           </Link>
         </Button>
       </div>
@@ -105,7 +107,7 @@ export function PostDetailView({
           className="flex items-center justify-between gap-4"
         >
           <div className="flex-1 min-w-0">
-            <span>This post is deleted. It's hidden from the portal.</span>
+            <span>{t("postDetail.deletedNotice")}</span>
           </div>
           <Button
             variant="outline"
@@ -113,7 +115,7 @@ export function PostDetailView({
             onClick={handleRestorePost}
             disabled={restoring}
           >
-            {restoring ? "Restoring…" : "Restore post"}
+            {restoring ? t("deletedItems.restoring") : t("postDetail.restorePost")}
           </Button>
         </Alert>
       )}
@@ -147,7 +149,7 @@ export function PostDetailView({
                   rel="noopener noreferrer"
                   title="Open public portal post"
                 >
-                  <span>Public portal</span>
+                  <span>{t("board.viewPortal")}</span>
                   <ExternalLink className="size-3.5" aria-hidden="true" />
                 </a>
               </Button>
@@ -158,7 +160,7 @@ export function PostDetailView({
               disabled={isStatusLocked}
               title={isStatusLocked ? "Status is locked to the linked roadmap item. Move the item on the roadmap to change status." : undefined}
             >
-              Change status
+              {t("postDetail.changeStatus")}
             </Button>
             <PostActionsMenu
               ws={ws}
@@ -204,7 +206,7 @@ export function PostDetailView({
           id="voters-heading"
           className="text-base font-semibold text-foreground"
         >
-          Voters ({post.voteCount})
+          {t("postDetail.votersTitle")} ({post.voteCount})
         </h2>
         <VoterList ws={ws} product={product} postNumber={post.number} />
       </section>
@@ -217,7 +219,7 @@ export function PostDetailView({
           id="comments-heading"
           className="text-base font-semibold text-foreground"
         >
-          Comments
+          {t("ui.commentsHeading")}
         </h2>
         <PostTimeline
           ws={ws}

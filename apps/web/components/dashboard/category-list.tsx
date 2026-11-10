@@ -17,6 +17,7 @@ import { ConfirmDialog } from "../ui/confirm-dialog";
 import { EmptyState } from "../empty-state";
 import { CategoryDialog } from "./category-dialog";
 import { apiFetch } from "../../lib/api-client";
+import { useI18n } from "../../lib/i18n/context";
 
 export interface CategoryListProps {
   ws: string;
@@ -33,6 +34,7 @@ export function CategoryList({
   onCategoryChanged,
   onAddCategory,
 }: CategoryListProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const [editingCategory, setEditingCategory] = React.useState<Category | null>(null);
   const [deletingCategory, setDeletingCategory] = React.useState<Category | null>(null);
@@ -43,7 +45,7 @@ export function CategoryList({
         `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/categories/${encodeURIComponent(deletingCategory.id)}`,
         { method: "DELETE" }
       );
-      toast.success(`${deletingCategory.name} deleted`);
+      toast.success(t("categories.deleteCategoryNamed", { name: deletingCategory.name }));
       setDeletingCategory(null);
       if (onCategoryChanged) {
         onCategoryChanged();
@@ -53,7 +55,7 @@ export function CategoryList({
       const heading = document.querySelector("h1");
       heading?.focus();
     } catch (err) {
-      toast.error("Failed to delete category");
+      toast.error(t("categories.deleteFailed"));
       throw err;
     }
   };
@@ -61,11 +63,11 @@ export function CategoryList({
   if (categories.length === 0) {
     return (
       <EmptyState
-        title="No categories"
-        body="Categories help customers file their ideas. Posts work fine without them."
+        title={t("categories.noCategoriesTitle")}
+        body={t("categories.noCategoriesBody")}
         action={
           onAddCategory ? (
-            <Button onClick={onAddCategory}>Add category</Button>
+            <Button onClick={onAddCategory}>{t("categories.addCategory")}</Button>
           ) : undefined
         }
       />
@@ -77,7 +79,7 @@ export function CategoryList({
       <ul className="rounded-lg border border-border divide-y divide-border bg-card">
         {categories.map((cat) => {
           const postCountText =
-            cat.postCount === 1 ? "1 post" : `${cat.postCount} posts`;
+            cat.postCount === 1 ? t("categories.postCountOne") : t("categories.postCountOther", { count: cat.postCount });
 
           return (
             <li
@@ -99,21 +101,21 @@ export function CategoryList({
                       variant="ghost"
                       size="icon"
                       className="size-8 text-muted-foreground hover:text-foreground"
-                      aria-label={`Actions for ${cat.name}`}
+                      aria-label={t("categories.actionsFor", { name: cat.name })}
                     >
                       <Ellipsis className="size-4" aria-hidden="true" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => setEditingCategory(cat)}>
-                      Rename category
+                      {t("categories.renameCategory")}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       className="text-destructive focus:text-destructive focus:bg-destructive/10"
                       onClick={() => setDeletingCategory(cat)}
                     >
-                      Delete category
+                      {t("categories.deleteCategory")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -150,11 +152,11 @@ export function CategoryList({
           onOpenChange={(open) => {
             if (!open) setDeletingCategory(null);
           }}
-          title={`Delete ${deletingCategory.name}?`}
-          description={`Its ${deletingCategory.postCount} ${deletingCategory.postCount === 1 ? "post stays" : "posts stay"} on the board with no category.`}
-          confirmLabel="Delete category"
-          pendingLabel="Deleting…"
-          dismissLabel="Keep category"
+          title={t("categories.deleteDialogTitle", { name: deletingCategory.name })}
+          description={t("categories.deleteDialogDesc", { count: deletingCategory.postCount })}
+          confirmLabel={t("categories.deleteCategory")}
+          pendingLabel={t("common.deleting")}
+          dismissLabel={t("common.cancel")}
           onConfirm={handleDeleteConfirm}
         />
       )}

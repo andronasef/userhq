@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
 import { errorCopy } from "@/lib/api-errors";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface StatusChangeDialogProps {
   open: boolean;
@@ -41,6 +42,7 @@ export function StatusChangeDialog({
   version,
   statuses,
 }: StatusChangeDialogProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const [selectedStatusId, setSelectedStatusId] = React.useState(currentStatusId);
   const [note, setNote] = React.useState("");
@@ -79,7 +81,7 @@ export function StatusChangeDialog({
       );
 
       const targetStatus = statuses.find((s) => s.id === selectedStatusId);
-      toast.success(`Status changed to ${targetStatus?.name ?? res.status.name}`);
+      toast.success(t("postDetail.statusUpdated"));
       onOpenChange(false);
       router.refresh();
     } catch (err) {
@@ -89,11 +91,11 @@ export function StatusChangeDialog({
           "Someone else changed this while you were editing. Reload to see their version, then try again."
         );
       } else if (err instanceof ApiClientError && err.code === "post_not_found") {
-        setAlertError("This post was removed or merged. Go back to the board.");
+        setAlertError(t("board.mergePostNotFound"));
       } else if (err instanceof ApiClientError) {
         setAlertError(errorCopy(err));
       } else {
-        setAlertError("Something went wrong on our end. Try again in a moment.");
+        setAlertError(t("common.errorGeneric"));
       }
     } finally {
       setIsSaving(false);
@@ -107,7 +109,7 @@ export function StatusChangeDialog({
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <DialogHeader>
-            <DialogTitle>Change status</DialogTitle>
+            <DialogTitle>{t("postDetail.changeStatus")}</DialogTitle>
           </DialogHeader>
 
           {alertError && (
@@ -129,7 +131,7 @@ export function StatusChangeDialog({
           )}
 
           <div className="flex flex-col gap-4">
-            <Field id="status-select" label="Status">
+            <Field id="status-select" label={t("board.colStatus")}>
               <NativeSelect
                 value={selectedStatusId}
                 onChange={(e) => setSelectedStatusId(e.target.value)}
@@ -154,7 +156,7 @@ export function StatusChangeDialog({
                 onChange={(e) => setNote(e.target.value)}
                 disabled={isSaving}
                 maxLength={1000}
-                placeholder="Share context on why the status changed…"
+                placeholder={t("postDetail.notePlaceholder")}
               />
             </Field>
           </div>
@@ -166,7 +168,7 @@ export function StatusChangeDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSaving}
             >
-              Discard changes
+              {t("categories.discardChanges")}
             </Button>
             <Button
               type="submit"
@@ -176,10 +178,10 @@ export function StatusChangeDialog({
               {isSaving ? (
                 <>
                   <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
-                  <span>Saving…</span>
+                  <span>{t("postDetail.updatingStatus")}</span>
                 </>
               ) : (
-                "Change status"
+                t("postDetail.changeStatus")
               )}
             </Button>
           </DialogFooter>

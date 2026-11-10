@@ -17,6 +17,7 @@ import { Alert } from "@/components/ui/alert";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
 import { errorCopy } from "@/lib/api-errors";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface BulkMergeDialogProps {
   open: boolean;
@@ -35,6 +36,7 @@ export function BulkMergeDialog({
   posts,
   onSuccess,
 }: BulkMergeDialogProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const [selectedKeepNumber, setSelectedKeepNumber] = React.useState<number | null>(null);
   const [isMerging, setIsMerging] = React.useState(false);
@@ -52,10 +54,10 @@ export function BulkMergeDialog({
   const handleMerge = async () => {
     if (!selectedKeepNumber || isMerging) return;
 
-    const mergeNumbers = posts
-      .map((p) => p.number)
-      .filter((n) => n !== selectedKeepNumber);
     const keepPost = posts.find((p) => p.number === selectedKeepNumber);
+    const mergeNumbers = posts
+      .filter((p) => p.number !== selectedKeepNumber)
+      .map((p) => p.number);
 
     setIsMerging(true);
     setAlertError(null);
@@ -73,21 +75,21 @@ export function BulkMergeDialog({
       );
 
       const targetTitle = keepPost?.title ?? `post #${res.number}`;
-      toast.success(`${posts.length} posts merged into "${targetTitle}"`);
+      toast.success(t("board.mergeSuccessToast", { count: posts.length, title: targetTitle }));
       onOpenChange(false);
       onSuccess?.();
       router.refresh();
     } catch (err) {
       if (err instanceof ApiClientError) {
         if (err.code === "merge_target_invalid") {
-          setAlertError("Cannot merge into this post. It may be deleted, already merged, or invalid.");
+          setAlertError(t("board.mergeTargetInvalid"));
         } else if (err.code === "post_not_found") {
-          setAlertError("One or more posts were removed or merged. Refresh the page.");
+          setAlertError(t("board.mergePostNotFound"));
         } else {
           setAlertError(errorCopy(err));
         }
       } else {
-        setAlertError("Something went wrong on our end. Try again in a moment.");
+        setAlertError(t("common.errorGeneric"));
       }
     } finally {
       setIsMerging(false);
@@ -98,7 +100,7 @@ export function BulkMergeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Merge {posts.length} posts</DialogTitle>
+          <DialogTitle>{t("board.bulkMergeTitle", { count: posts.length })}</DialogTitle>
         </DialogHeader>
 
         {alertError && (
@@ -110,11 +112,11 @@ export function BulkMergeDialog({
         <div className="flex flex-col gap-4">
           <fieldset className="flex flex-col gap-2">
             <legend className="text-sm font-medium text-foreground mb-1">
-              Keep this post
+              {t("board.keepPostLegend")}
             </legend>
             <div
               role="radiogroup"
-              aria-label="Keep this post"
+              aria-label={t("board.keepPostLegend")}
               className="flex flex-col gap-2 max-h-60 overflow-y-auto"
             >
               {posts.map((p) => (
@@ -140,9 +142,9 @@ export function BulkMergeDialog({
                       {p.title}
                     </div>
                     <div className="text-sm text-muted-foreground mt-0.5">
-                      {p.voteCount} {p.voteCount === 1 ? "vote" : "votes"} ·{" "}
+                      {p.voteCount} {p.voteCount === 1 ? t("ui.voteSingular") : t("ui.votes")} ·{" "}
                       {p.commentCount}{" "}
-                      {p.commentCount === 1 ? "comment" : "comments"}
+                      {p.commentCount === 1 ? t("ui.commentSingular") : t("ui.commentsCount")}
                     </div>
                   </div>
                 </label>
@@ -151,9 +153,7 @@ export function BulkMergeDialog({
           </fieldset>
 
           <p className="text-sm text-muted-foreground leading-relaxed">
-            The other posts&rsquo; votes and comments move to the post you keep,
-            and their links will open it. People who voted on more than one are
-            counted once. This can&rsquo;t be undone.
+            {t("board.bulkMergeNote")}
           </p>
 
           <DialogFooter className="gap-2 sm:gap-0">
@@ -163,7 +163,7 @@ export function BulkMergeDialog({
               onClick={() => onOpenChange(false)}
               disabled={isMerging}
             >
-              Keep all posts
+              {t("board.keepAllPosts")}
             </Button>
             <Button
               type="button"
@@ -174,7 +174,7 @@ export function BulkMergeDialog({
               {isMerging && (
                 <LoaderCircle className="size-4 animate-spin mr-2" />
               )}
-              {isMerging ? "Merging…" : "Merge posts"}
+              {isMerging ? t("board.mergingPosts") : t("board.mergePostsBtn")}
             </Button>
           </DialogFooter>
         </div>

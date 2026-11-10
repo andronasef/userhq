@@ -19,6 +19,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
 import { errorCopy } from "@/lib/api-errors";
 import { postHref, boardApiBase } from "@/lib/tenant";
+import { useI18n } from "@/lib/i18n/context";
 
 type MergeCandidate = Pick<PublicPostRow, "number" | "title" | "voteCount" | "status">;
 
@@ -44,6 +45,7 @@ export function MergeDialog({
   post,
   variant = "portal",
 }: MergeDialogProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const [step, setStep] = React.useState<1 | 2>(1);
   const [query, setQuery] = React.useState("");
@@ -113,7 +115,7 @@ export function MergeDialog({
         }
       );
 
-      toast.success("Posts merged");
+      toast.success(t("board.mergeSuccessToast"));
       onOpenChange(false);
 
       if (variant === "dashboard") {
@@ -126,14 +128,14 @@ export function MergeDialog({
     } catch (err) {
       if (err instanceof ApiClientError) {
         if (err.code === "merge_target_invalid") {
-          setAlertError("Cannot merge into this post. It may be deleted, already merged, or invalid.");
+          setAlertError(t("board.mergeTargetInvalid"));
         } else if (err.code === "post_not_found") {
-          setAlertError("This post was removed or merged. Go back to the board.");
+          setAlertError(t("board.mergePostNotFound"));
         } else {
           setAlertError(errorCopy(err));
         }
       } else {
-        setAlertError("Something went wrong on our end. Try again in a moment.");
+        setAlertError(t("common.errorGeneric"));
       }
     } finally {
       setIsMerging(false);
@@ -144,7 +146,7 @@ export function MergeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Merge into another post</DialogTitle>
+          <DialogTitle>{t("postDetail.mergeIntoPost")}</DialogTitle>
         </DialogHeader>
 
         {alertError && (
@@ -160,13 +162,13 @@ export function MergeDialog({
                 htmlFor="merge-search-input"
                 className="text-sm font-medium text-foreground"
               >
-                Find the post to keep
+                {t("postDetail.searchPostToMerge")}
               </label>
               <Input
                 id="merge-search-input"
                 type="search"
                 autoFocus
-                placeholder={`Search posts in ${product}`}
+                placeholder={t("board.searchPlaceholder")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
@@ -223,7 +225,7 @@ export function MergeDialog({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                Close
+                {t("common.close")}
               </Button>
             </DialogFooter>
           </div>
@@ -283,7 +285,7 @@ export function MergeDialog({
                 {isMerging && (
                   <LoaderCircle className="size-4 animate-spin mr-2" />
                 )}
-                {isMerging ? "Merging…" : "Merge posts"}
+                {isMerging ? t("board.mergingPosts") : t("board.mergePostsBtn")}
               </Button>
             </DialogFooter>
           </div>

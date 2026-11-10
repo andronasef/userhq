@@ -14,6 +14,7 @@ import { BulkMergeDialog } from "@/components/dashboard/bulk-merge-dialog";
 import { formatDate } from "@/lib/format";
 import { postHref } from "@/lib/tenant";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface BoardTableProps {
   ws: string;
@@ -32,6 +33,7 @@ export function BoardTable({
   statuses,
   categories = [],
 }: BoardTableProps): React.JSX.Element {
+  const { t } = useI18n();
   const searchParams = useSearchParams();
   const searchQuery = searchParams?.get("q") ?? "";
 
@@ -88,11 +90,11 @@ export function BoardTable({
       {selectedNumbers.size >= 1 && (
         <div
           role="region"
-          aria-label="Selection"
+          aria-label={t("board.selectedCount", { count: selectedNumbers.size })}
           className="flex items-center justify-between gap-4 p-3 mb-3 rounded-lg border border-border bg-muted/50"
         >
           <div className="text-sm font-medium text-foreground">
-            {selectedNumbers.size} selected
+            {t("board.selectedCount", { count: selectedNumbers.size })}
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -101,19 +103,19 @@ export function BoardTable({
               disabled={selectedNumbers.size < 2}
               title={
                 selectedNumbers.size < 2
-                  ? "Select at least 2 posts to merge"
+                  ? t("board.mergeSelectedTooltip")
                   : undefined
               }
               onClick={() => setBulkMergeOpen(true)}
             >
-              Merge posts…
+              {t("board.mergeSelected")}
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSelectedNumbers(new Set())}
             >
-              Clear selection
+              {t("board.clearSelection")}
             </Button>
           </div>
         </div>
@@ -127,20 +129,20 @@ export function BoardTable({
                 <input
                   type="checkbox"
                   ref={headerCheckboxRef}
-                  aria-label="Select all posts"
+                  aria-label={t("board.selectAll")}
                   checked={isAllSelected}
                   onChange={(e) => handleSelectAll(e.target.checked)}
                   className="size-4 accent-foreground cursor-pointer align-middle"
                 />
               </TH>
-              <TH>Post</TH>
-              <TH>Category</TH>
-              <TH>Status</TH>
-              <TH className="text-right">Votes</TH>
-              <TH className="text-right">Comments</TH>
-              <TH>Created</TH>
+              <TH>{t("board.colPost")}</TH>
+              <TH>{t("board.colCategory")}</TH>
+              <TH>{t("board.colStatus")}</TH>
+              <TH className="text-right">{t("board.colVotes")}</TH>
+              <TH className="text-right">{t("board.colComments")}</TH>
+              <TH>{t("board.colCreated")}</TH>
               <TH className="w-12 text-right">
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">{t("board.colActions")}</span>
               </TH>
             </TR>
           </THead>
@@ -155,7 +157,7 @@ export function BoardTable({
                   <TD className="w-10 px-3">
                     <input
                       type="checkbox"
-                      aria-label={`Select ${post.title}`}
+                      aria-label={t("board.selectPostNamed", { title: post.title })}
                       checked={isSelected}
                       onChange={(e) =>
                         handleToggleRow(post.number, e.target.checked)
@@ -178,8 +180,8 @@ export function BoardTable({
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-muted-foreground hover:text-foreground shrink-0 transition-colors"
-                          title="Open public portal post"
-                          aria-label={`Open ${post.title} on public portal`}
+                          title={t("board.viewOnPortal")}
+                          aria-label={t("board.viewOnPortal")}
                         >
                           <ExternalLink className="size-3.5" aria-hidden="true" />
                         </a>

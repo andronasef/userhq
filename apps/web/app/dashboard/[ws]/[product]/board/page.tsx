@@ -15,6 +15,7 @@ import { TabNav } from "@/components/tab-nav";
 import { BoardView } from "./board-view";
 import { DeletedItems } from "@/components/dashboard/deleted-items";
 import { CategoriesView } from "../categories/categories-view";
+import { getServerI18n } from "@/lib/i18n/server";
 
 interface BoardPageProps {
   params: Promise<{ ws: string; product: string }>;
@@ -32,12 +33,15 @@ export async function generateMetadata({
   params,
 }: BoardPageProps): Promise<Metadata> {
   const { ws, product } = await params;
-  const result = await getProduct(ws, product);
+  const [{ t }, result] = await Promise.all([
+    getServerI18n(),
+    getProduct(ws, product),
+  ]);
   if (!result.ok) {
-    return { title: "Board · UserHQ" };
+    return { title: t("board.metaTitle") };
   }
   return {
-    title: `Board · ${result.data.name}`,
+    title: t("board.metaTitleWs", { name: result.data.name }),
   };
 }
 
@@ -48,7 +52,8 @@ export default async function BoardPage({
   const { ws, product } = await params;
   const query = await searchParams;
 
-  const [productRes, statusesRes, categoriesRes] = await Promise.all([
+  const [{ t }, productRes, statusesRes, categoriesRes] = await Promise.all([
+    getServerI18n(),
     getProduct(ws, product),
     getStatuses(ws, product),
     getCategories(ws, product),
@@ -69,13 +74,13 @@ export default async function BoardPage({
   const isCategoriesView = query.view === "categories";
 
   const tabs = [
-    { label: "Posts", href: `/dashboard/${ws}/${product}/board` },
+    { label: t("board.postsTab"), href: `/dashboard/${ws}/${product}/board` },
     {
-      label: "Categories",
+      label: t("board.categoriesTab"),
       href: `/dashboard/${ws}/${product}/board?view=categories`,
     },
     {
-      label: "Deleted",
+      label: t("board.deletedTab"),
       href: `/dashboard/${ws}/${product}/board?view=deleted`,
     },
   ];
@@ -88,8 +93,8 @@ export default async function BoardPage({
   return (
     <div className="w-full max-w-5xl space-y-6">
       <PageHeader
-        title="Board"
-        description={`Every post on ${productRes.data.name}'s public board. Change statuses, merge duplicates, and restore deleted posts here.`}
+        title={t("board.title")}
+        description={t("board.description", { name: productRes.data.name })}
       />
 
       {!productRes.data.features.board && <HiddenModuleNotice ws={ws} product={product} module="board" />}

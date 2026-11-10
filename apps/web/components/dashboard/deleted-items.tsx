@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 import { formatDate } from "@/lib/format";
 import { apiFetch } from "@/lib/api-client";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface DeletedItemsProps {
   ws: string;
@@ -32,6 +33,7 @@ export function DeletedItems({
   initialComments,
   initialCommentsCursor,
 }: DeletedItemsProps): React.JSX.Element {
+  const { t } = useI18n();
   const [deletedPosts, setDeletedPosts] =
     React.useState<DeletedPostRow[]>(initialPosts);
   const [deletedComments, setDeletedComments] =
@@ -63,7 +65,7 @@ export function DeletedItems({
       setDeletedPosts((prev) => [...prev, ...res.posts]);
       setPostsCursor(res.nextCursor);
     } catch {
-      toast.error("Couldn't load more posts. Try again.");
+      toast.error(t("common.errorGeneric"));
     } finally {
       setLoadingMore(null);
     }
@@ -79,7 +81,7 @@ export function DeletedItems({
       setDeletedComments((prev) => [...prev, ...res.comments]);
       setCommentsCursor(res.nextCursor);
     } catch {
-      toast.error("Couldn't load more comments. Try again.");
+      toast.error(t("common.errorGeneric"));
     } finally {
       setLoadingMore(null);
     }
@@ -88,7 +90,7 @@ export function DeletedItems({
   const loadMoreButton = (onClick: () => void, busy: boolean) => (
     <div className="text-center">
       <Button variant="outline" size="sm" onClick={onClick} disabled={busy}>
-        {busy ? "Loading…" : "Load more"}
+        {busy ? t("board.loading") : t("board.loadMore")}
       </Button>
     </div>
   );
@@ -100,7 +102,7 @@ export function DeletedItems({
         `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/posts/${post.number}/restore`,
         { method: "POST" }
       );
-      toast.success("Post restored");
+      toast.success(t("deletedItems.postRestored"));
       setDeletedPosts((prev) => prev.filter((p) => p.number !== post.number));
       // update any comments on this post to no longer have post.deleted = true
       setDeletedComments((prev) =>
@@ -111,7 +113,7 @@ export function DeletedItems({
         )
       );
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to restore post.");
+      toast.error(err instanceof Error ? err.message : t("deletedItems.failedToRestorePost"));
     } finally {
       setRestoringPostId(null);
     }
@@ -124,11 +126,11 @@ export function DeletedItems({
         `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/comments/${comment.id}/restore`,
         { method: "POST" }
       );
-      toast.success("Comment restored");
+      toast.success(t("deletedItems.commentRestored"));
       setDeletedComments((prev) => prev.filter((c) => c.id !== comment.id));
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to restore comment."
+        err instanceof Error ? err.message : t("deletedItems.failedToRestoreComment")
       );
     } finally {
       setRestoringCommentId(null);
@@ -140,8 +142,8 @@ export function DeletedItems({
   if (bothEmpty) {
     return (
       <EmptyState
-        title="Nothing deleted"
-        body="Deleted posts and comments appear here, so you can restore them."
+        title={t("deletedItems.title")}
+        body={t("deletedItems.description")}
       />
     );
   }
@@ -154,20 +156,20 @@ export function DeletedItems({
           id="deleted-posts-heading"
           className="text-base font-semibold text-foreground"
         >
-          Deleted posts
+          {t("board.postsTab")}
         </h2>
 
         {deletedPosts.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No deleted posts.</p>
+          <p className="text-sm text-muted-foreground">{t("deletedItems.noDeletedPostsTitle")}</p>
         ) : (
           <Table>
             <THead>
               <TR>
-                <TH>Post</TH>
-                <TH>Deleted</TH>
-                <TH>Deleted by</TH>
+                <TH>{t("board.colPost")}</TH>
+                <TH>{t("board.colCreated")}</TH>
+                <TH>Author</TH>
                 <TH className="w-24 text-right">
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">{t("board.colActions")}</span>
                 </TH>
               </TR>
             </THead>
@@ -203,8 +205,8 @@ export function DeletedItems({
                         onClick={() => handleRestorePost(post)}
                       >
                         {restoringPostId === post.number
-                          ? "Restoring…"
-                          : "Restore"}
+                          ? t("deletedItems.restoring")
+                          : t("deletedItems.restore")}
                       </Button>
                     </TD>
                   </TR>
@@ -222,21 +224,21 @@ export function DeletedItems({
           id="deleted-comments-heading"
           className="text-base font-semibold text-foreground"
         >
-          Deleted comments
+          {t("deletedItems.commentsTab")}
         </h2>
 
         {deletedComments.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No deleted comments.</p>
+          <p className="text-sm text-muted-foreground">{t("deletedItems.noDeletedCommentsTitle")}</p>
         ) : (
           <Table>
             <THead>
               <TR>
-                <TH>Comment</TH>
-                <TH>On post</TH>
+                <TH>{t("board.colComments")}</TH>
+                <TH>{t("board.colPost")}</TH>
                 <TH>Author</TH>
-                <TH>Deleted</TH>
+                <TH>{t("board.colCreated")}</TH>
                 <TH className="w-28 text-right">
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">{t("board.colActions")}</span>
                 </TH>
               </TR>
             </THead>
@@ -271,9 +273,9 @@ export function DeletedItems({
                             variant="ghost"
                             size="sm"
                             disabled
-                            aria-label={`Restore comment`}
+                            aria-label="Restore comment"
                           >
-                            Restore
+                            {t("deletedItems.restore")}
                           </Button>
                           <span className="text-[12px] text-muted-foreground">
                             Restore the post first
@@ -283,13 +285,13 @@ export function DeletedItems({
                         <Button
                           variant="ghost"
                           size="sm"
-                          aria-label={`Restore comment`}
+                          aria-label="Restore comment"
                           disabled={restoringCommentId === comment.id}
                           onClick={() => handleRestoreComment(comment)}
                         >
                           {restoringCommentId === comment.id
-                            ? "Restoring…"
-                            : "Restore"}
+                            ? t("deletedItems.restoring")
+                            : t("deletedItems.restore")}
                         </Button>
                       )}
                     </TD>

@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { portalHref } from "@/lib/tenant";
 import { apiFetch } from "@/lib/api-client";
 
+import { useI18n } from "@/lib/i18n/context";
+
 export interface BoardViewProps {
   ws: string;
   product: string;
@@ -31,6 +33,7 @@ export function BoardView({
   categories,
   isFiltered,
 }: BoardViewProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const [posts, setPosts] = React.useState<AdminPostRow[]>(initialPosts);
   const [nextCursor, setNextCursor] = React.useState<string | null>(
@@ -66,7 +69,7 @@ export function BoardView({
       const res = await apiFetch<AdminPostPage>(url.pathname + url.search);
       setPosts((prev) => [...prev, ...res.posts]);
       setNextCursor(res.nextCursor);
-      setLiveAnnouncement(`Loaded ${res.posts.length} more posts`);
+      setLiveAnnouncement(t("board.loadedMoreAnnounce", { count: res.posts.length }));
     } catch {
       // ignore
     } finally {
@@ -81,18 +84,18 @@ export function BoardView({
       {posts.length === 0 ? (
         isFiltered ? (
           <EmptyState
-            title="No posts match"
-            body="Try a different search or filter."
+            title={t("board.noPostsMatch")}
+            body={t("board.noPostsMatchBody")}
             action={
               <Button variant="outline" onClick={handleClearFilters}>
-                Clear filters
+                {t("board.clearFilters")}
               </Button>
             }
           />
         ) : (
           <EmptyState
-            title="No posts yet"
-            body="When customers share ideas on your portal, they show up here."
+            title={t("board.noPostsYet")}
+            body={t("board.noPostsYetBody")}
             action={
               // U6: a hidden Board has no public page to link to.
               boardEnabled ? (
@@ -102,7 +105,7 @@ export function BoardView({
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    View portal
+                    {t("board.viewPortal")}
                   </a>
                 </Button>
               ) : undefined
@@ -128,7 +131,7 @@ export function BoardView({
                 onClick={handleLoadMore}
                 disabled={loadingMore}
               >
-                {loadingMore ? "Loading…" : "Load more"}
+                {loadingMore ? t("board.loading") : t("board.loadMore")}
               </Button>
             </div>
           )}

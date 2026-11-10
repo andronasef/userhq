@@ -5,6 +5,7 @@ import { useQueryStates, parseAsString, parseAsStringLiteral } from "nuqs";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface BoardFiltersProps {
   categories?: { id: string; name: string }[];
@@ -15,6 +16,7 @@ export function BoardFilters({
   categories = [],
   statuses = [],
 }: BoardFiltersProps): React.JSX.Element {
+  const { t } = useI18n();
   const [{ q, sort, category, status }, setParams] = useQueryStates(
     {
       q: parseAsString.withDefault(""),
@@ -59,7 +61,7 @@ export function BoardFilters({
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center mb-4">
       <div className="relative w-full sm:w-72">
         <label htmlFor="dashboard-board-search" className="sr-only">
-          Search posts
+          {t("board.searchPlaceholder")}
         </label>
         <Search
           className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none"
@@ -68,7 +70,7 @@ export function BoardFilters({
         <Input
           id="dashboard-board-search"
           type="search"
-          placeholder="Search posts"
+          placeholder={t("board.searchPlaceholder")}
           className="pl-9 h-9"
           value={searchVal}
           onChange={(e) => setSearchVal(e.target.value)}
@@ -87,7 +89,7 @@ export function BoardFilters({
 
       <div className="w-full sm:w-44">
         <label htmlFor="dashboard-status-filter" className="sr-only">
-          Status
+          {t("board.colStatus")}
         </label>
         <NativeSelect
           id="dashboard-status-filter"
@@ -100,8 +102,8 @@ export function BoardFilters({
             });
           }}
         >
-          <option value="">All statuses</option>
-          <option value="open">Open</option>
+          <option value="">{t("board.allStatuses")}</option>
+          <option value="open">{t("board.openStatus")}</option>
           {statuses.map((s) => (
             <option key={s.id} value={s.id}>
               {s.name}
@@ -113,7 +115,7 @@ export function BoardFilters({
       {categories.length > 0 && (
         <div className="w-full sm:w-44">
           <label htmlFor="dashboard-category-filter" className="sr-only">
-            Category
+            {t("board.colCategory")}
           </label>
           <NativeSelect
             id="dashboard-category-filter"
@@ -126,7 +128,7 @@ export function BoardFilters({
               });
             }}
           >
-            <option value="">All categories</option>
+            <option value="">{t("board.allCategories")}</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -138,7 +140,7 @@ export function BoardFilters({
 
       <div className="w-full sm:w-44">
         <label htmlFor="dashboard-sort-filter" className="sr-only">
-          Sort by
+          {t("board.colStatus")}
         </label>
         <NativeSelect
           id="dashboard-sort-filter"
@@ -151,9 +153,9 @@ export function BoardFilters({
             });
           }}
         >
-          {hasQ && <option value="match">Best match</option>}
-          <option value="new">Newest</option>
-          <option value="top">Top voted</option>
+          {hasQ && <option value="match">{t("board.sortBestMatch")}</option>}
+          <option value="new">{t("board.sortNewest")}</option>
+          <option value="top">{t("board.sortTopVoted")}</option>
         </NativeSelect>
       </div>
     </div>

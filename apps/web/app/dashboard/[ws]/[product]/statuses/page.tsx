@@ -5,6 +5,7 @@ import { getProduct, getStatuses } from "../../../../../lib/api-server";
 import { StatusesView } from "./statuses-view";
 import { PageHeader } from "../../../../../components/page-header";
 import { TabNav } from "../../../../../components/tab-nav";
+import { getServerI18n } from "@/lib/i18n/server";
 
 interface StatusesPageProps {
   params: Promise<{ ws: string; product: string }>;
@@ -14,12 +15,15 @@ export async function generateMetadata({
   params,
 }: StatusesPageProps): Promise<Metadata> {
   const { ws, product } = await params;
-  const result = await getProduct(ws, product);
+  const [{ t }, result] = await Promise.all([
+    getServerI18n(),
+    getProduct(ws, product),
+  ]);
   if (!result.ok) {
-    return { title: "Statuses · UserHQ" };
+    return { title: t("statuses.metaTitle") };
   }
   return {
-    title: `Statuses · ${result.data.name}`,
+    title: t("statuses.metaTitleWs", { name: result.data.name }),
   };
 }
 
@@ -27,7 +31,8 @@ export default async function StatusesPage({
   params,
 }: StatusesPageProps): Promise<React.JSX.Element | null> {
   const { ws, product } = await params;
-  const [productRes, statusesRes] = await Promise.all([
+  const [{ t }, productRes, statusesRes] = await Promise.all([
+    getServerI18n(),
     getProduct(ws, product),
     getStatuses(ws, product),
   ]);
@@ -45,9 +50,9 @@ export default async function StatusesPage({
 
   const statuses = statusesRes.data;
   const tabs = [
-    { label: "Roadmap", href: `/dashboard/${ws}/${product}/roadmap` },
+    { label: t("roadmap.title"), href: `/dashboard/${ws}/${product}/roadmap` },
     {
-      label: "Statuses",
+      label: t("statuses.title"),
       href: `/dashboard/${ws}/${product}/roadmap?view=statuses`,
     },
   ];
@@ -55,8 +60,8 @@ export default async function StatusesPage({
   return (
     <div className="w-full max-w-5xl space-y-6">
       <PageHeader
-        title="Roadmap"
-        description="Plan internal milestones and choose what appears on the public roadmap."
+        title={t("roadmap.title")}
+        description={t("roadmap.description")}
       />
       <TabNav
         tabs={tabs}

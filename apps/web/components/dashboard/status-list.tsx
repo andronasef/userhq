@@ -27,20 +27,13 @@ import { NativeSelect } from "../ui/native-select";
 import { StatusDialog } from "./status-dialog";
 import { apiFetch } from "../../lib/api-client";
 import { cn } from "../../lib/utils";
+import { useI18n } from "../../lib/i18n/context";
 
 export interface SortableStatusListProps {
   ws: string;
   product: string;
   initial: Status[];
 }
-
-const TYPE_LABELS: Record<StatusType, string> = {
-  review: "Review",
-  planned: "Planned",
-  active: "In Progress",
-  completed: "Completed",
-  closed: "Closed",
-};
 
 interface StatusRowProps {
   status: Status;
@@ -61,10 +54,19 @@ function StatusRow({
   onMakeDefault,
   onDelete,
 }: StatusRowProps) {
+  const { t } = useI18n();
   const { ref, handleRef, isDragging } = useSortable({
     id: status.id,
     index,
   });
+
+  const typeLabels: Record<StatusType, string> = {
+    review: t("statuses.typeReview"),
+    planned: t("statuses.typePlanned"),
+    active: t("statuses.typeActive"),
+    completed: t("statuses.typeCompleted"),
+    closed: t("statuses.typeClosed"),
+  };
 
   return (
     <div
@@ -97,7 +99,7 @@ function StatusRow({
       </span>
 
       <Badge variant="outline" className="shrink-0">
-        {TYPE_LABELS[status.type] ?? status.type}
+        {typeLabels[status.type] ?? status.type}
       </Badge>
 
       {status.isDefault && (
@@ -125,7 +127,7 @@ function StatusRow({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => onEdit(status)}>
-            Edit status
+            {t("statuses.editStatus")}
           </DropdownMenuItem>
 
           {!status.isDefault && (
@@ -139,7 +141,7 @@ function StatusRow({
           {status.isDefault ? (
             <div className="px-2 py-1.5 cursor-not-allowed opacity-50 select-none">
               <div className="text-sm text-destructive font-medium">
-                Delete status
+                {t("statuses.deleteStatusNamed", { name: "" }).replace(/\?$/, "").trim()}
               </div>
               <div className="text-xs text-muted-foreground">
                 The default status can&apos;t be deleted
@@ -148,7 +150,7 @@ function StatusRow({
           ) : total <= 1 ? (
             <div className="px-2 py-1.5 cursor-not-allowed opacity-50 select-none">
               <div className="text-sm text-destructive font-medium">
-                Delete status
+                {t("statuses.deleteStatusNamed", { name: "" }).replace(/\?$/, "").trim()}
               </div>
               <div className="text-xs text-muted-foreground">
                 A product needs at least one status
@@ -159,7 +161,7 @@ function StatusRow({
               onClick={() => onDelete(status)}
               className="text-destructive focus:text-destructive"
             >
-              Delete status
+              {t("statuses.deleteStatusNamed", { name: "" }).replace(/\?$/, "").trim()}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -173,6 +175,7 @@ export function SortableStatusList({
   product,
   initial,
 }: SortableStatusListProps) {
+  const { t } = useI18n();
   const router = useRouter();
   const [items, setItems] = React.useState<Status[]>(initial);
   const [announcement, setAnnouncement] = React.useState<string>("");
@@ -202,10 +205,10 @@ export function SortableStatusList({
       );
       setItems(updated);
       confirmedItemsRef.current = updated;
-      toast.success(`New posts will start in ${status.name}`);
+      toast.success(t("statuses.statusUpdated"));
       router.refresh();
     } catch {
-      toast.error("Couldn't update default status.");
+      toast.error(t("common.errorGeneric"));
     }
   };
 
@@ -223,7 +226,7 @@ export function SortableStatusList({
       `/api/v1/workspaces/${ws}/products/${product}/statuses/${deletingStatus.id}?moveTo=${moveTargetId}`,
       { method: "DELETE" }
     );
-    toast.success(`${name} deleted`);
+    toast.success(t("statuses.statusDeleted", { name }));
     setItems((prev) => prev.filter((s) => s.id !== deletingStatus.id));
     setDeletingStatus(null);
     document.querySelector("h1")?.focus();
@@ -292,7 +295,7 @@ export function SortableStatusList({
                 })
                 .catch(() => {
                   setItems(confirmedItemsRef.current);
-                  toast.error("Couldn't save the new order. Try again.");
+                  toast.error(t("common.errorGeneric"));
                 });
             }
           }
@@ -339,15 +342,15 @@ export function SortableStatusList({
         onOpenChange={(open) => {
           if (!open) setDeletingStatus(null);
         }}
-        title={`Delete ${deletingStatus?.name}?`}
-        description="Posts in this status will move to the status you choose."
-        dismissLabel="Keep status"
-        confirmLabel="Delete status"
-        pendingLabel="Deleting…"
+        title={t("statuses.deleteStatusNamed", { name: deletingStatus?.name })}
+        description={t("statuses.deleteStatusDesc")}
+        dismissLabel={t("common.cancel")}
+        confirmLabel={t("statuses.deleteStatusNamed", { name: "" }).replace(/\?$/, "").trim()}
+        pendingLabel={t("common.deleting")}
         confirmDisabled={!moveTargetId}
         onConfirm={handleConfirmDelete}
       >
-        <Field id="move-posts-to" label="Move its posts to">
+        <Field id="move-posts-to" label={t("statuses.movePostsTo")}>
           <NativeSelect
             id="move-posts-to"
             value={moveTargetId}
@@ -357,7 +360,7 @@ export function SortableStatusList({
               .filter((s) => s.id !== deletingStatus?.id)
               .map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.name} {s.isDefault ? "(Default)" : ""}
+                  {s.name} {s.isDefault ? `(${t("common.default")})` : ""}
                 </option>
               ))}
           </NativeSelect>

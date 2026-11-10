@@ -7,6 +7,7 @@ import { PageHeader } from "../../../../../components/page-header";
 import { Button } from "../../../../../components/ui/button";
 import { SortableStatusList } from "../../../../../components/dashboard/status-list";
 import { StatusDialog } from "../../../../../components/dashboard/status-dialog";
+import { useI18n } from "../../../../../lib/i18n/context";
 
 export interface StatusesViewProps {
   ws: string;
@@ -21,6 +22,7 @@ export function StatusesView({
   initial,
   showHeader = true,
 }: StatusesViewProps): React.JSX.Element {
+  const { t } = useI18n();
   const router = useRouter();
   const [addDialogOpen, setAddDialogOpen] = React.useState(false);
 
@@ -28,21 +30,21 @@ export function StatusesView({
     <div className="space-y-6 max-w-5xl">
       {showHeader ? (
         <PageHeader
-          title="Statuses"
-          description="Statuses show where each post stands. Drag to change the order customers see."
+          title={t("statuses.title")}
+          description={t("statuses.description")}
           action={
             <Button onClick={() => setAddDialogOpen(true)}>
-              Add status
+              {t("statuses.addStatus")}
             </Button>
           }
         />
       ) : (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            Statuses show where each post stands. Drag to change the order customers see.
+            {t("statuses.description")}
           </p>
           <Button onClick={() => setAddDialogOpen(true)} className="self-start sm:self-auto">
-            Add status
+            {t("statuses.addStatus")}
           </Button>
         </div>
       )}

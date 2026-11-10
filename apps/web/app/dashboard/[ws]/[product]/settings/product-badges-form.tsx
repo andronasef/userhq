@@ -19,6 +19,7 @@ import {
 import { BadgeChip } from "@/components/badges/badge-chip";
 import { apiFetch } from "@/lib/api-client";
 import { QueryProvider } from "@/lib/query-client";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface ProductBadgesFormProps {
   ws: string;
@@ -44,6 +45,7 @@ function ProductBadgesFormInner({
   ws,
   product,
 }: ProductBadgesFormProps): React.JSX.Element {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const queryKey = ["product-badges", ws, product.slug];
 
@@ -141,7 +143,7 @@ function ProductBadgesFormInner({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
-      toast.success(editingBadge ? "Badge updated" : "Badge created");
+      toast.success(t("badges.badgeSaved"));
       setCreateDialogOpen(false);
       resetForm();
     },
@@ -158,7 +160,7 @@ function ProductBadgesFormInner({
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
-      toast.success("Badge deleted");
+      toast.success(t("badges.badgeDeleted"));
     },
     onError: (err: any) => {
       toast.error(err?.message || "Failed to delete badge");
@@ -218,27 +220,25 @@ function ProductBadgesFormInner({
             id="badges-heading"
             className="text-base font-semibold text-foreground"
           >
-            User Badges & Attribution
+            {t("badges.title")}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Assign visual badges to users or automatically grant them when
-            visitors arrive with URL query parameters.
+            {t("badges.description")}
           </p>
         </div>
         <Button onClick={openCreate} size="sm" className="gap-1.5 shrink-0">
           <Plus className="size-4" />
-          <span>New badge</span>
+          <span>{t("badges.createBadge")}</span>
         </Button>
       </div>
 
       {isLoading ? (
         <div className="p-8 text-center text-sm text-muted-foreground">
-          Loading badges...
+          {t("board.loading")}
         </div>
       ) : badges.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-          No badges configured for this product yet. Click &quot;New badge&quot;
-          to create one.
+          {t("badges.noBadgesBody")}
         </div>
       ) : (
         <div className="grid gap-3">
@@ -265,7 +265,7 @@ function ProductBadgesFormInner({
                 {badge.rules && badge.rules.length > 0 && (
                   <div className="flex flex-wrap items-center gap-1.5 pt-1">
                     <span className="text-xs font-medium text-foreground">
-                      Rules:
+                      {t("badges.rulesTitle")}:
                     </span>
                     {badge.rules.map((rule: BadgeRule) => (
                       <span
@@ -300,21 +300,21 @@ function ProductBadgesFormInner({
                   size="sm"
                   onClick={() => setRuleBadge(badge)}
                 >
-                  Rules ({badge.rules?.length || 0})
+                  {t("badges.rulesTitle")} ({badge.rules?.length || 0})
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => openEdit(badge)}
                 >
-                  Edit
+                  {t("common.edit")}
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="size-8 text-destructive hover:text-destructive"
                   onClick={() => {
-                    if (confirm(`Delete badge "${badge.name}"?`)) {
+                    if (confirm(`${t("badges.deleteBadgeTitle")} "${badge.name}"?`)) {
                       deleteBadgeMutation.mutate(badge.id);
                     }
                   }}
@@ -332,10 +332,10 @@ function ProductBadgesFormInner({
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {editingBadge ? "Edit Badge" : "Create New Badge"}
+              {editingBadge ? t("badges.editBadge") : t("badges.createBadge")}
             </DialogTitle>
             <DialogDescription>
-              Configure visual appearance and priority for this product badge.
+              {t("badges.description")}
             </DialogDescription>
           </DialogHeader>
 
@@ -360,7 +360,7 @@ function ProductBadgesFormInner({
                 htmlFor="badge-name"
                 className="text-sm font-semibold text-foreground"
               >
-                Badge Name
+                {t("badges.badgeNameLabel")}
               </label>
               <Input
                 id="badge-name"
@@ -418,7 +418,7 @@ function ProductBadgesFormInner({
                   htmlFor="badge-bg-color"
                   className="text-sm font-semibold text-foreground"
                 >
-                  Background Color
+                  {t("badges.badgeColorLabel")}
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -466,7 +466,7 @@ function ProductBadgesFormInner({
                   htmlFor="badge-icon"
                   className="text-sm font-semibold text-foreground"
                 >
-                  Icon
+                  {t("badges.badgeIconLabel")}
                 </label>
                 <NativeSelect
                   id="badge-icon"
@@ -505,13 +505,13 @@ function ProductBadgesFormInner({
               variant="outline"
               onClick={() => setCreateDialogOpen(false)}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               onClick={() => saveMutation.mutate()}
               disabled={saveMutation.isPending || !name.trim() || !slug.trim()}
             >
-              {saveMutation.isPending ? "Saving..." : "Save Badge"}
+              {saveMutation.isPending ? t("common.saving") : t("common.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -534,7 +534,7 @@ function ProductBadgesFormInner({
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Active Rules
+                {t("badges.rulesTitle")}
               </h4>
               {ruleBadge &&
               badges.find((b) => b.id === ruleBadge.id)?.rules?.length ? (
@@ -704,14 +704,14 @@ function ProductBadgesFormInner({
                 className="w-full gap-1.5"
               >
                 <Plus className="size-4" />
-                <span>Add Rule</span>
+                <span>{t("badges.addRule")}</span>
               </Button>
             </div>
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setRuleBadge(null)}>
-              Done
+              {t("common.done")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -27,6 +27,7 @@ import { Alert } from "../ui/alert";
 import { apiFetch, ApiClientError } from "../../lib/api-client";
 import { errorCopy, FIELD_FOR_CODE } from "../../lib/api-errors";
 import { QueryProvider } from "../../lib/query-client";
+import { useI18n } from "../../lib/i18n/context";
 
 export interface CategoryDialogProps {
   mode: "add" | "rename";
@@ -47,6 +48,7 @@ function CategoryDialogInner({
   product,
   initialCategory,
 }: CategoryDialogProps): React.JSX.Element {
+  const { t } = useI18n();
   const [alertError, setAlertError] = React.useState<string | null>(null);
 
   const {
@@ -88,7 +90,7 @@ function CategoryDialogInner({
     onSuccess: () => {
       onOpenChange(false);
       toast.success(
-        mode === "add" ? "Category added" : "Category renamed"
+        mode === "add" ? t("categories.categoryAdded") : t("categories.categoryRenamed")
       );
       onSaved?.();
     },
@@ -116,20 +118,20 @@ function CategoryDialogInner({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {mode === "add" ? "Add category" : "Rename category"}
+            {mode === "add" ? t("categories.addCategory") : t("categories.renameCategory")}
           </DialogTitle>
           <DialogDescription>
             {mode === "add"
-              ? "Group feedback by topic so customers can find and file related ideas."
-              : "Rename this category. Existing posts will keep their assignment."}
+              ? t("categories.addCategoryDesc")
+              : t("categories.renameCategoryDesc")}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <fieldset disabled={isPending} className="space-y-4">
-            <Field id="category-name" label="Name" error={errors.name?.message}>
+            <Field id="category-name" label={t("categories.nameLabel")} error={errors.name?.message}>
               <Input
-                placeholder="Integrations"
+                placeholder={t("categories.namePlaceholder")}
                 autoFocus
                 {...register("name")}
               />
@@ -144,18 +146,18 @@ function CategoryDialogInner({
                 onClick={() => onOpenChange(false)}
                 disabled={isPending}
               >
-                Discard changes
+                {t("categories.discardChanges")}
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending ? (
                   <>
                     <LoaderCircle className="size-4 animate-spin" />
-                    <span>Saving…</span>
+                    <span>{t("common.saving")}</span>
                   </>
                 ) : mode === "add" ? (
-                  "Add category"
+                  t("categories.addCategory")
                 ) : (
-                  "Save category"
+                  t("categories.saveCategory")
                 )}
               </Button>
             </DialogFooter>

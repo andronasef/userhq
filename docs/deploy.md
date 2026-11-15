@@ -151,15 +151,14 @@ Google and GitHub require explicit redirect callback URLs.
 Tags identify releases; production deployment and GitHub release publication are separate operations:
 
 1. Complete the [documentation and tag checklist](../AGENTS.md#documentation-and-release-tags): update the changelog, review user/API/LLM docs, document environment and migration requirements, and commit the verified changes.
-2. With authorization, push `main`. Dokploy is configured to deploy pushes to `main`; do not assume a later tag's CI blocks that deployment. Verify environment prerequisites before the branch push.
+2. With authorization, push `main`. Dokploy is configured to deploy pushes to `main`; there is no CI workflow, so nothing blocks that deployment; run the tests locally first. Verify environment prerequisites before the branch push.
 3. With authorization, create an annotated semver tag on the intended verified commit. Use the next version appropriate to the change (major, minor, patch or prerelease), and do not overwrite an existing published tag:
    ```bash
    git tag -a <next-version> <verified-commit> -m "Release <next-version>"
    git push origin <next-version>
    ```
 4. GitHub Actions `release.yml` triggers on `v*`:
-   - Runs `jobs.ci` using `.github/workflows/ci.yml` (the exact CI checks).
-   - Once CI passes, it automatically creates an official GitHub Release with release notes.
+   - Automatically creates an official GitHub Release with release notes. There is no CI job; the repository has no test workflow.
 5. Confirm the workflow outcome and that the GitHub Release exists. The workflow currently tolerates `gh release create` errors, so a green job alone does not prove publication. It contains no Dokploy deployment job and does not update a release branch.
 
 The `v0.3.0` changelog entry was added retrospectively. Its published tag remains on the original release commit; documentation corrections are subsequent commits, not a rewritten release.

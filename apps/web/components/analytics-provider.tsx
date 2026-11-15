@@ -77,9 +77,9 @@ export function AnalyticsProvider({
     const current = analyticsRoute(window.location.pathname);
     // Clarity needs actual DOM observers; unlike GTM it is a recording instrument.
     // Record every public portal screen (posts and changelog entries included); the
-    // route allowlist already excludes admin/private screens. URLs carrying a query
-    // or hash are skipped because they can hold search words.
-    if (current.record && !window.location.search && !window.location.hash) {
+    // route allowlist already excludes admin/private screens, invite and unsubscribe
+    // pages (their URLs carry secret tokens). Filtered/search URLs are recorded too.
+    if (current.record) {
       const w = window as unknown as {
         clarity: ((...args: unknown[]) => void) & { q?: unknown[][] };
       };

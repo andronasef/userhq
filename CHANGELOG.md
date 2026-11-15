@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.5.1] - 2026-11-15
+
+### Fixed
+
+- **Clarity now records public post and changelog-entry pages** and no longer skips visits based on the referrer. Admin, account, login and other private screens are still never recorded, and URLs with a query string or `#` are still skipped.
+
 ## [v0.5.0] - 2026-11-15
 
 ### Added

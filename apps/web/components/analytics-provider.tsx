@@ -76,24 +76,10 @@ export function AnalyticsProvider({
     document.head.appendChild(boot);
     const current = analyticsRoute(window.location.pathname);
     // Clarity needs actual DOM observers; unlike GTM it is a recording instrument.
-    // Avoid query/referrer secrets and content-derived slugs; keep index/form journeys.
-    const safeReferrer =
-      !document.referrer ||
-      (() => {
-        try {
-          const r = new URL(document.referrer);
-          return !r.search && !r.hash && analyticsRoute(r.pathname).record;
-        } catch {
-          return false;
-        }
-      })();
-    if (
-      current.record &&
-      !current.route.includes(":ref") &&
-      !window.location.search &&
-      !window.location.hash &&
-      safeReferrer
-    ) {
+    // Record every public portal screen (posts and changelog entries included); the
+    // route allowlist already excludes admin/private screens. URLs carrying a query
+    // or hash are skipped because they can hold search words.
+    if (current.record && !window.location.search && !window.location.hash) {
       const w = window as unknown as {
         clarity: ((...args: unknown[]) => void) & { q?: unknown[][] };
       };

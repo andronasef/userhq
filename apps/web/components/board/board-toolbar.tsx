@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { track } from "../../lib/analytics";
 import { useI18n } from "../../lib/i18n/context";
 import { useQueryStates, parseAsString, parseAsStringLiteral } from "nuqs";
 import { Search, SlidersHorizontal } from "lucide-react";
@@ -9,11 +10,13 @@ import { NativeSelect } from "../ui/native-select";
 import { Button } from "../ui/button";
 
 export interface BoardToolbarProps {
+  resultCount?: number;
   categories?: { id: string; name: string }[];
   statuses?: { id: string; name: string; color: string; type: string }[];
 }
 
 export function BoardToolbar({
+  resultCount,
   categories = [],
   statuses = [],
 }: BoardToolbarProps): React.JSX.Element {
@@ -22,7 +25,7 @@ export function BoardToolbar({
     {
       q: parseAsString.withDefault(""),
       sort: parseAsStringLiteral(["top", "new", "match"] as const).withDefault(
-        "top"
+        "top",
       ),
       category: parseAsString.withDefault(""),
       status: parseAsString.withDefault(""),
@@ -30,10 +33,17 @@ export function BoardToolbar({
     {
       shallow: false,
       history: "push",
-    }
+    },
   );
 
   const [searchVal, setSearchVal] = React.useState(q);
+  const lastSearch = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    if (q.trim() && resultCount !== undefined && lastSearch.current !== q) {
+      lastSearch.current = q;
+      track("search_completed", { module: "board", result_count: resultCount });
+    }
+  }, [q, resultCount]);
   const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -42,9 +52,20 @@ export function BoardToolbar({
 
   const hasQ = q.trim() !== "";
   const defaultSort = hasQ ? "match" : "top";
-  const currentSort = sort === "top" ? (hasQ ? "top" : "top") : sort === "new" ? "new" : (hasQ ? "match" : "top");
+  const currentSort =
+    sort === "top"
+      ? hasQ
+        ? "top"
+        : "top"
+      : sort === "new"
+        ? "new"
+        : hasQ
+          ? "match"
+          : "top";
 
-  const isSortNonDefault = hasQ ? (sort === "top" || sort === "new") : sort === "new";
+  const isSortNonDefault = hasQ
+    ? sort === "top" || sort === "new"
+    : sort === "new";
   const isCategoryNonDefault = Boolean(category);
   const isStatusNonDefault = Boolean(status);
   const diffCount =
@@ -177,7 +198,11 @@ export function BoardToolbar({
           className="sm:hidden shrink-0"
         >
           <SlidersHorizontal className="size-4" aria-hidden="true" />
-          <span>{diffCount > 0 ? `${t("ui.filters")} · ${diffCount}` : t("ui.filters")}</span>
+          <span>
+            {diffCount > 0
+              ? `${t("ui.filters")} · ${diffCount}`
+              : t("ui.filters")}
+          </span>
         </Button>
 
         <div className="hidden sm:flex sm:items-center sm:gap-2 shrink-0">

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useAnalyticsRouter as useRouter } from "@/lib/analytics-navigation";
 import type { TimelineItem, PublicComment } from "@userhq/types";
 import { CommentItem } from "@/components/post/comment-item";
 import { CommentComposer } from "@/components/post/comment-composer";

@@ -2,6 +2,7 @@ import { Injectable, Inject } from "@nestjs/common";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { DB, type Db, posts, votes } from "@userhq/db";
 import { ApiException } from "../common/api-error.filter.js";
+import { recordOutcome } from "../analytics/context.js";
 
 @Injectable()
 export class VotesService {
@@ -11,7 +12,7 @@ export class VotesService {
     productId: string,
     number: number,
     userId: string,
-    on: boolean
+    on: boolean,
   ): Promise<{ voted: boolean; voteCount: number }> {
     return this.db.transaction(async (tx) => {
       const [p] = await tx
@@ -22,8 +23,8 @@ export class VotesService {
             eq(posts.productId, productId),
             eq(posts.number, number),
             isNull(posts.deletedAt),
-            isNull(posts.mergedIntoId)
-          )
+            isNull(posts.mergedIntoId),
+          ),
         )
         .for("update"); // NOT "share": share-then-update deadlocks two voters
 
@@ -43,6 +44,11 @@ export class VotesService {
             .returning({ u: votes.userId });
 
       const delta = changed.length ? (on ? 1 : -1) : 0;
+      if (delta)
+        recordOutcome(on ? "vote_added" : "vote_removed", {
+          module: "board",
+          action: "vote",
+        });
 
       const [row] = await tx
         .update(posts)

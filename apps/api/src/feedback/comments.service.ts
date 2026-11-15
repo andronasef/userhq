@@ -1,6 +1,16 @@
+import { recordOutcome } from "../analytics/context.js";
 import { Injectable, Inject, Optional } from "@nestjs/common";
 import { and, eq, isNull, or, sql } from "drizzle-orm";
-import { DB, type Db, posts, comments, user, products, workspaces, workspaceApiKeys } from "@userhq/db";
+import {
+  DB,
+  type Db,
+  posts,
+  comments,
+  user,
+  products,
+  workspaces,
+  workspaceApiKeys,
+} from "@userhq/db";
 import type {
   CreateCommentInput,
   UpdateCommentInput,
@@ -41,7 +51,7 @@ export interface CommentRowWithAuthor {
 export class CommentsService {
   constructor(
     @Inject(DB) private readonly db: Db,
-    @Optional() private readonly pushService?: PushService
+    @Optional() private readonly pushService?: PushService,
   ) {}
 
   async createComment(
@@ -50,7 +60,7 @@ export class CommentsService {
     number: number,
     input: CreateCommentInput,
     userAgent?: string | null,
-    apiKeyId?: string | null
+    apiKeyId?: string | null,
   ): Promise<PublicComment> {
     const deviceInfo = parseUserAgent(userAgent);
 
@@ -67,8 +77,8 @@ export class CommentsService {
             eq(posts.productId, portal.productId),
             eq(posts.number, number),
             isNull(posts.deletedAt),
-            isNull(posts.mergedIntoId)
-          )
+            isNull(posts.mergedIntoId),
+          ),
         )
         .for("update");
 
@@ -76,7 +86,11 @@ export class CommentsService {
         throw new ApiException("post_not_found", 404, "Post not found.");
       }
 
-      const isAdmin = await isFeedbackAdmin(tx, currentUser, portal.workspaceId);
+      const isAdmin = await isFeedbackAdmin(
+        tx,
+        currentUser,
+        portal.workspaceId,
+      );
 
       let resolvedParentId: string | null = null;
       if (input.parentId) {
@@ -87,12 +101,16 @@ export class CommentsService {
             and(
               eq(comments.id, input.parentId),
               eq(comments.postId, p.id),
-              isNull(comments.deletedAt)
-            )
+              isNull(comments.deletedAt),
+            ),
           );
 
         if (!parent) {
-          throw new ApiException("comment_not_found", 404, "Parent comment not found.");
+          throw new ApiException(
+            "comment_not_found",
+            404,
+            "Parent comment not found.",
+          );
         }
 
         // Replies are one level deep: reply to a reply attaches to the top-level parent (D-16)
@@ -112,6 +130,13 @@ export class CommentsService {
         })
         .returning();
 
+      recordOutcome("comment_created", { module: "board", action: "comment" });
+      if (isAdmin)
+        recordOutcome("public_response_added", {
+          module: "board",
+          action: "triage",
+        });
+
       // D-04: an admin reply resolves the whole customer thread (root plus its direct replies).
       // Conditional on unhandled so an existing handler and time are never overwritten.
       if (isAdmin && resolvedParentId) {
@@ -124,8 +149,11 @@ export class CommentsService {
               eq(comments.isAdmin, false),
               isNull(comments.deletedAt),
               isNull(comments.handledAt),
-              or(eq(comments.id, resolvedParentId), eq(comments.parentId, resolvedParentId))
-            )
+              or(
+                eq(comments.id, resolvedParentId),
+                eq(comments.parentId, resolvedParentId),
+              ),
+            ),
           );
       }
 
@@ -198,7 +226,11 @@ export class CommentsService {
         }
       }
 
-      const userBadgesMap = await getPublicBadgesForUsers(this.db, portal.productId, [currentUser.id]);
+      const userBadgesMap = await getPublicBadgesForUsers(
+        this.db,
+        portal.productId,
+        [currentUser.id],
+      );
       const userBadges = userBadgesMap.get(currentUser.id) ?? [];
 
       return {
@@ -212,7 +244,9 @@ export class CommentsService {
         },
         body: newComment.body,
         createdAt: newComment.createdAt.toISOString(),
-        editedAt: newComment.editedAt ? newComment.editedAt.toISOString() : null,
+        editedAt: newComment.editedAt
+          ? newComment.editedAt.toISOString()
+          : null,
         version: newComment.version,
         canEdit: true,
         canDelete: true,
@@ -226,7 +260,7 @@ export class CommentsService {
     portal: { workspaceId: string; productId: string },
     currentUser: Actor,
     commentId: string,
-    input: UpdateCommentInput
+    input: UpdateCommentInput,
   ): Promise<PublicComment> {
     const [row] = await this.db
       .select({
@@ -245,8 +279,8 @@ export class CommentsService {
           eq(comments.id, commentId),
           eq(posts.productId, portal.productId),
           isNull(posts.deletedAt),
-          isNull(posts.mergedIntoId)
-        )
+          isNull(posts.mergedIntoId),
+        ),
       )
       .limit(1);
 
@@ -254,7 +288,11 @@ export class CommentsService {
       throw new ApiException("comment_not_found", 404, "Comment not found.");
     }
 
-    const isAdmin = await isFeedbackAdmin(this.db, currentUser, portal.workspaceId);
+    const isAdmin = await isFeedbackAdmin(
+      this.db,
+      currentUser,
+      portal.workspaceId,
+    );
     const isAuthor = row.commentAuthorId === currentUser.id;
 
     if (!isAuthor && !isAdmin) {
@@ -272,8 +310,8 @@ export class CommentsService {
         and(
           eq(comments.id, commentId),
           eq(comments.version, input.version),
-          isNull(comments.deletedAt)
-        )
+          isNull(comments.deletedAt),
+        ),
       )
       .returning();
 
@@ -288,7 +326,7 @@ export class CommentsService {
         throw new ApiException(
           "edit_conflict",
           409,
-          "Someone edited this while you were looking at it. Refresh to see the latest version."
+          "Someone edited this while you were looking at it. Refresh to see the latest version.",
         );
       } else {
         throw new ApiException("comment_not_found", 404, "Comment not found.");
@@ -304,7 +342,11 @@ export class CommentsService {
     const isDeletedUser = Boolean(authorUser?.deletedAt);
     const updatedBadges = isDeletedUser
       ? []
-      : ((await getPublicBadgesForUsers(this.db, portal.productId, [updated.authorId])).get(updated.authorId) ?? []);
+      : ((
+          await getPublicBadgesForUsers(this.db, portal.productId, [
+            updated.authorId,
+          ])
+        ).get(updated.authorId) ?? []);
     const [keyRow] = updated.createdByApiKeyId
       ? await this.db
           .select({ name: workspaceApiKeys.name })
@@ -338,7 +380,7 @@ export class CommentsService {
   async deleteComment(
     portal: { workspaceId: string; productId: string },
     currentUser: Actor,
-    commentId: string
+    commentId: string,
   ): Promise<void> {
     const [row] = await this.db
       .select({
@@ -354,8 +396,8 @@ export class CommentsService {
           eq(comments.id, commentId),
           eq(posts.productId, portal.productId),
           isNull(posts.deletedAt),
-          isNull(posts.mergedIntoId)
-        )
+          isNull(posts.mergedIntoId),
+        ),
       )
       .limit(1);
 
@@ -363,7 +405,11 @@ export class CommentsService {
       throw new ApiException("comment_not_found", 404, "Comment not found.");
     }
 
-    const isAdmin = await isFeedbackAdmin(this.db, currentUser, portal.workspaceId);
+    const isAdmin = await isFeedbackAdmin(
+      this.db,
+      currentUser,
+      portal.workspaceId,
+    );
     const isAuthor = row.commentAuthorId === currentUser.id;
 
     if (!isAuthor && !isAdmin) {
@@ -400,7 +446,7 @@ export class CommentsService {
   shapeTimeline(
     rows: CommentRowWithAuthor[],
     viewer: { userId: string | null; isAdmin: boolean },
-    badgesByUserId?: Map<string, PublicBadgeChip[]>
+    badgesByUserId?: Map<string, PublicBadgeChip[]>,
   ): TimelineItem[] {
     const topLevelRows: CommentRowWithAuthor[] = [];
     const repliesByParent = new Map<string, CommentRowWithAuthor[]>();
@@ -427,7 +473,13 @@ export class CommentsService {
       return {
         id: row.id,
         author: isDeletedUser
-          ? { name: null, image: null, isAdmin: false, deleted: true, badges: [] }
+          ? {
+              name: null,
+              image: null,
+              isAdmin: false,
+              deleted: true,
+              badges: [],
+            }
           : {
               name: row.authorName,
               image: row.authorImage,

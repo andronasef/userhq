@@ -1,4 +1,5 @@
 "use client";
+import { startContribution } from "../../lib/analytics";
 
 import * as React from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -92,6 +93,7 @@ function VoteButtonInner({
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!stateRef.current.voted) startContribution("vote", !signedIn);
 
     if (!signedIn) {
       const nextUrl = window.location.pathname + window.location.search;
@@ -114,15 +116,17 @@ function VoteButtonInner({
 
   const formattedCount =
     optimistic.count >= 1000
-      ? new Intl.NumberFormat(currentLocale || "en", { notation: "compact" }).format(
-          optimistic.count,
-        )
+      ? new Intl.NumberFormat(currentLocale || "en", {
+          notation: "compact",
+        }).format(optimistic.count)
       : String(optimistic.count);
 
   const voteUnit =
     optimistic.count === 1 ? t("ui.voteSingular") : t("ui.votes");
   const voteLabel = `${optimistic.count} ${voteUnit}`;
-  const ariaLabel = title ? `${t("ui.upvote")} ${title}, ${voteLabel}` : voteLabel;
+  const ariaLabel = title
+    ? `${t("ui.upvote")} ${title}, ${voteLabel}`
+    : voteLabel;
 
   return (
     <button

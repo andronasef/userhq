@@ -5,7 +5,8 @@ import {
   Injectable,
   Inject,
 } from "@nestjs/common";
-import { APP_GUARD, APP_FILTER, APP_PIPE } from "@nestjs/core";
+import { APP_GUARD, APP_FILTER, APP_PIPE, APP_INTERCEPTOR } from "@nestjs/core";
+import { AnalyticsInterceptor } from "./analytics/analytics.interceptor.js";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import helmet from "helmet";
 import type pg from "pg";
@@ -40,8 +41,15 @@ import { ExportModule } from "./export/export.module.js";
 import { WebhooksModule } from "./webhooks/webhooks.module.js";
 import { PushModule } from "./push/push.module.js";
 import { BadgesModule } from "./badges/badges.module.js";
-import { PostgresThrottlerStorage, RateLimitSweeper } from "./common/postgres-throttler-storage.js";
-import { OutboundHttp, OUTBOUND_NETWORK, systemOutboundNetwork } from "./common/outbound-http.js";
+import {
+  PostgresThrottlerStorage,
+  RateLimitSweeper,
+} from "./common/postgres-throttler-storage.js";
+import {
+  OutboundHttp,
+  OUTBOUND_NETWORK,
+  systemOutboundNetwork,
+} from "./common/outbound-http.js";
 
 const DB_POOL = Symbol.for("@userhq/api/db-pool");
 
@@ -74,7 +82,12 @@ export class AppModule {
             // Better Auth runs before Nest guards; keys must never fall back
             // to a human cookie on these session-only endpoints.
             if (apiKeyToken(req.headers.authorization) !== null) {
-              res.status(403).json({ code: "api_key_route_forbidden", message: "API keys cannot access this route." });
+              res
+                .status(403)
+                .json({
+                  code: "api_key_route_forbidden",
+                  message: "API keys cannot access this route.",
+                });
               return;
             }
             next();
@@ -108,6 +121,7 @@ export class AppModule {
       ],
       controllers: [HealthController, MeController],
       providers: [
+        { provide: APP_INTERCEPTOR, useClass: AnalyticsInterceptor },
         { provide: OUTBOUND_NETWORK, useValue: systemOutboundNetwork },
         OutboundHttp,
         {

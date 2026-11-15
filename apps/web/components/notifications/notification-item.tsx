@@ -1,4 +1,5 @@
 "use client";
+import { track } from "../../lib/analytics";
 
 import * as React from "react";
 import Link from "next/link";
@@ -47,17 +48,23 @@ export function NotificationItem({
   return (
     <Link
       href={targetHref}
-      onClick={() => onRead(notification)}
+      onClick={() => {
+        track("notification_link_opened", {
+          channel: "in_app",
+          notification_type: "status",
+        });
+        onRead(notification);
+      }}
       className={cn(
         "flex items-start gap-3 p-3.5 transition-colors text-left group hover:bg-muted/50",
-        isUnread ? "bg-muted/20" : "bg-transparent"
+        isUnread ? "bg-muted/20" : "bg-transparent",
       )}
     >
       <div className="pt-1.5 shrink-0">
         <span
           className={cn(
             "size-2 rounded-full block transition-colors",
-            isUnread ? "bg-primary" : "bg-transparent"
+            isUnread ? "bg-primary" : "bg-transparent",
           )}
           aria-hidden="true"
         />
@@ -69,7 +76,10 @@ export function NotificationItem({
             {post.title}
           </span>
           <span className="text-[11px] text-muted-foreground shrink-0">
-            {formatRelativeTime(activity.createdAt || notification.createdAt, t)}
+            {formatRelativeTime(
+              activity.createdAt || notification.createdAt,
+              t,
+            )}
           </span>
         </div>
 

@@ -1,6 +1,17 @@
+import { recordOutcome } from "../analytics/context.js";
 import { Injectable, Inject, Optional } from "@nestjs/common";
 import { NotificationsService } from "../notifications/notifications.service.js";
-import { and, eq, isNull, inArray, desc, asc, sql, or, ilike } from "drizzle-orm";
+import {
+  and,
+  eq,
+  isNull,
+  inArray,
+  desc,
+  asc,
+  sql,
+  or,
+  ilike,
+} from "drizzle-orm";
 import {
   DB,
   type Db,
@@ -30,7 +41,7 @@ import { enqueueWebhookEvent } from "../webhooks/outbox.js";
 export class RoadmapService {
   constructor(
     @Inject(DB) private readonly db: Db,
-    @Optional() private readonly notificationsService?: NotificationsService
+    @Optional() private readonly notificationsService?: NotificationsService,
   ) {}
 
   async listAdminItems(tenant: {
@@ -62,7 +73,7 @@ export class RoadmapService {
       .from(roadmapItems)
       .innerJoin(
         roadmapItemInternals,
-        eq(roadmapItems.id, roadmapItemInternals.itemId)
+        eq(roadmapItems.id, roadmapItemInternals.itemId),
       )
       .leftJoin(user, eq(roadmapItemInternals.assigneeId, user.id))
       .leftJoin(
@@ -70,16 +81,15 @@ export class RoadmapService {
         and(
           eq(posts.roadmapItemId, roadmapItems.id),
           isNull(posts.deletedAt),
-          isNull(posts.mergedIntoId)
-        )
+          isNull(posts.mergedIntoId),
+        ),
       )
       .where(eq(roadmapItems.productId, tenant.productId))
-      .groupBy(
-        roadmapItems.id,
-        roadmapItemInternals.itemId,
-        user.id
-      )
-      .orderBy(asc(sql`${roadmapItems.rank} COLLATE "C"`), asc(roadmapItems.createdAt));
+      .groupBy(roadmapItems.id, roadmapItemInternals.itemId, user.id)
+      .orderBy(
+        asc(sql`${roadmapItems.rank} COLLATE "C"`),
+        asc(roadmapItems.createdAt),
+      );
 
     return rows.map((r) => this.mapAdminItem(r));
   }
@@ -87,7 +97,7 @@ export class RoadmapService {
   async getItemById(
     tenant: { workspaceId: string; productId: string },
     itemId: string,
-    executor: any = this.db
+    executor: any = this.db,
   ): Promise<AdminRoadmapItem> {
     const [row] = await executor
       .select({
@@ -114,7 +124,7 @@ export class RoadmapService {
       .from(roadmapItems)
       .innerJoin(
         roadmapItemInternals,
-        eq(roadmapItems.id, roadmapItemInternals.itemId)
+        eq(roadmapItems.id, roadmapItemInternals.itemId),
       )
       .leftJoin(user, eq(roadmapItemInternals.assigneeId, user.id))
       .leftJoin(
@@ -122,20 +132,16 @@ export class RoadmapService {
         and(
           eq(posts.roadmapItemId, roadmapItems.id),
           isNull(posts.deletedAt),
-          isNull(posts.mergedIntoId)
-        )
+          isNull(posts.mergedIntoId),
+        ),
       )
       .where(
         and(
           eq(roadmapItems.id, itemId),
-          eq(roadmapItems.productId, tenant.productId)
-        )
+          eq(roadmapItems.productId, tenant.productId),
+        ),
       )
-      .groupBy(
-        roadmapItems.id,
-        roadmapItemInternals.itemId,
-        user.id
-      )
+      .groupBy(roadmapItems.id, roadmapItemInternals.itemId, user.id)
       .limit(1);
 
     if (!row) {
@@ -148,7 +154,7 @@ export class RoadmapService {
   async createItem(
     tenant: { workspaceId: string; productId: string },
     adminUser: Actor,
-    input: CreateRoadmapItemInput
+    input: CreateRoadmapItemInput,
   ): Promise<AdminRoadmapItem> {
     return this.db.transaction(async (tx) => {
       // 1. Verify target status exists in this product
@@ -158,8 +164,8 @@ export class RoadmapService {
         .where(
           and(
             eq(statuses.id, input.statusId),
-            eq(statuses.productId, tenant.productId)
-          )
+            eq(statuses.productId, tenant.productId),
+          ),
         )
         .limit(1);
 
@@ -175,8 +181,8 @@ export class RoadmapService {
           .where(
             and(
               eq(workspaceMembers.workspaceId, tenant.workspaceId),
-              eq(workspaceMembers.userId, input.assigneeId)
-            )
+              eq(workspaceMembers.userId, input.assigneeId),
+            ),
           )
           .limit(1);
 
@@ -184,7 +190,7 @@ export class RoadmapService {
           throw new ApiException(
             "validation_failed",
             400,
-            "Assignee must be a member of this workspace."
+            "Assignee must be a member of this workspace.",
           );
         }
       }
@@ -198,8 +204,8 @@ export class RoadmapService {
           .where(
             and(
               eq(roadmapItems.productId, tenant.productId),
-              eq(roadmapItems.statusId, input.statusId)
-            )
+              eq(roadmapItems.statusId, input.statusId),
+            ),
           )
           .orderBy(desc(sql`${roadmapItems.rank} COLLATE "C"`))
           .limit(1);
@@ -266,20 +272,24 @@ export class RoadmapService {
               eq(posts.productId, tenant.productId),
               inArray(posts.id, input.postIds),
               isNull(posts.deletedAt),
-              isNull(posts.mergedIntoId)
-            )
+              isNull(posts.mergedIntoId),
+            ),
           )
           .for("update");
 
         if (postsToLink.length !== new Set(input.postIds).size) {
-          throw new ApiException("post_not_found", 404, "One or more posts not found.");
+          throw new ApiException(
+            "post_not_found",
+            404,
+            "One or more posts not found.",
+          );
         }
 
         if (postsToLink.some((p) => p.roadmapItemId !== null)) {
           throw new ApiException(
             "post_already_linked",
             400,
-            "A post is already linked to another roadmap item."
+            "A post is already linked to another roadmap item.",
           );
         }
 
@@ -287,7 +297,13 @@ export class RoadmapService {
           .update(posts)
           .set({ roadmapItemId: newItem.id })
           .where(inArray(posts.id, input.postIds));
-        await this.followItemStatus(tx, tenant, adminUser, statusRow, postsToLink);
+        await this.followItemStatus(
+          tx,
+          tenant,
+          adminUser,
+          statusRow,
+          postsToLink,
+        );
       }
 
       return this.getItemById(tenant, newItem.id, tx);
@@ -298,7 +314,7 @@ export class RoadmapService {
     tenant: { workspaceId: string; productId: string },
     adminUser: Actor,
     itemId: string,
-    input: UpdateRoadmapItemInput
+    input: UpdateRoadmapItemInput,
   ): Promise<AdminRoadmapItem> {
     return this.db.transaction(async (tx) => {
       // 1. Fetch & lock existing item and internals
@@ -313,31 +329,40 @@ export class RoadmapService {
         .from(roadmapItems)
         .innerJoin(
           roadmapItemInternals,
-          eq(roadmapItems.id, roadmapItemInternals.itemId)
+          eq(roadmapItems.id, roadmapItemInternals.itemId),
         )
         .where(
           and(
             eq(roadmapItems.id, itemId),
-            eq(roadmapItems.productId, tenant.productId)
-          )
+            eq(roadmapItems.productId, tenant.productId),
+          ),
         )
         .for("update");
 
       if (!existing) {
-        throw new ApiException("item_not_found", 404, "Roadmap item not found.");
+        throw new ApiException(
+          "item_not_found",
+          404,
+          "Roadmap item not found.",
+        );
       }
 
       // 2. Validate status if updating statusId
-      let targetStatus: { id: string; name: string; color: string } | null = null;
+      let targetStatus: { id: string; name: string; color: string } | null =
+        null;
       if (input.statusId && input.statusId !== existing.statusId) {
         const [foundStatus] = await tx
-          .select({ id: statuses.id, name: statuses.name, color: statuses.color })
+          .select({
+            id: statuses.id,
+            name: statuses.name,
+            color: statuses.color,
+          })
           .from(statuses)
           .where(
             and(
               eq(statuses.id, input.statusId),
-              eq(statuses.productId, tenant.productId)
-            )
+              eq(statuses.productId, tenant.productId),
+            ),
           )
           .limit(1);
 
@@ -355,8 +380,8 @@ export class RoadmapService {
           .where(
             and(
               eq(workspaceMembers.workspaceId, tenant.workspaceId),
-              eq(workspaceMembers.userId, input.assigneeId)
-            )
+              eq(workspaceMembers.userId, input.assigneeId),
+            ),
           )
           .limit(1);
 
@@ -364,22 +389,29 @@ export class RoadmapService {
           throw new ApiException(
             "validation_failed",
             400,
-            "Assignee must be a member of this workspace."
+            "Assignee must be a member of this workspace.",
           );
         }
       }
 
       // 4. Validate public title when making public
-      const resultingIsPublic = input.isPublic !== undefined ? input.isPublic : existing.isPublic;
+      const resultingIsPublic =
+        input.isPublic !== undefined ? input.isPublic : existing.isPublic;
       let resultingPublicTitle =
-        input.publicTitle !== undefined ? input.publicTitle : existing.publicTitle;
+        input.publicTitle !== undefined
+          ? input.publicTitle
+          : existing.publicTitle;
 
       if (resultingIsPublic) {
         if (!resultingPublicTitle) {
           resultingPublicTitle = input.internalTitle ?? existing.internalTitle;
         }
         if (!resultingPublicTitle || resultingPublicTitle.trim().length === 0) {
-          throw new ApiException("public_title_required", 400, "A public title is required for public items.");
+          throw new ApiException(
+            "public_title_required",
+            400,
+            "A public title is required for public items.",
+          );
         }
       }
 
@@ -387,10 +419,14 @@ export class RoadmapService {
       const itemUpdates: Record<string, any> = { updatedAt: new Date() };
       if (input.statusId !== undefined) itemUpdates.statusId = input.statusId;
       if (input.isPublic !== undefined) itemUpdates.isPublic = input.isPublic;
-      if (resultingPublicTitle !== undefined) itemUpdates.publicTitle = resultingPublicTitle;
-      if (input.publicDescription !== undefined) itemUpdates.publicDescription = input.publicDescription;
-      if (input.sourceLocale !== undefined) itemUpdates.sourceLocale = input.sourceLocale;
-      if (input.translations !== undefined) itemUpdates.translations = input.translations;
+      if (resultingPublicTitle !== undefined)
+        itemUpdates.publicTitle = resultingPublicTitle;
+      if (input.publicDescription !== undefined)
+        itemUpdates.publicDescription = input.publicDescription;
+      if (input.sourceLocale !== undefined)
+        itemUpdates.sourceLocale = input.sourceLocale;
+      if (input.translations !== undefined)
+        itemUpdates.translations = input.translations;
 
       await tx
         .update(roadmapItems)
@@ -399,14 +435,20 @@ export class RoadmapService {
 
       // 6. Update roadmapItemInternals
       const internalUpdates: Record<string, any> = {};
-      if (input.internalTitle !== undefined) internalUpdates.internalTitle = input.internalTitle;
+      if (input.internalTitle !== undefined)
+        internalUpdates.internalTitle = input.internalTitle;
       if (input.internalDescription !== undefined)
         internalUpdates.internalDescription = input.internalDescription;
-      if (input.internalNotes !== undefined) internalUpdates.internalNotes = input.internalNotes;
-      if (input.assigneeId !== undefined) internalUpdates.assigneeId = input.assigneeId;
-      if (input.deadlineText !== undefined) internalUpdates.deadlineText = input.deadlineText;
+      if (input.internalNotes !== undefined)
+        internalUpdates.internalNotes = input.internalNotes;
+      if (input.assigneeId !== undefined)
+        internalUpdates.assigneeId = input.assigneeId;
+      if (input.deadlineText !== undefined)
+        internalUpdates.deadlineText = input.deadlineText;
       if (input.deadlineDate !== undefined)
-        internalUpdates.deadlineDate = input.deadlineDate ? new Date(input.deadlineDate) : null;
+        internalUpdates.deadlineDate = input.deadlineDate
+          ? new Date(input.deadlineDate)
+          : null;
 
       if (Object.keys(internalUpdates).length > 0) {
         await tx
@@ -415,6 +457,12 @@ export class RoadmapService {
           .where(eq(roadmapItemInternals.itemId, itemId));
       }
 
+      if (targetStatus && (input.isPublic ?? existing.isPublic))
+        recordOutcome("roadmap_status_changed", {
+          module: "roadmap",
+          action: "publish",
+        });
+
       // 7. Cascade status changes to linked posts
       if (targetStatus) {
         await this.followItemStatus(
@@ -422,7 +470,7 @@ export class RoadmapService {
           tenant,
           adminUser,
           targetStatus,
-          await this.lockLinkedPosts(tx, tenant.productId, itemId)
+          await this.lockLinkedPosts(tx, tenant.productId, itemId),
         );
       }
 
@@ -434,7 +482,7 @@ export class RoadmapService {
     tenant: { workspaceId: string; productId: string },
     adminUser: Actor,
     itemId: string,
-    input: MoveRoadmapItemInput
+    input: MoveRoadmapItemInput,
   ): Promise<AdminRoadmapItem> {
     return this.db.transaction(async (tx) => {
       // 1. Fetch & lock roadmap item
@@ -443,18 +491,23 @@ export class RoadmapService {
           id: roadmapItems.id,
           statusId: roadmapItems.statusId,
           rank: roadmapItems.rank,
+          isPublic: roadmapItems.isPublic,
         })
         .from(roadmapItems)
         .where(
           and(
             eq(roadmapItems.id, itemId),
-            eq(roadmapItems.productId, tenant.productId)
-          )
+            eq(roadmapItems.productId, tenant.productId),
+          ),
         )
         .for("update");
 
       if (!existing) {
-        throw new ApiException("item_not_found", 404, "Roadmap item not found.");
+        throw new ApiException(
+          "item_not_found",
+          404,
+          "Roadmap item not found.",
+        );
       }
 
       // 2. Fetch target status
@@ -464,8 +517,8 @@ export class RoadmapService {
         .where(
           and(
             eq(statuses.id, input.statusId),
-            eq(statuses.productId, tenant.productId)
-          )
+            eq(statuses.productId, tenant.productId),
+          ),
         )
         .limit(1);
 
@@ -487,12 +540,17 @@ export class RoadmapService {
 
       // 4. Cascade to linked posts if column changed
       if (statusChanged) {
+        if (existing.isPublic)
+          recordOutcome("roadmap_status_changed", {
+            module: "roadmap",
+            action: "publish",
+          });
         await this.followItemStatus(
           tx,
           tenant,
           adminUser,
           targetStatus,
-          await this.lockLinkedPosts(tx, tenant.productId, itemId)
+          await this.lockLinkedPosts(tx, tenant.productId, itemId),
         );
       }
 
@@ -502,15 +560,15 @@ export class RoadmapService {
 
   async deleteItem(
     tenant: { workspaceId: string; productId: string },
-    itemId: string
+    itemId: string,
   ): Promise<void> {
     const [deleted] = await this.db
       .delete(roadmapItems)
       .where(
         and(
           eq(roadmapItems.id, itemId),
-          eq(roadmapItems.productId, tenant.productId)
-        )
+          eq(roadmapItems.productId, tenant.productId),
+        ),
       )
       .returning({ id: roadmapItems.id });
 
@@ -523,26 +581,34 @@ export class RoadmapService {
     tenant: { workspaceId: string; productId: string },
     adminUser: Actor,
     itemId: string,
-    postId: string
+    postId: string,
   ): Promise<{ success: true; linkedPostCount: number }> {
     return this.db.transaction(async (tx) => {
       const [item] = await tx
         .select({
           id: roadmapItems.id,
-          status: { id: statuses.id, name: statuses.name, color: statuses.color },
+          status: {
+            id: statuses.id,
+            name: statuses.name,
+            color: statuses.color,
+          },
         })
         .from(roadmapItems)
         .innerJoin(statuses, eq(roadmapItems.statusId, statuses.id))
         .where(
           and(
             eq(roadmapItems.id, itemId),
-            eq(roadmapItems.productId, tenant.productId)
-          )
+            eq(roadmapItems.productId, tenant.productId),
+          ),
         )
         .for("update", { of: roadmapItems });
 
       if (!item) {
-        throw new ApiException("item_not_found", 404, "Roadmap item not found.");
+        throw new ApiException(
+          "item_not_found",
+          404,
+          "Roadmap item not found.",
+        );
       }
 
       const [post] = await tx
@@ -558,8 +624,8 @@ export class RoadmapService {
             eq(posts.id, postId),
             eq(posts.productId, tenant.productId),
             isNull(posts.deletedAt),
-            isNull(posts.mergedIntoId)
-          )
+            isNull(posts.mergedIntoId),
+          ),
         )
         .for("update");
 
@@ -571,7 +637,7 @@ export class RoadmapService {
         throw new ApiException(
           "post_already_linked",
           400,
-          "This post is already linked to a roadmap item."
+          "This post is already linked to a roadmap item.",
         );
       }
 
@@ -588,10 +654,14 @@ export class RoadmapService {
           and(
             eq(posts.roadmapItemId, item.id),
             isNull(posts.deletedAt),
-            isNull(posts.mergedIntoId)
-          )
+            isNull(posts.mergedIntoId),
+          ),
         );
 
+      recordOutcome("roadmap_feedback_linked", {
+        module: "roadmap",
+        action: "triage",
+      });
       return { success: true, linkedPostCount: countRow?.count ?? 0 };
     });
   }
@@ -599,7 +669,7 @@ export class RoadmapService {
   async unlinkPost(
     tenant: { workspaceId: string; productId: string },
     itemId: string,
-    postId: string
+    postId: string,
   ): Promise<{ success: true }> {
     return this.db.transaction(async (tx) => {
       const [post] = await tx
@@ -609,8 +679,8 @@ export class RoadmapService {
           and(
             eq(posts.id, postId),
             eq(posts.productId, tenant.productId),
-            eq(posts.roadmapItemId, itemId)
-          )
+            eq(posts.roadmapItemId, itemId),
+          ),
         )
         .for("update");
 
@@ -618,7 +688,7 @@ export class RoadmapService {
         throw new ApiException(
           "post_not_found",
           404,
-          "Post not found or not linked to this item."
+          "Post not found or not linked to this item.",
         );
       }
 
@@ -633,7 +703,7 @@ export class RoadmapService {
 
   async searchPosts(
     tenant: { workspaceId: string; productId: string },
-    searchQuery?: string
+    searchQuery?: string,
   ): Promise<RoadmapPostLinkSearchResult[]> {
     const whereConditions = [
       eq(posts.productId, tenant.productId),
@@ -646,7 +716,10 @@ export class RoadmapService {
       const asNum = parseInt(trimmed, 10);
       if (!isNaN(asNum) && asNum > 0) {
         whereConditions.push(
-          or(eq(posts.number, asNum), ilike(posts.title, `%${escapeLike(trimmed)}%`))!
+          or(
+            eq(posts.number, asNum),
+            ilike(posts.title, `%${escapeLike(trimmed)}%`),
+          )!,
         );
       } else {
         whereConditions.push(ilike(posts.title, `%${escapeLike(trimmed)}%`));
@@ -670,18 +743,21 @@ export class RoadmapService {
     return rows;
   }
 
-
   private lockLinkedPosts(tx: any, productId: string, itemId: string) {
     return tx
-      .select({ id: posts.id, statusId: posts.statusId, version: posts.version })
+      .select({
+        id: posts.id,
+        statusId: posts.statusId,
+        version: posts.version,
+      })
       .from(posts)
       .where(
         and(
           eq(posts.productId, productId),
           eq(posts.roadmapItemId, itemId),
           isNull(posts.deletedAt),
-          isNull(posts.mergedIntoId)
-        )
+          isNull(posts.mergedIntoId),
+        ),
       )
       .for("update");
   }
@@ -693,21 +769,38 @@ export class RoadmapService {
     tenant: { workspaceId: string; productId: string },
     actor: Actor,
     status: { id: string; name: string; color: string },
-    linked: { id: string; statusId: string; version: number }[]
+    linked: { id: string; statusId: string; version: number }[],
   ): Promise<void> {
     const changed = linked.filter((p) => p.statusId !== status.id);
     if (changed.length === 0) return;
+    recordOutcome("feedback_decision_published", {
+      module: "board",
+      action: "triage",
+    });
 
     // Webhook payload: the shared status row and post numbers only, never anything from the roadmap item.
     const [statusRow] = await tx
       .select({ type: statuses.type })
       .from(statuses)
-      .where(and(eq(statuses.id, status.id), eq(statuses.productId, tenant.productId)))
+      .where(
+        and(
+          eq(statuses.id, status.id),
+          eq(statuses.productId, tenant.productId),
+        ),
+      )
       .limit(1);
     const numberRows: { id: string; number: number }[] = await tx
       .select({ id: posts.id, number: posts.number })
       .from(posts)
-      .where(and(inArray(posts.id, changed.map((p) => p.id)), eq(posts.productId, tenant.productId)));
+      .where(
+        and(
+          inArray(
+            posts.id,
+            changed.map((p) => p.id),
+          ),
+          eq(posts.productId, tenant.productId),
+        ),
+      );
     const numbers = new Map(numberRows.map((r) => [r.id, r.number]));
 
     for (const post of changed) {
@@ -746,7 +839,12 @@ export class RoadmapService {
           postId: post.id,
           postNumber: numbers.get(post.id) ?? null,
           previousStatusId: post.statusId,
-          newStatus: { id: status.id, name: status.name, color: status.color, type: statusRow?.type ?? null },
+          newStatus: {
+            id: status.id,
+            name: status.name,
+            color: status.color,
+            type: statusRow?.type ?? null,
+          },
           actorId: actor.id,
           note: null,
         },
@@ -775,7 +873,9 @@ export class RoadmapService {
           }
         : null,
       deadlineText: row.deadlineText ?? null,
-      deadlineDate: row.deadlineDate ? new Date(row.deadlineDate).toISOString() : null,
+      deadlineDate: row.deadlineDate
+        ? new Date(row.deadlineDate).toISOString()
+        : null,
       linkedPostCount: Number(row.linkedPostCount ?? 0),
       createdAt: new Date(row.createdAt).toISOString(),
       updatedAt: new Date(row.updatedAt).toISOString(),

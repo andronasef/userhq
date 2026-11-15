@@ -62,6 +62,7 @@ Secrets must never be committed to git, printed in CI logs, or shared in chat. C
 | `POSTGRES_PASSWORD` | `<random-hex-staging>` | `<random-hex-prod>` | Unique, URL-safe random string per environment (`openssl rand -hex 24`) |
 | `POSTGRES_DB` | `userhq_staging` | `userhq_prod` | Distinct database name per environment |
 | `PUBLIC_URL` | `https://${STAGING_DOMAIN}` | `https://${PROD_DOMAIN}` | Public canonical HTTPS origin (no trailing slash) |
+| `ANALYTICS_ID_SALT`     | `<random-hex-staging>`              | `<random-hex-prod>`                 | Stable random salt for opaque analytics IDs (`openssl rand -hex 32`). Not the auth secret. Optional `ANALYTICS_ENABLED=false` disables analytics. See [analytics](analytics.md). |
 | `BETTER_AUTH_SECRET` | `<random-hex-staging>` | `<random-hex-prod>` | 64-character hex secret for session encryption (`openssl rand -hex 32`) |
 | `GOOGLE_CLIENT_ID` | `<staging-google-client-id>` | `<prod-google-client-id>` | Google OAuth 2.0 Client ID for this environment |
 | `GOOGLE_CLIENT_SECRET` | `<staging-google-secret>` | `<prod-google-secret>` | Google OAuth 2.0 Client Secret for this environment |
@@ -218,3 +219,9 @@ ssh userhq-vps "docker exec -e SMTP_HOST=smtp-relay.brevo.com -e SMTP_USER=<logi
 # Inspect application logs
 ssh userhq-vps "docker logs --tail 100 -f \$(docker ps -q -f name=userhq-staging-api)"
 ```
+
+## Analytics and monitoring
+
+Production loads GTM through Partytown, public-only masked Clarity replay, and the configured New Relic browser agent. No visitor consent/opt-out UI is included in this version; operator policy review is deferred. Read [the analytics guide](analytics.md) before rollout: the supplied GTM container still requires a GA4 stream/tag mapping and publication. Do not add duplicate Clarity/New Relic tags in GTM. `ANALYTICS_ENABLED=false` disables browser providers operationally; development/test is always off. A stable `ANALYTICS_ID_SALT` is recommended for account pseudonyms and must not reuse the auth secret.
+
+Optional server APM uses a separate `NEW_RELIC_LICENSE_KEY` ingest key, `NEW_RELIC_APP_NAME` (default `UserHQ API`) and `NEW_RELIC_ENABLED`. The browser key cannot enable server APM. The production API startup wrapper preloads New Relic before Nest/pg when a server key exists. No key preserves normal Node startup. Worker assets under `/~partytown/` must be served from the same origin; build scripts copy them into standalone output. No database migration is required.

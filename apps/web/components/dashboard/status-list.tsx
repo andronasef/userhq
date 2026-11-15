@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useAnalyticsRouter as useRouter } from "@/lib/analytics-navigation";
 import { DragDropProvider } from "@dnd-kit/react";
 import { useSortable, isSortable } from "@dnd-kit/react/sortable";
 import { GripVertical, Ellipsis } from "lucide-react";

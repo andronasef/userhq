@@ -16,3 +16,5 @@
 - [Deployment runbook](docs/deploy.md): Docker/Dokploy, OAuth and persistent environment configuration, including VAPID.
 - [Changelog](CHANGELOG.md): Release history and upgrade notes.
 - [Repository agent rules](AGENTS.md): Required development and release documentation workflow for agents editing the project.
+
+- [Analytics and diagnostics](docs/analytics.md): operator-only provider setup, event catalogue, sensitive-data boundaries and DB-backed operational reporting.

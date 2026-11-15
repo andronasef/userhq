@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import {  useSearchParams } from "next/navigation";
+import { useAnalyticsRouter as useRouter } from "@/lib/analytics-navigation";
 import {
   MessageSquare,
   ChevronUp,

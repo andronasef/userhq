@@ -17,6 +17,7 @@
     "file-type": "22.1.1",
     "geoip-lite": "2.0.3",
     "helmet": "8.3.0",
+    "newrelic": "14.12.0",
     "nodemailer": "10.0.13",
     "pg": "8.23.1",
     "reflect-metadata": "0.2.2",
@@ -47,11 +48,12 @@
   "scripts": {
     "build": "node ./node_modules/@nestjs/cli/bin/nest.js build --path tsconfig.json",
     "dev": "node --env-file=../../env.local.dev ./node_modules/@nestjs/cli/bin/nest.js start --watch --path tsconfig.json",
-    "start": "node dist/main.js",
+    "start": "node scripts/start.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
     "test:e2e": "vitest run --config vitest.e2e.config.ts",
     "test:browser": "playwright test",
-    "smtp:check": "node dist/scripts/smtp-check.js"
+    "smtp:check": "node dist/scripts/smtp-check.js",
+    "analytics:report": "node dist/scripts/analytics-report.js"
   }
 }

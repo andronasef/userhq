@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useAnalyticsRouter as useRouter } from "@/lib/analytics-navigation";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import type { PostStatus, StatusChangeResult } from "@userhq/types";

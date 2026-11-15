@@ -1,3 +1,4 @@
+import { recordOutcome } from "../analytics/context.js";
 import {
   Controller,
   Get,
@@ -27,7 +28,7 @@ export class InvitesController {
   @SerializeOptions({ schema: InviteLookupSchema })
   async lookup(
     @Param("token") token: string,
-    @CurrentUser() user: any
+    @CurrentUser() user: any,
   ): Promise<InviteLookup> {
     return await this.invitesService.lookup(token, user);
   }
@@ -37,8 +38,13 @@ export class InvitesController {
   @SerializeOptions({ schema: AcceptInviteResultSchema })
   async accept(
     @Param("token") token: string,
-    @CurrentUser() user: any
+    @CurrentUser() user: any,
   ): Promise<AcceptInviteResult> {
-    return await this.invitesService.acceptWorkspaceInvite(token, user);
+    const result = await this.invitesService.acceptWorkspaceInvite(token, user);
+    recordOutcome("team_invite_accepted", {
+      module: "team",
+      action: "configure",
+    });
+    return result;
   }
 }

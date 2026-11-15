@@ -1,4 +1,5 @@
 "use client";
+import { track } from "../../lib/analytics";
 
 import * as React from "react";
 import { useI18n } from "../../lib/i18n/context";
@@ -19,7 +20,9 @@ export interface FaqPortalProps {
   boardEnabled: boolean;
 }
 
-export function extractTextFromRichText(doc: RichTextDoc | null | undefined): string {
+export function extractTextFromRichText(
+  doc: RichTextDoc | null | undefined,
+): string {
   if (!doc) return "";
   let text = "";
   const traverse = (node: any) => {
@@ -44,11 +47,15 @@ export function FaqPortal({
 }: FaqPortalProps): React.JSX.Element {
   const { t } = useI18n();
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [openQuestions, setOpenQuestions] = React.useState<Set<string>>(new Set());
-  const [closedInSearch, setClosedInSearch] = React.useState<Set<string>>(new Set());
+  const [openQuestions, setOpenQuestions] = React.useState<Set<string>>(
+    new Set(),
+  );
+  const [closedInSearch, setClosedInSearch] = React.useState<Set<string>>(
+    new Set(),
+  );
   const [activeHashId, setActiveHashId] = React.useState<string | null>(null);
   const [activeCategoryId, setActiveCategoryId] = React.useState<string | null>(
-    categories[0]?.id ?? null
+    categories[0]?.id ?? null,
   );
 
   // Deep-link hash detection (#q-[id])
@@ -113,8 +120,21 @@ export function FaqPortal({
   }, [categories, isSearching, trimmedQuery]);
 
   const matchCount = React.useMemo(() => {
-    return filteredCategories.reduce((sum, cat) => sum + cat.questions.length, 0);
+    return filteredCategories.reduce(
+      (sum, cat) => sum + cat.questions.length,
+      0,
+    );
   }, [filteredCategories]);
+
+  React.useEffect(() => {
+    if (!isSearching) return;
+    const timer = setTimeout(
+      () =>
+        track("search_completed", { module: "faq", result_count: matchCount }),
+      600,
+    );
+    return () => clearTimeout(timer);
+  }, [trimmedQuery, matchCount, isSearching]);
 
   // When query changes, reset closed-in-search set
   const handleQueryChange = (val: string) => {
@@ -123,6 +143,15 @@ export function FaqPortal({
   };
 
   const handleToggleQuestion = (questionId: string) => {
+    if (
+      isSearching
+        ? closedInSearch.has(questionId)
+        : !openQuestions.has(questionId)
+    ) {
+      track(isSearching ? "search_result_opened" : "content_opened", {
+        module: "faq",
+      });
+    }
     if (isSearching) {
       setClosedInSearch((prev) => {
         const next = new Set(prev);
@@ -166,14 +195,21 @@ export function FaqPortal({
   if (totalQuestionsCount === 0 || categories.length === 0) {
     return (
       <EmptyState
-        icon={<HelpCircle className="size-6 text-muted-foreground" aria-hidden="true" />}
+        icon={
+          <HelpCircle
+            className="size-6 text-muted-foreground"
+            aria-hidden="true"
+          />
+        }
         title={t("ui.noFaqYet")}
         body={t("faq.noFaqBody")}
-        action={boardEnabled ? (
-          <Button asChild variant="default">
-            <Link href={`/${ws}/${product}`}>{t("ui.exploreFeedback")}</Link>
-          </Button>
-        ) : undefined}
+        action={
+          boardEnabled ? (
+            <Button asChild variant="default">
+              <Link href={`/${ws}/${product}`}>{t("ui.exploreFeedback")}</Link>
+            </Button>
+          ) : undefined
+        }
       />
     );
   }
@@ -187,7 +223,12 @@ export function FaqPortal({
       />
 
       {isSearching && matchCount === 0 ? (
-        <FaqNotFoundPrompt boardEnabled={boardEnabled} ws={ws} product={product} query={searchQuery} />
+        <FaqNotFoundPrompt
+          boardEnabled={boardEnabled}
+          ws={ws}
+          product={product}
+          query={searchQuery}
+        />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <FaqSidebarNav

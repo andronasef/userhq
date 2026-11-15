@@ -1,0 +1,2 @@
+{"mode":"worker","collectorCalls":[{"host":"c.clarity.ms","method":"GET","bytes":0},{"host":"a.clarity.ms","method":"POST","bytes":477},{"host":"a.clarity.ms","method":"POST","bytes":201}],"errors":[]}
+{"mode":"main","collectorCalls":[{"host":"c.clarity.ms","method":"GET","bytes":0},{"host":"a.clarity.ms","method":"POST","bytes":642},{"host":"a.clarity.ms","method":"POST","bytes":323}],"errors":[]}

@@ -7,6 +7,7 @@
     "@dnd-kit/react": "0.5.0",
     "@fontsource-variable/inter": "5.3.0",
     "@hookform/resolvers": "5.9.1",
+    "@qwik.dev/partytown": "1.0.5",
     "@radix-ui/react-alert-dialog": "1.1.23",
     "@radix-ui/react-avatar": "1.2.6",
     "@radix-ui/react-dialog": "1.1.23",
@@ -48,10 +49,10 @@
     "vitest": "5.0.3"
   },
   "scripts": {
-    "dev": "node --env-file=../../env.local.dev ./node_modules/vinext/dist/cli.js dev --port 3000",
-    "build": "vinext build",
+    "dev": "node scripts/copy-partytown.mjs && node --env-file=../../env.local.dev ./node_modules/vinext/dist/cli.js dev --port 3000",
+    "build": "node scripts/copy-partytown.mjs && vinext build",
     "start": "node dist/standalone/server.js",
-    "build:next": "next build",
+    "build:next": "node scripts/copy-partytown.mjs && next build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   }

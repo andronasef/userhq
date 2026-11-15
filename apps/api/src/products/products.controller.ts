@@ -1,3 +1,4 @@
+import { recordOutcome, recordScope } from "../analytics/context.js";
 import {
   Controller,
   Get,
@@ -47,7 +48,10 @@ import { RequireScopes } from "../api-keys/api-key.decorator.js";
 import { ApiException } from "../common/api-error.filter.js";
 import { isUniqueViolation } from "../common/db-errors.js";
 import { suppressQueuedWebhooks } from "../webhooks/outbox.js";
-import { pickFeatures, productFeatureColumns } from "../portal/product-features.js";
+import {
+  pickFeatures,
+  productFeatureColumns,
+} from "../portal/product-features.js";
 
 @Controller("workspaces/:ws/products")
 @UseGuards(TenantGuard)
@@ -128,6 +132,8 @@ export class ProductsController {
         },
       ]);
 
+      recordScope({ productId: inserted.id });
+
       await tx.insert(changelogTags).values(
         SEEDED_CHANGELOG_TAGS.map((t) => ({
           productId: inserted.id,
@@ -137,6 +143,11 @@ export class ProductsController {
       );
     });
 
+    recordOutcome("product_created", {
+      module: "settings",
+      action: "configure",
+    });
+    recordOutcome("portal_ready", { module: "settings", action: "configure" });
     return ProductCreatedSchema.parse({ slug: input.slug });
   }
 
@@ -216,7 +227,10 @@ export class ProductsController {
       accentTextColor: row.accentTextColor ?? null,
       tagline: row.tagline ?? null,
       websiteUrl: row.websiteUrl ?? null,
-      locales: (row.locales as any) ?? { defaultLocale: "en", enabledLocales: ["en"] },
+      locales: (row.locales as any) ?? {
+        defaultLocale: "en",
+        enabledLocales: ["en"],
+      },
     });
   }
 
@@ -321,10 +335,23 @@ export class ProductsController {
       updateData.accentColor = input.accentColor;
     if (input.accentTextColor !== undefined)
       updateData.accentTextColor = input.accentTextColor;
-    if (input.locales !== undefined)
-      updateData.locales = input.locales;
+    if (input.locales !== undefined) updateData.locales = input.locales;
 
+    let analyticsChanged = false;
     if (Object.keys(updateData).length > 0) {
+      const [before] = await this.db
+        .select()
+        .from(products)
+        .where(eq(products.id, tenant.productId!))
+        .limit(1);
+      analyticsChanged = Boolean(
+        before &&
+        Object.entries(updateData).some(
+          ([key, value]) =>
+            JSON.stringify((before as Record<string, unknown>)[key]) !==
+            JSON.stringify(value),
+        ),
+      );
       try {
         await this.db.transaction(async (tx) => {
           if (input.locales?.defaultLocale) {
@@ -345,32 +372,44 @@ export class ProductsController {
             .update(products)
             .set(updateData)
             .where(
-              and(eq(products.id, tenant.productId!), eq(products.workspaceId, tenant.workspaceId), isNull(products.deletedAt)),
+              and(
+                eq(products.id, tenant.productId!),
+                eq(products.workspaceId, tenant.workspaceId),
+                isNull(products.deletedAt),
+              ),
             );
-        if (input.features?.board === false) {
-          // Delete only derived, unsent delivery state. Source content and read history survive.
-          await tx.execute(sql`
+          if (input.features?.board === false) {
+            // Delete only derived, unsent delivery state. Source content and read history survive.
+            await tx.execute(sql`
             DELETE FROM comment_email_items i USING comment_email_batches b, comments c, posts p, products pr
             WHERE i.batch_id = b.id AND i.comment_id = c.id AND c.post_id = p.id
               AND p.product_id = pr.id AND pr.id = ${tenant.productId!}
               AND pr.workspace_id = ${tenant.workspaceId} AND b.workspace_id = pr.workspace_id
               AND b.status IN ('pending', 'retrying', 'sending')
           `);
-          await tx.execute(sql`
+            await tx.execute(sql`
             DELETE FROM notifications WHERE product_id = ${tenant.productId!}
               AND workspace_id = ${tenant.workspaceId} AND read_at IS NULL
           `);
-          // Same intent for push: drop only derived, unsent rows (D-14). Enqueue share-locks this
-          // product row, so a racing enqueue cannot leave a surviving row.
-          await tx.execute(sql`
+            // Same intent for push: drop only derived, unsent rows (D-14). Enqueue share-locks this
+            // product row, so a racing enqueue cannot leave a surviving row.
+            await tx.execute(sql`
             DELETE FROM push_deliveries
             WHERE status IN ('pending', 'sending') AND data->>'productId' = ${tenant.productId!}
           `);
-          await suppressQueuedWebhooks(tx, { workspaceId: tenant.workspaceId, productId: tenant.productId!, module: "board" });
-        }
-        if (input.features?.changelog === false) {
-          await suppressQueuedWebhooks(tx, { workspaceId: tenant.workspaceId, productId: tenant.productId!, module: "changelog" });
-        }
+            await suppressQueuedWebhooks(tx, {
+              workspaceId: tenant.workspaceId,
+              productId: tenant.productId!,
+              module: "board",
+            });
+          }
+          if (input.features?.changelog === false) {
+            await suppressQueuedWebhooks(tx, {
+              workspaceId: tenant.workspaceId,
+              productId: tenant.productId!,
+              module: "changelog",
+            });
+          }
         });
       } catch (e) {
         // The pre-check above can lose a race with a concurrent rename.

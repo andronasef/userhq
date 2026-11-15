@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useAnalyticsRouter as useRouter } from "@/lib/analytics-navigation";
 import { toast } from "sonner";
 import { type InviteRow } from "@userhq/types";
 import { Table, THead, TBody, TR, TH, TD } from "../ui/table";

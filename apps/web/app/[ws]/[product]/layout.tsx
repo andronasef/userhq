@@ -182,6 +182,13 @@ export default async function PortalLayout({
         href={portalHref(ws, product)}
       />
       <PortalLocaleScope locales={p.locales} />
+      {result.analyticsContext && (
+        <span
+          hidden
+          data-userhq-analytics-workspace={result.analyticsContext.workspace_id}
+          data-userhq-analytics-product={result.analyticsContext.product_id}
+        />
+      )}
 
       <PortalBadgeAttribution ws={ws} product={product} />
       <AppToaster />

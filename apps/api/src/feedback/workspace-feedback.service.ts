@@ -1,5 +1,16 @@
+import { recordOutcome } from "../analytics/context.js";
 import { Injectable, Inject } from "@nestjs/common";
-import { and, eq, isNull, isNotNull, sql, desc, inArray, gte, lt } from "drizzle-orm";
+import {
+  and,
+  eq,
+  isNull,
+  isNotNull,
+  sql,
+  desc,
+  inArray,
+  gte,
+  lt,
+} from "drizzle-orm";
 import {
   DB,
   type Db,
@@ -26,7 +37,11 @@ import type {
 import { ApiException } from "../common/api-error.filter.js";
 import { resolveLocationFromIp } from "./geo.util.js";
 import { prefixTsQuery } from "./search.js";
-import { encodeKeysetCursor, decodeKeysetCursor, type KeysetKind } from "./cursor.js";
+import {
+  encodeKeysetCursor,
+  decodeKeysetCursor,
+  type KeysetKind,
+} from "./cursor.js";
 import { postSlug } from "@userhq/types";
 import { type Actor, adminKeySource } from "../auth/principal.js";
 import { CommentsService } from "./comments.service.js";
@@ -35,25 +50,28 @@ import { CommentsService } from "./comments.service.js";
 export class WorkspaceFeedbackService {
   constructor(
     @Inject(DB) private readonly db: Db,
-    private readonly commentsService: CommentsService
+    private readonly commentsService: CommentsService,
   ) {}
 
   async listRequests(
     tenant: { workspaceId: string },
     query: WorkspaceRequestsQuery,
-    includePii = false
+    includePii = false,
   ): Promise<WorkspaceRequestsResponse> {
-    const limit = typeof query.limit === "number" ? query.limit : (Number(query.limit) || 20);
+    const limit =
+      typeof query.limit === "number" ? query.limit : Number(query.limit) || 20;
     const sort = query.sort ?? "top";
     const kind: KeysetKind = `requests:${sort}`;
     // Decode (and reject tampered cursors) before touching the database.
-    const position = query.cursor ? decodeKeysetCursor(kind, query.cursor) : null;
+    const position = query.cursor
+      ? decodeKeysetCursor(kind, query.cursor)
+      : null;
 
     const baseWhere = and(
       eq(products.workspaceId, tenant.workspaceId),
       isNull(products.deletedAt),
       isNull(posts.deletedAt),
-      isNull(posts.mergedIntoId)
+      isNull(posts.mergedIntoId),
     );
 
     const productWhere = query.product
@@ -80,7 +98,12 @@ export class WorkspaceFeedbackService {
       ? gte(posts.createdAt, new Date(`${query.createdFrom}T00:00:00Z`))
       : undefined;
     const toWhere = query.createdTo
-      ? lt(posts.createdAt, new Date(new Date(`${query.createdTo}T00:00:00Z`).getTime() + 86_400_000))
+      ? lt(
+          posts.createdAt,
+          new Date(
+            new Date(`${query.createdTo}T00:00:00Z`).getTime() + 86_400_000,
+          ),
+        )
       : undefined;
 
     const effectiveWhere = and(
@@ -90,7 +113,7 @@ export class WorkspaceFeedbackService {
       categoryWhere,
       searchWhere,
       fromWhere,
-      toWhere
+      toWhere,
     );
 
     const totalCountQuery = await this.db
@@ -119,7 +142,9 @@ export class WorkspaceFeedbackService {
           : sql`(${posts.voteCount}, ${posts.createdAt}, ${posts.id}) < (${position.v}::int, ${position.t}::timestamptz, ${position.id}::uuid)`
       : undefined;
     const cursorTs =
-      sort === "activity" ? sql<string>`(${activityAt})::text` : sql<string>`${posts.createdAt}::text`;
+      sort === "activity"
+        ? sql<string>`(${activityAt})::text`
+        : sql<string>`${posts.createdAt}::text`;
 
     const rows = await this.db
       .select({
@@ -136,7 +161,9 @@ export class WorkspaceFeedbackService {
         authorEmail: user.email,
         authorImage: user.image,
         authorDeletedAt: user.deletedAt,
-        authorLatestIp: sql<string | null>`(SELECT s.ip_address FROM ${session} s WHERE s.user_id = ${posts.authorId} ORDER BY s.created_at DESC LIMIT 1)`,
+        authorLatestIp: sql<
+          string | null
+        >`(SELECT s.ip_address FROM ${session} s WHERE s.user_id = ${posts.authorId} ORDER BY s.created_at DESC LIMIT 1)`,
         productId: products.id,
         productSlug: products.slug,
         productName: products.name,
@@ -158,7 +185,10 @@ export class WorkspaceFeedbackService {
       .leftJoin(categories, eq(posts.categoryId, categories.id))
       .leftJoin(uploads, eq(products.logoUploadId, uploads.id))
       .leftJoin(user, eq(posts.authorId, user.id))
-      .leftJoin(workspaceApiKeys, eq(posts.createdByApiKeyId, workspaceApiKeys.id))
+      .leftJoin(
+        workspaceApiKeys,
+        eq(posts.createdByApiKeyId, workspaceApiKeys.id),
+      )
       .where(and(effectiveWhere, cursorWhere))
       .orderBy(...orderClauses)
       .limit(limit + 1);
@@ -188,16 +218,28 @@ export class WorkspaceFeedbackService {
         color: r.statusColor,
         type: r.statusType as any,
       },
-      category: r.categoryId && r.categoryName ? { id: r.categoryId, name: r.categoryName } : null,
+      category:
+        r.categoryId && r.categoryName
+          ? { id: r.categoryId, name: r.categoryName }
+          : null,
       author: r.authorDeletedAt
-        ? { name: null, image: null, isAdmin: false, deleted: true, email: null, location: null }
+        ? {
+            name: null,
+            image: null,
+            isAdmin: false,
+            deleted: true,
+            email: null,
+            location: null,
+          }
         : {
             name: r.authorName,
             image: r.authorImage,
             isAdmin: r.authorIsAdmin,
             deleted: false,
             email: includePii ? (r.authorEmail ?? null) : null,
-            location: includePii ? resolveLocationFromIp(r.authorLatestIp) : null,
+            location: includePii
+              ? resolveLocationFromIp(r.authorLatestIp)
+              : null,
           },
       commentCount: r.commentCount,
       source: adminKeySource(r.createdByApiKeyId, r.apiKeyName),
@@ -208,7 +250,11 @@ export class WorkspaceFeedbackService {
       items,
       nextCursor:
         hasMore && lastRow
-          ? encodeKeysetCursor(kind, { t: lastRow.cursorTs, id: lastRow.id, v: lastRow.voteCount })
+          ? encodeKeysetCursor(kind, {
+              t: lastRow.cursorTs,
+              id: lastRow.id,
+              v: lastRow.voteCount,
+            })
           : null,
       totalCount,
     };
@@ -218,16 +264,19 @@ export class WorkspaceFeedbackService {
     tenant: { workspaceId: string },
     viewer: { id: string },
     query: WorkspaceCommentsQuery,
-    includePii = false
+    includePii = false,
   ): Promise<WorkspaceCommentsResponse> {
-    const limit = typeof query.limit === "number" ? query.limit : (Number(query.limit) || 20);
-    const position = query.cursor ? decodeKeysetCursor("comments", query.cursor) : null;
+    const limit =
+      typeof query.limit === "number" ? query.limit : Number(query.limit) || 20;
+    const position = query.cursor
+      ? decodeKeysetCursor("comments", query.cursor)
+      : null;
 
     const baseWhere = and(
       eq(products.workspaceId, tenant.workspaceId),
       isNull(products.deletedAt),
       isNull(posts.deletedAt),
-      isNull(comments.deletedAt)
+      isNull(comments.deletedAt),
     );
 
     const productWhere = query.product
@@ -260,8 +309,8 @@ export class WorkspaceFeedbackService {
           isNull(posts.deletedAt),
           isNull(comments.deletedAt),
           eq(comments.isAdmin, false),
-          isNull(comments.handledAt)
-        )
+          isNull(comments.handledAt),
+        ),
       );
 
     const needsAttentionCount = needsAttentionCountQuery[0]?.count ?? 0;
@@ -281,7 +330,9 @@ export class WorkspaceFeedbackService {
         authorEmail: user.email,
         authorImage: user.image,
         authorDeletedAt: user.deletedAt,
-        authorLatestIp: sql<string | null>`(SELECT s.ip_address FROM ${session} s WHERE s.user_id = ${comments.authorId} ORDER BY s.created_at DESC LIMIT 1)`,
+        authorLatestIp: sql<
+          string | null
+        >`(SELECT s.ip_address FROM ${session} s WHERE s.user_id = ${comments.authorId} ORDER BY s.created_at DESC LIMIT 1)`,
         postId: posts.id,
         postNumber: posts.number,
         postTitle: posts.title,
@@ -299,10 +350,16 @@ export class WorkspaceFeedbackService {
       .innerJoin(products, eq(posts.productId, products.id))
       .leftJoin(uploads, eq(products.logoUploadId, uploads.id))
       .leftJoin(user, eq(comments.authorId, user.id))
-      .leftJoin(workspaceApiKeys, eq(comments.createdByApiKeyId, workspaceApiKeys.id))
+      .leftJoin(
+        workspaceApiKeys,
+        eq(comments.createdByApiKeyId, workspaceApiKeys.id),
+      )
       .leftJoin(
         commentReads,
-        and(eq(commentReads.commentId, comments.id), eq(commentReads.userId, viewer.id))
+        and(
+          eq(commentReads.commentId, comments.id),
+          eq(commentReads.userId, viewer.id),
+        ),
       )
       .where(and(effectiveWhere, cursorWhere))
       .orderBy(desc(comments.createdAt), desc(comments.id))
@@ -319,11 +376,22 @@ export class WorkspaceFeedbackService {
 
     const handledUsersMap = new Map<
       string,
-      { name: string | null; email: string | null; image: string | null; deleted: boolean }
+      {
+        name: string | null;
+        email: string | null;
+        image: string | null;
+        deleted: boolean;
+      }
     >();
     if (handledByIds.length > 0) {
       const handledUsers = await this.db
-        .select({ id: user.id, name: user.name, email: user.email, image: user.image, deletedAt: user.deletedAt })
+        .select({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+          deletedAt: user.deletedAt,
+        })
         .from(user)
         .where(inArray(user.id, handledByIds));
       for (const u of handledUsers) {
@@ -337,7 +405,9 @@ export class WorkspaceFeedbackService {
     }
 
     const items: WorkspaceCommentItem[] = pageRows.map((r) => {
-      const handledUser = r.handledById ? handledUsersMap.get(r.handledById) : null;
+      const handledUser = r.handledById
+        ? handledUsersMap.get(r.handledById)
+        : null;
       return {
         id: r.id,
         body: r.body,
@@ -347,8 +417,22 @@ export class WorkspaceFeedbackService {
         handledAt: r.handledAt ? r.handledAt.toISOString() : null,
         handledBy: handledUser
           ? handledUser.deleted
-            ? { name: null, image: null, isAdmin: false, deleted: true, email: null, location: null }
-            : { name: handledUser.name, image: handledUser.image, isAdmin: true, deleted: false, email: includePii ? (handledUser.email ?? null) : null, location: null }
+            ? {
+                name: null,
+                image: null,
+                isAdmin: false,
+                deleted: true,
+                email: null,
+                location: null,
+              }
+            : {
+                name: handledUser.name,
+                image: handledUser.image,
+                isAdmin: true,
+                deleted: false,
+                email: includePii ? (handledUser.email ?? null) : null,
+                location: null,
+              }
           : null,
         isUnread: !r.isRead && r.authorId !== viewer.id,
         post: {
@@ -365,14 +449,23 @@ export class WorkspaceFeedbackService {
           accentColor: r.productAccentColor,
         },
         author: r.authorDeletedAt
-          ? { name: null, image: null, isAdmin: false, deleted: true, email: null, location: null }
+          ? {
+              name: null,
+              image: null,
+              isAdmin: false,
+              deleted: true,
+              email: null,
+              location: null,
+            }
           : {
               name: r.authorName,
               image: r.authorImage,
               isAdmin: r.isAdmin,
               deleted: false,
               email: includePii ? (r.authorEmail ?? null) : null,
-              location: includePii ? resolveLocationFromIp(r.authorLatestIp) : null,
+              location: includePii
+                ? resolveLocationFromIp(r.authorLatestIp)
+                : null,
             },
         source: adminKeySource(r.createdByApiKeyId, r.apiKeyName),
       };
@@ -382,7 +475,10 @@ export class WorkspaceFeedbackService {
       items,
       nextCursor:
         hasMore && lastRow
-          ? encodeKeysetCursor("comments", { t: lastRow.cursorTs, id: lastRow.id })
+          ? encodeKeysetCursor("comments", {
+              t: lastRow.cursorTs,
+              id: lastRow.id,
+            })
           : null,
       needsAttentionCount,
     };
@@ -391,7 +487,7 @@ export class WorkspaceFeedbackService {
   async markCommentHandled(
     tenant: { workspaceId: string },
     viewer: { id: string },
-    commentId: string
+    commentId: string,
   ): Promise<void> {
     const [c] = await this.db
       .select({ id: comments.id })
@@ -404,8 +500,8 @@ export class WorkspaceFeedbackService {
           eq(products.workspaceId, tenant.workspaceId),
           isNull(products.deletedAt),
           isNull(posts.deletedAt),
-          isNull(comments.deletedAt)
-        )
+          isNull(comments.deletedAt),
+        ),
       )
       .limit(1);
 
@@ -413,15 +509,18 @@ export class WorkspaceFeedbackService {
       throw new ApiException("comment_not_found", 404, "Comment not found.");
     }
 
-    await this.db
+    const changed = await this.db
       .update(comments)
       .set({ handledAt: new Date(), handledById: viewer.id })
-      .where(and(eq(comments.id, commentId), isNull(comments.handledAt)));
+      .where(and(eq(comments.id, commentId), isNull(comments.handledAt)))
+      .returning({ id: comments.id });
+    if (changed.length)
+      recordOutcome("feedback_handled", { module: "board", action: "triage" });
   }
 
   async reopenComment(
     tenant: { workspaceId: string },
-    commentId: string
+    commentId: string,
   ): Promise<void> {
     const [c] = await this.db
       .select({ id: comments.id })
@@ -434,8 +533,8 @@ export class WorkspaceFeedbackService {
           eq(products.workspaceId, tenant.workspaceId),
           isNull(products.deletedAt),
           isNull(posts.deletedAt),
-          isNull(comments.deletedAt)
-        )
+          isNull(comments.deletedAt),
+        ),
       )
       .limit(1);
 
@@ -454,7 +553,7 @@ export class WorkspaceFeedbackService {
     viewer: Actor & { name: string | null; image: string | null },
     commentId: string,
     input: ReplyWorkspaceCommentInput,
-    apiKeyId?: string | null
+    apiKeyId?: string | null,
   ): Promise<WorkspaceCommentItem> {
     // Tenant-scoped lookup first: a foreign or deleted comment id is a 404 before anything else runs.
     const [parent] = await this.db
@@ -479,8 +578,8 @@ export class WorkspaceFeedbackService {
           eq(products.workspaceId, tenant.workspaceId),
           isNull(products.deletedAt),
           isNull(posts.deletedAt),
-          isNull(comments.deletedAt)
-        )
+          isNull(comments.deletedAt),
+        ),
       )
       .limit(1);
 
@@ -496,7 +595,7 @@ export class WorkspaceFeedbackService {
       parent.postNumber,
       { body: input.body, parentId: parent.id },
       null,
-      apiKeyId
+      apiKeyId,
     );
 
     return {
@@ -518,12 +617,17 @@ export class WorkspaceFeedbackService {
         id: parent.productId,
         slug: parent.productSlug,
         name: parent.productName,
-        logoUrl: parent.productLogoKey ? `/uploads/${parent.productLogoKey}` : null,
+        logoUrl: parent.productLogoKey
+          ? `/uploads/${parent.productLogoKey}`
+          : null,
         accentColor: parent.productAccentColor,
       },
       author: created.author,
       source: created.source
-        ? adminKeySource(apiKeyId ?? viewer.apiPrincipal?.keyId, created.source.name)
+        ? adminKeySource(
+            apiKeyId ?? viewer.apiPrincipal?.keyId,
+            created.source.name,
+          )
         : null,
     };
   }
@@ -531,7 +635,7 @@ export class WorkspaceFeedbackService {
   async markCommentRead(
     tenant: { workspaceId: string },
     viewer: { id: string },
-    commentId: string
+    commentId: string,
   ): Promise<void> {
     const [c] = await this.db
       .select({ id: comments.id })
@@ -544,8 +648,8 @@ export class WorkspaceFeedbackService {
           eq(products.workspaceId, tenant.workspaceId),
           isNull(products.deletedAt),
           isNull(posts.deletedAt),
-          isNull(comments.deletedAt)
-        )
+          isNull(comments.deletedAt),
+        ),
       )
       .limit(1);
 
@@ -564,5 +668,6 @@ export class WorkspaceFeedbackService {
         target: [commentReads.userId, commentReads.commentId],
         set: { readAt: new Date() },
       });
+    recordOutcome("feedback_reviewed", { module: "board", action: "triage" });
   }
 }

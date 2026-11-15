@@ -8,6 +8,7 @@ import {
 } from "@nestjs/common";
 import type { Response } from "express";
 import type { ApiErrorCode } from "@userhq/types";
+import { reportApiError } from "../analytics/monitoring.js";
 
 export class ApiException extends HttpException {
   readonly code: ApiErrorCode;
@@ -23,7 +24,10 @@ const BY_STATUS: Partial<Record<number, [ApiErrorCode, string]>> = {
   [HttpStatus.FORBIDDEN]: ["forbidden", "Forbidden"],
   [HttpStatus.NOT_FOUND]: ["not_found", "Not Found"],
   [HttpStatus.PAYLOAD_TOO_LARGE]: ["file_too_large", "File too large"],
-  [HttpStatus.UNSUPPORTED_MEDIA_TYPE]: ["unsupported_type", "Unsupported media type"],
+  [HttpStatus.UNSUPPORTED_MEDIA_TYPE]: [
+    "unsupported_type",
+    "Unsupported media type",
+  ],
   [HttpStatus.TOO_MANY_REQUESTS]: ["rate_limited", "Too many requests"],
 };
 
@@ -33,7 +37,9 @@ function detailOf(exception: any): string {
     const res: any = exception.getResponse();
     if (typeof res === "string") return res;
     if (res?.message) {
-      return Array.isArray(res.message) ? res.message.join(", ") : String(res.message);
+      return Array.isArray(res.message)
+        ? res.message.join(", ")
+        : String(res.message);
     }
   }
   return exception?.message || "";
@@ -56,11 +62,17 @@ export class ApiErrorFilter implements ExceptionFilter {
       code = exception.code;
       message = exception.message;
     } else {
-      const s = exception instanceof HttpException ? exception.getStatus() : (e?.status ?? e?.statusCode);
+      const s =
+        exception instanceof HttpException
+          ? exception.getStatus()
+          : (e?.status ?? e?.statusCode);
       if (typeof s === "number") {
         status = s;
         if (status >= 400 && status < 500) {
-          const [mapped, fallback] = BY_STATUS[status] ?? ["internal_error", "Request Error"];
+          const [mapped, fallback] = BY_STATUS[status] ?? [
+            "internal_error",
+            "Request Error",
+          ];
           code = mapped;
           message = detailOf(exception) || fallback;
         }
@@ -68,9 +80,10 @@ export class ApiErrorFilter implements ExceptionFilter {
     }
 
     if (status >= 500) {
+      reportApiError(status);
       this.logger.error(
         `Internal server error: ${message}`,
-        exception instanceof Error ? exception.stack : String(exception)
+        exception instanceof Error ? exception.stack : String(exception),
       );
     }
 

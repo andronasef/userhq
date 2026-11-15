@@ -1,4 +1,5 @@
 "use client";
+import { startContribution, track } from "@/lib/analytics";
 
 import * as React from "react";
 import { LoaderCircle } from "lucide-react";
@@ -65,12 +66,21 @@ export function CommentComposer({
     if (e) e.preventDefault();
     if (isPending) return;
 
+    startContribution("comment");
     const trimmed = body.trim();
     if (!trimmed) {
+      track("validation_error_shown", {
+        action: "comment",
+        outcome: "validation",
+      });
       setFieldError(t("ui.commentRequired"));
       return;
     }
     if (trimmed.length > 5000) {
+      track("validation_error_shown", {
+        action: "comment",
+        outcome: "validation",
+      });
       setFieldError(t("ui.commentTooLong"));
       return;
     }
@@ -88,7 +98,7 @@ export function CommentComposer({
             body: trimmed,
             ...(parentId ? { parentId } : {}),
           },
-        }
+        },
       );
 
       setBody("");
@@ -97,14 +107,24 @@ export function CommentComposer({
     } catch (err) {
       if (err instanceof ApiClientError) {
         if (err.code === "comment_required") {
+          track("validation_error_shown", {
+            action: "comment",
+            outcome: "validation",
+          });
           setFieldError(t("ui.commentRequired"));
         } else if (err.code === "comment_too_long") {
+          track("validation_error_shown", {
+            action: "comment",
+            outcome: "validation",
+          });
           setFieldError(t("ui.commentTooLong"));
         } else {
           setAlertError(errorCopy(err));
         }
       } else {
-        setAlertError("Something went wrong on our end. Try again in a moment.");
+        setAlertError(
+          "Something went wrong on our end. Try again in a moment.",
+        );
       }
     } finally {
       setIsPending(false);
@@ -112,9 +132,15 @@ export function CommentComposer({
   };
 
   const isReply = mode === "reply";
-  const formId = isReply ? (parentId ? `comment-${parentId}` : undefined) : "comment";
+  const formId = isReply
+    ? parentId
+      ? `comment-${parentId}`
+      : undefined
+    : "comment";
   const labelText = isReply ? t("ui.writeAReply") : t("ui.writeAComment");
-  const placeholder = isReply ? t("ui.writeAReplyPlaceholder") : t("ui.addACommentPlaceholder");
+  const placeholder = isReply
+    ? t("ui.writeAReplyPlaceholder")
+    : t("ui.addACommentPlaceholder");
   const submitText = isReply ? t("ui.postReply") : t("ui.postComment");
 
   return (
@@ -124,7 +150,10 @@ export function CommentComposer({
       className="flex flex-col gap-2"
       noValidate
     >
-      <label htmlFor={formId ? `${formId}-body` : undefined} className="sr-only">
+      <label
+        htmlFor={formId ? `${formId}-body` : undefined}
+        className="sr-only"
+      >
         {labelText}
       </label>
       <Textarea
@@ -178,7 +207,10 @@ export function CommentComposer({
         >
           {isPending ? (
             <>
-              <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+              <LoaderCircle
+                className="size-4 animate-spin"
+                aria-hidden="true"
+              />
               <span>{t("ui.submitting")}</span>
             </>
           ) : (

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useAnalyticsRouter as useRouter } from "@/lib/analytics-navigation";
 import { Globe, Check } from "lucide-react";
 import { LOCALE_CATALOG } from "@userhq/types";
 import { useI18n } from "../lib/i18n/context";

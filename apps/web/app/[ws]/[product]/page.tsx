@@ -16,7 +16,10 @@ import { buttonVariants } from "@/components/ui/button";
 
 interface PortalBoardPageProps {
   params: Promise<{ ws: string; product: string }>;
-  searchParams: Promise<{ new?: string; [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<{
+    new?: string;
+    [key: string]: string | string[] | undefined;
+  }>;
 }
 
 export async function generateMetadata({
@@ -29,7 +32,8 @@ export async function generateMetadata({
   ]);
   if (!result.ok) return {};
   const features = result.data.product.features;
-  if (!landingHref(ws, product, features)) return { robots: { index: false, follow: false } };
+  if (!landingHref(ws, product, features))
+    return { robots: { index: false, follow: false } };
   if (!features.board) return {};
   const dict = getDictionary(locale);
   return {
@@ -77,7 +81,10 @@ export default async function PortalBoardPage({
           body={dict.portal.emptyBody.replace("{name}", p.name)}
           actions={
             p.websiteUrl ? (
-              <Link href={p.websiteUrl} className={buttonVariants({ variant: "outline" })}>
+              <Link
+                href={p.websiteUrl}
+                className={buttonVariants({ variant: "outline" })}
+              >
                 {dict.portal.visitCompany.replace("{company}", company)}
               </Link>
             ) : undefined
@@ -86,7 +93,10 @@ export default async function PortalBoardPage({
       </div>
     );
   }
-  const [boardResult, me] = await Promise.all([getBoard(ws, product, search), getMe()]);
+  const [boardResult, me] = await Promise.all([
+    getBoard(ws, product, search),
+    getMe(),
+  ]);
   if (!boardResult.ok && boardResult.status === 404) notFound();
 
   const productName = productResult.data.product.name;
@@ -100,14 +110,16 @@ export default async function PortalBoardPage({
   const defaultOpen = sp?.new === "1";
 
   const isFiltered = Boolean(
-    sp?.q || sp?.category || sp?.status || (sp?.sort && sp?.sort !== "top")
+    sp?.q || sp?.category || sp?.status || (sp?.sort && sp?.sort !== "top"),
   );
 
   return (
     <div className="mx-auto max-w-3xl flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">{dict.ui.feedback}</h1>
+          <h1 className="text-2xl font-semibold text-foreground">
+            {dict.ui.feedback}
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground" dir="auto">
             {dict.board.feedbackSubtitle.replace("{name}", productName)}
           </p>
@@ -121,7 +133,11 @@ export default async function PortalBoardPage({
         />
       </div>
 
-      <BoardToolbar categories={categories} statuses={statuses} />
+      <BoardToolbar
+        categories={categories}
+        statuses={statuses}
+        resultCount={posts.length}
+      />
 
       {posts.length === 0 ? (
         isFiltered ? (

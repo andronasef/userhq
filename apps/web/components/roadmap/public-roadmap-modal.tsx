@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { track } from "../../lib/analytics";
 import Link from "next/link";
 import { ArrowUpRight, MessageSquare, ArrowBigUp } from "lucide-react";
 import type {
@@ -43,12 +44,33 @@ export function PublicRoadmapModal({
 }: PublicRoadmapModalProps): React.JSX.Element | null {
   const { contentDefaultLocale, t } = useI18n();
   const [loadingPosts, setLoadingPosts] = React.useState(false);
-  const [linkedPosts, setLinkedPosts] = React.useState<PublicRoadmapPostRef[]>([]);
+  const lastOpened = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    if (!open) {
+      lastOpened.current = null;
+      return;
+    }
+    if (item && lastOpened.current !== item.id) {
+      lastOpened.current = item.id;
+      track("content_opened", { module: "roadmap" });
+    }
+  }, [open, item]);
+  const [linkedPosts, setLinkedPosts] = React.useState<PublicRoadmapPostRef[]>(
+    [],
+  );
 
   const displayTitle = item?.title ?? "";
   const displayDescription = item?.description;
-  const isFallback = Boolean(("isFallback" in (item ?? {})) && (item as { isFallback?: boolean }).isFallback);
-  const textDir = isRtl((item as { resolvedLocale?: string } | undefined)?.resolvedLocale ?? contentDefaultLocale) ? "rtl" : "ltr";
+  const isFallback = Boolean(
+    "isFallback" in (item ?? {}) &&
+    (item as { isFallback?: boolean }).isFallback,
+  );
+  const textDir = isRtl(
+    (item as { resolvedLocale?: string } | undefined)?.resolvedLocale ??
+      contentDefaultLocale,
+  )
+    ? "rtl"
+    : "ltr";
 
   React.useEffect(() => {
     if (!open || !item) {
@@ -59,7 +81,7 @@ export function PublicRoadmapModal({
     if (item.postCount > 0) {
       setLoadingPosts(true);
       apiFetch<{ item: PublicRoadmapItem; posts: PublicRoadmapPostRef[] }>(
-        `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap/${encodeURIComponent(item.id)}`
+        `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap/${encodeURIComponent(item.id)}`,
       )
         .then((res) => {
           setLinkedPosts(res.posts ?? []);
@@ -91,7 +113,10 @@ export function PublicRoadmapModal({
               </span>
             )}
           </div>
-          <DialogTitle dir={textDir} className="text-xl font-semibold text-foreground text-left">
+          <DialogTitle
+            dir={textDir}
+            className="text-xl font-semibold text-foreground text-left"
+          >
             {displayTitle}
           </DialogTitle>
           <DialogDescription className="sr-only">
@@ -99,7 +124,10 @@ export function PublicRoadmapModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-5" dir={textDir}>
+        <div
+          className="flex-1 overflow-y-auto pr-1 flex flex-col gap-5"
+          dir={textDir}
+        >
           {displayDescription ? (
             <div className="text-sm text-foreground leading-relaxed">
               <PlainText text={displayDescription} />

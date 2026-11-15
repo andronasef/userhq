@@ -1,3 +1,4 @@
+import { recordOutcome } from "../analytics/context.js";
 import { Injectable, Inject, Optional } from "@nestjs/common";
 import {
   and,
@@ -43,7 +44,13 @@ import {
   postSlug,
 } from "@userhq/types";
 import { ApiException } from "../common/api-error.filter.js";
-import { type Actor, actorApiKeyId, actorSource, adminKeySource, keySource } from "../auth/principal.js";
+import {
+  type Actor,
+  actorApiKeyId,
+  actorSource,
+  adminKeySource,
+  keySource,
+} from "../auth/principal.js";
 import { prefixTsQuery } from "./search.js";
 import { encodeBoardCursor, decodeBoardCursor } from "./cursor.js";
 import { loadTimeline } from "./posts.service.js";
@@ -58,14 +65,14 @@ export class ModerationService {
     @Inject(DB) private readonly db: Db,
     @Optional() private readonly commentsService?: CommentsService,
     @Optional() private readonly notificationsService?: NotificationsService,
-    @Optional() private readonly pushService?: PushService
+    @Optional() private readonly pushService?: PushService,
   ) {}
 
   async changeStatus(
     tenant: { workspaceId: string; productId: string },
     actor: Actor & { name?: string | null; image?: string | null },
     postNumber: number,
-    input: StatusChangeInput
+    input: StatusChangeInput,
   ): Promise<StatusChangeResult> {
     return this.db.transaction(async (tx) => {
       const [post] = await tx
@@ -82,8 +89,8 @@ export class ModerationService {
             eq(posts.productId, tenant.productId),
             eq(posts.number, postNumber),
             isNull(posts.deletedAt),
-            isNull(posts.mergedIntoId)
-          )
+            isNull(posts.mergedIntoId),
+          ),
         )
         .for("update");
 
@@ -91,7 +98,7 @@ export class ModerationService {
         throw new ApiException(
           "post_not_found",
           404,
-          "This post was removed or merged. Go back to the board."
+          "This post was removed or merged. Go back to the board.",
         );
       }
 
@@ -99,7 +106,7 @@ export class ModerationService {
         throw new ApiException(
           "post_locked",
           400,
-          "This post's status is managed by a roadmap item."
+          "This post's status is managed by a roadmap item.",
         );
       }
 
@@ -107,7 +114,7 @@ export class ModerationService {
         throw new ApiException(
           "edit_conflict",
           409,
-          "Someone else changed this while you were editing. Reload to see their version, then try again."
+          "Someone else changed this while you were editing. Reload to see their version, then try again.",
         );
       }
 
@@ -122,12 +129,16 @@ export class ModerationService {
         .where(
           and(
             eq(statuses.id, input.statusId),
-            eq(statuses.productId, tenant.productId)
-          )
+            eq(statuses.productId, tenant.productId),
+          ),
         );
 
       if (!targetStatus) {
-        throw new ApiException("validation_failed", 400, "Choose a valid status.");
+        throw new ApiException(
+          "validation_failed",
+          400,
+          "Choose a valid status.",
+        );
       }
 
       if (post.statusId === targetStatus.id) {
@@ -152,6 +163,10 @@ export class ModerationService {
         })
         .where(eq(posts.id, post.id));
 
+      recordOutcome("feedback_decision_published", {
+        module: "board",
+        action: "triage",
+      });
       const trimmedNote = input.note ?? null;
 
       const [insertedActivity] = await tx
@@ -254,7 +269,7 @@ export class ModerationService {
 
   async listAdminPosts(
     tenant: { workspaceId: string; productId: string },
-    query?: AdminBoardQuery
+    query?: AdminBoardQuery,
   ): Promise<AdminPostPage> {
     const statusWhere =
       query?.status === "all" || !query?.status
@@ -306,7 +321,10 @@ export class ModerationService {
       .from(posts)
       .innerJoin(statuses, eq(posts.statusId, statuses.id))
       .leftJoin(categories, eq(posts.categoryId, categories.id))
-      .leftJoin(workspaceApiKeys, eq(posts.createdByApiKeyId, workspaceApiKeys.id))
+      .leftJoin(
+        workspaceApiKeys,
+        eq(posts.createdByApiKeyId, workspaceApiKeys.id),
+      )
       .where(
         and(
           eq(posts.productId, tenant.productId),
@@ -314,8 +332,8 @@ export class ModerationService {
           isNull(posts.mergedIntoId),
           statusWhere,
           categoryWhere,
-          searchWhere
-        )
+          searchWhere,
+        ),
       )
       .orderBy(...orderClauses)
       .offset(offset)
@@ -355,7 +373,7 @@ export class ModerationService {
   async getAdminPost(
     tenant: { workspaceId: string; productId: string },
     viewer: { id: string },
-    postNumber: number
+    postNumber: number,
   ): Promise<AdminPostDetail> {
     const [row] = await this.db
       .select({
@@ -382,7 +400,9 @@ export class ModerationService {
         authorImage: user.image,
         authorDeletedAt: user.deletedAt,
         roadmapItemId: posts.roadmapItemId,
-        roadmapItemTitle: sql<string | null>`coalesce(${roadmapItems.publicTitle}, ${roadmapItemInternals.internalTitle})`,
+        roadmapItemTitle: sql<
+          string | null
+        >`coalesce(${roadmapItems.publicTitle}, ${roadmapItemInternals.internalTitle})`,
         createdByApiKeyId: posts.createdByApiKeyId,
         apiKeyName: workspaceApiKeys.name,
       })
@@ -390,14 +410,20 @@ export class ModerationService {
       .innerJoin(statuses, eq(posts.statusId, statuses.id))
       .leftJoin(categories, eq(posts.categoryId, categories.id))
       .innerJoin(user, eq(posts.authorId, user.id))
-      .leftJoin(workspaceApiKeys, eq(posts.createdByApiKeyId, workspaceApiKeys.id))
+      .leftJoin(
+        workspaceApiKeys,
+        eq(posts.createdByApiKeyId, workspaceApiKeys.id),
+      )
       .leftJoin(roadmapItems, eq(posts.roadmapItemId, roadmapItems.id))
-      .leftJoin(roadmapItemInternals, eq(roadmapItems.id, roadmapItemInternals.itemId))
+      .leftJoin(
+        roadmapItemInternals,
+        eq(roadmapItems.id, roadmapItemInternals.itemId),
+      )
       .where(
         and(
           eq(posts.productId, tenant.productId),
-          eq(posts.number, postNumber)
-        )
+          eq(posts.number, postNumber),
+        ),
       )
       .limit(1);
 
@@ -412,8 +438,8 @@ export class ModerationService {
         .where(
           and(
             eq(posts.id, row.mergedIntoId),
-            eq(posts.productId, tenant.productId)
-          )
+            eq(posts.productId, tenant.productId),
+          ),
         )
         .limit(1);
 
@@ -453,14 +479,16 @@ export class ModerationService {
               and(
                 eq(comments.postId, row.id),
                 eq(comments.authorId, viewer.id),
-                isNull(comments.deletedAt)
-              )
+                isNull(comments.deletedAt),
+              ),
             )
             .limit(1),
       this.db
         .select({ userId: postMutes.userId })
         .from(postMutes)
-        .where(and(eq(postMutes.postId, row.id), eq(postMutes.userId, viewer.id)))
+        .where(
+          and(eq(postMutes.postId, row.id), eq(postMutes.userId, viewer.id)),
+        )
         .limit(1),
       this.db
         .select({ commentEmails: user.commentEmails })
@@ -485,7 +513,7 @@ export class ModerationService {
       this.db,
       row.id,
       { userId: viewer.id, isAdmin: true },
-      this.commentsService
+      this.commentsService,
     );
 
     return {
@@ -528,7 +556,7 @@ export class ModerationService {
   async listVoters(
     tenant: { workspaceId: string; productId: string },
     postNumber: number,
-    cursor?: string
+    cursor?: string,
   ): Promise<VoterPage> {
     const [post] = await this.db
       .select({ id: posts.id, voteCount: posts.voteCount })
@@ -537,8 +565,8 @@ export class ModerationService {
         and(
           eq(posts.productId, tenant.productId),
           eq(posts.number, postNumber),
-          isNull(posts.mergedIntoId)
-        )
+          isNull(posts.mergedIntoId),
+        ),
       )
       .limit(1);
 
@@ -583,7 +611,7 @@ export class ModerationService {
 
   async listDeletedPosts(
     tenant: { workspaceId: string; productId: string },
-    cursor?: string
+    cursor?: string,
   ): Promise<DeletedPostPage> {
     const offset = cursor ? decodeBoardCursor(cursor) : 0;
 
@@ -602,8 +630,8 @@ export class ModerationService {
         and(
           eq(posts.productId, tenant.productId),
           isNotNull(posts.deletedAt),
-          isNull(posts.mergedIntoId)
-        )
+          isNull(posts.mergedIntoId),
+        ),
       )
       .orderBy(desc(posts.deletedAt), desc(posts.id))
       .offset(offset)
@@ -630,7 +658,7 @@ export class ModerationService {
   async restorePost(
     tenant: { workspaceId: string; productId: string },
     postNumber: number,
-    actorId: string
+    actorId: string,
   ): Promise<void> {
     await this.db.transaction(async (tx) => {
       const [post] = await tx
@@ -643,8 +671,8 @@ export class ModerationService {
         .where(
           and(
             eq(posts.productId, tenant.productId),
-            eq(posts.number, postNumber)
-          )
+            eq(posts.number, postNumber),
+          ),
         )
         .for("update");
 
@@ -671,7 +699,7 @@ export class ModerationService {
 
   async listDeletedComments(
     tenant: { workspaceId: string; productId: string },
-    cursor?: string
+    cursor?: string,
   ): Promise<DeletedCommentPage> {
     const offset = cursor ? decodeBoardCursor(cursor) : 0;
     const rows = await this.db
@@ -691,8 +719,8 @@ export class ModerationService {
       .where(
         and(
           eq(posts.productId, tenant.productId),
-          isNotNull(comments.deletedAt)
-        )
+          isNotNull(comments.deletedAt),
+        ),
       )
       .orderBy(desc(comments.deletedAt), desc(comments.id))
       .offset(offset)
@@ -718,7 +746,7 @@ export class ModerationService {
   async restoreComment(
     tenant: { workspaceId: string; productId: string },
     commentId: string,
-    actorId: string
+    actorId: string,
   ): Promise<void> {
     await this.db.transaction(async (tx) => {
       const [row] = await tx
@@ -734,8 +762,8 @@ export class ModerationService {
         .where(
           and(
             eq(comments.id, commentId),
-            eq(posts.productId, tenant.productId)
-          )
+            eq(posts.productId, tenant.productId),
+          ),
         )
         .for("update");
 
@@ -768,13 +796,13 @@ export class ModerationService {
     tenant: { workspaceId: string; productId: string },
     keepNumber: number,
     mergeNumbers: number[],
-    actorId: string
+    actorId: string,
   ): Promise<MergeResult> {
     if (mergeNumbers.includes(keepNumber)) {
       throw new ApiException(
         "merge_target_invalid",
         400,
-        "Cannot merge a post into itself."
+        "Cannot merge a post into itself.",
       );
     }
 
@@ -783,7 +811,7 @@ export class ModerationService {
       throw new ApiException(
         "merge_target_invalid",
         400,
-        "No duplicate posts specified."
+        "No duplicate posts specified.",
       );
     }
 
@@ -803,8 +831,8 @@ export class ModerationService {
         .where(
           and(
             eq(posts.productId, tenant.productId),
-            inArray(posts.number, allNumbers)
-          )
+            inArray(posts.number, allNumbers),
+          ),
         )
         .orderBy(asc(posts.id))
         .for("update");
@@ -814,7 +842,7 @@ export class ModerationService {
         throw new ApiException(
           "merge_target_invalid",
           400,
-          "Target post not found."
+          "Target post not found.",
         );
       }
 
@@ -822,7 +850,7 @@ export class ModerationService {
         throw new ApiException(
           "merge_target_invalid",
           400,
-          "Cannot merge into a deleted or merged post."
+          "Cannot merge into a deleted or merged post.",
         );
       }
 
@@ -833,7 +861,7 @@ export class ModerationService {
           throw new ApiException(
             "merge_target_invalid",
             400,
-            `Duplicate post ${dupNumber} not found.`
+            `Duplicate post ${dupNumber} not found.`,
           );
         }
         if (dupRow.deletedAt !== null || dupRow.mergedIntoId !== null) {

@@ -1,8 +1,10 @@
 "use client";
+import { startContribution, track } from "@/lib/analytics";
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useAnalyticsRouter as useRouter } from "@/lib/analytics-navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -33,7 +35,12 @@ import { apiFetch, ApiClientError } from "@/lib/api-client";
 import { errorCopy, FIELD_FOR_CODE } from "@/lib/api-errors";
 import { QueryProvider } from "@/lib/query-client";
 import { useI18n } from "@/lib/i18n/context";
-import { postHref, portalHref, boardApiBase, type BoardVariant } from "@/lib/tenant";
+import {
+  postHref,
+  portalHref,
+  boardApiBase,
+  type BoardVariant,
+} from "@/lib/tenant";
 
 export interface PostFormDialogProps {
   ws: string;
@@ -86,6 +93,7 @@ function PostFormDialogInner({
 
   React.useEffect(() => {
     if (open) {
+      if (mode === "create") startContribution("feedback");
       setAlertError(null);
       setIsConflict(false);
       if (mode === "edit" && initial) {
@@ -118,7 +126,7 @@ function PostFormDialogInner({
               version: initial.version,
             },
             schema: PostCreatedSchema,
-          }
+          },
         );
       }
       return apiFetch(
@@ -127,7 +135,7 @@ function PostFormDialogInner({
           method: "POST",
           body: data,
           schema: PostCreatedSchema,
-        }
+        },
       );
     },
     onSuccess: (result) => {
@@ -135,7 +143,11 @@ function PostFormDialogInner({
       if (mode === "edit") {
         toast.success(t("ui.postUpdated"));
         // Dashboard URLs are keyed by number, so only the portal URL changes with the slug.
-        if (variant === "portal" && initial?.slug && result.slug !== initial.slug) {
+        if (
+          variant === "portal" &&
+          initial?.slug &&
+          result.slug !== initial.slug
+        ) {
           router.replace(postHref(ws, product, result.number, result.slug));
         } else {
           router.refresh();
@@ -179,17 +191,29 @@ function PostFormDialogInner({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{mode === "edit" ? t("ui.editPost") : t("ui.newPost")}</DialogTitle>
+          <DialogTitle>
+            {mode === "edit" ? t("ui.editPost") : t("ui.newPost")}
+          </DialogTitle>
           <DialogDescription>
-            {mode === "edit"
-              ? t("ui.editPostDesc")
-              : t("ui.newPostDesc")}
+            {mode === "edit" ? t("ui.editPostDesc") : t("ui.newPostDesc")}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={handleSubmit(onSubmit, () =>
+            track("validation_error_shown", {
+              action: "feedback",
+              outcome: "validation",
+            }),
+          )}
+          className="space-y-4"
+        >
           <fieldset disabled={mutation.isPending} className="space-y-4">
-            <Field id="post-title" label={t("entries.titleLabel")} error={errors.title?.message}>
+            <Field
+              id="post-title"
+              label={t("entries.titleLabel")}
+              error={errors.title?.message}
+            >
               <Input
                 placeholder={t("ui.titlePlaceholder")}
                 {...register("title")}
@@ -265,7 +289,11 @@ function PostFormDialogInner({
                 {mutation.isPending ? (
                   <>
                     <LoaderCircle className="size-4 animate-spin" />
-                    <span>{mode === "edit" ? t("common.saving") : t("ui.submitting")}</span>
+                    <span>
+                      {mode === "edit"
+                        ? t("common.saving")
+                        : t("ui.submitting")}
+                    </span>
                   </>
                 ) : mode === "edit" ? (
                   t("ui.savePost")
@@ -327,12 +355,13 @@ export function NewPostButton({
   };
 
   if (!signedIn) {
-    const nextUrl = encodeURIComponent(
-      `${portalHref(ws, product)}?new=1`
-    );
+    const nextUrl = encodeURIComponent(`${portalHref(ws, product)}?new=1`);
     return (
       <Button asChild className="shrink-0">
-        <Link href={`/login?next=${nextUrl}`}>
+        <Link
+          href={`/login?next=${nextUrl}`}
+          onClick={() => startContribution("feedback", true)}
+        >
           <Plus className="size-4" />
           <span>{t("ui.newPost")}</span>
         </Link>

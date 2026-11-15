@@ -1,12 +1,12 @@
 {
-  "jsPlugins": [
-    "./tools/oxlint-userhq.mjs"
-  ],
+  "jsPlugins": ["./tools/oxlint-userhq.mjs"],
   "ignorePatterns": [
     "**/dist/**",
     "**/node_modules/**",
     "**/.next/**",
-    "packages/db/migrations/**"
+    "packages/db/migrations/**",
+    "apps/web/public/~partytown/**",
+    "apps/web/public/monitoring/newrelic-browser.js"
   ],
   "overrides": [
     {
@@ -60,29 +60,19 @@
             ],
             "patterns": [
               {
-                "group": [
-                  "drizzle-orm/*"
-                ],
+                "group": ["drizzle-orm/*"],
                 "message": "apps/web must not import drizzle-orm subpaths"
               },
               {
-                "group": [
-                  "vinext/*"
-                ],
+                "group": ["vinext/*"],
                 "message": "vinext/* imports are forbidden in web app code"
               },
               {
-                "group": [
-                  "@auth/*"
-                ],
+                "group": ["@auth/*"],
                 "message": "@auth/* is unsupported under vinext"
               },
               {
-                "group": [
-                  "*?raw",
-                  "*?url",
-                  "*?inline"
-                ],
+                "group": ["*?raw", "*?url", "*?inline"],
                 "message": "Vite query suffixes (*?raw, *?url, *?inline) break the next build escape hatch"
               },
               {
@@ -103,10 +93,7 @@
       }
     },
     {
-      "files": [
-        "apps/api/**",
-        "packages/db/**"
-      ],
+      "files": ["apps/api/**", "packages/db/**"],
       "rules": {
         "userhq/no-exclusion-columns": "error"
       }

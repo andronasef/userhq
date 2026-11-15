@@ -1,3 +1,4 @@
+import { notificationDestination } from "@userhq/types";
 import {
   Injectable,
   Inject,
@@ -36,7 +37,7 @@ export class EmailWorker
 
   constructor(
     @Inject(DB) private readonly db: Db,
-    @Inject(ENV) private readonly env: Env
+    @Inject(ENV) private readonly env: Env,
   ) {
     this.enabled = Boolean(this.env.SMTP_HOST);
   }
@@ -46,7 +47,7 @@ export class EmailWorker
       // A rejected tick must not become an unhandled rejection: Node exits on those.
       this.intervalRef = setInterval(() => {
         this.runOnce(new Date()).catch((err) =>
-          this.logger.error(`Email worker tick failed: ${err?.message ?? err}`)
+          this.logger.error(`Email worker tick failed: ${err?.message ?? err}`),
         );
       }, 60_000);
       this.intervalRef.unref?.();
@@ -186,11 +187,11 @@ export class EmailWorker
                 .where(
                   and(
                     eq(postMutes.userId, recipient.id),
-                    eq(postMutes.postId, posts.id)
-                  )
-                )
-            )
-          )
+                    eq(postMutes.postId, posts.id),
+                  ),
+                ),
+            ),
+          ),
         )
         .orderBy(asc(comments.createdAt), asc(comments.id));
 
@@ -239,13 +240,13 @@ export class EmailWorker
 
       // Sort sections by newest comment descending
       const sortedGroups = Array.from(postsMap.values()).sort(
-        (a, b) => b.newestCreatedAt.getTime() - a.newestCreatedAt.getTime()
+        (a, b) => b.newestCreatedAt.getTime() - a.newestCreatedAt.getTime(),
       );
 
       const allToken = signToken(
         this.env.BETTER_AUTH_SECRET,
         recipient.id,
-        "all"
+        "all",
       );
       const unsubscribeUrl = `${this.env.PUBLIC_URL}/unsubscribe/${allToken}`;
 
@@ -255,7 +256,7 @@ export class EmailWorker
         const muteToken = signToken(
           this.env.BETTER_AUTH_SECRET,
           recipient.id,
-          `p:${g.postId}`
+          `p:${g.postId}`,
         );
         const muteUrl = `${this.env.PUBLIC_URL}/unsubscribe/${muteToken}`;
 
@@ -266,7 +267,7 @@ export class EmailWorker
         return {
           productName: g.productName,
           postTitle: g.postTitle,
-          postUrl,
+          postUrl: notificationDestination(postUrl, "email", "new_comment"),
           muteUrl,
           moreCount,
           comments: last3Comments.map((c) => ({
@@ -319,8 +320,16 @@ export class EmailWorker
           })
           .where(eq(commentEmailBatches.id, batch.id));
 
+        diagnosticEvent("UserHQDelivery", {
+          channel: "email",
+          outcome: "provider_accepted",
+        });
         sentCount++;
       } catch (err: unknown) {
+        diagnosticEvent("UserHQDelivery", {
+          channel: "email",
+          outcome: "attempt_failed",
+        });
         const errorMsg = String((err as any)?.message ?? err);
         let redacted = errorMsg;
         if (this.env.SMTP_PASS) {
@@ -342,7 +351,7 @@ export class EmailWorker
             .where(eq(commentEmailBatches.id, batch.id));
           failedCount++;
           this.logger.warn(
-            `Email batch ${batch.id} failed after 5 attempts: ${redacted}`
+            `Email batch ${batch.id} failed after 5 attempts: ${redacted}`,
           );
         } else {
           const backoffMin = BACKOFF_MINUTES[nextAttempts - 1] ?? 360;
@@ -371,3 +380,4 @@ export class EmailWorker
     };
   }
 }
+import { diagnosticEvent } from "../analytics/monitoring.js";

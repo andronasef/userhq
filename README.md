@@ -37,6 +37,7 @@ Behind the scenes, your product and engineering team manages ideas privately wit
 - [User guide](docs/user-guide.md): customer and workspace-admin workflows.
 - [API quickstart](docs/api-quickstart.md) and [automation API reference](docs/automation-api.md): credentials, examples, scopes and endpoints.
 - [LLM guide](docs/llm-guide.md) and [llms.txt](llms.txt): integration context and a repository documentation index for assistants.
+- [Analytics and diagnostics](docs/analytics.md): provider setup, event definitions, privacy boundaries and operational metrics.
 - [Deployment runbook](docs/deploy.md) and [changelog](CHANGELOG.md): configuration, upgrade requirements and release history.
 
 ## ✨ Key Features

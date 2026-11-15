@@ -3,7 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getWorkspace, getMe, getProducts } from "../../../lib/api-server";
 import { isDevUploadEnabled } from "../../../lib/dev-flags";
-import { getDictionary, getRequestLocale, formatMessage } from "../../../lib/i18n/server";
+import {
+  getDictionary,
+  getRequestLocale,
+  formatMessage,
+} from "../../../lib/i18n/server";
 import { UserMenu } from "../../../components/user-menu";
 import { NotificationBell } from "../../../components/notifications/notification-bell";
 import { ThemeToggle } from "../../../components/theme-toggle";
@@ -40,8 +44,14 @@ export default async function DashboardLayout({
       return (
         <AppShell>
           <StatePage
-            title={formatMessage(dict.workspace?.workspaceUnavailable ?? "{name} is unavailable", { name })}
-            body={dict.workspace?.suspendedDesc ?? "This workspace has been suspended by the UserHQ team. Your data is kept. Contact the UserHQ team to restore access."}
+            title={formatMessage(
+              dict.workspace?.workspaceUnavailable ?? "{name} is unavailable",
+              { name },
+            )}
+            body={
+              dict.workspace?.suspendedDesc ??
+              "This workspace has been suspended by the UserHQ team. Your data is kept. Contact the UserHQ team to restore access."
+            }
             actions={
               <>
                 <Button variant="outline" asChild>
@@ -49,7 +59,9 @@ export default async function DashboardLayout({
                 </Button>
                 {me.workspaces.length > 1 && (
                   <Button variant="outline" asChild>
-                    <Link href="/dashboard">{dict.workspace?.switchWorkspace ?? "Switch workspace"}</Link>
+                    <Link href="/dashboard">
+                      {dict.workspace?.switchWorkspace ?? "Switch workspace"}
+                    </Link>
                   </Button>
                 )}
               </>
@@ -68,7 +80,8 @@ export default async function DashboardLayout({
   const me = await getMe();
   const devUploadEnabled = isDevUploadEnabled();
   const isWorkspaceOwner =
-    me.isPlatformOwner || me.workspaces.some((w) => w.slug === ws && w.role === "owner");
+    me.isPlatformOwner ||
+    me.workspaces.some((w) => w.slug === ws && w.role === "owner");
   const productsResult = await getProducts(ws);
   const products = productsResult.ok ? productsResult.data : [];
 
@@ -79,7 +92,11 @@ export default async function DashboardLayout({
         className="h-16 border-b border-border bg-card px-4 flex items-center gap-3 min-w-0"
       >
         <MobileNav>
-          <DashboardSidebar ws={ws} products={products} isWorkspaceOwner={isWorkspaceOwner} />
+          <DashboardSidebar
+            ws={ws}
+            products={products}
+            isWorkspaceOwner={isWorkspaceOwner}
+          />
         </MobileNav>
         <Link
           href="/dashboard"
@@ -115,12 +132,22 @@ export default async function DashboardLayout({
 
       <div className="flex flex-1 min-h-0">
         <aside className="hidden lg:flex flex-col w-60 shrink-0 border-r border-border bg-card p-4 pt-6 gap-6 overflow-y-auto">
-          <DashboardSidebar ws={ws} products={products} isWorkspaceOwner={isWorkspaceOwner} />
+          <DashboardSidebar
+            ws={ws}
+            products={products}
+            isWorkspaceOwner={isWorkspaceOwner}
+          />
         </aside>
         <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           {children}
         </main>
       </div>
+      {result.analyticsContext && (
+        <span
+          hidden
+          data-userhq-analytics-workspace={result.analyticsContext.workspace_id}
+        />
+      )}
       <AppToaster />
     </div>
   );

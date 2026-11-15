@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
 import { and, eq, sql } from "drizzle-orm";
 import { schema } from "@userhq/db";
-import { SEEDED_STATUSES } from "@userhq/types";
+import { SEEDED_STATUSES, AnalyticsReceiptSchema } from "@userhq/types";
 import { createTestApp, signedInCookie } from "./support/test-app.js";
 
 describe("Votes API (Plan 03-06)", () => {
@@ -66,7 +66,7 @@ describe("Votes API (Plan 03-06)", () => {
         color: s.color,
         position: idx,
         isDefault: s.type === "review",
-      }))
+      })),
     );
 
     // Seed categories
@@ -98,6 +98,51 @@ describe("Votes API (Plan 03-06)", () => {
 
   afterAll(async () => {
     await testApp.close();
+  });
+
+  it("analytics relays a committed changed vote once with current-workspace role", async () => {
+    const created = await request(testApp.http)
+      .post(`/api/v1/portal/${wsSlug}/${prodSlug}/posts`)
+      .set("cookie", userA.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({
+        title: "Analytics receipt fixture",
+        description: "Synthetic",
+        categoryId: catId,
+      });
+    expect(created.status).toBe(201);
+    const endpoint = `/api/v1/portal/${wsSlug}/${prodSlug}/posts/${created.body.number}/vote`;
+    const voted = await request(testApp.http)
+      .put(endpoint)
+      .set("cookie", userB.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .set("x-userhq-browser", "1");
+    expect(voted.status).toBe(200);
+    const receipt = AnalyticsReceiptSchema.parse(
+      JSON.parse(
+        Buffer.from(
+          voted.headers["x-userhq-analytics"],
+          "base64url",
+        ).toString(),
+      ),
+    );
+    expect(receipt.events).toHaveLength(1);
+    expect(receipt.events[0].name).toBe("vote_added");
+    expect(receipt.events[0].properties.actor_role).toBe("customer");
+    expect(receipt.events[0].properties.product_id).toMatch(/^[a-f0-9]{32}$/);
+    const noop = await request(testApp.http)
+      .put(endpoint)
+      .set("cookie", userB.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .set("x-userhq-browser", "1");
+    expect(noop.status).toBe(200);
+    expect(noop.headers["x-userhq-analytics"]).toBeUndefined();
+    const rejected = await request(testApp.http)
+      .put(endpoint)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .set("x-userhq-browser", "1");
+    expect(rejected.status).toBe(401);
+    expect(rejected.headers["x-userhq-analytics"]).toBeUndefined();
   });
 
   it("tracer: PUT then DELETE vote round-trips with an exact count", async () => {
@@ -207,8 +252,8 @@ describe("Votes API (Plan 03-06)", () => {
       .where(
         and(
           eq(schema.posts.productId, prodId),
-          eq(schema.posts.number, postNumber)
-        )
+          eq(schema.posts.number, postNumber),
+        ),
       );
 
     const results = await Promise.all(
@@ -216,8 +261,8 @@ describe("Votes API (Plan 03-06)", () => {
         request(testApp.http)
           .put(`/api/v1/portal/${wsSlug}/${prodSlug}/posts/${postNumber}/vote`)
           .set("cookie", freshUser.cookie)
-          .set("Origin", testApp.env.PUBLIC_URL)
-      )
+          .set("Origin", testApp.env.PUBLIC_URL),
+      ),
     );
 
     for (const res of results) {
@@ -232,8 +277,8 @@ describe("Votes API (Plan 03-06)", () => {
       .where(
         and(
           eq(schema.votes.postId, postBefore.id),
-          eq(schema.votes.userId, freshUser.userId)
-        )
+          eq(schema.votes.userId, freshUser.userId),
+        ),
       );
 
     expect(voteRows).toHaveLength(1);
@@ -264,18 +309,20 @@ describe("Votes API (Plan 03-06)", () => {
         signedInCookie(testApp.test, {
           name: `Concurrent Voter ${i}`,
           emailVerified: true,
-        })
-      )
+        }),
+      ),
     );
 
     // 20 parallel PUTs
     const putResults = await Promise.all(
       voters.map((u) =>
         request(testApp.http)
-          .put(`/api/v1/portal/${wsSlug}/${prodSlug}/posts/${testPostNumber}/vote`)
+          .put(
+            `/api/v1/portal/${wsSlug}/${prodSlug}/posts/${testPostNumber}/vote`,
+          )
           .set("cookie", u.cookie)
-          .set("Origin", testApp.env.PUBLIC_URL)
-      )
+          .set("Origin", testApp.env.PUBLIC_URL),
+      ),
     );
 
     for (const res of putResults) {
@@ -289,8 +336,8 @@ describe("Votes API (Plan 03-06)", () => {
       .where(
         and(
           eq(schema.posts.productId, prodId),
-          eq(schema.posts.number, testPostNumber)
-        )
+          eq(schema.posts.number, testPostNumber),
+        ),
       );
 
     const countRows = await testApp.db
@@ -328,8 +375,8 @@ describe("Votes API (Plan 03-06)", () => {
       .where(
         and(
           eq(schema.posts.productId, prodId),
-          eq(schema.posts.number, delNumber)
-        )
+          eq(schema.posts.number, delNumber),
+        ),
       );
 
     const voteDeletedRes = await request(testApp.http)
@@ -356,8 +403,8 @@ describe("Votes API (Plan 03-06)", () => {
       .where(
         and(
           eq(schema.posts.productId, prodId),
-          eq(schema.posts.number, postNumber)
-        )
+          eq(schema.posts.number, postNumber),
+        ),
       );
 
     await testApp.db
@@ -366,8 +413,8 @@ describe("Votes API (Plan 03-06)", () => {
       .where(
         and(
           eq(schema.posts.productId, prodId),
-          eq(schema.posts.number, dupNumber)
-        )
+          eq(schema.posts.number, dupNumber),
+        ),
       );
 
     const voteMergedRes = await request(testApp.http)
@@ -393,8 +440,8 @@ describe("Votes API (Plan 03-06)", () => {
       .where(
         and(
           eq(schema.posts.productId, prodId),
-          eq(schema.posts.number, postNumber)
-        )
+          eq(schema.posts.number, postNumber),
+        ),
       );
 
     const voter = await signedInCookie(testApp.test, {
@@ -426,8 +473,8 @@ describe("Votes API (Plan 03-06)", () => {
       .where(
         and(
           eq(schema.posts.productId, prodId),
-          eq(schema.posts.number, postNumber)
-        )
+          eq(schema.posts.number, postNumber),
+        ),
       );
 
     expect(pAfter.version).toBe(pBefore.version);

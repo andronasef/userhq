@@ -3,7 +3,7 @@
 import * as React from "react";
 import { HiddenModuleNotice } from "../dashboard/hidden-module-notice";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useAnalyticsRouter as useRouter } from "@/lib/analytics-navigation";
 import {
   ArrowLeft,
   Eye,

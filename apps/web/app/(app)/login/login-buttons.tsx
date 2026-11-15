@@ -1,4 +1,5 @@
 "use client";
+import { track } from "../../../lib/analytics";
 
 import * as React from "react";
 import { LoaderCircle } from "lucide-react";
@@ -31,16 +32,17 @@ export function LoginButtons({
   >(null);
 
   const [activeError, setActiveError] = React.useState<LoginErrorCopy | null>(
-    () => (rawErrorCode ? loginErrorCopy(rawErrorCode) : null)
+    () => (rawErrorCode ? loginErrorCopy(rawErrorCode) : null),
   );
 
   const [displayedErrorCode, setDisplayedErrorCode] = React.useState<
     string | null
   >(() =>
-    rawErrorCode && isDisplayableErrorCode(rawErrorCode) ? rawErrorCode : null
+    rawErrorCode && isDisplayableErrorCode(rawErrorCode) ? rawErrorCode : null,
   );
 
   const handleSignIn = async (provider: "google" | "github") => {
+    track("auth_started", { method: provider, module: "auth" });
     setActiveError(null);
     setDisplayedErrorCode(null);
     setPendingProvider(provider);
@@ -58,10 +60,20 @@ export function LoginButtons({
       if (res?.error) {
         setPendingProvider(null);
         setActiveError(loginErrorCopy("request_failed"));
+        track("auth_failed", {
+          method: provider,
+          outcome: "request_failed",
+          module: "auth",
+        });
       }
     } catch {
       setPendingProvider(null);
       setActiveError(loginErrorCopy("request_failed"));
+      track("auth_failed", {
+        method: provider,
+        outcome: "request_failed",
+        module: "auth",
+      });
     }
   };
 

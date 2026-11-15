@@ -1,3 +1,4 @@
+import { recordOutcome } from "../analytics/context.js";
 import { AttributionBindInterceptor } from "../badges/attribution-bind.interceptor.js";
 import {
   Controller,
@@ -97,7 +98,14 @@ export class PortalPostsController {
     }
     const portal = req.portal;
     const userAgent = req.headers?.["user-agent"];
-    return this.postsService.createPost(portal, user, input, userAgent);
+    const result = await this.postsService.createPost(
+      portal,
+      user,
+      input,
+      userAgent,
+    );
+    recordOutcome("feedback_created", { module: "board", action: "feedback" });
+    return result;
   }
 
   @Patch("posts/:number")

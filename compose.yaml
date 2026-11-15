@@ -9,7 +9,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-userhq} -d ${POSTGRES_DB:-userhq}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-userhq} -d ${POSTGRES_DB:-userhq}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -34,6 +38,10 @@ services:
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:?GITHUB_CLIENT_ID is required}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:?GITHUB_CLIENT_SECRET is required}
       PLATFORM_OWNER_EMAIL: ${PLATFORM_OWNER_EMAIL:?PLATFORM_OWNER_EMAIL is required}
+      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY:-}
+      NEW_RELIC_APP_NAME: ${NEW_RELIC_APP_NAME:-UserHQ API}
+      NEW_RELIC_ENABLED: ${NEW_RELIC_ENABLED:-true}
+      APP_RELEASE: ${APP_RELEASE:-unversioned}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
@@ -57,6 +65,9 @@ services:
       - api
     environment:
       API_INTERNAL_URL: ${API_INTERNAL_URL:-http://api:4000}
+      ANALYTICS_ENABLED: ${ANALYTICS_ENABLED:-true}
+      APP_RELEASE: ${APP_RELEASE:-unversioned}
+      ANALYTICS_ID_SALT: ${ANALYTICS_ID_SALT:-}
       DEV_UPLOAD_PAGE: ${DEV_UPLOAD_PAGE:-false}
 
   mailpit:
@@ -72,4 +83,3 @@ services:
 volumes:
   pgdata:
   uploads:
-

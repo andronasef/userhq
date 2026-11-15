@@ -7,6 +7,8 @@ import {
 } from "@nestjs/common";
 import { and, eq, sql } from "drizzle-orm";
 import webpush from "web-push";
+import { diagnosticEvent } from "../analytics/monitoring.js";
+import { notificationDestination } from "@userhq/types";
 import {
   DB,
   type Db,
@@ -47,7 +49,7 @@ export class PushWorker implements OnModuleInit, OnModuleDestroy {
   constructor(
     @Inject(DB) private readonly db: Db,
     @Inject(ENV) private readonly env: Env,
-    private readonly outbound: OutboundHttp
+    private readonly outbound: OutboundHttp,
   ) {}
 
   onModuleInit() {
@@ -127,13 +129,16 @@ export class PushWorker implements OnModuleInit, OnModuleDestroy {
       .from(user)
       .where(eq(user.id, item.user_id))
       .limit(1);
-    if (!recipient || recipient.bannedAt || recipient.deletedAt) return "recipient_inactive";
+    if (!recipient || recipient.bannedAt || recipient.deletedAt)
+      return "recipient_inactive";
 
     const productId = item.data?.productId;
     if (typeof productId !== "string") return null; // test events carry no product
 
-    const postId = typeof item.data.postId === "string" ? item.data.postId : null;
-    const commentId = typeof item.data.commentId === "string" ? item.data.commentId : null;
+    const postId =
+      typeof item.data.postId === "string" ? item.data.postId : null;
+    const commentId =
+      typeof item.data.commentId === "string" ? item.data.commentId : null;
     const res = await this.db.execute(sql`
       SELECT p.board_enabled, p.deleted_at AS product_deleted_at, p.workspace_id,
              w.deleted_at AS ws_deleted_at, w.suspended_at,
@@ -147,11 +152,19 @@ export class PushWorker implements OnModuleInit, OnModuleDestroy {
       WHERE p.id = ${productId}::uuid
     `);
     const ctx = ((res as any).rows ?? res)[0];
-    if (!ctx || !ctx.board_enabled || ctx.product_deleted_at || ctx.ws_deleted_at || ctx.suspended_at) {
+    if (
+      !ctx ||
+      !ctx.board_enabled ||
+      ctx.product_deleted_at ||
+      ctx.ws_deleted_at ||
+      ctx.suspended_at
+    ) {
       return "board_unavailable";
     }
-    if (postId && (!ctx.post_id || ctx.post_deleted_at || ctx.merged_into_id)) return "post_unavailable";
-    if (commentId && (!ctx.comment_id || ctx.comment_deleted_at)) return "comment_deleted";
+    if (postId && (!ctx.post_id || ctx.post_deleted_at || ctx.merged_into_id))
+      return "post_unavailable";
+    if (commentId && (!ctx.comment_id || ctx.comment_deleted_at))
+      return "comment_deleted";
     if (ctx.muted) return "post_muted";
 
     // Product-wide alerts go only to admins who still follow the product.
@@ -159,10 +172,16 @@ export class PushWorker implements OnModuleInit, OnModuleDestroy {
       const [follow] = await this.db
         .select({ userId: pushFollowedProducts.userId })
         .from(pushFollowedProducts)
-        .where(and(eq(pushFollowedProducts.userId, item.user_id), eq(pushFollowedProducts.productId, productId)))
+        .where(
+          and(
+            eq(pushFollowedProducts.userId, item.user_id),
+            eq(pushFollowedProducts.productId, productId),
+          ),
+        )
         .limit(1);
       if (!follow) return "not_following";
-      if (!(await isWorkspaceAdmin(this.db, item.user_id, ctx.workspace_id))) return "not_workspace_admin";
+      if (!(await isWorkspaceAdmin(this.db, item.user_id, ctx.workspace_id)))
+        return "not_workspace_admin";
     }
     return null;
   }
@@ -209,11 +228,27 @@ export class PushWorker implements OnModuleInit, OnModuleDestroy {
     }
 
     // One notification per post: a repeat event with the same tag replaces it and re-alerts.
-    const postId = typeof item.data?.postId === "string" ? item.data.postId : null;
+    const postId =
+      typeof item.data?.postId === "string" ? item.data.postId : null;
     const payload = JSON.stringify({
       title: item.title,
       body: item.body,
-      url: item.url ?? "/",
+      url:
+        item.event_type === "test"
+          ? (item.url ?? "/")
+          : notificationDestination(
+              item.url ?? "/",
+              "push",
+              item.event_type === "status_change"
+                ? "status"
+                : item.event_type === "comment_reply"
+                  ? "reply"
+                  : item.event_type === "new_post"
+                    ? "new_post"
+                    : item.event_type === "new_comment"
+                      ? "new_comment"
+                      : "other",
+            ),
       data: item.data ?? {},
       ...(postId ? { tag: `post-${postId}`, renotify: true } : {}),
     });
@@ -229,13 +264,23 @@ export class PushWorker implements OnModuleInit, OnModuleDestroy {
             auth: sub.auth,
           },
         },
-        payload
+        payload,
       );
-      const result = await this.outbound.post(details.endpoint, details.headers, details.body ?? undefined);
+      const result = await this.outbound.post(
+        details.endpoint,
+        details.headers,
+        details.body ?? undefined,
+      );
       if (result.statusCode < 200 || result.statusCode >= 300) {
-        throw Object.assign(new Error(`HTTP ${result.statusCode}`), { statusCode: result.statusCode });
+        throw Object.assign(new Error(`HTTP ${result.statusCode}`), {
+          statusCode: result.statusCode,
+        });
       }
 
+      diagnosticEvent("UserHQDelivery", {
+        channel: "push",
+        outcome: "provider_accepted",
+      });
       // Successful delivery
       await this.db
         .update(pushDeliveries)
@@ -248,15 +293,24 @@ export class PushWorker implements OnModuleInit, OnModuleDestroy {
         .where(eq(pushDeliveries.id, item.id));
     } catch (err: any) {
       const statusCode = err?.statusCode;
-      const errorMessage = err instanceof OutboundError ? err.message
-        : typeof statusCode === "number" ? `HTTP ${statusCode}` : "Push delivery failed";
+      const errorMessage =
+        err instanceof OutboundError
+          ? err.message
+          : typeof statusCode === "number"
+            ? `HTTP ${statusCode}`
+            : "Push delivery failed";
 
       // 404/410: expired or unsubscribed. 401/403: the push service rejects our VAPID identity for
       // this subscription (e.g. created under other keys). Either way it can never succeed, so remove
       // it; push_deliveries.subscription_id cascades, which drops this and its other queued rows.
-      if (statusCode === 404 || statusCode === 410 || statusCode === 401 || statusCode === 403) {
+      if (
+        statusCode === 404 ||
+        statusCode === 410 ||
+        statusCode === 401 ||
+        statusCode === 403
+      ) {
         this.logger.warn(
-          `Push subscription ${sub.id} rejected (${statusCode}), removing.`
+          `Push subscription ${sub.id} rejected (${statusCode}), removing.`,
         );
         await this.db
           .delete(pushSubscriptions)

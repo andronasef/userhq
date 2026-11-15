@@ -1,4 +1,5 @@
 "use client";
+import { track } from "../../lib/analytics";
 
 import * as React from "react";
 import Link from "next/link";
@@ -36,7 +37,9 @@ export function getChangelogTagClasses(name: string): string {
   return "bg-slate-500/10 text-slate-700 dark:text-slate-400 border border-slate-500/20";
 }
 
-export function isContentExpandable(doc: RichTextDoc | null | undefined): boolean {
+export function isContentExpandable(
+  doc: RichTextDoc | null | undefined,
+): boolean {
   if (!doc?.content || doc.content.length === 0) return false;
   if (doc.content.length > 2) return true;
   let charCount = 0;
@@ -65,8 +68,16 @@ export function ChangelogTimelineItem({
 
   const displayTitle = entry.title;
   const displayContent = entry.content;
-  const isFallback = Boolean(("isFallback" in (entry ?? {})) && (entry as { isFallback?: boolean }).isFallback);
-  const textDir = isRtl((entry as { resolvedLocale?: string } | undefined)?.resolvedLocale ?? contentDefaultLocale) ? "rtl" : "ltr";
+  const isFallback = Boolean(
+    "isFallback" in (entry ?? {}) &&
+    (entry as { isFallback?: boolean }).isFallback,
+  );
+  const textDir = isRtl(
+    (entry as { resolvedLocale?: string } | undefined)?.resolvedLocale ??
+      contentDefaultLocale,
+  )
+    ? "rtl"
+    : "ltr";
 
   const expandable = isContentExpandable(displayContent);
 
@@ -113,7 +124,7 @@ export function ChangelogTimelineItem({
             key={tag.id}
             className={cn(
               "inline-flex items-center h-5 px-2 rounded-full text-xs font-semibold",
-              getChangelogTagClasses(tag.name)
+              getChangelogTagClasses(tag.name),
             )}
           >
             {tag.name}
@@ -154,14 +165,17 @@ export function ChangelogTimelineItem({
           <div
             className={cn(
               "relative",
-              !expanded && "max-h-48 overflow-hidden mask-fade-bottom"
+              !expanded && "max-h-48 overflow-hidden mask-fade-bottom",
             )}
           >
             <RichTextViewer content={displayContent} />
           </div>
           <button
             type="button"
-            onClick={() => setExpanded(!expanded)}
+            onClick={() => {
+              if (!expanded) track("content_opened", { module: "changelog" });
+              setExpanded(!expanded);
+            }}
             className="text-sm font-semibold text-[var(--primary-text)] hover:underline flex items-center gap-1 mt-2 cursor-pointer"
           >
             {expanded ? `${t("ui.showLess")} ↑` : `${t("ui.readMore")} ↓`}

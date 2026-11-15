@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useAnalyticsRouter as useRouter } from "@/lib/analytics-navigation";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n/context";
 import { EntityLogo } from "../entity-logo";

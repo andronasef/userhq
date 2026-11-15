@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useAnalyticsRouter as useRouter } from "@/lib/analytics-navigation";
 import type { Status } from "@userhq/types";
 import { PageHeader } from "../../../../../components/page-header";
 import { Button } from "../../../../../components/ui/button";

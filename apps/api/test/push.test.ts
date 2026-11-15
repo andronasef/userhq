@@ -1,4 +1,13 @@
-import { describe, it, expect, beforeAll, afterAll, afterEach, beforeEach, vi } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  afterEach,
+  beforeEach,
+  vi,
+} from "vitest";
 import request from "supertest";
 import { eq, and, sql } from "drizzle-orm";
 import { schema } from "@userhq/db";
@@ -105,9 +114,14 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
   });
 
   it("rejects private push endpoints before registering a subscription", async () => {
-    const res = await request(testApp.http).post("/api/v1/push/subscriptions")
-      .set("Cookie", userA.cookie).set("Origin", testApp.env.PUBLIC_URL)
-      .send({ endpoint: "https://127.0.0.1/internal", keys: { p256dh: "test-key", auth: "test-auth" } });
+    const res = await request(testApp.http)
+      .post("/api/v1/push/subscriptions")
+      .set("Cookie", userA.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({
+        endpoint: "https://127.0.0.1/internal",
+        keys: { p256dh: "test-key", auth: "test-auth" },
+      });
     expect(res.status).toBe(400);
     expect(res.body.code).toBe("invalid_url");
   });
@@ -228,7 +242,7 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
           productSlug: prodSlug,
           workspaceSlug: wsSlug,
         }),
-      ])
+      ]),
     );
 
     // Unfollow product
@@ -243,7 +257,9 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
       .set("Cookie", userA.cookie)
       .expect(200);
 
-    expect(listAfterRes.body.some((p: any) => p.productId === prodId)).toBe(false);
+    expect(listAfterRes.body.some((p: any) => p.productId === prodId)).toBe(
+      false,
+    );
   });
 
   it("enqueues push delivery on status change and respects generic title/body when includePreviews is false", async () => {
@@ -289,7 +305,9 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
 
     // UserA (admin) updates status of the post
     await request(testApp.http)
-      .put(`/api/v1/workspaces/${wsSlug}/products/${prodSlug}/posts/${postNumber}/status`)
+      .put(
+        `/api/v1/workspaces/${wsSlug}/products/${prodSlug}/posts/${postNumber}/status`,
+      )
       .set("Cookie", userA.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)
       .send({
@@ -305,8 +323,8 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
       .where(
         and(
           eq(schema.pushDeliveries.userId, userB.userId),
-          eq(schema.pushDeliveries.eventType, "status_change")
-        )
+          eq(schema.pushDeliveries.eventType, "status_change"),
+        ),
       );
 
     expect(deliveries.length).toBeGreaterThan(0);
@@ -314,7 +332,10 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
     // Generic text per D-02 since includePreviews = false
     expect(delivery.title).toBe("Feedback status updated");
     expect(delivery.body).toBe("A post you follow has an updated status.");
-    expect(delivery.url).toBe(`/${wsSlug}/${prodSlug}/p/${postNumber}-${postSlug("Test Push Feature Request")}`);
+    expect(delivery.url.split("?")[0]).toBe(
+      `/${wsSlug}/${prodSlug}/p/${postNumber}-${postSlug("Test Push Feature Request")}`,
+    );
+    expect(delivery.url).toContain("uhq_channel=push");
     expect(delivery.status).toBe("pending");
   });
 
@@ -343,7 +364,9 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
 
     // UserA changes status to Completed
     await request(testApp.http)
-      .put(`/api/v1/workspaces/${wsSlug}/products/${prodSlug}/posts/${postNumber}/status`)
+      .put(
+        `/api/v1/workspaces/${wsSlug}/products/${prodSlug}/posts/${postNumber}/status`,
+      )
       .set("Cookie", userA.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)
       .send({
@@ -358,8 +381,8 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
       .where(
         and(
           eq(schema.pushDeliveries.userId, userB.userId),
-          eq(schema.pushDeliveries.eventType, "status_change")
-        )
+          eq(schema.pushDeliveries.eventType, "status_change"),
+        ),
       );
 
     // Find the latest delivery
@@ -407,13 +430,15 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
       .where(
         and(
           eq(schema.pushDeliveries.userId, userB.userId),
-          eq(schema.pushDeliveries.eventType, "comment_reply")
-        )
+          eq(schema.pushDeliveries.eventType, "comment_reply"),
+        ),
       );
 
     expect(deliveries.length).toBeGreaterThan(0);
     const latest = deliveries[deliveries.length - 1];
-    expect(latest.url).toBe(`/${wsSlug}/${prodSlug}/p/${postNumber}-${postSlug("Commentable Post")}`);
+    expect(latest.url.split("?")[0]).toBe(
+      `/${wsSlug}/${prodSlug}/p/${postNumber}-${postSlug("Commentable Post")}`,
+    );
     // userB has includePreviews: true from previous test
     expect(latest.title).toContain("User Alice");
     expect(latest.body).toContain("Here is a helpful comment reply!");
@@ -426,14 +451,19 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
       email: "carol@push.test",
       emailVerified: true,
     });
-    await testApp.db.insert(schema.workspaceMembers).values({ workspaceId: wsId, userId: userC.userId, role: "admin" });
+    await testApp.db
+      .insert(schema.workspaceMembers)
+      .values({ workspaceId: wsId, userId: userC.userId, role: "admin" });
     await request(testApp.http)
       .post("/api/v1/push/subscriptions")
       .set("Cookie", userC.cookie)
       .set("Origin", testApp.env.PUBLIC_URL)
       .send({
         endpoint: `https://fcm.googleapis.com/fcm/send/user-c-${Date.now()}`,
-        keys: { p256dh: "BFakeKeyP256dh1234567890abcdef...", auth: "fakeAuth123456789==" },
+        keys: {
+          p256dh: "BFakeKeyP256dh1234567890abcdef...",
+          auth: "fakeAuth123456789==",
+        },
       })
       .expect(201);
     await request(testApp.http)
@@ -466,13 +496,15 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
       .where(
         and(
           eq(schema.pushDeliveries.userId, userC.userId),
-          eq(schema.pushDeliveries.eventType, "new_post")
-        )
+          eq(schema.pushDeliveries.eventType, "new_post"),
+        ),
       );
 
     expect(deliveries.length).toBeGreaterThan(0);
     const latest = deliveries[deliveries.length - 1];
-    expect(latest.url).toBe(`/${wsSlug}/${prodSlug}/p/${postNumber}-${postSlug("Announcing Feature X")}`);
+    expect(latest.url.split("?")[0]).toBe(
+      `/${wsSlug}/${prodSlug}/p/${postNumber}-${postSlug("Announcing Feature X")}`,
+    );
     expect(latest.title).toContain("Push Product");
   });
 
@@ -501,12 +533,13 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
       });
     });
 
-    const freshEndpoint = () => `https://fcm.googleapis.com/fcm/send/own-${Date.now()}-${counter++}`;
+    const freshEndpoint = () =>
+      `https://fcm.googleapis.com/fcm/send/own-${Date.now()}-${counter++}`;
     const register = (
       who: { cookie: string },
       endpoint: string,
       keys: { p256dh: string; auth: string },
-      userAgent?: string
+      userAgent?: string,
     ) =>
       request(testApp.http)
         .post("/api/v1/push/subscriptions")
@@ -514,9 +547,14 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
         .set("Origin", testApp.env.PUBLIC_URL)
         .send({ endpoint, keys, ...(userAgent ? { userAgent } : {}) });
     const rows = (endpoint: string) =>
-      testApp.db.select().from(schema.pushSubscriptions).where(eq(schema.pushSubscriptions.endpoint, endpoint));
+      testApp.db
+        .select()
+        .from(schema.pushSubscriptions)
+        .where(eq(schema.pushSubscriptions.endpoint, endpoint));
     const cleanup = (endpoint: string) =>
-      testApp.db.delete(schema.pushSubscriptions).where(eq(schema.pushSubscriptions.endpoint, endpoint));
+      testApp.db
+        .delete(schema.pushSubscriptions)
+        .where(eq(schema.pushSubscriptions.endpoint, endpoint));
 
     it("refuses a different user without the stored keys and leaves the row untouched", async () => {
       const endpoint = freshEndpoint();
@@ -562,7 +600,12 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
 
     it("lets the same user refresh keys and user agent in place", async () => {
       const endpoint = freshEndpoint();
-      const first = await register(userA, endpoint, K1, "AliceBrowser/1").expect(201);
+      const first = await register(
+        userA,
+        endpoint,
+        K1,
+        "AliceBrowser/1",
+      ).expect(201);
       const res = await register(userA, endpoint, K2, "AliceBrowser/2");
       expect(res.status).toBe(201);
       expect(res.body.id).toBe(first.body.id);
@@ -581,7 +624,12 @@ describe("Browser Web Push Notifications (Slice 8 / Phase 11)", () => {
 
     it("replaces the old owner's row on an account switch and drops their queued deliveries", async () => {
       const endpoint = freshEndpoint();
-      const first = await register(userA, endpoint, K1, "Shared browser").expect(201);
+      const first = await register(
+        userA,
+        endpoint,
+        K1,
+        "Shared browser",
+      ).expect(201);
       const [queued] = await testApp.db
         .insert(schema.pushDeliveries)
         .values({
@@ -665,38 +713,75 @@ describe("Push delivery network safety", () => {
   let sequence = 0;
   let redirectStatus = 302;
   const received: Array<{ headers: any; body: Buffer }> = [];
-  const ca = readFileSync(new URL("./fixtures/outbound-test-cert.pem", import.meta.url));
+  const ca = readFileSync(
+    new URL("./fixtures/outbound-test-cert.pem", import.meta.url),
+  );
   beforeAll(async () => {
-    server = https.createServer({ cert: ca, key: readFileSync(new URL("./fixtures/outbound-test-key.pem", import.meta.url)) }, (req, res) => {
-      const chunks: Buffer[] = [];
-      req.on("data", chunk => chunks.push(Buffer.from(chunk)));
-      req.on("end", () => {
-        received.push({ headers: req.headers, body: Buffer.concat(chunks) });
-        if (req.url?.startsWith("/stall")) return;
-        if (req.url?.startsWith("/redirect")) { res.writeHead(redirectStatus, { Location: "https://127.0.0.1/private" }); res.end(); return; }
-        res.statusCode = req.url?.startsWith("/gone") ? 410 : 201;
-        res.end();
-      });
-    });
-    await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
-    port = (server.address() as AddressInfo).port;
-    testApp = await createTestApp({ outboundNetwork: {
-      ...fixtureOutboundNetwork, deadlineMs: 150,
-      resolve: async () => [{ address: dnsAddress, family: 4 }],
-      request: (url, options, response) => {
-        connections++;
-        return https.request(url, { ...options, ca, lookup: (_h, _o, cb) => cb(null, "127.0.0.1", 4) }, response);
+    server = https.createServer(
+      {
+        cert: ca,
+        key: readFileSync(
+          new URL("./fixtures/outbound-test-key.pem", import.meta.url),
+        ),
       },
-    } });
+      (req, res) => {
+        const chunks: Buffer[] = [];
+        req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+        req.on("end", () => {
+          received.push({ headers: req.headers, body: Buffer.concat(chunks) });
+          if (req.url?.startsWith("/stall")) return;
+          if (req.url?.startsWith("/redirect")) {
+            res.writeHead(redirectStatus, {
+              Location: "https://127.0.0.1/private",
+            });
+            res.end();
+            return;
+          }
+          res.statusCode = req.url?.startsWith("/gone") ? 410 : 201;
+          res.end();
+        });
+      },
+    );
+    await new Promise<void>((resolve) =>
+      server.listen(0, "127.0.0.1", resolve),
+    );
+    port = (server.address() as AddressInfo).port;
+    testApp = await createTestApp({
+      outboundNetwork: {
+        ...fixtureOutboundNetwork,
+        deadlineMs: 150,
+        resolve: async () => [{ address: dnsAddress, family: 4 }],
+        request: (url, options, response) => {
+          connections++;
+          return https.request(
+            url,
+            {
+              ...options,
+              ca,
+              lookup: (_h, _o, cb) => cb(null, "127.0.0.1", 4),
+            },
+            response,
+          );
+        },
+      },
+    });
     worker = testApp.app.get(PushWorker);
-    owner = await signedInCookie(testApp.test, { name: "Push recipient", email: "network@push.test", emailVerified: true });
-    await request(testApp.http).patch("/api/v1/push/preferences")
-      .set("Cookie", owner.cookie).set("Origin", testApp.env.PUBLIC_URL).send({ enabled: true }).expect(200);
+    owner = await signedInCookie(testApp.test, {
+      name: "Push recipient",
+      email: "network@push.test",
+      emailVerified: true,
+    });
+    await request(testApp.http)
+      .patch("/api/v1/push/preferences")
+      .set("Cookie", owner.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({ enabled: true })
+      .expect(200);
   });
   afterAll(async () => {
     await testApp?.close();
     server.closeAllConnections();
-    await new Promise<void>(resolve => server.close(() => resolve()));
+    await new Promise<void>((resolve) => server.close(() => resolve()));
   });
   afterEach(async () => {
     dnsAddress = "8.8.8.8";
@@ -707,19 +792,36 @@ describe("Push delivery network safety", () => {
   async function enqueue(path: string) {
     const ecdh = createECDH("prime256v1");
     const p256dh = ecdh.generateKeys().toString("base64url");
-    const registered = await request(testApp.http).post("/api/v1/push/subscriptions")
-      .set("Cookie", owner.cookie).set("Origin", testApp.env.PUBLIC_URL)
-      .send({ endpoint: `https://receiver.example.test:${port}/${path}-${sequence++}`, keys: { p256dh, auth: randomBytes(16).toString("base64url") } });
+    const registered = await request(testApp.http)
+      .post("/api/v1/push/subscriptions")
+      .set("Cookie", owner.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({
+        endpoint: `https://receiver.example.test:${port}/${path}-${sequence++}`,
+        keys: { p256dh, auth: randomBytes(16).toString("base64url") },
+      });
     expect(registered.status).toBe(201);
     // Worker/DB boundary: seed one outbox job, rather than enqueuing a test for all subscriptions.
-    const [delivery] = await testApp.db.insert(schema.pushDeliveries).values({
-      subscriptionId: registered.body.id, userId: owner.userId, eventType: "test",
-      title: "Private test title", body: "Private test body",
-    }).returning();
-    return { subscriptionId: registered.body.id as string, deliveryId: delivery.id };
+    const [delivery] = await testApp.db
+      .insert(schema.pushDeliveries)
+      .values({
+        subscriptionId: registered.body.id,
+        userId: owner.userId,
+        eventType: "test",
+        title: "Private test title",
+        body: "Private test body",
+      })
+      .returning();
+    return {
+      subscriptionId: registered.body.id as string,
+      deliveryId: delivery.id,
+    };
   }
   async function delivery(id: string) {
-    const [row] = await testApp.db.select().from(schema.pushDeliveries).where(eq(schema.pushDeliveries.id, id));
+    const [row] = await testApp.db
+      .select()
+      .from(schema.pushDeliveries)
+      .where(eq(schema.pushDeliveries.id, id));
     return row;
   }
 
@@ -740,7 +842,11 @@ describe("Push delivery network safety", () => {
     dnsAddress = "169.254.169.254";
     await worker.processPending();
     expect(connections).toBe(before);
-    expect(await delivery(item.deliveryId)).toMatchObject({ status: "pending", attempts: 1, errorMessage: "Outbound destination rejected" });
+    expect(await delivery(item.deliveryId)).toMatchObject({
+      status: "pending",
+      attempts: 1,
+      errorMessage: "Outbound destination rejected",
+    });
   });
 
   it("does not follow a push redirect and retries successfully later", async () => {
@@ -748,25 +854,42 @@ describe("Push delivery network safety", () => {
     const before = connections;
     await worker.processPending();
     expect(connections).toBe(before + 1);
-    expect(await delivery(item.deliveryId)).toMatchObject({ status: "pending", attempts: 1, errorMessage: "HTTP 302" });
+    expect(await delivery(item.deliveryId)).toMatchObject({
+      status: "pending",
+      attempts: 1,
+      errorMessage: "HTTP 302",
+    });
     redirectStatus = 201;
-    await testApp.db.update(schema.pushDeliveries).set({ nextAttemptAt: new Date(0) }).where(eq(schema.pushDeliveries.id, item.deliveryId));
+    await testApp.db
+      .update(schema.pushDeliveries)
+      .set({ nextAttemptAt: new Date(0) })
+      .where(eq(schema.pushDeliveries.id, item.deliveryId));
     await worker.processPending();
-    expect(await delivery(item.deliveryId)).toMatchObject({ status: "delivered", attempts: 2, errorMessage: null });
+    expect(await delivery(item.deliveryId)).toMatchObject({
+      status: "delivered",
+      attempts: 2,
+      errorMessage: null,
+    });
   });
 
   it("bounds a stalled push endpoint so the next delivery proceeds", async () => {
     const stalled = await enqueue("stall");
     const later = await enqueue("ok");
     await worker.processPending();
-    expect(await delivery(stalled.deliveryId)).toMatchObject({ status: "pending", errorMessage: "Outbound delivery timed out" });
+    expect(await delivery(stalled.deliveryId)).toMatchObject({
+      status: "pending",
+      errorMessage: "Outbound delivery timed out",
+    });
     expect((await delivery(later.deliveryId)).status).toBe("delivered");
   });
 
   it("removes expired subscriptions on HTTP 410", async () => {
     const item = await enqueue("gone");
     await worker.processPending();
-    const subscriptions = await testApp.db.select().from(schema.pushSubscriptions).where(eq(schema.pushSubscriptions.id, item.subscriptionId));
+    const subscriptions = await testApp.db
+      .select()
+      .from(schema.pushSubscriptions)
+      .where(eq(schema.pushSubscriptions.id, item.subscriptionId));
     expect(subscriptions).toHaveLength(0);
   });
 });
@@ -788,81 +911,188 @@ describe("Push notification path: canonical URL, tag, Board lock and cleanup (D-
 
   const latch = () => {
     let release!: () => void;
-    const promise = new Promise<void>((resolve) => { release = resolve; });
+    const promise = new Promise<void>((resolve) => {
+      release = resolve;
+    });
     return { promise, release };
   };
 
   async function seedSub(userId: string, host: string) {
     const ecdh = createECDH("prime256v1");
-    const [row] = await testApp.db.insert(schema.pushSubscriptions).values({
-      userId, endpoint: `https://${host}.example.test/push`,
-      p256dh: ecdh.generateKeys().toString("base64url"), auth: randomBytes(16).toString("base64url"),
-    }).returning();
+    const [row] = await testApp.db
+      .insert(schema.pushSubscriptions)
+      .values({
+        userId,
+        endpoint: `https://${host}.example.test/push`,
+        p256dh: ecdh.generateKeys().toString("base64url"),
+        auth: randomBytes(16).toString("base64url"),
+      })
+      .returning();
     return row;
   }
   const statusOpts = () => ({
-    workspaceId: wsId, productId: prod.id, postId: post.id, actorId: owner.userId,
-    postTitle: "Path Post", newStatusName: "Done", productSlug: prod.slug, workspaceSlug: wsSlug, postNumber: post.number,
+    workspaceId: wsId,
+    productId: prod.id,
+    postId: post.id,
+    actorId: owner.userId,
+    postTitle: "Path Post",
+    newStatusName: "Done",
+    productSlug: prod.slug,
+    workspaceSlug: wsSlug,
+    postNumber: post.number,
   });
   const rowsFor = (productId: string) =>
-    testApp.db.select().from(schema.pushDeliveries).where(sql`${schema.pushDeliveries.data}->>'productId' = ${productId}`);
+    testApp.db
+      .select()
+      .from(schema.pushDeliveries)
+      .where(sql`${schema.pushDeliveries.data}->>'productId' = ${productId}`);
 
   beforeAll(async () => {
     testApp = await createTestApp();
     pushService = testApp.app.get(PushService);
     worker = testApp.app.get(PushWorker);
-    owner = await signedInCookie(testApp.test, { name: "Path Owner", email: "path-owner@push.test", emailVerified: true });
-    customer = await signedInCookie(testApp.test, { name: "Path Customer", email: "path-customer@push.test", emailVerified: true });
-    const [ws] = await testApp.db.insert(schema.workspaces).values({ name: "Path WS", slug: wsSlug }).returning();
+    owner = await signedInCookie(testApp.test, {
+      name: "Path Owner",
+      email: "path-owner@push.test",
+      emailVerified: true,
+    });
+    customer = await signedInCookie(testApp.test, {
+      name: "Path Customer",
+      email: "path-customer@push.test",
+      emailVerified: true,
+    });
+    const [ws] = await testApp.db
+      .insert(schema.workspaces)
+      .values({ name: "Path WS", slug: wsSlug })
+      .returning();
     wsId = ws.id;
-    await testApp.db.insert(schema.workspaceMembers).values({ workspaceId: wsId, userId: owner.userId, role: "owner" });
+    await testApp.db
+      .insert(schema.workspaceMembers)
+      .values({ workspaceId: wsId, userId: owner.userId, role: "owner" });
     const mk = async (slug: string) => {
-      const [p] = await testApp.db.insert(schema.products).values({ workspaceId: wsId, name: slug, slug }).returning();
-      const [st] = await testApp.db.insert(schema.statuses).values({ productId: p.id, name: "Open", color: "#123456", type: "review", position: 0, isDefault: true }).returning();
-      const [po] = await testApp.db.insert(schema.posts).values({ productId: p.id, number: 7, title: "Path Post", authorId: customer.userId, statusId: st.id }).returning();
+      const [p] = await testApp.db
+        .insert(schema.products)
+        .values({ workspaceId: wsId, name: slug, slug })
+        .returning();
+      const [st] = await testApp.db
+        .insert(schema.statuses)
+        .values({
+          productId: p.id,
+          name: "Open",
+          color: "#123456",
+          type: "review",
+          position: 0,
+          isDefault: true,
+        })
+        .returning();
+      const [po] = await testApp.db
+        .insert(schema.posts)
+        .values({
+          productId: p.id,
+          number: 7,
+          title: "Path Post",
+          authorId: customer.userId,
+          statusId: st.id,
+        })
+        .returning();
       return { p, po };
     };
     const a = await mk("path-a");
     const b = await mk("path-b");
-    prod = a.p; post = a.po; otherProd = b.p; otherPost = b.po;
+    prod = a.p;
+    post = a.po;
+    otherProd = b.p;
+    otherPost = b.po;
     sub = await seedSub(customer.userId, "path-sub");
     otherSub = await seedSub(customer.userId, "path-other");
   });
-  afterAll(async () => { await testApp?.close(); });
+  afterAll(async () => {
+    await testApp?.close();
+  });
   beforeEach(async () => {
     await testApp.db.delete(schema.pushDeliveries);
-    await testApp.db.update(schema.products).set({ boardEnabled: true, deletedAt: null }).where(eq(schema.products.workspaceId, wsId));
+    await testApp.db
+      .update(schema.products)
+      .set({ boardEnabled: true, deletedAt: null })
+      .where(eq(schema.products.workspaceId, wsId));
   });
-  afterEach(() => { vi.restoreAllMocks(); });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
-  const toggle = (board: boolean) => request(testApp.http).patch(`/api/v1/workspaces/${wsSlug}/products/${prod.slug}`)
-    .set("Cookie", owner.cookie).set("Origin", testApp.env.PUBLIC_URL).send({ features: { board } });
+  const toggle = (board: boolean) =>
+    request(testApp.http)
+      .patch(`/api/v1/workspaces/${wsSlug}/products/${prod.slug}`)
+      .set("Cookie", owner.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
+      .send({ features: { board } });
 
   it("uses the bare post path when the title slugifies to nothing", async () => {
-    await testApp.db.update(schema.posts).set({ title: "!!!" }).where(eq(schema.posts.id, post.id));
+    await testApp.db
+      .update(schema.posts)
+      .set({ title: "!!!" })
+      .where(eq(schema.posts.id, post.id));
     try {
-      await testApp.db.transaction((tx) => pushService.enqueueStatusChangePush(tx, { ...statusOpts(), postTitle: "!!!" }));
+      await testApp.db.transaction((tx) =>
+        pushService.enqueueStatusChangePush(tx, {
+          ...statusOpts(),
+          postTitle: "!!!",
+        }),
+      );
     } finally {
-      await testApp.db.update(schema.posts).set({ title: "Path Post" }).where(eq(schema.posts.id, post.id));
+      await testApp.db
+        .update(schema.posts)
+        .set({ title: "Path Post" })
+        .where(eq(schema.posts.id, post.id));
     }
     const [row] = await rowsFor(prod.id);
-    expect(row.url).toBe(`/${wsSlug}/${prod.slug}/p/${post.number}`);
+    expect(row.url.split("?")[0]).toBe(
+      `/${wsSlug}/${prod.slug}/p/${post.number}`,
+    );
   });
 
   it("carries the canonical url, per-post tag and renotify in the encrypted payload; test events carry neither", async () => {
-    await testApp.db.transaction((tx) => pushService.enqueueStatusChangePush(tx, statusOpts()));
+    await testApp.db.transaction((tx) =>
+      pushService.enqueueStatusChangePush(tx, statusOpts()),
+    );
     await testApp.db.insert(schema.pushDeliveries).values({
-      subscriptionId: sub.id, userId: customer.userId, eventType: "test", title: "t", body: "b", data: { test: true },
+      subscriptionId: sub.id,
+      userId: customer.userId,
+      eventType: "test",
+      title: "t",
+      body: "b",
+      data: { test: true },
     });
     const posts: string[] = [];
     const real = webpush.generateRequestDetails.bind(webpush);
-    vi.spyOn(webpush, "generateRequestDetails").mockImplementation(((s: any, payload: string) => { posts.push(payload); return real(s, payload); }) as any);
-    vi.spyOn(testApp.app.get(OutboundHttp), "post").mockResolvedValue({ statusCode: 201, body: "" } as any);
+    vi.spyOn(webpush, "generateRequestDetails").mockImplementation(((
+      s: any,
+      payload: string,
+    ) => {
+      posts.push(payload);
+      return real(s, payload);
+    }) as any);
+    vi.spyOn(testApp.app.get(OutboundHttp), "post").mockResolvedValue({
+      statusCode: 201,
+      body: "",
+    } as any);
     await worker.processPending();
     expect(posts).toHaveLength(3); // two status rows (two subscriptions) plus the test row
     const parsed = posts.map((p) => JSON.parse(p));
     const statusPayload = parsed.find((p) => p.data?.postId)!;
-    expect(statusPayload.url).toBe(`/${wsSlug}/${prod.slug}/p/${post.number}-${postSlug("Path Post")}`);
+    expect(statusPayload.url.split("?")[0]).toBe(
+      `/${wsSlug}/${prod.slug}/p/${post.number}-${postSlug("Path Post")}`,
+    );
+    expect(
+      new URL(statusPayload.url, "https://example.test").searchParams.get(
+        "uhq_channel",
+      ),
+    ).toBe("push");
+    expect(
+      new URL(statusPayload.url, "https://example.test").searchParams.get(
+        "uhq_type",
+      ),
+    ).toBe("status");
     expect(statusPayload.tag).toBe(`post-${post.id}`);
     expect(statusPayload.renotify).toBe(true);
     const testPayload = parsed.find((p) => !p.data?.postId)!;
@@ -871,32 +1101,102 @@ describe("Push notification path: canonical URL, tag, Board lock and cleanup (D-
   });
 
   it("inserts nothing for a Board-disabled, missing or soft-deleted product", async () => {
-    await testApp.db.update(schema.products).set({ boardEnabled: false }).where(eq(schema.products.id, prod.id));
-    await testApp.db.transaction((tx) => pushService.enqueueStatusChangePush(tx, statusOpts()));
-    await testApp.db.update(schema.products).set({ boardEnabled: true, deletedAt: new Date() }).where(eq(schema.products.id, prod.id));
-    await testApp.db.transaction((tx) => pushService.enqueueStatusChangePush(tx, statusOpts()));
-    await testApp.db.transaction((tx) => pushService.enqueueStatusChangePush(tx, { ...statusOpts(), productId: "00000000-0000-4000-8000-000000000000" }));
-    await testApp.db.update(schema.products).set({ deletedAt: null }).where(eq(schema.products.id, prod.id));
-    expect(await testApp.db.select().from(schema.pushDeliveries)).toHaveLength(0);
+    await testApp.db
+      .update(schema.products)
+      .set({ boardEnabled: false })
+      .where(eq(schema.products.id, prod.id));
+    await testApp.db.transaction((tx) =>
+      pushService.enqueueStatusChangePush(tx, statusOpts()),
+    );
+    await testApp.db
+      .update(schema.products)
+      .set({ boardEnabled: true, deletedAt: new Date() })
+      .where(eq(schema.products.id, prod.id));
+    await testApp.db.transaction((tx) =>
+      pushService.enqueueStatusChangePush(tx, statusOpts()),
+    );
+    await testApp.db.transaction((tx) =>
+      pushService.enqueueStatusChangePush(tx, {
+        ...statusOpts(),
+        productId: "00000000-0000-4000-8000-000000000000",
+      }),
+    );
+    await testApp.db
+      .update(schema.products)
+      .set({ deletedAt: null })
+      .where(eq(schema.products.id, prod.id));
+    expect(await testApp.db.select().from(schema.pushDeliveries)).toHaveLength(
+      0,
+    );
   });
 
   it("board disable removes only that product's unsent push rows; re-enable creates nothing", async () => {
-    const base = { userId: customer.userId, eventType: "status_change", title: "t", body: "b" };
-    const [pending, sending, delivered, failed, testEvent, otherPending] = await testApp.db.insert(schema.pushDeliveries).values([
-      { ...base, subscriptionId: sub.id, status: "pending", data: { productId: prod.id, postId: post.id } },
-      { ...base, subscriptionId: sub.id, status: "sending", data: { productId: prod.id, postId: post.id } },
-      { ...base, subscriptionId: sub.id, status: "delivered", data: { productId: prod.id, postId: post.id } },
-      { ...base, subscriptionId: sub.id, status: "failed", data: { productId: prod.id, postId: post.id } },
-      { ...base, subscriptionId: sub.id, eventType: "test", status: "pending", data: { test: true } },
-      { ...base, subscriptionId: otherSub.id, status: "pending", data: { productId: otherProd.id, postId: otherPost.id } },
-    ]).returning();
+    const base = {
+      userId: customer.userId,
+      eventType: "status_change",
+      title: "t",
+      body: "b",
+    };
+    const [pending, sending, delivered, failed, testEvent, otherPending] =
+      await testApp.db
+        .insert(schema.pushDeliveries)
+        .values([
+          {
+            ...base,
+            subscriptionId: sub.id,
+            status: "pending",
+            data: { productId: prod.id, postId: post.id },
+          },
+          {
+            ...base,
+            subscriptionId: sub.id,
+            status: "sending",
+            data: { productId: prod.id, postId: post.id },
+          },
+          {
+            ...base,
+            subscriptionId: sub.id,
+            status: "delivered",
+            data: { productId: prod.id, postId: post.id },
+          },
+          {
+            ...base,
+            subscriptionId: sub.id,
+            status: "failed",
+            data: { productId: prod.id, postId: post.id },
+          },
+          {
+            ...base,
+            subscriptionId: sub.id,
+            eventType: "test",
+            status: "pending",
+            data: { test: true },
+          },
+          {
+            ...base,
+            subscriptionId: otherSub.id,
+            status: "pending",
+            data: { productId: otherProd.id, postId: otherPost.id },
+          },
+        ])
+        .returning();
     expect((await toggle(false)).status).toBe(200);
-    const left = (await testApp.db.select({ id: schema.pushDeliveries.id }).from(schema.pushDeliveries)).map((r) => r.id).sort();
-    expect(left).toEqual([delivered.id, failed.id, testEvent.id, otherPending.id].sort());
+    const left = (
+      await testApp.db
+        .select({ id: schema.pushDeliveries.id })
+        .from(schema.pushDeliveries)
+    )
+      .map((r) => r.id)
+      .sort();
+    expect(left).toEqual(
+      [delivered.id, failed.id, testEvent.id, otherPending.id].sort(),
+    );
     expect(left).not.toContain(pending.id);
     expect(left).not.toContain(sending.id);
     expect((await toggle(true)).status).toBe(200);
-    expect(await testApp.db.select().from(schema.pushDeliveries)).toHaveLength(4);
+    expect(await testApp.db.select().from(schema.pushDeliveries)).toHaveLength(
+      4,
+    );
   });
 
   it("serializes an in-flight enqueue with a concurrent Board disable", async () => {
@@ -910,7 +1210,10 @@ describe("Push notification path: canonical URL, tag, Board lock and cleanup (D-
     try {
       await produced.promise;
       let disableFinished = false;
-      const disabling = toggle(false).then((res) => { disableFinished = true; return res; });
+      const disabling = toggle(false).then((res) => {
+        disableFinished = true;
+        return res;
+      });
       // Two valid orderings: disable finishes, or it reaches a real PostgreSQL lock wait on the product row.
       const deadline = Date.now() + 5000;
       while (!disableFinished) {
@@ -920,13 +1223,18 @@ describe("Push notification path: canonical URL, tag, Board lock and cleanup (D-
             AND wait_event_type = 'Lock' AND query ILIKE '%update%products%'
         `);
         if (waiting.rows.length > 0) break;
-        if (Date.now() > deadline) throw new Error("Disable neither completed nor reached its product lock");
+        if (Date.now() > deadline)
+          throw new Error(
+            "Disable neither completed nor reached its product lock",
+          );
       }
       commit.release();
       await producer;
       expect((await disabling).status).toBe(200);
       expect((await toggle(true)).status).toBe(200);
-      const survivors = (await rowsFor(prod.id)).filter((r) => r.status === "pending" || r.status === "sending");
+      const survivors = (await rowsFor(prod.id)).filter(
+        (r) => r.status === "pending" || r.status === "sending",
+      );
       expect(survivors).toHaveLength(0);
     } finally {
       commit.release();
@@ -950,40 +1258,90 @@ describe("Admin-only tenant-guarded product follow (D-11)", () => {
   const followPath = `/api/v1/workspaces/${wsSlug}/products/${prodSlug}/push-follow`;
 
   const follows = (productId: string) =>
-    testApp.db.select().from(schema.pushFollowedProducts).where(eq(schema.pushFollowedProducts.productId, productId));
+    testApp.db
+      .select()
+      .from(schema.pushFollowedProducts)
+      .where(eq(schema.pushFollowedProducts.productId, productId));
   const mut = (method: "post" | "delete", path: string, cookie: string) =>
-    request(testApp.http)[method](path).set("Cookie", cookie).set("Origin", testApp.env.PUBLIC_URL);
+    request(testApp.http)
+      [method](path)
+      .set("Cookie", cookie)
+      .set("Origin", testApp.env.PUBLIC_URL);
 
   beforeAll(async () => {
     testApp = await createTestApp();
     pushService = testApp.app.get(PushService);
-    owner = await signedInCookie(testApp.test, { name: "F Owner", email: "f-owner@push.test", emailVerified: true });
-    admin = await signedInCookie(testApp.test, { name: "F Admin", email: "f-admin@push.test", emailVerified: true });
-    customer = await signedInCookie(testApp.test, { name: "F Customer", email: "f-customer@push.test", emailVerified: true });
-    foreign = await signedInCookie(testApp.test, { name: "F Foreign", email: "f-foreign@push.test", emailVerified: true });
-    const [ws] = await testApp.db.insert(schema.workspaces).values({ name: "Follow WS", slug: wsSlug }).returning();
+    owner = await signedInCookie(testApp.test, {
+      name: "F Owner",
+      email: "f-owner@push.test",
+      emailVerified: true,
+    });
+    admin = await signedInCookie(testApp.test, {
+      name: "F Admin",
+      email: "f-admin@push.test",
+      emailVerified: true,
+    });
+    customer = await signedInCookie(testApp.test, {
+      name: "F Customer",
+      email: "f-customer@push.test",
+      emailVerified: true,
+    });
+    foreign = await signedInCookie(testApp.test, {
+      name: "F Foreign",
+      email: "f-foreign@push.test",
+      emailVerified: true,
+    });
+    const [ws] = await testApp.db
+      .insert(schema.workspaces)
+      .values({ name: "Follow WS", slug: wsSlug })
+      .returning();
     wsId = ws.id;
     await testApp.db.insert(schema.workspaceMembers).values([
       { workspaceId: wsId, userId: owner.userId, role: "owner" },
       { workspaceId: wsId, userId: admin.userId, role: "admin" },
     ]);
-    const [prod] = await testApp.db.insert(schema.products).values({ workspaceId: wsId, name: "Follow Product", slug: prodSlug }).returning();
+    const [prod] = await testApp.db
+      .insert(schema.products)
+      .values({ workspaceId: wsId, name: "Follow Product", slug: prodSlug })
+      .returning();
     prodId = prod.id;
-    const [fws] = await testApp.db.insert(schema.workspaces).values({ name: "Foreign WS", slug: "ws-follow-foreign" }).returning();
-    await testApp.db.insert(schema.workspaceMembers).values({ workspaceId: fws.id, userId: foreign.userId, role: "owner" });
-    const [fprod] = await testApp.db.insert(schema.products).values({ workspaceId: fws.id, name: "Foreign Product", slug: "foreign-prod" }).returning();
+    const [fws] = await testApp.db
+      .insert(schema.workspaces)
+      .values({ name: "Foreign WS", slug: "ws-follow-foreign" })
+      .returning();
+    await testApp.db
+      .insert(schema.workspaceMembers)
+      .values({ workspaceId: fws.id, userId: foreign.userId, role: "owner" });
+    const [fprod] = await testApp.db
+      .insert(schema.products)
+      .values({
+        workspaceId: fws.id,
+        name: "Foreign Product",
+        slug: "foreign-prod",
+      })
+      .returning();
     foreignProdId = fprod.id;
   });
-  afterAll(async () => { await testApp?.close(); });
-  beforeEach(async () => { await testApp.db.delete(schema.pushFollowedProducts); await testApp.db.delete(schema.pushDeliveries); });
+  afterAll(async () => {
+    await testApp?.close();
+  });
+  beforeEach(async () => {
+    await testApp.db.delete(schema.pushFollowedProducts);
+    await testApp.db.delete(schema.pushDeliveries);
+  });
 
   it("lets workspace owners and admins follow idempotently, list, and unfollow", async () => {
     for (const who of [owner, admin]) {
-      expect((await mut("post", followPath, who.cookie)).body).toEqual({ success: true });
+      expect((await mut("post", followPath, who.cookie)).body).toEqual({
+        success: true,
+      });
       expect((await mut("post", followPath, who.cookie)).status).toBe(200);
     }
     expect(await follows(prodId)).toHaveLength(2);
-    const list = await request(testApp.http).get("/api/v1/push/followed-products").set("Cookie", owner.cookie).expect(200);
+    const list = await request(testApp.http)
+      .get("/api/v1/push/followed-products")
+      .set("Cookie", owner.cookie)
+      .expect(200);
     expect(list.body.map((p: any) => p.productId)).toEqual([prodId]);
     expect((await mut("delete", followPath, owner.cookie)).status).toBe(200);
     const left = await follows(prodId);
@@ -995,20 +1353,35 @@ describe("Admin-only tenant-guarded product follow (D-11)", () => {
     expect(nonMember.status).toBe(404);
     expect(nonMember.body.code).toBe("not_found");
 
-    const crossTenant = await mut("post", `/api/v1/workspaces/${wsSlug}/products/${prodSlug}/push-follow`, foreign.cookie);
+    const crossTenant = await mut(
+      "post",
+      `/api/v1/workspaces/${wsSlug}/products/${prodSlug}/push-follow`,
+      foreign.cookie,
+    );
     expect(crossTenant.status).toBe(404);
-    const reversed = await mut("post", "/api/v1/workspaces/ws-follow-foreign/products/foreign-prod/push-follow", owner.cookie);
+    const reversed = await mut(
+      "post",
+      "/api/v1/workspaces/ws-follow-foreign/products/foreign-prod/push-follow",
+      owner.cookie,
+    );
     expect(reversed.status).toBe(404);
 
-    const anon = await request(testApp.http).post(followPath).set("Origin", testApp.env.PUBLIC_URL);
+    const anon = await request(testApp.http)
+      .post(followPath)
+      .set("Origin", testApp.env.PUBLIC_URL);
     expect(anon.status).toBe(401);
 
-    const key = await request(testApp.http).post(`/api/v1/workspaces/${wsSlug}/api-keys`)
-      .set("Cookie", owner.cookie).set("Origin", testApp.env.PUBLIC_URL)
+    const key = await request(testApp.http)
+      .post(`/api/v1/workspaces/${wsSlug}/api-keys`)
+      .set("Cookie", owner.cookie)
+      .set("Origin", testApp.env.PUBLIC_URL)
       .send({ name: "Follow policy", scopes: ["admin"] });
     expect(key.status).toBe(201);
     for (const method of ["post", "delete"] as const) {
-      const res = await request(testApp.http)[method](followPath).set("Authorization", `Bearer ${key.body.token}`).send({});
+      const res = await request(testApp.http)
+        [method](followPath)
+        .set("Authorization", `Bearer ${key.body.token}`)
+        .send({});
       expect(res.status, method).toBe(403);
       expect(res.body.code).toBe("api_key_route_forbidden");
     }
@@ -1018,7 +1391,11 @@ describe("Admin-only tenant-guarded product follow (D-11)", () => {
   });
 
   it("no longer exposes the raw product id follow route", async () => {
-    const res = await mut("post", `/api/v1/push/followed-products/${prodId}`, owner.cookie);
+    const res = await mut(
+      "post",
+      `/api/v1/push/followed-products/${prodId}`,
+      owner.cookie,
+    );
     expect(res.status).toBe(404);
     expect(await follows(prodId)).toHaveLength(0);
   });
@@ -1028,20 +1405,47 @@ describe("Admin-only tenant-guarded product follow (D-11)", () => {
       { userId: owner.userId, productId: prodId },
       { userId: admin.userId, productId: prodId },
     ]);
-    expect((await mut("delete", `/api/v1/push/followed-products/${prodId}`, admin.cookie)).status).toBe(200);
-    expect((await follows(prodId)).map((f) => f.userId)).toEqual([owner.userId]);
+    expect(
+      (
+        await mut(
+          "delete",
+          `/api/v1/push/followed-products/${prodId}`,
+          admin.cookie,
+        )
+      ).status,
+    ).toBe(200);
+    expect((await follows(prodId)).map((f) => f.userId)).toEqual([
+      owner.userId,
+    ]);
   });
 
   it("hides a product from the followed list once the caller left the workspace", async () => {
-    await testApp.db.insert(schema.pushFollowedProducts).values({ userId: admin.userId, productId: prodId });
-    const before = await request(testApp.http).get("/api/v1/push/followed-products").set("Cookie", admin.cookie).expect(200);
+    await testApp.db
+      .insert(schema.pushFollowedProducts)
+      .values({ userId: admin.userId, productId: prodId });
+    const before = await request(testApp.http)
+      .get("/api/v1/push/followed-products")
+      .set("Cookie", admin.cookie)
+      .expect(200);
     expect(before.body).toHaveLength(1);
-    await testApp.db.delete(schema.workspaceMembers).where(and(eq(schema.workspaceMembers.workspaceId, wsId), eq(schema.workspaceMembers.userId, admin.userId)));
+    await testApp.db
+      .delete(schema.workspaceMembers)
+      .where(
+        and(
+          eq(schema.workspaceMembers.workspaceId, wsId),
+          eq(schema.workspaceMembers.userId, admin.userId),
+        ),
+      );
     try {
-      const after = await request(testApp.http).get("/api/v1/push/followed-products").set("Cookie", admin.cookie).expect(200);
+      const after = await request(testApp.http)
+        .get("/api/v1/push/followed-products")
+        .set("Cookie", admin.cookie)
+        .expect(200);
       expect(after.body).toEqual([]);
     } finally {
-      await testApp.db.insert(schema.workspaceMembers).values({ workspaceId: wsId, userId: admin.userId, role: "admin" });
+      await testApp.db
+        .insert(schema.workspaceMembers)
+        .values({ workspaceId: wsId, userId: admin.userId, role: "admin" });
     }
   });
 
@@ -1050,8 +1454,10 @@ describe("Admin-only tenant-guarded product follow (D-11)", () => {
     const mkSub = async (userId: string, host: string) => {
       const ecdh = createECDH("prime256v1");
       await testApp.db.insert(schema.pushSubscriptions).values({
-        userId, endpoint: `https://${host}.example.test/push`,
-        p256dh: ecdh.generateKeys().toString("base64url"), auth: randomBytes(16).toString("base64url"),
+        userId,
+        endpoint: `https://${host}.example.test/push`,
+        p256dh: ecdh.generateKeys().toString("base64url"),
+        auth: randomBytes(16).toString("base64url"),
       });
     };
     await mkSub(stale.userId, "stale");
@@ -1060,20 +1466,53 @@ describe("Admin-only tenant-guarded product follow (D-11)", () => {
       { userId: stale.userId, productId: prodId },
       { userId: admin.userId, productId: prodId },
     ]);
-    const [st] = await testApp.db.insert(schema.statuses).values({ productId: prodId, name: "Open", color: "#123456", type: "review", position: 0, isDefault: true }).returning();
-    const [post] = await testApp.db.insert(schema.posts).values({ productId: prodId, number: 1, title: "Stale Post", authorId: owner.userId, statusId: st.id }).returning();
-    const [comment] = await testApp.db.insert(schema.comments).values({ postId: post.id, authorId: owner.userId, body: "c" }).returning();
+    const [st] = await testApp.db
+      .insert(schema.statuses)
+      .values({
+        productId: prodId,
+        name: "Open",
+        color: "#123456",
+        type: "review",
+        position: 0,
+        isDefault: true,
+      })
+      .returning();
+    const [post] = await testApp.db
+      .insert(schema.posts)
+      .values({
+        productId: prodId,
+        number: 1,
+        title: "Stale Post",
+        authorId: owner.userId,
+        statusId: st.id,
+      })
+      .returning();
+    const [comment] = await testApp.db
+      .insert(schema.comments)
+      .values({ postId: post.id, authorId: owner.userId, body: "c" })
+      .returning();
     const common = {
-      workspaceId: wsId, productId: prodId, postId: post.id, actorId: owner.userId, postTitle: "Stale Post",
-      productName: "Follow Product", productSlug: prodSlug, workspaceSlug: wsSlug, postNumber: 1,
+      workspaceId: wsId,
+      productId: prodId,
+      postId: post.id,
+      actorId: owner.userId,
+      postTitle: "Stale Post",
+      productName: "Follow Product",
+      productSlug: prodSlug,
+      workspaceSlug: wsSlug,
+      postNumber: 1,
     };
     await testApp.db.transaction(async (tx) => {
       await pushService.enqueueNewPostPush(tx, common);
-      await pushService.enqueueNewCommentPush(tx, { ...common, commentId: comment.id, actorName: "Owner" });
+      await pushService.enqueueNewCommentPush(tx, {
+        ...common,
+        commentId: comment.id,
+        actorName: "Owner",
+      });
     });
     const rows = await testApp.db.select().from(schema.pushDeliveries);
-    expect(rows.map((r) => `${r.userId}:${r.eventType}`).sort()).toEqual([
-      `${admin.userId}:new_comment`, `${admin.userId}:new_post`,
-    ].sort());
+    expect(rows.map((r) => `${r.userId}:${r.eventType}`).sort()).toEqual(
+      [`${admin.userId}:new_comment`, `${admin.userId}:new_post`].sort(),
+    );
   });
 });

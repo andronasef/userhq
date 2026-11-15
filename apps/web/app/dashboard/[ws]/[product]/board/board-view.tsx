@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useAnalyticsRouter as useRouter } from "@/lib/analytics-navigation";
 import type { AdminPostRow, AdminPostPage, PostStatus } from "@userhq/types";
 import { BoardFilters } from "@/components/dashboard/board-filters";
 import { BoardTable } from "@/components/dashboard/board-table";

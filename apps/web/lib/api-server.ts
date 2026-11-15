@@ -87,12 +87,12 @@ import {
 
 export async function apiServer(
   path: string,
-  init?: RequestInit
+  init?: RequestInit,
 ): Promise<Response> {
   const apiInternalUrl = process.env.API_INTERNAL_URL;
   if (!apiInternalUrl) {
     throw new Error(
-      "apiServer: API_INTERNAL_URL environment variable is required"
+      "apiServer: API_INTERNAL_URL environment variable is required",
     );
   }
 
@@ -115,6 +115,7 @@ export async function apiServer(
     }
   }
 
+  forwardHeaders.set("x-userhq-browser", "context");
   return fetch(targetUrl, {
     ...init,
     headers: forwardHeaders,
@@ -139,7 +140,11 @@ export const getMe: () => Promise<MeResponse> = cache(async () => {
 });
 
 export type ApiReadResult<T> =
-  | { ok: true; data: T }
+  | {
+      ok: true;
+      data: T;
+      analyticsContext?: { workspace_id: string; product_id?: string };
+    }
   | { ok: false; status: number; code: string | null };
 
 /** Public portal reads are served in the visitor's language (API falls back to the product default). */
@@ -149,13 +154,35 @@ async function localizedPath(path: string): Promise<string> {
 
 export async function apiRead<T>(
   path: string,
-  schema: z.ZodType<T>
+  schema: z.ZodType<T>,
 ): Promise<ApiReadResult<T>> {
   const res = await apiServer(path, { method: "GET" });
 
   if (res.ok) {
     const json = await res.json();
-    return { ok: true, data: schema.parse(json) };
+    let analyticsContext:
+      { workspace_id: string; product_id?: string } | undefined;
+    try {
+      const raw = res.headers.get("x-userhq-analytics-context");
+      if (raw && raw.length < 500) {
+        const value = JSON.parse(Buffer.from(raw, "base64url").toString());
+        if (
+          /^[a-f0-9]{32}$/.test(value.workspace_id) &&
+          (!value.product_id || /^[a-f0-9]{32}$/.test(value.product_id))
+        )
+          analyticsContext = {
+            workspace_id: value.workspace_id,
+            product_id: value.product_id,
+          };
+      }
+    } catch {
+      /* optional context cannot affect a page read */
+    }
+    return {
+      ok: true,
+      data: schema.parse(json),
+      ...(analyticsContext ? { analyticsContext } : {}),
+    };
   }
 
   if (res.status >= 400 && res.status < 500) {
@@ -175,19 +202,25 @@ export async function apiRead<T>(
 }
 
 export const getPortalProduct = cache(
-  (ws: string, product: string): Promise<ApiReadResult<PublicPortalProduct>> => {
+  (
+    ws: string,
+    product: string,
+  ): Promise<ApiReadResult<PublicPortalProduct>> => {
     return apiRead(
-      "/api/v1/portal/" + encodeURIComponent(ws) + "/" + encodeURIComponent(product),
-      PublicPortalProductSchema
+      "/api/v1/portal/" +
+        encodeURIComponent(ws) +
+        "/" +
+        encodeURIComponent(product),
+      PublicPortalProductSchema,
     );
-  }
+  },
 );
 
 export const getBoard = cache(
   (
     ws: string,
     product: string,
-    search: string
+    search: string,
   ): Promise<ApiReadResult<PublicBoardPage>> => {
     const qs = search ? `?${search}` : "";
     return apiRead(
@@ -197,16 +230,16 @@ export const getBoard = cache(
         encodeURIComponent(product) +
         "/posts" +
         qs,
-      PublicBoardPageSchema
+      PublicBoardPageSchema,
     );
-  }
+  },
 );
 
 export const getPost = cache(
   (
     ws: string,
     product: string,
-    number: number
+    number: number,
   ): Promise<ApiReadResult<PublicPostPage>> => {
     return apiRead(
       "/api/v1/portal/" +
@@ -215,67 +248,85 @@ export const getPost = cache(
         encodeURIComponent(product) +
         "/posts/" +
         encodeURIComponent(String(number)),
-      PublicPostPageSchema
+      PublicPostPageSchema,
     );
-  }
+  },
 );
 
 export const getWorkspace = cache(
   (ws: string): Promise<ApiReadResult<Workspace>> => {
     return apiRead(
       "/api/v1/workspaces/" + encodeURIComponent(ws),
-      WorkspaceSchema
+      WorkspaceSchema,
     );
-  }
+  },
 );
 
-export const getPlatformInvites = cache((): Promise<ApiReadResult<InviteRow[]>> => {
-  return apiRead("/api/v1/platform/invites", z.array(InviteRowSchema));
-});
+export const getPlatformInvites = cache(
+  (): Promise<ApiReadResult<InviteRow[]>> => {
+    return apiRead("/api/v1/platform/invites", z.array(InviteRowSchema));
+  },
+);
 
-export const getInvite = cache((token: string): Promise<ApiReadResult<InviteLookup>> => {
-  return apiRead("/api/v1/invites/" + encodeURIComponent(token), InviteLookupSchema);
-});
+export const getInvite = cache(
+  (token: string): Promise<ApiReadResult<InviteLookup>> => {
+    return apiRead(
+      "/api/v1/invites/" + encodeURIComponent(token),
+      InviteLookupSchema,
+    );
+  },
+);
 
-export const getMembers = cache((ws: string): Promise<ApiReadResult<MemberRow[]>> => {
-  return apiRead(
-    "/api/v1/workspaces/" + encodeURIComponent(ws) + "/members",
-    z.array(MemberRowSchema)
-  );
-});
+export const getMembers = cache(
+  (ws: string): Promise<ApiReadResult<MemberRow[]>> => {
+    return apiRead(
+      "/api/v1/workspaces/" + encodeURIComponent(ws) + "/members",
+      z.array(MemberRowSchema),
+    );
+  },
+);
 
-export const getTeamInvites = cache((ws: string): Promise<ApiReadResult<InviteRow[]>> => {
-  return apiRead(
-    "/api/v1/workspaces/" + encodeURIComponent(ws) + "/invites",
-    z.array(InviteRowSchema)
-  );
-});
+export const getTeamInvites = cache(
+  (ws: string): Promise<ApiReadResult<InviteRow[]>> => {
+    return apiRead(
+      "/api/v1/workspaces/" + encodeURIComponent(ws) + "/invites",
+      z.array(InviteRowSchema),
+    );
+  },
+);
 
 export const getProducts = cache(
   (ws: string): Promise<ApiReadResult<ProductSummary[]>> => {
     return apiRead(
       "/api/v1/workspaces/" + encodeURIComponent(ws) + "/products",
-      z.array(ProductSummarySchema)
+      z.array(ProductSummarySchema),
     );
-  }
+  },
 );
 
 export const getProduct = cache(
   (ws: string, product: string): Promise<ApiReadResult<ProductDetail>> => {
     return apiRead(
-      "/api/v1/workspaces/" + encodeURIComponent(ws) + "/products/" + encodeURIComponent(product),
-      ProductDetailSchema
+      "/api/v1/workspaces/" +
+        encodeURIComponent(ws) +
+        "/products/" +
+        encodeURIComponent(product),
+      ProductDetailSchema,
     );
-  }
+  },
 );
 
 export const getStatuses = cache(
   (ws: string, product: string): Promise<ApiReadResult<Status[]>> => {
     return apiRead(
-      "/api/v1/workspaces/" + encodeURIComponent(ws) + "/products/" + encodeURIComponent(product) + "/statuses",
-      z.array(StatusSchema)
+      "/api/v1/workspaces/" +
+        encodeURIComponent(ws) +
+        "/products/" +
+        encodeURIComponent(product) +
+        "/statuses",
+      z.array(StatusSchema),
     );
-  }
+  },
 );
 
 export const getCategories = cache(
@@ -286,37 +337,43 @@ export const getCategories = cache(
         "/products/" +
         encodeURIComponent(product) +
         "/categories",
-      z.array(CategorySchema)
+      z.array(CategorySchema),
     );
-  }
+  },
 );
 
 export const getPortalDirectory = cache(
   (ws: string): Promise<ApiReadResult<PublicPortalDirectory>> => {
     return apiRead(
       "/api/v1/portal/" + encodeURIComponent(ws),
-      PublicPortalDirectorySchema
+      PublicPortalDirectorySchema,
     );
-  }
+  },
 );
 
 export const getPlatformWorkspaces = cache(
-  (q?: string, page?: number): Promise<ApiReadResult<PlatformWorkspacePage>> => {
+  (
+    q?: string,
+    page?: number,
+  ): Promise<ApiReadResult<PlatformWorkspacePage>> => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (page && page > 1) params.set("page", String(page));
     const qs = params.toString() ? `?${params.toString()}` : "";
-    return apiRead(`/api/v1/platform/workspaces${qs}`, PlatformWorkspacePageSchema);
-  }
+    return apiRead(
+      `/api/v1/platform/workspaces${qs}`,
+      PlatformWorkspacePageSchema,
+    );
+  },
 );
 
 export const getPlatformWorkspace = cache(
   (id: string): Promise<ApiReadResult<PlatformWorkspaceDetail>> => {
     return apiRead(
       `/api/v1/platform/workspaces/${encodeURIComponent(id)}`,
-      PlatformWorkspaceDetailSchema
+      PlatformWorkspaceDetailSchema,
     );
-  }
+  },
 );
 
 export const getPlatformUsers = cache(
@@ -326,7 +383,7 @@ export const getPlatformUsers = cache(
     if (page && page > 1) params.set("page", String(page));
     const qs = params.toString() ? `?${params.toString()}` : "";
     return apiRead(`/api/v1/platform/users${qs}`, PlatformUserPageSchema);
-  }
+  },
 );
 
 export async function publicHost(): Promise<string> {
@@ -355,7 +412,7 @@ export const getAdminPosts = cache(
       category?: string;
       status?: string;
       cursor?: string;
-    }
+    },
   ): Promise<ApiReadResult<AdminPostPage>> => {
     const params = new URLSearchParams();
     if (search?.q) params.set("q", search.q);
@@ -366,58 +423,55 @@ export const getAdminPosts = cache(
     const qs = params.toString() ? `?${params.toString()}` : "";
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/posts${qs}`,
-      AdminPostPageSchema
+      AdminPostPageSchema,
     );
-  }
+  },
 );
 
 export const getDeletedPosts = cache(
   (
     ws: string,
     product: string,
-    cursor?: string
+    cursor?: string,
   ): Promise<ApiReadResult<DeletedPostPage>> => {
     const params = new URLSearchParams({ view: "deleted" });
     if (cursor) params.set("cursor", cursor);
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/posts?${params.toString()}`,
-      DeletedPostPageSchema
+      DeletedPostPageSchema,
     );
-  }
+  },
 );
 
 export const getDeletedComments = cache(
-  (
-    ws: string,
-    product: string
-  ): Promise<ApiReadResult<DeletedCommentPage>> => {
+  (ws: string, product: string): Promise<ApiReadResult<DeletedCommentPage>> => {
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/comments/deleted`,
-      DeletedCommentPageSchema
+      DeletedCommentPageSchema,
     );
-  }
+  },
 );
 
 export const getAdminPost = cache(
   (
     ws: string,
     product: string,
-    number: number | string
+    number: number | string,
   ): Promise<ApiReadResult<AdminPostDetail>> => {
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/posts/${encodeURIComponent(String(number))}`,
-      AdminPostDetailSchema
+      AdminPostDetailSchema,
     );
-  }
+  },
 );
 
 export const getUnsubscribe = cache(
   (token: string): Promise<ApiReadResult<UnsubscribeState>> => {
     return apiRead(
       "/api/v1/unsubscribe/" + encodeURIComponent(token),
-      UnsubscribeStateSchema
+      UnsubscribeStateSchema,
     );
-  }
+  },
 );
 
 export const getAccount = cache((): Promise<ApiReadResult<Account>> => {
@@ -425,103 +479,130 @@ export const getAccount = cache((): Promise<ApiReadResult<Account>> => {
 });
 
 export const getAdminRoadmap = cache(
-  (ws: string, product: string): Promise<ApiReadResult<AdminRoadmapListResponse>> => {
+  (
+    ws: string,
+    product: string,
+  ): Promise<ApiReadResult<AdminRoadmapListResponse>> => {
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/roadmap`,
-      AdminRoadmapListResponseSchema
+      AdminRoadmapListResponseSchema,
     );
-  }
+  },
 );
 
 export const getPublicRoadmap = cache(
-  (ws: string, product: string): Promise<ApiReadResult<PublicRoadmapListResponse>> => {
-    return localizedPath(`/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap`).then((path) =>
-      apiRead(path, PublicRoadmapListResponseSchema)
-    );
-  }
+  (
+    ws: string,
+    product: string,
+  ): Promise<ApiReadResult<PublicRoadmapListResponse>> => {
+    return localizedPath(
+      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap`,
+    ).then((path) => apiRead(path, PublicRoadmapListResponseSchema));
+  },
 );
 
 export const getPublicRoadmapItem = cache(
-  (ws: string, product: string, id: string): Promise<ApiReadResult<PublicRoadmapDetailResponse>> => {
+  (
+    ws: string,
+    product: string,
+    id: string,
+  ): Promise<ApiReadResult<PublicRoadmapDetailResponse>> => {
     return localizedPath(
-      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap/${encodeURIComponent(id)}`
+      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/roadmap/${encodeURIComponent(id)}`,
     ).then((path) => apiRead(path, PublicRoadmapDetailResponseSchema));
-  }
+  },
 );
 
 export const getActivity = cache(
-  (ws: string, product: string): Promise<ApiReadResult<ActivityListResponse>> => {
+  (
+    ws: string,
+    product: string,
+  ): Promise<ApiReadResult<ActivityListResponse>> => {
     return apiRead(
       `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/activity`,
-      ActivityListResponseSchema
+      ActivityListResponseSchema,
     );
-  }
+  },
 );
 
 export const getPublicChangelogFeed = cache(
-  (ws: string, product: string): Promise<ApiReadResult<PublicChangelogFeedResponse>> => {
-    return localizedPath(`/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/changelog`).then((path) =>
-      apiRead(path, PublicChangelogFeedResponseSchema)
-    );
-  }
+  (
+    ws: string,
+    product: string,
+  ): Promise<ApiReadResult<PublicChangelogFeedResponse>> => {
+    return localizedPath(
+      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/changelog`,
+    ).then((path) => apiRead(path, PublicChangelogFeedResponseSchema));
+  },
 );
 
 export const getPublicChangelogEntry = cache(
-  (ws: string, product: string, slug: string): Promise<ApiReadResult<PublicChangelogEntry>> => {
+  (
+    ws: string,
+    product: string,
+    slug: string,
+  ): Promise<ApiReadResult<PublicChangelogEntry>> => {
     return localizedPath(
-      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/changelog/${encodeURIComponent(slug)}`
+      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/changelog/${encodeURIComponent(slug)}`,
     ).then((path) => apiRead(path, PublicChangelogEntrySchema));
-  }
+  },
 );
 
 export const getAdminChangelogList = cache(
-  (ws: string, product: string): Promise<ApiReadResult<AdminChangelogListResponse>> => {
+  (
+    ws: string,
+    product: string,
+  ): Promise<ApiReadResult<AdminChangelogListResponse>> => {
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/changelog`,
-      AdminChangelogListResponseSchema
+      AdminChangelogListResponseSchema,
     );
-  }
+  },
 );
 
 export const getAdminChangelogEntry = cache(
-  (ws: string, product: string, id: string): Promise<ApiReadResult<AdminChangelogEntry>> => {
+  (
+    ws: string,
+    product: string,
+    id: string,
+  ): Promise<ApiReadResult<AdminChangelogEntry>> => {
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/changelog/${encodeURIComponent(id)}`,
-      AdminChangelogEntrySchema
+      AdminChangelogEntrySchema,
     );
-  }
+  },
 );
 
 export const getAdminChangelogTags = cache(
   (ws: string, product: string): Promise<ApiReadResult<ChangelogTag[]>> => {
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/changelog/tags`,
-      z.array(ChangelogTagSchema)
+      z.array(ChangelogTagSchema),
     );
-  }
+  },
 );
 
 export const getPublicFaqTree = cache(
   (ws: string, product: string): Promise<ApiReadResult<PublicFaqResponse>> => {
-    return localizedPath(`/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/faq`).then((path) =>
-      apiRead(path, PublicFaqResponseSchema)
-    );
-  }
+    return localizedPath(
+      `/api/v1/portal/${encodeURIComponent(ws)}/${encodeURIComponent(product)}/faq`,
+    ).then((path) => apiRead(path, PublicFaqResponseSchema));
+  },
 );
 
 export const getAdminFaqCategories = cache(
   (ws: string, product: string): Promise<ApiReadResult<AdminFaqResponse>> => {
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/products/${encodeURIComponent(product)}/faq`,
-      AdminFaqResponseSchema
+      AdminFaqResponseSchema,
     );
-  }
+  },
 );
 
 export const getWorkspaceRequests = cache(
   (
     ws: string,
-    query?: WorkspaceRequestsQuery
+    query?: WorkspaceRequestsQuery,
   ): Promise<ApiReadResult<WorkspaceRequestsResponse>> => {
     const params = new URLSearchParams();
     if (query?.product) params.set("product", query.product);
@@ -537,15 +618,15 @@ export const getWorkspaceRequests = cache(
     const qs = params.toString();
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/requests${qs ? `?${qs}` : ""}`,
-      WorkspaceRequestsResponseSchema
+      WorkspaceRequestsResponseSchema,
     );
-  }
+  },
 );
 
 export const getWorkspaceComments = cache(
   (
     ws: string,
-    query?: WorkspaceCommentsQuery
+    query?: WorkspaceCommentsQuery,
   ): Promise<ApiReadResult<WorkspaceCommentsResponse>> => {
     const params = new URLSearchParams();
     if (query?.product) params.set("product", query.product);
@@ -555,32 +636,34 @@ export const getWorkspaceComments = cache(
     const qs = params.toString();
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/comments${qs ? `?${qs}` : ""}`,
-      WorkspaceCommentsResponseSchema
+      WorkspaceCommentsResponseSchema,
     );
-  }
+  },
 );
 
 export const getPushFollowedProducts = cache(
   (): Promise<ApiReadResult<FollowedProductItem[]>> => {
-    return apiRead("/api/v1/push/followed-products", z.array(FollowedProductItemSchema));
-  }
+    return apiRead(
+      "/api/v1/push/followed-products",
+      z.array(FollowedProductItemSchema),
+    );
+  },
 );
 
 export const getWorkspaceApiKeys = cache(
   (ws: string): Promise<ApiReadResult<ApiKeyListResponse>> => {
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/api-keys`,
-      apiKeyListResponseSchema
+      apiKeyListResponseSchema,
     );
-  }
+  },
 );
 
 export const getWorkspaceWebhooks = cache(
   (ws: string): Promise<ApiReadResult<WebhookSubscriptionListResponse>> => {
     return apiRead(
       `/api/v1/workspaces/${encodeURIComponent(ws)}/webhooks`,
-      webhookSubscriptionListResponseSchema
+      webhookSubscriptionListResponseSchema,
     );
-  }
+  },
 );
-

@@ -1,3 +1,4 @@
+import { notificationDestination } from "@userhq/types";
 import { Injectable, Inject } from "@nestjs/common";
 import { and, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import {
@@ -36,7 +37,7 @@ export class PushService {
   constructor(
     @Inject(DB) private readonly db: Db,
     @Inject(ENV) private readonly env: Env,
-    private readonly outbound: OutboundHttp
+    private readonly outbound: OutboundHttp,
   ) {}
 
   getVapidPublicKey(): VapidPublicKeyResponse {
@@ -46,7 +47,7 @@ export class PushService {
 
   async registerSubscription(
     userId: string,
-    input: RegisterPushSubscriptionInput
+    input: RegisterPushSubscriptionInput,
   ): Promise<PushSubscriptionResponse> {
     await this.outbound.validateTarget(input.endpoint);
     const sub = await this.db.transaction(async (tx) => {
@@ -59,8 +60,8 @@ export class PushService {
             eq(pushSubscriptions.endpoint, input.endpoint),
             ne(pushSubscriptions.userId, userId),
             eq(pushSubscriptions.p256dh, input.keys.p256dh),
-            eq(pushSubscriptions.auth, input.keys.auth)
-          )
+            eq(pushSubscriptions.auth, input.keys.auth),
+          ),
         );
       const [row] = await tx
         .insert(pushSubscriptions)
@@ -89,7 +90,7 @@ export class PushService {
       throw new ApiException(
         "push_endpoint_conflict",
         409,
-        "This push endpoint is already registered to another account."
+        "This push endpoint is already registered to another account.",
       );
     }
 
@@ -109,14 +110,17 @@ export class PushService {
     };
   }
 
-  async unregisterSubscription(userId: string, endpoint: string): Promise<{ success: boolean }> {
+  async unregisterSubscription(
+    userId: string,
+    endpoint: string,
+  ): Promise<{ success: boolean }> {
     const result = await this.db
       .delete(pushSubscriptions)
       .where(
         and(
           eq(pushSubscriptions.userId, userId),
-          eq(pushSubscriptions.endpoint, endpoint)
-        )
+          eq(pushSubscriptions.endpoint, endpoint),
+        ),
       );
 
     return { success: true };
@@ -152,7 +156,7 @@ export class PushService {
 
   async updatePreferences(
     userId: string,
-    input: UpdatePushPreferencesInput
+    input: UpdatePushPreferencesInput,
   ): Promise<PushPreferences> {
     const [existing] = await this.db
       .select()
@@ -218,14 +222,17 @@ export class PushService {
       // Current members only: a removed admin must not keep seeing the product (D-11).
       .innerJoin(
         workspaceMembers,
-        and(eq(workspaceMembers.workspaceId, workspaces.id), eq(workspaceMembers.userId, pushFollowedProducts.userId))
+        and(
+          eq(workspaceMembers.workspaceId, workspaces.id),
+          eq(workspaceMembers.userId, pushFollowedProducts.userId),
+        ),
       )
       .where(
         and(
           eq(pushFollowedProducts.userId, userId),
           isNull(products.deletedAt),
-          isNull(workspaces.deletedAt)
-        )
+          isNull(workspaces.deletedAt),
+        ),
       );
 
     return rows.map((r) => ({
@@ -238,7 +245,10 @@ export class PushService {
   }
 
   /** The caller must already be authorized: productId comes from TenantGuard, never from the client. */
-  async followProduct(userId: string, productId: string): Promise<{ success: boolean }> {
+  async followProduct(
+    userId: string,
+    productId: string,
+  ): Promise<{ success: boolean }> {
     await this.db
       .insert(pushFollowedProducts)
       .values({
@@ -250,14 +260,17 @@ export class PushService {
     return { success: true };
   }
 
-  async unfollowProduct(userId: string, productId: string): Promise<{ success: boolean }> {
+  async unfollowProduct(
+    userId: string,
+    productId: string,
+  ): Promise<{ success: boolean }> {
     await this.db
       .delete(pushFollowedProducts)
       .where(
         and(
           eq(pushFollowedProducts.userId, userId),
-          eq(pushFollowedProducts.productId, productId)
-        )
+          eq(pushFollowedProducts.productId, productId),
+        ),
       );
 
     return { success: true };
@@ -280,7 +293,9 @@ export class PushService {
         subscriptionId: sub.id,
         userId,
         eventType: "test",
-        title: pref.includePreviews ? "UserHQ Push Test" : "UserHQ Notification",
+        title: pref.includePreviews
+          ? "UserHQ Push Test"
+          : "UserHQ Notification",
         body: pref.includePreviews
           ? "This is a verified test push notification from UserHQ."
           : "You have a new test notification.",
@@ -293,7 +308,12 @@ export class PushService {
   }
 
   /** Canonical portal post path, same shape as the web app's postHref. */
-  private postUrl(o: { workspaceSlug: string; productSlug: string; postNumber: number; postTitle: string }): string {
+  private postUrl(o: {
+    workspaceSlug: string;
+    productSlug: string;
+    postNumber: number;
+    postTitle: string;
+  }): string {
     const slug = postSlug(o.postTitle);
     return `/${o.workspaceSlug}/${o.productSlug}/p/${o.postNumber}${slug ? `-${slug}` : ""}`;
   }
@@ -303,7 +323,11 @@ export class PushService {
    * A concurrent Board disable (UPDATE products) waits for this transaction, so its cleanup always sees
    * the rows inserted here (D-14).
    */
-  private async lockBoardEnabled(tx: DbOrTx, workspaceId: string, productId: string): Promise<boolean> {
+  private async lockBoardEnabled(
+    tx: DbOrTx,
+    workspaceId: string,
+    productId: string,
+  ): Promise<boolean> {
     const rows = await tx.execute(sql`
       SELECT 1 FROM products
       WHERE id = ${productId} AND workspace_id = ${workspaceId} AND board_enabled AND deleted_at IS NULL
@@ -328,9 +352,10 @@ export class PushService {
       productSlug: string;
       workspaceSlug: string;
       postNumber: number;
-    }
+    },
   ): Promise<void> {
-    if (!(await this.lockBoardEnabled(tx, opts.workspaceId, opts.productId))) return;
+    if (!(await this.lockBoardEnabled(tx, opts.workspaceId, opts.productId)))
+      return;
 
     // Stakeholders: post author, voters, and non-deleted commenters, excluding actor
     const stakeholders = await tx.execute(sql<{ user_id: string }>`
@@ -396,7 +421,7 @@ export class PushService {
         eventType: "status_change",
         title,
         body,
-        url: postUrl,
+        url: notificationDestination(postUrl, "push", "status"),
         data: {
           postId: opts.postId,
           productId: opts.productId,
@@ -424,9 +449,10 @@ export class PushService {
       productSlug: string;
       workspaceSlug: string;
       postNumber: number;
-    }
+    },
   ): Promise<void> {
-    if (!(await this.lockBoardEnabled(tx, opts.workspaceId, opts.productId))) return;
+    if (!(await this.lockBoardEnabled(tx, opts.workspaceId, opts.productId)))
+      return;
 
     // Recipient: if nested reply, author of parent comment; else author of post
     let targetUserId: string | null = null;
@@ -482,7 +508,7 @@ export class PushService {
         eventType: "comment_reply",
         title,
         body,
-        url: postUrl,
+        url: notificationDestination(postUrl, "push", "reply"),
         data: {
           postId: opts.postId,
           productId: opts.productId,
@@ -507,9 +533,10 @@ export class PushService {
       productSlug: string;
       workspaceSlug: string;
       postNumber: number;
-    }
+    },
   ): Promise<void> {
-    if (!(await this.lockBoardEnabled(tx, opts.workspaceId, opts.productId))) return;
+    if (!(await this.lockBoardEnabled(tx, opts.workspaceId, opts.productId)))
+      return;
 
     // Users following this product, excluding actor
     const followers = await tx
@@ -517,13 +544,16 @@ export class PushService {
       .from(pushFollowedProducts)
       .innerJoin(
         workspaceMembers,
-        and(eq(workspaceMembers.workspaceId, opts.workspaceId), eq(workspaceMembers.userId, pushFollowedProducts.userId))
+        and(
+          eq(workspaceMembers.workspaceId, opts.workspaceId),
+          eq(workspaceMembers.userId, pushFollowedProducts.userId),
+        ),
       )
       .where(
         and(
           eq(pushFollowedProducts.productId, opts.productId),
-          sql`${pushFollowedProducts.userId} != ${opts.actorId}`
-        )
+          sql`${pushFollowedProducts.userId} != ${opts.actorId}`,
+        ),
       );
 
     if (followers.length === 0) return;
@@ -557,7 +587,7 @@ export class PushService {
         eventType: "new_post",
         title,
         body,
-        url: postUrl,
+        url: notificationDestination(postUrl, "push", "new_post"),
         data: {
           postId: opts.postId,
           productId: opts.productId,
@@ -583,22 +613,26 @@ export class PushService {
       productSlug: string;
       workspaceSlug: string;
       postNumber: number;
-    }
+    },
   ): Promise<void> {
-    if (!(await this.lockBoardEnabled(tx, opts.workspaceId, opts.productId))) return;
+    if (!(await this.lockBoardEnabled(tx, opts.workspaceId, opts.productId)))
+      return;
 
     const followers = await tx
       .select({ userId: pushFollowedProducts.userId })
       .from(pushFollowedProducts)
       .innerJoin(
         workspaceMembers,
-        and(eq(workspaceMembers.workspaceId, opts.workspaceId), eq(workspaceMembers.userId, pushFollowedProducts.userId))
+        and(
+          eq(workspaceMembers.workspaceId, opts.workspaceId),
+          eq(workspaceMembers.userId, pushFollowedProducts.userId),
+        ),
       )
       .where(
         and(
           eq(pushFollowedProducts.productId, opts.productId),
-          sql`${pushFollowedProducts.userId} != ${opts.actorId}`
-        )
+          sql`${pushFollowedProducts.userId} != ${opts.actorId}`,
+        ),
       );
 
     if (followers.length === 0) return;
@@ -632,7 +666,7 @@ export class PushService {
         eventType: "new_comment",
         title,
         body,
-        url: postUrl,
+        url: notificationDestination(postUrl, "push", "new_comment"),
         data: {
           postId: opts.postId,
           productId: opts.productId,

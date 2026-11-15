@@ -1,4 +1,5 @@
 import type { z } from "zod";
+import { relayAnalyticsReceipt, track, reportBrowserError } from "./analytics";
 import {
   WorkspaceCommentItemSchema,
   type WorkspaceCommentItem,
@@ -32,10 +33,19 @@ export interface ApiFetchOptions<T> {
 
 export async function apiFetch<T = unknown>(
   path: string,
-  opts?: ApiFetchOptions<T>
+  opts?: ApiFetchOptions<T>,
 ): Promise<T> {
   const method = opts?.method ?? (opts?.body ? "POST" : "GET");
+  const action = /\/vote(?:[?#]|$)/.test(path)
+    ? "vote"
+    : /\/comments(?:[?#]|$)/.test(path)
+      ? "comment"
+      : /\/posts(?:[?#]|$)/.test(path)
+        ? "feedback"
+        : null;
   const headers = new Headers(opts?.headers);
+  if (path.startsWith("/api/v1/") && typeof window !== "undefined")
+    headers.set("x-userhq-browser", "1");
 
   let bodyData: BodyInit | undefined;
   if (opts?.body !== undefined) {
@@ -55,11 +65,19 @@ export async function apiFetch<T = unknown>(
       body: bodyData,
     });
   } catch (err) {
+    if (method !== "GET" && action)
+      track("contribution_failed", { action, outcome: "network" });
+    reportBrowserError("network");
     const msg = err instanceof Error ? err.message : "Network error";
     throw new ApiClientError(0, "network", msg);
   }
 
   if (!res.ok) {
+    if (method !== "GET" && action)
+      track("contribution_failed", {
+        action,
+        outcome: res.status >= 500 ? "server_error" : "rejected",
+      });
     let code: string | null = null;
     let message = res.statusText || "Request failed";
     try {
@@ -76,6 +94,8 @@ export async function apiFetch<T = unknown>(
     throw new ApiClientError(res.status, code, message);
   }
 
+  relayAnalyticsReceipt(res.headers.get("x-userhq-analytics"));
+
   if (res.status === 204) {
     return undefined as unknown as T;
   }
@@ -89,7 +109,7 @@ export async function apiFetch<T = unknown>(
 
 export async function fetchWorkspaceRequests(
   ws: string,
-  query?: WorkspaceRequestsQuery
+  query?: WorkspaceRequestsQuery,
 ): Promise<WorkspaceRequestsResponse> {
   const params = new URLSearchParams();
   if (query?.product) params.set("product", query.product);
@@ -105,13 +125,13 @@ export async function fetchWorkspaceRequests(
   const qs = params.toString();
   return apiFetch(
     `/api/v1/workspaces/${encodeURIComponent(ws)}/requests${qs ? `?${qs}` : ""}`,
-    { schema: WorkspaceRequestsResponseSchema }
+    { schema: WorkspaceRequestsResponseSchema },
   );
 }
 
 export async function fetchWorkspaceComments(
   ws: string,
-  query?: WorkspaceCommentsQuery
+  query?: WorkspaceCommentsQuery,
 ): Promise<WorkspaceCommentsResponse> {
   const params = new URLSearchParams();
   if (query?.product) params.set("product", query.product);
@@ -121,34 +141,34 @@ export async function fetchWorkspaceComments(
   const qs = params.toString();
   return apiFetch(
     `/api/v1/workspaces/${encodeURIComponent(ws)}/comments${qs ? `?${qs}` : ""}`,
-    { schema: WorkspaceCommentsResponseSchema }
+    { schema: WorkspaceCommentsResponseSchema },
   );
 }
 
 export async function markCommentHandled(
   ws: string,
-  commentId: string
+  commentId: string,
 ): Promise<void> {
   return apiFetch(
     `/api/v1/workspaces/${encodeURIComponent(ws)}/comments/${encodeURIComponent(commentId)}/handled`,
-    { method: "POST" }
+    { method: "POST" },
   );
 }
 
 export async function reopenComment(
   ws: string,
-  commentId: string
+  commentId: string,
 ): Promise<void> {
   return apiFetch(
     `/api/v1/workspaces/${encodeURIComponent(ws)}/comments/${encodeURIComponent(commentId)}/handled`,
-    { method: "DELETE" }
+    { method: "DELETE" },
   );
 }
 
 export async function replyWorkspaceComment(
   ws: string,
   commentId: string,
-  input: ReplyWorkspaceCommentInput
+  input: ReplyWorkspaceCommentInput,
 ): Promise<WorkspaceCommentItem> {
   return apiFetch(
     `/api/v1/workspaces/${encodeURIComponent(ws)}/comments/${encodeURIComponent(commentId)}/reply`,
@@ -156,17 +176,16 @@ export async function replyWorkspaceComment(
       method: "POST",
       body: input,
       schema: WorkspaceCommentItemSchema,
-    }
+    },
   );
 }
 
 export async function markCommentRead(
   ws: string,
-  commentId: string
+  commentId: string,
 ): Promise<void> {
   return apiFetch(
     `/api/v1/workspaces/${encodeURIComponent(ws)}/comments/${encodeURIComponent(commentId)}/read`,
-    { method: "POST" }
+    { method: "POST" },
   );
 }
-

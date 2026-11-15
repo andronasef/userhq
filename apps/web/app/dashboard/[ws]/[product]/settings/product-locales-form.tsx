@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useAnalyticsRouter as useRouter } from "@/lib/analytics-navigation";
 import { useMutation } from "@tanstack/react-query";
 import { LoaderCircle, Globe, Check, AlertCircle } from "lucide-react";
 import { toast } from "sonner";

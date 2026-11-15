@@ -3,7 +3,8 @@
 import * as React from "react";
 import { useI18n } from "../lib/i18n/context";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useAnalyticsRouter as useRouter } from "@/lib/analytics-navigation";
 import {
   ImageUp,
   LogOut,
@@ -38,6 +39,7 @@ import {
 } from "./ui/dropdown-menu";
 import { useTheme } from "./theme-provider";
 import { authClient } from "../lib/auth-client";
+import { clearAnalyticsIdentity } from "../lib/analytics";
 
 export interface UserMenuProps {
   user: {
@@ -64,16 +66,18 @@ export function UserMenu({
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const pathname = usePathname();
   const isAccountPage = pathname === "/account";
-  const [accountReturnHref, setAccountReturnHref] = React.useState<string | null>(null);
+  const [accountReturnHref, setAccountReturnHref] = React.useState<
+    string | null
+  >(null);
 
   const ThemeIcon =
     theme === "system"
       ? Monitor
       : resolvedTheme === "charcoal"
-      ? Contrast
-      : resolvedTheme === "dark"
-      ? Moon
-      : Sun;
+        ? Contrast
+        : resolvedTheme === "dark"
+          ? Moon
+          : Sun;
 
   React.useEffect(() => {
     if (pathname && pathname !== "/account" && pathname !== "/login") {
@@ -85,8 +89,14 @@ export function UserMenu({
     } else if (isAccountPage) {
       try {
         const sp = new URLSearchParams(window.location.search);
-        const back = sp.get("back") || sessionStorage.getItem("userhq_last_return");
-        if (back && back.startsWith("/") && back !== "/account" && back !== "/login") {
+        const back =
+          sp.get("back") || sessionStorage.getItem("userhq_last_return");
+        if (
+          back &&
+          back.startsWith("/") &&
+          back !== "/account" &&
+          back !== "/login"
+        ) {
           setAccountReturnHref(back);
         }
       } catch {
@@ -95,10 +105,20 @@ export function UserMenu({
     }
   }, [pathname, isAccountPage]);
 
-  const portalProductMatch = pathname ? pathname.match(/^\/([^/]+)\/([^/]+)(?:\/.*)?$/) : null;
+  const portalProductMatch = pathname
+    ? pathname.match(/^\/([^/]+)\/([^/]+)(?:\/.*)?$/)
+    : null;
   const isPortalProduct =
     portalProductMatch &&
-    !["dashboard", "platform", "account", "login", "dev", "invite", "api"].includes(portalProductMatch[1]);
+    ![
+      "dashboard",
+      "platform",
+      "account",
+      "login",
+      "dev",
+      "invite",
+      "api",
+    ].includes(portalProductMatch[1]);
   const activityHref = isPortalProduct
     ? `/${portalProductMatch[1]}/${portalProductMatch[2]}/activity`
     : null;
@@ -109,9 +129,15 @@ export function UserMenu({
       : null;
   const isReturnPortal =
     returnPortalMatch &&
-    !["dashboard", "platform", "account", "login", "dev", "invite", "api"].includes(
-      returnPortalMatch[1]
-    );
+    ![
+      "dashboard",
+      "platform",
+      "account",
+      "login",
+      "dev",
+      "invite",
+      "api",
+    ].includes(returnPortalMatch[1]);
 
   const effectiveActivityHref =
     activityHref ||
@@ -135,6 +161,7 @@ export function UserMenu({
         setErrorMessage(t("ui.signOutError"));
         return;
       }
+      clearAnalyticsIdentity();
       window.location.assign("/");
     } catch {
       setIsPending(false);
@@ -165,15 +192,24 @@ export function UserMenu({
           <>
             {hasWorkspaces && (
               <DropdownMenuItem asChild>
-                <Link href="/dashboard" className="flex items-center gap-2 w-full">
-                  <LayoutDashboard className="size-4 shrink-0" aria-hidden="true" />
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 w-full"
+                >
+                  <LayoutDashboard
+                    className="size-4 shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>{t("nav.goToDashboard")}</span>
                 </Link>
               </DropdownMenuItem>
             )}
             {isPlatformOwner && (
               <DropdownMenuItem asChild>
-                <Link href="/platform" className="flex items-center gap-2 w-full">
+                <Link
+                  href="/platform"
+                  className="flex items-center gap-2 w-full"
+                >
                   <ShieldCheck className="size-4 shrink-0" aria-hidden="true" />
                   <span>{t("ui.platformConsole")}</span>
                 </Link>
@@ -186,7 +222,10 @@ export function UserMenu({
         {devUploadEnabled && (
           <>
             <DropdownMenuItem asChild>
-              <Link href="/dev/upload" className="flex items-center gap-2 w-full">
+              <Link
+                href="/dev/upload"
+                className="flex items-center gap-2 w-full"
+              >
                 <ImageUp className="size-4 shrink-0" aria-hidden="true" />
                 <span>{t("ui.uploadTest")}</span>
               </Link>
@@ -197,14 +236,17 @@ export function UserMenu({
 
         {isAccountPage && accountReturnHref && (
           <DropdownMenuItem asChild>
-            <Link href={accountReturnHref} className="flex items-center gap-2 w-full">
+            <Link
+              href={accountReturnHref}
+              className="flex items-center gap-2 w-full"
+            >
               <ArrowLeft className="size-4 shrink-0" aria-hidden="true" />
               <span>
                 {accountReturnHref.startsWith("/dashboard")
                   ? t("ui.backToDashboard")
                   : isReturnPortal
-                  ? t("nav.backToPortal")
-                  : t("common.back")}
+                    ? t("nav.backToPortal")
+                    : t("common.back")}
               </span>
             </Link>
           </DropdownMenuItem>
@@ -212,7 +254,10 @@ export function UserMenu({
 
         {effectiveActivityHref && (
           <DropdownMenuItem asChild>
-            <Link href={effectiveActivityHref} className="flex items-center gap-2 w-full">
+            <Link
+              href={effectiveActivityHref}
+              className="flex items-center gap-2 w-full"
+            >
               <Activity className="size-4 shrink-0" aria-hidden="true" />
               <span>{t("ui.myActivity")}</span>
             </Link>
@@ -220,7 +265,10 @@ export function UserMenu({
         )}
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="flex items-center gap-2 w-full cursor-pointer">
-            <ThemeIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <ThemeIcon
+              className="size-4 shrink-0 text-muted-foreground"
+              aria-hidden="true"
+            />
             <span>{t("ui.theme")}</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-36">
@@ -229,47 +277,82 @@ export function UserMenu({
               className="flex items-center justify-between cursor-pointer"
             >
               <span className="flex items-center gap-2">
-                <Monitor className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <Monitor
+                  className="size-4 shrink-0 text-muted-foreground"
+                  aria-hidden="true"
+                />
                 <span>{t("ui.themeSystem")}</span>
               </span>
-              {theme === "system" && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
+              {theme === "system" && (
+                <Check
+                  className="size-3.5 text-[var(--primary-text)] shrink-0"
+                  aria-hidden="true"
+                />
+              )}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => setTheme("light")}
               className="flex items-center justify-between cursor-pointer"
             >
               <span className="flex items-center gap-2">
-                <Sun className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <Sun
+                  className="size-4 shrink-0 text-muted-foreground"
+                  aria-hidden="true"
+                />
                 <span>{t("ui.themeLight")}</span>
               </span>
-              {theme === "light" && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
+              {theme === "light" && (
+                <Check
+                  className="size-3.5 text-[var(--primary-text)] shrink-0"
+                  aria-hidden="true"
+                />
+              )}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => setTheme("dark")}
               className="flex items-center justify-between cursor-pointer"
             >
               <span className="flex items-center gap-2">
-                <Moon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <Moon
+                  className="size-4 shrink-0 text-muted-foreground"
+                  aria-hidden="true"
+                />
                 <span>{t("ui.themeDark")}</span>
               </span>
-              {theme === "dark" && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
+              {theme === "dark" && (
+                <Check
+                  className="size-3.5 text-[var(--primary-text)] shrink-0"
+                  aria-hidden="true"
+                />
+              )}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => setTheme("charcoal")}
               className="flex items-center justify-between cursor-pointer"
             >
               <span className="flex items-center gap-2">
-                <Contrast className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <Contrast
+                  className="size-4 shrink-0 text-muted-foreground"
+                  aria-hidden="true"
+                />
                 <span>{t("ui.themeCharcoal")}</span>
               </span>
-              {theme === "charcoal" && <Check className="size-3.5 text-[var(--primary-text)] shrink-0" aria-hidden="true" />}
+              {theme === "charcoal" && (
+                <Check
+                  className="size-3.5 text-[var(--primary-text)] shrink-0"
+                  aria-hidden="true"
+                />
+              )}
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
 
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="flex items-center gap-2 w-full cursor-pointer">
-            <Globe className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <Globe
+              className="size-4 shrink-0 text-muted-foreground"
+              aria-hidden="true"
+            />
             <span>{t("common.language")}</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-48 max-h-72 overflow-y-auto">
@@ -307,8 +390,14 @@ export function UserMenu({
 
         {(isWorkspaceOwner || isPlatformOwner) && (
           <DropdownMenuItem asChild>
-            <Link href="/guide" className="flex items-center gap-2 w-full cursor-pointer">
-              <BookOpen className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <Link
+              href="/guide"
+              className="flex items-center gap-2 w-full cursor-pointer"
+            >
+              <BookOpen
+                className="size-4 shrink-0 text-muted-foreground"
+                aria-hidden="true"
+              />
               <span>{t("ui.userGuide")}</span>
             </Link>
           </DropdownMenuItem>

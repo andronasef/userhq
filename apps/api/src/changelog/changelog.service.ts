@@ -1,3 +1,4 @@
+import { recordOutcome } from "../analytics/context.js";
 import { Injectable, Inject } from "@nestjs/common";
 import { and, eq, ne, inArray, desc, asc, isNull } from "drizzle-orm";
 import {
@@ -22,13 +23,16 @@ import { isUniqueViolation } from "../common/db-errors.js";
 import { enqueueWebhookEvent } from "../webhooks/outbox.js";
 
 /** Live means published at or before now; drafts (null) and future-dated entries are not live. */
-const isLiveAt = (publishedAt: Date | null): boolean => publishedAt !== null && publishedAt.getTime() <= Date.now();
+const isLiveAt = (publishedAt: Date | null): boolean =>
+  publishedAt !== null && publishedAt.getTime() <= Date.now();
 
 @Injectable()
 export class ChangelogService {
   constructor(@Inject(DB) private readonly db: Db) {}
 
-  async listAdminEntries(productId: string): Promise<AdminChangelogListResponse> {
+  async listAdminEntries(
+    productId: string,
+  ): Promise<AdminChangelogListResponse> {
     const entries = await this.db
       .select({
         id: changelogEntries.id,
@@ -77,7 +81,9 @@ export class ChangelogService {
         slug: e.slug,
         summary: e.summary ?? null,
         content: e.content as any,
-        publishedAt: e.publishedAt ? new Date(e.publishedAt).toISOString() : null,
+        publishedAt: e.publishedAt
+          ? new Date(e.publishedAt).toISOString()
+          : null,
         sourceLocale: (e.sourceLocale as any) ?? "en",
         tags: tagsByEntry.get(e.id) ?? [],
         translations: (e.translations as any) ?? {},
@@ -91,7 +97,7 @@ export class ChangelogService {
   async getEntryById(
     productId: string,
     entryId: string,
-    executor: any = this.db
+    executor: any = this.db,
   ): Promise<AdminChangelogEntry> {
     const [row] = await executor
       .select({
@@ -110,8 +116,8 @@ export class ChangelogService {
       .where(
         and(
           eq(changelogEntries.id, entryId),
-          eq(changelogEntries.productId, productId)
-        )
+          eq(changelogEntries.productId, productId),
+        ),
       )
       .limit(1);
 
@@ -130,8 +136,8 @@ export class ChangelogService {
       .where(
         and(
           eq(changelogEntryTags.entryId, row.id),
-          eq(changelogEntryTags.productId, productId)
-        )
+          eq(changelogEntryTags.productId, productId),
+        ),
       );
 
     return {
@@ -140,7 +146,9 @@ export class ChangelogService {
       slug: row.slug,
       summary: row.summary ?? null,
       content: row.content as any,
-      publishedAt: row.publishedAt ? new Date(row.publishedAt).toISOString() : null,
+      publishedAt: row.publishedAt
+        ? new Date(row.publishedAt).toISOString()
+        : null,
       sourceLocale: (row.sourceLocale as any) ?? "en",
       tags: tagRows,
       translations: (row.translations as any) ?? {},
@@ -153,18 +161,36 @@ export class ChangelogService {
   private async announceIfWentLive(
     tx: any,
     productId: string,
-    entry: { id: string; title: string; summary: string | null; publishedAt: string | null },
-    wasLive: boolean
+    entry: {
+      id: string;
+      title: string;
+      summary: string | null;
+      publishedAt: string | null;
+    },
+    wasLive: boolean,
   ): Promise<void> {
-    const isLive = entry.publishedAt !== null && new Date(entry.publishedAt).getTime() <= Date.now();
+    const isLive =
+      entry.publishedAt !== null &&
+      new Date(entry.publishedAt).getTime() <= Date.now();
     if (wasLive || !isLive) return;
 
     // The request already owns the entry lock; share the durable claim with the scheduled path.
-    const [claimed] = await tx.update(changelogEntries)
+    const [claimed] = await tx
+      .update(changelogEntries)
       .set({ announcedAt: new Date() })
-      .where(and(eq(changelogEntries.id, entry.id), eq(changelogEntries.productId, productId), isNull(changelogEntries.announcedAt)))
+      .where(
+        and(
+          eq(changelogEntries.id, entry.id),
+          eq(changelogEntries.productId, productId),
+          isNull(changelogEntries.announcedAt),
+        ),
+      )
       .returning({ id: changelogEntries.id });
     if (!claimed) return;
+    recordOutcome("changelog_published", {
+      module: "changelog",
+      action: "publish",
+    });
 
     const [prod] = await tx
       .select({ workspaceId: products.workspaceId })
@@ -188,7 +214,7 @@ export class ChangelogService {
 
   async createEntry(
     productId: string,
-    input: CreateChangelogEntryInput
+    input: CreateChangelogEntryInput,
   ): Promise<AdminChangelogEntry> {
     return this.db.transaction(async (tx) => {
       const baseSlug = input.slug
@@ -226,8 +252,8 @@ export class ChangelogService {
           .where(
             and(
               eq(changelogTags.productId, productId),
-              inArray(changelogTags.id, input.tagIds)
-            )
+              inArray(changelogTags.id, input.tagIds),
+            ),
           );
 
         if (validTags.length > 0) {
@@ -236,7 +262,7 @@ export class ChangelogService {
               entryId: created.id,
               tagId: t.id,
               productId,
-            }))
+            })),
           );
         }
       }
@@ -250,7 +276,7 @@ export class ChangelogService {
   async updateEntry(
     productId: string,
     entryId: string,
-    input: UpdateChangelogEntryInput
+    input: UpdateChangelogEntryInput,
   ): Promise<AdminChangelogEntry> {
     return this.db.transaction(async (tx) => {
       const [existing] = await tx
@@ -264,8 +290,8 @@ export class ChangelogService {
         .where(
           and(
             eq(changelogEntries.id, entryId),
-            eq(changelogEntries.productId, productId)
-          )
+            eq(changelogEntries.productId, productId),
+          ),
         )
         .for("update");
 
@@ -293,23 +319,41 @@ export class ChangelogService {
         updates.translations = input.translations;
       }
       if (input.publishedAt !== undefined) {
-        updates.publishedAt = input.publishedAt ? new Date(input.publishedAt) : null;
+        updates.publishedAt = input.publishedAt
+          ? new Date(input.publishedAt)
+          : null;
       }
-      if (!isLiveAt(input.publishedAt === undefined ? existing.publishedAt : updates.publishedAt)) {
+      if (
+        !isLiveAt(
+          input.publishedAt === undefined
+            ? existing.publishedAt
+            : updates.publishedAt,
+        )
+      ) {
         updates.announcedAt = null;
       }
 
       // Slug deduplication: if slug explicitly passed, use it; else if title changed on draft, re-derive
       if (input.slug !== undefined) {
         const baseSlug = slugify(input.slug, 80) || "entry";
-        updates.slug = await this.findUniqueSlug(tx, productId, baseSlug, entryId);
+        updates.slug = await this.findUniqueSlug(
+          tx,
+          productId,
+          baseSlug,
+          entryId,
+        );
       } else if (
         input.title !== undefined &&
         input.title !== existing.title &&
         existing.publishedAt === null
       ) {
         const baseSlug = slugify(input.title, 80) || "entry";
-        updates.slug = await this.findUniqueSlug(tx, productId, baseSlug, entryId);
+        updates.slug = await this.findUniqueSlug(
+          tx,
+          productId,
+          baseSlug,
+          entryId,
+        );
       }
 
       await tx
@@ -323,8 +367,8 @@ export class ChangelogService {
           .where(
             and(
               eq(changelogEntryTags.entryId, entryId),
-              eq(changelogEntryTags.productId, productId)
-            )
+              eq(changelogEntryTags.productId, productId),
+            ),
           );
 
         if (input.tagIds.length > 0) {
@@ -334,8 +378,8 @@ export class ChangelogService {
             .where(
               and(
                 eq(changelogTags.productId, productId),
-                inArray(changelogTags.id, input.tagIds)
-              )
+                inArray(changelogTags.id, input.tagIds),
+              ),
             );
 
           if (validTags.length > 0) {
@@ -344,14 +388,19 @@ export class ChangelogService {
                 entryId,
                 tagId: t.id,
                 productId,
-              }))
+              })),
             );
           }
         }
       }
 
       const entry = await this.getEntryById(productId, entryId, tx);
-      await this.announceIfWentLive(tx, productId, entry, isLiveAt(existing.publishedAt));
+      await this.announceIfWentLive(
+        tx,
+        productId,
+        entry,
+        isLiveAt(existing.publishedAt),
+      );
       return entry;
     });
   }
@@ -359,17 +408,20 @@ export class ChangelogService {
   async publishEntry(
     productId: string,
     entryId: string,
-    customDate?: string
+    customDate?: string,
   ): Promise<AdminChangelogEntry> {
     return this.db.transaction(async (tx) => {
       const [existing] = await tx
-        .select({ id: changelogEntries.id, publishedAt: changelogEntries.publishedAt })
+        .select({
+          id: changelogEntries.id,
+          publishedAt: changelogEntries.publishedAt,
+        })
         .from(changelogEntries)
         .where(
           and(
             eq(changelogEntries.id, entryId),
-            eq(changelogEntries.productId, productId)
-          )
+            eq(changelogEntries.productId, productId),
+          ),
         )
         .for("update");
 
@@ -389,7 +441,12 @@ export class ChangelogService {
         .where(eq(changelogEntries.id, entryId));
 
       const entry = await this.getEntryById(productId, entryId, tx);
-      await this.announceIfWentLive(tx, productId, entry, isLiveAt(existing.publishedAt));
+      await this.announceIfWentLive(
+        tx,
+        productId,
+        entry,
+        isLiveAt(existing.publishedAt),
+      );
 
       return entry;
     });
@@ -397,7 +454,7 @@ export class ChangelogService {
 
   async unpublishEntry(
     productId: string,
-    entryId: string
+    entryId: string,
   ): Promise<AdminChangelogEntry> {
     return this.db.transaction(async (tx) => {
       const [existing] = await tx
@@ -406,8 +463,8 @@ export class ChangelogService {
         .where(
           and(
             eq(changelogEntries.id, entryId),
-            eq(changelogEntries.productId, productId)
-          )
+            eq(changelogEntries.productId, productId),
+          ),
         )
         .for("update");
 
@@ -434,8 +491,8 @@ export class ChangelogService {
       .where(
         and(
           eq(changelogEntries.id, entryId),
-          eq(changelogEntries.productId, productId)
-        )
+          eq(changelogEntries.productId, productId),
+        ),
       )
       .returning({ id: changelogEntries.id });
 
@@ -460,7 +517,7 @@ export class ChangelogService {
 
   async createTag(
     productId: string,
-    input: ChangelogTagInput
+    input: ChangelogTagInput,
   ): Promise<ChangelogTag> {
     try {
       const [inserted] = await this.db
@@ -482,7 +539,7 @@ export class ChangelogService {
         throw new ApiException(
           "tag_name_taken",
           409,
-          "A tag with that name already exists."
+          "A tag with that name already exists.",
         );
       }
       throw e;
@@ -495,8 +552,8 @@ export class ChangelogService {
       .where(
         and(
           eq(changelogTags.id, tagId),
-          eq(changelogTags.productId, productId)
-        )
+          eq(changelogTags.productId, productId),
+        ),
       )
       .returning({ id: changelogTags.id });
 
@@ -509,7 +566,7 @@ export class ChangelogService {
     executor: any,
     productId: string,
     baseSlug: string,
-    excludeEntryId?: string
+    excludeEntryId?: string,
   ): Promise<string> {
     let candidate = baseSlug;
     let counter = 1;

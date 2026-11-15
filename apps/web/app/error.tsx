@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { reportBrowserError } from "../lib/analytics";
 import { Button } from "../components/ui/button";
 import { useI18n } from "@/lib/i18n/context";
 
@@ -16,6 +17,7 @@ export default function ErrorBoundary({
   const { t } = useI18n();
 
   React.useEffect(() => {
+    reportBrowserError("server_error");
     document.title = "Error · UserHQ";
     if (error?.digest) {
       console.error("Error digest:", error.digest);

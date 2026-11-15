@@ -58,10 +58,12 @@ COPY --from=build /app/packages/types/dist ./packages/types/dist
 COPY --from=build /app/packages/db/dist ./packages/db/dist
 COPY --from=build /app/apps/api/dist ./apps/api/dist
 COPY packages/db/migrations ./packages/db/migrations
+COPY apps/api/scripts ./apps/api/scripts
+COPY apps/api/newrelic.cjs ./apps/api/newrelic.cjs
 
 RUN mkdir -p /data/uploads && chown -R node:node /data
 
 USER node
 EXPOSE 4000
 
-CMD ["sh", "-c", "node packages/db/dist/migrate.js && exec node apps/api/dist/main.js"]
+CMD ["sh", "-c", "node packages/db/dist/migrate.js && exec node apps/api/scripts/start.mjs"]

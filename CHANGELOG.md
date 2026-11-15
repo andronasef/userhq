@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.5.0] - 2026-11-15
+
+### Added
+
+- **Product analytics and diagnostics**: Google Tag Manager/GA4 (loaded through Partytown), Microsoft Clarity on public screens only, and New Relic browser monitoring with optional API APM. A fixed, privacy-allowlisted event catalogue covers browsing, search, sign-in outcomes, votes, comments, feedback, workspace setup, triage, public decisions, changelog publication and notification returns, with success events confirmed by the API. Adds a read-only `analytics:report` backlog and response-time report. Enabled by default in production (`ANALYTICS_ENABLED=false` disables); GTM tags must still be configured and published. See `docs/analytics.md`.
+- **Upgrade steps**: set `ANALYTICS_ID_SALT` (random, stable) on the web container; set `NEW_RELIC_LICENSE_KEY` only for API APM. In Google Tag Manager `GTM-TNBWG655`, publish the `userhq_event` trigger and GA4 Event tag described in `docs/analytics.md`. No database migration.
+- **Environment**: `ANALYTICS_ENABLED`, `ANALYTICS_ID_SALT`, `NEW_RELIC_LICENSE_KEY`, `NEW_RELIC_APP_NAME`, `NEW_RELIC_ENABLED`, `APP_RELEASE`.
+
+### Changed
+
+- Privacy text in all 13 languages now discloses these providers and purposes.
+
 ## [v0.4.1] - 2026-11-10
 
 ### Added

@@ -1,3 +1,4 @@
+import { recordOutcome, recordScope } from "../analytics/context.js";
 import {
   Controller,
   Get,
@@ -46,7 +47,7 @@ export class WorkspacesController {
   constructor(
     @Inject(ENV) private readonly env: Env,
     @Inject(DB) private readonly db: Db,
-    private readonly invitesService: InvitesService
+    private readonly invitesService: InvitesService,
   ) {}
 
   @Post()
@@ -54,14 +55,14 @@ export class WorkspacesController {
   @SerializeOptions({ schema: WorkspaceCreatedSchema })
   async create(
     @Body({ schema: CreateWorkspaceInputSchema }) input: CreateWorkspaceInput,
-    @CurrentUser() user: any
+    @CurrentUser() user: any,
   ): Promise<WorkspaceCreated> {
     const owner = isPlatformOwner(user, this.env.PLATFORM_OWNER_EMAIL);
     if (!owner && user.emailVerified !== true) {
       throw new ApiException(
         "not_allowed",
         403,
-        "Workspace creation is invite-only."
+        "Workspace creation is invite-only.",
       );
     }
 
@@ -72,8 +73,8 @@ export class WorkspacesController {
         .where(
           and(
             eq(uploads.id, input.logoUploadId),
-            eq(uploads.uploaderId, user.id)
-          )
+            eq(uploads.uploaderId, user.id),
+          ),
         )
         .limit(1);
 
@@ -81,7 +82,7 @@ export class WorkspacesController {
         throw new ApiException(
           "validation_failed",
           400,
-          "That logo can't be used."
+          "That logo can't be used.",
         );
       }
     }
@@ -101,6 +102,7 @@ export class WorkspacesController {
         throw new ApiException("slug_taken", 409, "That URL is taken.");
       }
 
+      recordScope({ workspaceId: inserted.id, role: "owner" });
       await tx.insert(workspaceMembers).values({
         workspaceId: inserted.id,
         userId: user.id,
@@ -112,6 +114,11 @@ export class WorkspacesController {
       }
     });
 
+    recordOutcome("workspace_created", {
+      module: "workspace",
+      action: "configure",
+      actor_role: "owner",
+    });
     return WorkspaceCreatedSchema.parse({ slug: input.slug });
   }
 }
@@ -124,9 +131,7 @@ export class WorkspaceController {
 
   @Get()
   @SerializeOptions({ schema: WorkspaceSchema })
-  async getWorkspace(
-    @CurrentTenant() tenant: Tenant
-  ): Promise<Workspace> {
+  async getWorkspace(@CurrentTenant() tenant: Tenant): Promise<Workspace> {
     const [row] = await this.db
       .select({
         slug: workspaces.slug,
@@ -159,7 +164,7 @@ export class WorkspaceController {
   async updateWorkspace(
     @CurrentTenant() tenant: Tenant,
     @CurrentUser() user: any,
-    @Body({ schema: UpdateWorkspaceInputSchema }) input: UpdateWorkspaceInput
+    @Body({ schema: UpdateWorkspaceInputSchema }) input: UpdateWorkspaceInput,
   ): Promise<Workspace> {
     if (input.logoUploadId) {
       const [upload] = await this.db
@@ -168,8 +173,8 @@ export class WorkspaceController {
         .where(
           and(
             eq(uploads.id, input.logoUploadId),
-            eq(uploads.uploaderId, user.id)
-          )
+            eq(uploads.uploaderId, user.id),
+          ),
         )
         .limit(1);
 
@@ -177,7 +182,7 @@ export class WorkspaceController {
         throw new ApiException(
           "validation_failed",
           400,
-          "That logo can't be used."
+          "That logo can't be used.",
         );
       }
     }
@@ -190,9 +195,11 @@ export class WorkspaceController {
     }> = {};
 
     if (input.name !== undefined) updates.name = input.name;
-    if (input.logoUploadId !== undefined) updates.logoUploadId = input.logoUploadId;
+    if (input.logoUploadId !== undefined)
+      updates.logoUploadId = input.logoUploadId;
     if (input.websiteUrl !== undefined) updates.websiteUrl = input.websiteUrl;
-    if (input.directoryEnabled !== undefined) updates.directoryEnabled = input.directoryEnabled;
+    if (input.directoryEnabled !== undefined)
+      updates.directoryEnabled = input.directoryEnabled;
 
     if (Object.keys(updates).length > 0) {
       await this.db
@@ -206,14 +213,12 @@ export class WorkspaceController {
 
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteWorkspace(
-    @CurrentTenant() tenant: Tenant
-  ): Promise<void> {
+  async deleteWorkspace(@CurrentTenant() tenant: Tenant): Promise<void> {
     if (tenant.role !== "owner") {
       throw new ApiException(
         "forbidden",
         403,
-        "Only the workspace owner can delete the workspace."
+        "Only the workspace owner can delete the workspace.",
       );
     }
 
@@ -229,8 +234,8 @@ export class WorkspaceController {
         .where(
           and(
             eq(products.workspaceId, tenant.workspaceId),
-            isNull(products.deletedAt)
-          )
+            isNull(products.deletedAt),
+          ),
         );
     });
   }

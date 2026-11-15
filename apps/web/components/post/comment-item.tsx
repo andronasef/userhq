@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useAnalyticsRouter as useRouter } from "@/lib/analytics-navigation";
 import { Reply, LoaderCircle } from "lucide-react";
 import type { PublicComment } from "@userhq/types";
 import { AuthorLine } from "@/components/post/author-line";
